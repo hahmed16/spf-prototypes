@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام الحماية الاجتماعية - النماذج التجريبية</title>
+  <link href="https://fonts.googleapis.com/css2?family=Zain:wght@300;400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --g1: #004d43;
+      --g2: #006052;
+      --gold: #c39b5a;
+      --bg: #f8faf9;
+    }
+    body {
+      margin: 0;
+      font-family: 'Zain', sans-serif;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: var(--g1);
+    }
+    .container {
+      text-align: center;
+      max-width: 900px;
+      padding: 40px;
+    }
+    .logo {
+      width: 180px;
+      margin-bottom: 30px;
+    }
+    h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      font-weight: 800;
+    }
+    p {
+      font-size: 20px;
+      color: #666;
+      margin-bottom: 50px;
+    }
+    .systems {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+    .system-card {
+      background: white;
+      border: 1px solid #e0e6e4;
+      padding: 40px;
+      border-radius: 20px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      background: #fff;
+    }
+    .system-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--gold);
+      box-shadow: 0 10px 30px rgba(195,155,90,0.15);
+    }
+    .system-card i {
+      font-size: 50px;
+      margin-bottom: 20px;
+      color: var(--gold);
+    }
+    .system-card h2 {
+      font-size: 26px;
+      margin: 10px 0;
+      font-weight: 700;
+    }
+    .system-card p {
+      font-size: 16px;
+      margin-bottom: 0;
+      color: #777;
+    }
+    @media (max-width: 600px) {
+      .systems { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="Logo.png" alt="SPF Logo" class="logo">
+    <h1>أنظمة التجربة التفاعلية</h1>
+    <p>يرجى اختيار النظام للبدء في تصفح النماذج التجريبية (Mockups)</p>
+
+    <div class="systems">
+      <a href="Saving/01-dashboard.html" class="system-card">
+        <i>💰</i>
+        <h2>نظام الادخار</h2>
+        <p>إدارة مساهمات وتحويلات نظام الادخار للمؤمن عليهم.</p>
+      </a>
+      <a href="Directorate-WorkInjuries/S.2-home.html" class="system-card">
+        <i>🏥</i>
+        <h2>مديرية إصابات العمل</h2>
+        <p>إدارة إصابات العمل، الأمراض المهنية، واللجان الطبية.</p>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
