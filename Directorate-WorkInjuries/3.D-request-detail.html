@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تفاصيل طلب الأمراض المستديمة - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m3" data-page="3.D-request-detail.html" data-title="تفاصيل طلب منفعة الأمراض المستديمة" data-crumbs="الرئيسية|الأمراض المستديمة|تفاصيل الطلب">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">تفاصيل طلب منفعة الأمراض المستديمة</h2>
+          <p>عرض الملف الكامل لطلب REQ-2026-042 واتخاذ قرار الاستحقاق أو الإحالة للجنة الطبية.</p>
+        </div>
+        <div class="inline-actions">
+           <span class="status s-pending" style="font-size:18px; padding:8px 20px">المرحلة: مراجعة الموظف المختص</span>
+        </div>
+      </div>
+
+      <div class="split">
+        <div class="drawer">
+          <div class="card summary-card">
+            <div class="card-head"><h3>ملخص الطلب</h3></div>
+            <div class="card-body">
+              <div class="summary-list">
+                <div class="summary-item"><span>رقم الطلب</span><b>REQ-2026-042</b></div>
+                <div class="summary-item"><span>المستفيد</span><b>سالم الحسني</b></div>
+                <div class="summary-item"><span>نوع المرض</span><b>مرض مستديم (سرطان)</b></div>
+                <div class="summary-item"><span>حالة التحقق</span><b>مستحق مباشر (آلي)</b></div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:18px">
+            <div class="card-head"><h3>بيانات التواصل</h3></div>
+            <div class="card-body">
+              <div class="mini">الهاتف: 96600000</div>
+              <div class="mini">البنك: بنك مسقط</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-content">
+          <div class="tabs">
+            <button class="tab active" data-tab="med">البيانات الطبية المحالة</button>
+            <button class="tab" data-tab="legal">المرفقات القانونية</button>
+            <button class="tab" data-tab="hist">السجل</button>
+          </div>
+
+          <div data-tab-panel="med">
+            <div class="card" style="margin-top:18px">
+              <div class="card-head"><h3>التشخيص الطبي الوارد من المصدر</h3></div>
+              <div class="card-body">
+                <div class="form-grid">
+                  <div class="field"><label>التشخيص</label><input value="سرطان الرئة - المرحلة الرابعة (انتشار)" readonly></div>
+                  <div class="field"><label>كود التصنيف (ICD-10)</label><input value="C34.9" readonly></div>
+                  <div class="field"><label>المستشفى المعالج</label><input value="المركز الوطني للأورام" readonly></div>
+                  <div class="field"><label>رقم الملف الطبي</label><input value="MRN-8821" readonly></div>
+                </div>
+                <div class="alert ok" style="margin-top:14px">هذا التشخيص يقع ضمن "قائمة الأمراض ذات القواعد المباشرة" ولا يتطلب عرضه على لجنة تقييم العجز.</div>
+              </div>
+            </div>
+          </div>
+
+          <div data-tab-panel="legal" style="display:none">
+            <div class="card" style="margin-top:18px">
+              <div class="card-head"><h3>التحققات الآلية</h3></div>
+              <div class="card-body">
+                <div class="summary-list">
+                  <div class="summary-item"><span>الربط مع التنمية الاجتماعية</span><b>لا توجد بطاقة إعاقة سابقة</b></div>
+                  <div class="summary-item"><span>الربط مع التأمينات</span><b>مؤمن عليه نشط (قطاع خاص)</b></div>
+                  <div class="summary-item"><span>متوسط الأجر (سنة)</span><b>900 ر.ع</b></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div data-tab-panel="hist" style="display:none">
+             <div class="card" style="margin-top:18px">
+               <div class="card-head"><h3>السجل الزمني</h3></div>
+               <div class="card-body">
+                  <div class="timeline">
+                    <div class="timeline-item"><b>تحويل الحالة طبياً</b><div class="mini">30/03/2026 - MOH</div><p>تم استلام بيانات مريض الأورام من المستشفى آلياً.</p></div>
+                    <div class="timeline-item"><b>كمال الطلب</b><div class="mini">31/03/2026 - المستفيد</div><p>تم إدخال البيانات البنكية والإقرارات عبر التطبيق.</p></div>
+                  </div>
+               </div>
+             </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Decision Panel (Full Row) -->
+      <div class="card" style="margin-top:24px; border: 2px solid var(--g2)">
+        <div class="card-head"><h3>اتخاذ القرار</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field">
+              <label>المسار المقترح من النظام</label>
+              <input value="استحقاق مباشر (موافقة موظف)" readonly style="background:#f0fdf4; font-weight:bold">
+            </div>
+            <div class="field">
+              <label>قرار الموظف الاختياري</label>
+              <select id="pathSelector">
+                <option value="direct">اعتماد استحقاق مباشر</option>
+                <option value="commission">إحالة استثنائية لمؤسسة صحية (تقييم)</option>
+                <option value="reject">رفض (عدم استيفاء شروط)</option>
+                <option value="return">إرجاع للمستفيد لاستكمال بنكي</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="commissionPanel" style="display:none; margin-top:14px; background: #fffbeb; padding: 14px; border-radius: 8px">
+            <h4>تفاصيل الإحالة للجنة الطبية</h4>
+            <div class="form-grid">
+              <div class="field"><label>المؤسسة الصحية</label><select><option>مستشفى خولة</option><option>مستشفى السلطان قابوس</option></select></div>
+              <div class="field"><label>الغرض من العرض</label><input value="تقييم النقاط الوظيفية للحالة"></div>
+            </div>
+          </div>
+
+          <div class="field" style="margin-top:14px">
+            <label>ملاحظات القرار</label>
+            <textarea placeholder="أدخل الملاحظات التي ستظهر في التقارير ورسائل الإشعار..."></textarea>
+          </div>
+
+          <div class="actions" style="margin-top:18px">
+            <button class="btn primary" data-action="تأكيد القرار" data-message="تم تسجيل القرار بنجاح وتوجيه الطلب للمرحلة التالية">تأكيد الإجراء</button>
+            <a class="btn secondary" href="3.C-registration-requests-list.html">إلغاء</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+  <script>
+    document.getElementById('pathSelector')?.addEventListener('change', function() {
+      const panel = document.getElementById('commissionPanel');
+      if(this.value === 'commission') panel.style.display = 'block';
+      else panel.style.display = 'none';
+    });
+  </script>
+</body>
+</html>

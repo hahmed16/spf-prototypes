@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الاستفسارات المتعلقة بالادخار - نظام الادخار</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Match page 09 behavior: intro page without dashboard controls */
+        .spf-navbar .user-toggle,
+        .spf-navbar .notification-bell,
+        .spf-navbar .user-badge {
+            display: none !important;
+        }
+
+        .spf-sidebar {
+            display: none !important;
+        }
+
+        .service-inquiry-card {
+            border: 1px solid var(--spf-border);
+            border-radius: var(--spf-radius);
+            background: #fff;
+            box-shadow: var(--spf-shadow);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .service-inquiry-header {
+            background: var(--spf-green-lighter);
+            color: var(--spf-green-dark);
+            padding: 12px 16px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .service-inquiry-header i {
+            color: var(--spf-green);
+        }
+
+        .service-inquiry-body {
+            padding: 16px 18px;
+        }
+
+        .service-inquiry-list {
+            margin: 0;
+            padding-right: 18px;
+        }
+
+        .service-inquiry-list li {
+            margin-bottom: 10px;
+            line-height: 1.7;
+            border: 1px solid #eef1ee;
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: #fcfdfc;
+        }
+
+        .service-inquiry-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .inq-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .inq-text {
+            flex: 1;
+        }
+
+        .inq-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .inq-status-btn {
+            border: 1px solid #d5ddd5;
+            background: #fff;
+            color: #4f5b4f;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            padding: 3px 10px;
+            cursor: pointer;
+        }
+
+        .inq-status-btn.active-answered {
+            background: #e9f8ef;
+            border-color: #7ac08f;
+            color: #1f7a3e;
+            font-weight: 700;
+        }
+
+        .inq-status-btn.active-deferred {
+            background: #fff6e8;
+            border-color: #efbf70;
+            color: #9a6500;
+            font-weight: 700;
+        }
+
+        .inq-item.deferred .inq-text {
+            opacity: 0.85;
+        }
+
+        .inq-item.answered .inq-text {
+            font-weight: 600;
+        }
+
+        .inquiry-section-title {
+            margin: 18px 0 12px;
+            font-weight: 800;
+            color: var(--spf-green-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .inquiry-section-title .badge {
+            font-size: 0.75rem;
+        }
+
+        .inquiry-summary {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .summary-pill {
+            border: 1px solid var(--spf-border);
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            background: #fff;
+        }
+
+        .summary-pill strong {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body data-user-role="saver">
+    <div id="navbarPlaceholder"></div>
+    <div id="sidebarPlaceholder"></div>
+
+    <main class="spf-main no-sidebar">
+        <div class="page-header">
+            <div>
+                <h4>الاستفسارات المتعلقة بالادخار (الاختياري والإلزامي)</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="01-dashboard.html">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">الاستفسارات</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge saver">المدخر</span>
+            </div>
+        </div>
+
+        <div class="inquiry-summary">
+            <span class="summary-pill"><strong>تمت الإجابة:</strong> <span id="sumAnswered">0</span></span>
+            <span class="summary-pill"><strong>مؤجل:</strong> <span id="sumDeferred">0</span></span>
+            <span class="summary-pill"><strong>قيد المتابعة:</strong> <span id="sumPending">0</span></span>
+        </div>
+
+        <div id="groupedInquiries"></div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="common.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+    const STORAGE_KEY = 'spf-inquiry-decisions-v1';
+
+    // ─── COMMON (shared between optional & mandatory) ───────────────────────
+    const commonGroups = [
+        {
+            service: "العائد واحتساب الأرباح",
+            inquiries: [
+                "احتساب العائد سنوياً لكن هل يتم توزيع هذا العائد واحتسابه شهرياً أم سنوياً (كانت هناك آراء مختلفة في حين أن المادة القانونية أوضحت أن التوزيع شهرياً).",
+                "هل يبدأ احتساب العائد من تاريخ الإيداع أم من دورة شهرية محددة؟",
+                "ما هي آلية احتساب العائد؟ هل على إجمالي المبالغ في الحساب أم إجمالي مصادر معينة، وهل المبالغ المودعة إلزامياً يتم الاحتساب عليها أيضاً؟ وهل يتم احتساب العائد على الإجمالي مشتملاً على العوائد المحتسبة سابقاً أيضاً أم لا؟",
+                "هل من الممكن أن يتم تحديد عائد الاستثمار لكل مصدر من مصادر الادخار على حدة؟ أم أنه عائد ثابت دائماً لكل المصادر؟"
+            ]
+        },
+        {
+            service: "ضوابط الصرف والالتزامات",
+            inquiries: [
+                "تتنوع مصادر الإيداع في حساب الادخار، فما هي ضوابط الصرف الخاصة بكل مصدر؟",
+                "هل يلزم تسوية أية استحقاقات حالية على المدخر قبل الصرف؟",
+                "ما ترتيب الأولوية عند تعدد الالتزامات؟"
+            ]
+        },
+        {
+            service: "الإجراءات والأدوار التشغيلية",
+            inquiries: [
+                "ما هي الدورة المستندية لمعالجة طلبات الصرف؟ المقترح أن تكون إلكترونية 100% دون تدخل بشري.",
+                "ما هي الأدوار المعنية بمعالجة طلبات الادخار (الاختياري والإلزامي)؟"
+            ]
+        }
+    ];
+
+    // ─── OPTIONAL (الادخار الاختياري) ────────────────────────────────────────
+    const optionalGroups = [
+        {
+            service: "الادخار الاختياري",
+            inquiries: [
+                "هل يحق لغير العماني ممن أودع فائض اشتراكاته أن يقوم هو بالادخار لنفسه أيضاً أم يقتصر الإيداع في حسابه على جهة العمل؟ حيث إنه تم تقييد هذا الاشتراط \"العمال غير العمانيين للمدخرات التي تتجاوز الحد الإلزامي\"؟",
+                "تم الإشارة إلى حالات التسجيل المباشر طبقاً للمادة 99 من القانون ولكن ماذا يترتب على هذا التسجيل المباشر: ١ – كل مؤمن عليه تتجاوز اشتراكاته المسددة في فرع تأمين كبار السن والعجز والوفاة الاشتراكات المحتسبة على سقف أجر الاشتراك. ٢ – كل مؤمن عليه يفقد الجنسية العمانية أو تسحب منه أو تسقط عنه ولم تتوفر في شأنه شروط استحقاق المعاش قبل الفقد أو السحب أو الإسقاط. ٣ – كل مؤمن عليه منتسب لأي برنامج تكميلي تم إيقاف العمل به وتحويل أصوله إلى نظام الادخار.",
+                "تم التأكيد على أن فائض الاشتراك يكون فقط في حالة تعدد العقود ولا توجد أي حالات أخرى.",
+                "هل يوجد تصور لآلية التعاقد مع أصحاب العمل بحيث يكون الإيداع في حساب العمال بشكل تلقائي شهرياً (الاتفاقيات)؟",
+                "في حالة تسجيل أصحاب العمل لعدد من العمال سواء كان بموجب اتفاقية أم لا، هل تخضع لضوابط حد السقف المسموح به وكذلك الحد الأدنى أم لا؟",
+                "هل يتحمل الصندوق النسبة التي يتم اقتطاعها من إجمالي المبلغ المدفوع؟ في حالة رغبة صاحب العمل في دفع مبالغ كبيرة فإن النسبة المقتطعة لصالح VISA ستكون مبلغاً كبيراً أيضاً.",
+                "تم الإشارة في المادة 111 إلى أنه \"يجوز للمدخر استخدام مدخراته لسداد الاشتراكات لفرع كبار السن والعجز والوفاة وفرع تأمين إصابات العمل والأمراض المهنية، إذا كان الالتزام بسداد الاشتراكات على المؤمن عليه، أو لسداد أي التزام مالي يترتب عليه للصندوق.\". وبناء عليه، ما هي الاشتراكات التي يلتزم المؤمن عليه بسدادها؟",
+                "ما هي آليات وضوابط الخصم التلقائي من حساب المدخر لسداد الالتزامات المستحقة عليه المشار إليها في المادة 111 من اللائحة؟",
+                "هل كل مصدر من مصادر الإيداع له سقف خاص به 36,000 أم أن هذا السقف للحساب ككل بتنوع مصادره؟",
+                "ما هي ضوابط وأسباب الخروج من الصندوق (يلتزم المدخر في حالة خروجه من نظام الادخار أو فقدانه أي شرط من شروط أحكامه، بإخطار الصندوق بذلك على النحو الذي تبينه اللائحة، كما تبين اللائحة الغرامات الإدارية المترتبة على عدم الإخطار.)؟"
+            ]
+        }
+    ];
+
+    // ─── MANDATORY (الادخار الإلزامي) ────────────────────────────────────────
+    const mandatoryGroups = [
+        {
+            service: "الادخار الإلزامي",
+            inquiries: [
+                "ما هي الجهات المعتمدة لتسجيل واعتماد عقود العمل غير وزارة العمل، حيث تم الإفادة بعدد من القطاعات الأخرى التي لا يلزم تسجيل العمال المنتسبين إليها في وزارة العمل كديوان البلاط السلطاني ووزارة الصحة وبلدية مسقط على سبيل المثال؟",
+                "هل يتطلب التسجيل أي تدخل أو تأكيد من جهة العمل؟",
+                "هل يجب على جميع القطاعات وجهات العمل التسجيل في نظام الادخار الإلزامي أم أنه مسموح ببعض الاستثناءات؟",
+                "ما الحالات التي يتم فيها التسجيل بأثر رجعي؟",
+                "آلية احتساب الغرامة عند قبول التظلم وثبوت تسجيل بيانات العامل ببيانات غير صحيحة — هل نسبة الـ 8% من إجمالي اشتراكات العامل الواحد أم الجميع؟ حيث إن المادة تنص على: يُفرض على كل جهة عمل لم تؤدِّ الاشتراكات المقررة على أساس الأجور الحقيقية لغير العمانيين، أو امتنعت عن سداد الاشتراكات المستحقة للصندوق خلال الأجل المنصوص عليه في المادة (١٠١)، مبلغ إضافي بنسبة (٨٪) سنوياً من إجمالي الاشتراكات الواجب سدادها.",
+                "ماذا لو أثبتت جهة العمل عدم صحة الاعتراض، ومن له الحق في معالجة الطلب حينها؟",
+                "آلية التحويل عند مغادرة العامل السلطنة؟",
+                "في حالة الصرف عن طريق الأقساط هل يتم احتساب العوائد على الرصيد المتبقي؟",
+                "هل توجد مهلة زمنية ملزمة للتسوية من خلال أصحاب العمل وماذا لو تعذّر على بعض أصحاب العمل التسوية؟",
+                "هل يتطلب التحويل موافقة العامل؟ ونفترض هنا أنه لا بد من وجود قرار يخص كل عامل إما بإقراره باستلام المبلغ وإما بتحويل المبلغ لحساب الادخار، وأيضاً لضمان الشفافية أن يتم التحويل عبر نظام حماية الأجور.",
+                "هل يوجد مسار اعتراض على الغرامات المفروضة؟",
+                "احتساب الـ 8% بسيطة أم مركبة؟ واتضح أن هناك سببين لهذا النوع من الغرامات — فهل احتساب الغرامة موحّد للسببين؟",
+                "ما هي الإجراءات عند عدم السداد؟"
+            ]
+        }
+    ];
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+    function encodeKey(text) {
+        return btoa(unescape(encodeURIComponent(text)));
+    }
+
+    function loadDecisions() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+        catch (e) { return {}; }
+    }
+
+    function saveDecisions(state) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function renderInquiryItem(sectionTitle, serviceName, question, state) {
+        const key = encodeKey(`${sectionTitle}||${serviceName}||${question}`);
+        const status = state[key] || '';
+        const liClass = status === 'answered' ? 'inq-item answered'
+                      : status === 'deferred'  ? 'inq-item deferred'
+                      : 'inq-item';
+        return `
+            <li class="${liClass}" data-inquiry-key="${key}">
+                <div class="inq-row">
+                    <span class="inq-text">${question}</span>
+                    <span class="inq-actions">
+                        <button type="button" class="inq-status-btn ${status === 'answered' ? 'active-answered' : ''}" data-action="answered">تمت الإجابة</button>
+                        <button type="button" class="inq-status-btn ${status === 'deferred'  ? 'active-deferred'  : ''}" data-action="deferred">مؤجل</button>
+                    </span>
+                </div>
+            </li>`;
+    }
+
+    function renderSection(title, badgeClass, groups, prefix, state) {
+        return `
+            <div class="inquiry-section-title">
+                <i class="fas fa-layer-group"></i>
+                <span>${title}</span>
+                <span class="badge ${badgeClass}">${groups.length} مجموعة</span>
+            </div>
+            ${groups.map((group, idx) => {
+                const collapseId = `${prefix}InqGroup${idx + 1}`;
+                return `
+                    <div class="service-inquiry-card">
+                        <div class="service-inquiry-header" data-bs-toggle="collapse"
+                             data-bs-target="#${collapseId}" aria-expanded="${idx === 0 ? 'true' : 'false'}">
+                            <span><i class="fas fa-folder-open me-2"></i>${group.service}</span>
+                            <span class="badge text-bg-light">${group.inquiries.length}</span>
+                        </div>
+                        <div id="${collapseId}" class="collapse ${idx === 0 ? 'show' : ''}">
+                            <div class="service-inquiry-body">
+                                <ol class="service-inquiry-list">
+                                    ${group.inquiries.map(q => renderInquiryItem(title, group.service, q, state)).join('')}
+                                </ol>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('')}`;
+    }
+
+    function updateSummary() {
+        const all      = container.querySelectorAll('[data-inquiry-key]').length;
+        const answered = container.querySelectorAll('.inq-item.answered').length;
+        const deferred = container.querySelectorAll('.inq-item.deferred').length;
+        document.getElementById('sumAnswered').textContent = answered;
+        document.getElementById('sumDeferred').textContent = deferred;
+        document.getElementById('sumPending').textContent  = all - answered - deferred;
+    }
+
+    // ─── Render ───────────────────────────────────────────────────────────────
+    const state     = loadDecisions();
+    const container = document.getElementById('groupedInquiries');
+
+    container.innerHTML =
+        renderSection("استفسارات مشتركة",           "text-bg-primary",  commonGroups,    "common",    state) +
+        renderSection("استفسارات الادخار الاختياري", "text-bg-success",  optionalGroups,  "optional",  state) +
+        renderSection("استفسارات الادخار الإلزامي",  "text-bg-warning",  mandatoryGroups, "mandatory", state);
+
+    updateSummary();
+
+    // ─── Event delegation ─────────────────────────────────────────────────────
+    container.addEventListener('click', function (e) {
+        const btn = e.target.closest('.inq-status-btn');
+        if (!btn) return;
+        const li  = btn.closest('[data-inquiry-key]');
+        if (!li)  return;
+
+        const key    = li.getAttribute('data-inquiry-key');
+        const action = btn.getAttribute('data-action');
+        state[key]   = state[key] === action ? '' : action;
+        saveDecisions(state);
+
+        li.querySelector('[data-action="answered"]').classList.toggle('active-answered', state[key] === 'answered');
+        li.querySelector('[data-action="deferred"]').classList.toggle('active-deferred',  state[key] === 'deferred');
+        li.classList.toggle('answered', state[key] === 'answered');
+        li.classList.toggle('deferred', state[key] === 'deferred');
+        updateSummary();
+    });
+});
+      </script>
+</body>
+</html>

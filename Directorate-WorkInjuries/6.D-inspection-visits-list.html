@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>قائمة الزيارات التفتيشية - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m6" data-page="6.D-inspection-visits-list.html" data-title="إدارة الزيارات التفتيشية والرقابية" data-crumbs="الرئيسية|الترخيص والرقابة|الزيارات التفتيشية">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">إدارة الزيارات التفتيشية والرقابية</h2>
+          <p>جدولة ومتابعة الزيارات التفتيشية للمؤسسات الصحية للتأكد من مطابقة المعايير الفنية والإدارية.</p>
+        </div>
+        <div class="inline-actions"><button class="btn primary" data-action="جدولة زيارة">جدولة زيارة جديدة</button></div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><h3>البحث في الزيارات</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field"><label>المؤسسة</label><input value=""></div>
+            <div class="field"><label>نوع الزيارة</label><select><option>دورية</option><option>مفاجئة</option><option>معاينة ترخيص</option></select></div>
+            <div class="field"><label>الحالة</label><select><option>مجدولة</option><option>تمت</option><option>ملغاة</option></select></div>
+          </div>
+          <div class="actions" style="margin-top:14px"><button class="btn primary">تحديث</button></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:24px">
+        <div class="card-head"><h3>جدول الزيارات</h3></div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>المؤسسة</th>
+                <th>المفتش</th>
+                <th>النوع</th>
+                <th>الحالة</th>
+                <th>الإجراء</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>01/04/2026</td>
+                <td>مستشفى مسقط الخاص</td>
+                <td>سالم الهنائي</td>
+                <td>دورية</td>
+                <td><span class="status s-pending">مجدولة</span></td>
+                <td><a class="btn secondary" href="6.E-inspection-report.html">تعبئة التقرير</a></td>
+              </tr>
+              <tr>
+                <td>15/03/2026</td>
+                <td>مستشفى كيمز</td>
+                <td>أحمد البلوشي</td>
+                <td>دورية</td>
+                <td><span class="status s-approved">تمت</span></td>
+                <td><button class="btn secondary">عرض التقرير</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

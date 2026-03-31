@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معالجة طلبات الصرف - نظام الادخار</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-user-role="staff">
+    <div id="navbarPlaceholder"></div>
+    <div id="sidebarPlaceholder"></div>
+
+    <main class="spf-main">
+        <div class="page-header">
+            <div>
+                <h4>معالجة طلبات صرف المدخرات</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="01-dashboard.html">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">معالجة الطلبات</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge staff">موظف الصندوق</span>
+            </div>
+        </div>
+
+        <div class="filter-panel mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label">الرقم المدني</label>
+                    <input type="text" class="form-control" placeholder="12345678">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">السجل التجاري</label>
+                    <input type="text" class="form-control" placeholder="1002003">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">سبب الصرف</label>
+                    <select class="form-select">
+                        <option>الكل</option>
+                        <option>استحقاق معاش</option>
+                        <option>مغادرة السلطنة</option>
+                        <option>وفاة</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">حالة الطلب</label>
+                    <select class="form-select">
+                        <option>قيد المراجعة</option>
+                        <option>تم الاعتماد</option>
+                        <option>مرفوض</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">الفترة الزمنية</label>
+                    <div class="input-group">
+                        <input type="date" class="form-control">
+                        <input type="date" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-spf w-100" title="بحث"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-12">
+                <div class="spf-card">
+                    <div class="card-header-custom">طلبات الصرف قيد المراجعة</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="spf-table">
+                                <thead>
+                                    <tr>
+                                        <th>المدخر</th>
+                                        <th>الرقم المدني</th>
+                                        <th>المبلغ المطلوب</th>
+                                        <th>سبب الصرف</th>
+                                        <th>تاريخ الطلب</th>
+                                        <th>الحالة</th>
+                                        <th>إجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-700">سعيد بن راشد المعمري</td>
+                                        <td>88223344</td>
+                                        <td>2,150.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"></td>
+                                        <td>استحقاق معاش تقاعدي</td>
+                                        <td>20/02/2026</td>
+                                        <td><span class="badge-status pending">قيد المراجعة</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-spf-outline py-1" onclick="reviewRequest(' المعمري')">مراجعة</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-700">ليلى بنت محمود الزدجالية</td>
+                                        <td>77665544</td>
+                                        <td>4,800.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"></td>
+                                        <td>استحقاق معاش تقاعدي</td>
+                                        <td>18/02/2026</td>
+                                        <td><span class="badge-status pending">قيد المراجعة</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-spf-outline py-1" onclick="reviewRequest(' الزدجالية')">مراجعة</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Review Modal -->
+    <div class="modal fade" id="reviewModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">مراجعة طلب صرف: <span id="requesterName"></span></h5>
+                    <button type="button" class="btn-close ms-0 me-auto" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6 border-start">
+                            <h6 class="fw-800 text-spf mb-3">بيانات المبالغ</h6>
+                            <div class="d-flex justify-content-between mb-2"><span>إيداع ذاتي:</span> <strong>1,200.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"></strong></div>
+                            <div class="d-flex justify-content-between mb-2"><span>إيداع صاحب عمل:</span> <strong>850.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"></strong></div>
+                            <div class="d-flex justify-content-between mb-2"><span>عائد استثمار:</span> <strong>100.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"></strong></div>
+                            <div class="d-flex justify-content-between border-top pt-2"><span>الإجمالي:</span> <strong class="text-spf-dark">2,150.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"></strong></div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-800 text-spf mb-3">بيانات البنك</h6>
+                            <div class="mb-2"><span>البنك:</span> <strong>بنك مسقط</strong></div>
+                            <div class="mb-2"><span>رقم الحساب:</span> <strong>0412********9876</strong></div>
+                            <div class="mb-2"><span>الايبان:</span> <strong>OM67BMUS0000...</strong></div>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-800 text-spf mb-3">التحقق من الأهلية (System Check)</h6>
+                    <div class="list-group mb-4">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>التحقق من إنهاء الخدمة (لغير العماني)</span>
+                            <i class="fas fa-check-circle text-success"></i>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>التحقق من مغادرة السلطنة (سجلات شرطة عمان السلطانية)</span>
+                            <i class="fas fa-check-circle text-success"></i>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>عدم وجود التزامات مالية قائمة</span>
+                            <i class="fas fa-exclamation-triangle text-warning" title="يوجد قسط متأخر"></i>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-700">مبررات القرار</label>
+                        <textarea class="form-control" rows="2" id="staffJustification" placeholder="أدخل الملاحظات التي ستظهر للمدخر..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-spf-outline px-4" onclick="action('docs')">طلب وثائق إضافية</button>
+                    <button class="btn btn-danger px-4" onclick="action('reject')">رفض الطلب</button>
+                    <button class="btn btn-spf px-4" onclick="action('approve')">اعتماد الصرف</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="common.js"></script>
+    <script>
+        function reviewRequest(name) {
+            document.getElementById('requesterName').innerText = name;
+            const modal = new bootstrap.Modal(document.getElementById('reviewModal'));
+            modal.show();
+        }
+
+        function action(type) {
+            bootstrap.Modal.getInstance(document.getElementById('reviewModal')).hide();
+            if (type === 'approve') spf.showSuccess('تم اعتماد طلب الصرف وجاري تحويل المبلغ للبنك.');
+            if (type === 'reject') spf.showError('تم رفض الطلب كما طلبت. سيتم إشعار المدخر بذلك.');
+            if (type === 'docs') spf.showSuccess('تم إرسال طلب للمدخر لتوفير المستندات المطلوبة.');
+        }
+
+        // Initialize inquiries
+        document.addEventListener('DOMContentLoaded', function() {
+            spf.renderInquiries([
+                "ما هي الدورة المستندية لمعالجة طلبات الصرف؟ المقترح أن تكون إلكترونية 100% دون تدخل بشري",
+                "تتنوع مصادر الإيداع في حساب الادخار، فما هي ضوابط الصرف الخاصة بكل مصدر ؟"
+            ]);
+        });
+    </script>
+</body>
+</html>

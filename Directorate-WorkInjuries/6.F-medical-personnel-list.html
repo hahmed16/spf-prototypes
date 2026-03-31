@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الكوادر الطبية المعتمدة - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m6" data-page="6.F-medical-personnel-list.html" data-title="السجل المركزي للكوادر الطبية المعتمدة" data-crumbs="الرئيسية|الترخيص والرقابة|الكوادر الطبية">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">السجل المركزي للكوادر الطبية المعتمدة</h2>
+          <p>إحصاء ومتابعة كافة الأطباء والاستشاريين المعتمدين لدى الصندوق للمشاركة في اللجان الطبية.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><h3>البحث في سجل الأطباء</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field"><label>الاسم</label><input value=""></div>
+            <div class="field"><label>التخصص</label><select><option>الكل</option><option>عظام</option><option>أعصاب</option><option>نفسي</option></select></div>
+            <div class="field"><label>المؤسسة الحالية</label><select><option>الكل</option><option>مستشفى خولة</option><option>مستشفى كيمز</option></select></div>
+          </div>
+          <div class="actions" style="margin-top:14px"><button class="btn primary">تحديث</button></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:24px">
+        <div class="card-head"><h3>قائمة الأطباء المعتمدين</h3></div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>الاسم</th>
+                <th>التخصص الدقيق</th>
+                <th>المؤسسة الرئيسية</th>
+                <th>تاريخ الاعتماد</th>
+                <th>عدد اللجان (هذا العام)</th>
+                <th>الحالة</th>
+                <th>الإجراء</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>د. أحمد الهنائي</td>
+                <td>جراحة عظام متقدمة</td>
+                <td>مستشفى خولة</td>
+                <td>01/01/2024</td>
+                <td>24 لجنة</td>
+                <td><span class="status s-approved">نشط</span></td>
+                <td><button class="btn secondary">عرض التقييم</button></td>
+              </tr>
+              <tr>
+                <td>د. هند الراشدية</td>
+                <td>طب وظيفي</td>
+                <td>المستشفى السلطاني</td>
+                <td>15/02/2024</td>
+                <td>18 لجنة</td>
+                <td><span class="status s-approved">نشط</span></td>
+                <td><button class="btn secondary">عرض التقييم</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

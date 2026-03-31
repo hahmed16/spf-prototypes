@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>متابعة إعادة التقييم - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m3" data-page="3.E-reassessment-followup.html" data-title="متابعة إعادة التقييم الدوري" data-crumbs="الرئيسية|الأمراض المستديمة|إعادة التقييم">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">متابعة إعادة التقييم الدوري</h2>
+          <p>إدارة الحالات التي تتطلب إعادة تقييم طبي دوري لضمان استمرار استحقاق المنفعة.</p>
+        </div>
+      </div>
+
+      <div class="alert warn">تعد فئات "إصابات الدماغ" و"الأمراض العصبية المتغيرة" من الفئات التي تتطلب إعادة تقييم كل 4 أشهر بحد أقصى.</div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><h3>فلترة نوافذ التقييم</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+             <div class="field"><label>الفترة القادمة</label><select><option>خلال 30 يوم</option><option>خلال 60 يوم</option><option>متجاوزة للموعد</option></select></div>
+             <div class="field"><label>نوع المرض</label><input value=""></div>
+          </div>
+          <div class="actions" style="margin-top:14px"><button class="btn primary">تحديث القائمة</button></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:24px">
+        <div class="card-head"><h3>الحالات المستوجبة لإعادة التقييم</h3></div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>المستفيد</th>
+                <th>نوع الحالة</th>
+                <th>آخر تقييم</th>
+                <th>تاريخ التقييم القادم</th>
+                <th>حالة النافذة</th>
+                <th>الإجراء</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>سليمان البلوشي</td>
+                <td>إصابة دماغية</td>
+                <td>01/01/2026</td>
+                <td>01/05/2026</td>
+                <td><span class="status s-pending">قريباً</span></td>
+                <td><button class="btn primary">إصدار خطاب إحالة</button></td>
+              </tr>
+              <tr>
+                <td>موزة الحبسية</td>
+                <td>تصلب متعدد</td>
+                <td>15/10/2025</td>
+                <td>15/02/2026</td>
+                <td><span class="status s-final">متجاوزة (موقوف مؤقت)</span></td>
+                <td><button class="btn primary">تفعيل إعادة التقييم</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

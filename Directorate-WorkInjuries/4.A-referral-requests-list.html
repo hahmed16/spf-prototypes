@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>طلبات الإحالة للجنة - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m4" data-page="4.A-referral-requests-list.html" data-title="قائمة طلبات الإحالة للمؤسسات الصحية" data-crumbs="الرئيسية|العرض على المؤسسات الصحية المرخصة|طلبات الإحالة">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">قائمة طلبات الإحالة للمؤسسات الصحية</h2>
+          <p>عرض كافة طلبات الإحالة الواردة من الوحدات الأخرى (بدلات الانقطاع، الأمراض المستديمة، منفعة الإعاقة).</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><h3>البحث</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field"><label>نوع الحالة</label><select><option>إصابة عمل</option><option>مرض مهني</option><option>عجز غير مهني</option></select></div>
+            <div class="field"><label>الغرض من العرض</label><select><option>تقييم نسبة عجز</option><option>إعادة عرض</option></select></div>
+            <div class="field"><label>الحالة</label><select><option>جديد</option><option>محال للمؤسسة</option><option>تم البت</option></select></div>
+          </div>
+          <div class="actions" style="margin-top:14px"><button class="btn primary">بحث</button></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:24px">
+        <div class="card-head"><h3>قائمة الطلبات</h3></div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>رقم الطلب الأصلي</th>
+                <th>المستفيد</th>
+                <th>نوع الحالة</th>
+                <th>الوحدة المحيلة</th>
+                <th>تاريخ الإحالة</th>
+                <th>الحالة</th>
+                <th>الإجراء</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>WI-2026-00142</td><td>سالم البلوشي</td><td>إصابة عمل</td><td>بدلات الانقطاع</td><td>31/03/2026</td><td><span class="status s-pending">جديد</span></td><td><a class="btn secondary" href="4.B-referral-request-detail.html">مراجعة الإحالة</a></td></tr>
+              <tr><td>REQ-2026-001</td><td>ليلى البلوشية</td><td>مرض مستديم</td><td>الأمراض المستديمة</td><td>30/03/2026</td><td><span class="status s-review">محال لخولة</span></td><td><a class="btn secondary" href="4.B-referral-request-detail.html">عرض التفاصيل</a></td></tr>
+              <tr><td>DB-2026-0421</td><td>خالد الراشدي</td><td>عجز غير مهني</td><td>منفعة الإعاقة</td><td>29/03/2026</td><td><span class="status s-approved">تم البت</span></td><td><a class="btn secondary" href="4.B-referral-request-detail.html">عرض القرار</a></td></tr>
+              <tr><td>WI-2026-00146</td><td>ياسر الهنائي</td><td>إصابة عمل</td><td>بدلات الانقطاع</td><td>28/03/2026</td><td><span class="status s-review">موعد مسبق</span></td><td><a class="btn secondary" href="4.B-referral-request-detail.html">عرض التفاصيل</a></td></tr>
+              <tr><td>REQ-2026-044</td><td>ماجد المعولي</td><td>مرض مستديم</td><td>الأمراض المستديمة</td><td>27/03/2026</td><td><span class="status s-pending">بانتظار الموعد</span></td><td><a class="btn secondary" href="4.B-referral-request-detail.html">عرض التفاصيل</a></td></tr>
+              <tr><td>WI-2026-00145</td><td>خالد الشعيلي</td><td>إصابة عمل</td><td>بدلات الانقطاع</td><td>26/03/2026</td><td><span class="status s-approved">مكتمل</span></td><td><a class="btn secondary" href="4.B-referral-request-detail.html">عرض القرار</a></td></tr>
+              <tr><td>DB-2026-0425</td><td>ليلى العجمية</td><td>عجز غير مهني</td><td>منفعة الإعاقة</td><td>25/03/2026</td><td><span class="status s-review">قيد المراجعة</span></td><td><a class="btn secondary" href="4.B-referral-request-detail.html">عرض التفاصيل</a></td></tr>
+              <tr><td>WI-2026-00147</td><td>منى المعمرية</td><td>مرض مهني</td><td>بدلات الانقطاع</td><td>24/03/2026</td><td><span class="status s-pending">جديد</span></td><td><a class="btn secondary" href="4.B-referral-request-detail.html">عرض التفاصيل</a></td></tr>
+              <tr><td>REQ-2026-042</td><td>سالم الحسني</td><td>مرض مستديم</td><td>الأمراض المستديمة</td><td>23/03/2026</td><td><span class="status s-approved">تم البت</span></td><td><a class="btn secondary" href="4.B-referral-request-detail.html">عرض القرار</a></td></tr>
+              <tr><td>WI-2026-00143</td><td>فهد الحوسني</td><td>إصابة عمل</td><td>بدلات الانقطاع</td><td>22/03/2026</td><td><span class="status s-review">بانتظار التقرير</span></td><td><a class="btn secondary" href="4.B-referral-request-detail.html">عرض التفاصيل</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

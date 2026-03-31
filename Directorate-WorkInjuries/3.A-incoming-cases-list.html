@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الحالات الواردة - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m3" data-page="3.A-incoming-cases-list.html" data-title="الحالات الواردة من المؤسسات الصحية المعالجة" data-crumbs="الرئيسية|الأمراض المستديمة|الحالات الواردة">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">الحالات الواردة من المؤسسات الصحية المعالجة</h2>
+          <p>هذه الشاشة تعرض التشخيصات الطبية المحالة آلياً من المؤسسات الصحية، تمهيداً لاستكمال الطلب من قبل المستفيد.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><h3>فلترة الحالات الواردة</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field"><label>الرقم المدني</label><input value=""></div>
+            <div class="field"><label>المؤسسة الصحية</label><select><option>الكل</option><option>مستشفى السلطاني</option><option>مستشفى خولة</option></select></div>
+            <div class="field"><label>هل تم تقديم طلب؟</label><select><option>الكل</option><option>نعم</option><option>لا</option></select></div>
+          </div>
+          <div class="actions" style="margin-top:14px">
+            <button class="btn primary" data-action="بحث">تحديث النتائج</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:24px">
+        <div class="card-head"><h3>قائمة التشخيصات المحالة</h3></div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>رقم المرجع (صحة)</th>
+                <th>المستفيد</th>
+                <th>المؤسسة الصحية</th>
+                <th>التشخيص</th>
+                <th>المسار المتوقع</th>
+                <th>حالة الطلب الفعلي</th>
+                <th>الإجراء</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>MOH-4521</td>
+                <td>ناصر العماني</td>
+                <td>المستشفى السلطاني</td>
+                <td>فشل كلوي مزمن</td>
+                <td><span class="status s-approved">استحقاق مباشر</span></td>
+                <td><span class="status s-rejected">لم يقدم بعد</span></td>
+                <td><button class="btn secondary">عرض البيانات الطبية</button></td>
+              </tr>
+              <tr>
+                <td>MOH-8890</td>
+                <td>ليلى البلوشية</td>
+                <td>مستشفى خولة</td>
+                <td>إصابة عصبية مستديمة</td>
+                <td><span class="status s-pending">يحتاج تقييم (نقاط)</span></td>
+                <td><span class="status s-approved">مقدم (REQ-55)</span></td>
+                <td><a class="btn secondary" href="3.D-request-detail.html">فتح الطلب</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

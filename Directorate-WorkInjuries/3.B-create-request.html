@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>التسجيل في منفعة الأمراض المستديمة - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m3" data-page="3.B-create-request.html" data-title="التسجيل في منفعة الأمراض المستديمة" data-crumbs="الرئيسية|الأمراض المستديمة|تقديم طلب">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">تحويل الحالة إلى طلب منفعة (تسجيل)</h2>
+          <p>استكمال البيانات القانونية والبنكية لتحويل الإحالة الطبية الرقم MOH-4521 إلى طلب منفعة فعلي.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>بيانات الحالة الطبية المحالة</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field"><label>الاسم</label><input value="ناصر العماني" readonly></div>
+            <div class="field"><label>الرقم المدني</label><input value="10492837" readonly></div>
+            <div class="field"><label>التشخيص الطبي</label><input value="فشل كلوي مزمن (مرحلة نهائية)" readonly></div>
+            <div class="field"><label>المؤسسة المحيلة</label><input value="المستشفى السلطاني" readonly></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><h3>بيانات استكمال الطلب</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field"><label>رقم الهاتف المعتمد</label><input value="96611223"></div>
+            <div class="field"><label>البريد الإلكتروني</label><input value="nas@example.com"></div>
+            <div class="field"><label>العنوان الحالي (المحافظة)</label><select><option>مسقط</option><option>ظفار</option><option>الباطنة</option></select></div>
+            <div class="field"><label>البنك</label><select><option>بنك مسقط</option><option>البنك الوطني</option><option>بنك ظفار</option></select></div>
+            <div class="field" style="grid-column: 1 / -1"><label>رقم الحساب الدولي (IBAN)</label><input placeholder="OM00 0000 0000 ..."></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><h3>الإقرارات</h3></div>
+        <div class="card-body">
+           <div style="display:flex; flex-direction:column; gap:10px">
+             <label style="display:flex; gap:8px; cursor:pointer"><input type="checkbox"> أقر بأن البيانات أعلاه صحيحة وأتحمل المسؤولية القانونية.</label>
+             <label style="display:flex; gap:8px; cursor:pointer"><input type="checkbox"> أوافق على شروط استحقاق منفعة الإعاقة - فئة الأمراض المستديمة.</label>
+           </div>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top:20px">
+        <button class="btn primary" data-action="تسجيل الطلب" data-message="تم إنشاء طلب المنفعة بنجاح وتحويله للمراجعة" data-redirect="3.C-registration-requests-list.html">تقديم طلب التسجيل</button>
+        <a class="btn secondary" href="3.A-incoming-cases-list.html">رجوع</a>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

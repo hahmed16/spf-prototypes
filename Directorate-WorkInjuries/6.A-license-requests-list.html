@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>طلبات الترخيص - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m6" data-page="6.A-license-requests-list.html" data-title="قائمة طلبات الترخيص الطبية" data-crumbs="الرئيسية|الترخيص والرقابة|طلبات الترخيص">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">قائمة طلبات الترخيص الطبية</h2>
+          <p>إدارة طلبات الترخيص الجديدة للمؤسسات الصحية الراغبة في تقديم خدمات تقييم العجز المهني وغير المهني.</p>
+        </div>
+        <div class="inline-actions"><a class="btn primary" href="6.B-new-license-request.html">تقديم طلب ترخيص جديد</a></div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><h3>البحث</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field"><label>اسم المؤسسة</label><input value=""></div>
+            <div class="field"><label>نوع الترخيص</label><select><option>تقييم عجز (عام)</option><option>تقييم تخصصي</option></select></div>
+            <div class="field"><label>الحالة</label><select><option>الكل</option><option>جديد</option><option>قيد المعاينة</option><option>معتمد</option></select></div>
+          </div>
+          <div class="actions" style="margin-top:14px"><button class="btn primary">بحث</button></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:24px">
+        <div class="card-head"><h3>قائمة الطلبات</h3></div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>اسم المؤسسة</th>
+                <th>المحافظة</th>
+                <th>تاريخ التقديم</th>
+                <th>الحالة</th>
+                <th>الإجراء</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>LIC-2026-001</td><td>مركز أطلس الطبي</td><td>ظفار</td><td>30/03/2026</td><td><span class="status s-pending">جديد</span></td><td><button class="btn secondary">مراجعة الملف</button></td></tr>
+              <tr><td>LIC-2025-084</td><td>مستشفى كيمز</td><td>مسقط</td><td>15/12/2025</td><td><span class="status s-approved">معتمد</span></td><td><a class="btn secondary" href="6.C-institution-profile.html">عرض الملف</a></td></tr>
+              <tr><td>LIC-2026-002</td><td>مستشفى الرفاعة</td><td>مسقط</td><td>28/03/2026</td><td><span class="status s-review">قيد المعاينة</span></td><td><button class="btn secondary">مراجعة الملف</button></td></tr>
+              <tr><td>LIC-2026-003</td><td>بدر السما</td><td>الباطنة</td><td>25/03/2026</td><td><span class="status s-pending">بانتظار النواقص</span></td><td><button class="btn secondary">مراجعة الملف</button></td></tr>
+              <tr><td>LIC-2026-004</td><td>مستشفى ستار كير</td><td>مسقط</td><td>20/03/2026</td><td><span class="status s-approved">معتمد</span></td><td><button class="btn secondary">عرض الملف</button></td></tr>
+              <tr><td>LIC-2026-005</td><td>مركز الحياة</td><td>الداخلية</td><td>15/03/2026</td><td><span class="status s-review">مراجعة فنية</span></td><td><button class="btn secondary">مراجعة الملف</button></td></tr>
+              <tr><td>LIC-2026-006</td><td>مستشفى مسقط</td><td>مسقط</td><td>10/03/2026</td><td><span class="status s-approved">معتمد</span></td><td><button class="btn secondary">عرض الملف</button></td></tr>
+              <tr><td>LIC-2026-007</td><td>عيادة الخليج</td><td>البريمي</td><td>05/03/2026</td><td><span class="status s-pending">جديد</span></td><td><button class="btn secondary">مراجعة الملف</button></td></tr>
+              <tr><td>LIC-2026-008</td><td>مركز الشفاء</td><td>الظاهرة</td><td>01/03/2026</td><td><span class="status s-approved">معتمد</span></td><td><button class="btn secondary">عرض الملف</button></td></tr>
+              <tr><td>LIC-2026-009</td><td>مستشفى عمان</td><td>مسقط</td><td>25/02/2026</td><td><span class="status s-review">في انتظار التفتيش</span></td><td><button class="btn secondary">تم تحديد موعد</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

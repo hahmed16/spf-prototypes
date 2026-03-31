@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة جلسات التظلم - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m5" data-page="5.D-session-management.html" data-title="إدارة جلسات لجنة التظلمات العليا" data-crumbs="الرئيسية|التظلمات الطبية|جلسات التظلم">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">إدارة جلسات لجنة التظلمات العليا</h2>
+          <p>جدولة وإدارة جلسات اللجنة الطبية العليا المختصة بالبت النهائي في التظلمات المقدمة.</p>
+        </div>
+        <div class="inline-actions"><button class="btn primary" data-action="إنشاء جلسة">جدولة جلسة عليا</button></div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><h3>البحث في جلسات التظلم</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field"><label>رقم الجلسة</label><input value=""></div>
+            <div class="field"><label>تاريخ الجلسة</label><input type="date"></div>
+            <div class="field"><label>الحالة</label><select><option>مجدولة</option><option>منعقدة</option><option>مكتملة التوقيعات</option></select></div>
+          </div>
+          <div class="actions" style="margin-top:14px"><button class="btn primary">تحديث</button></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:24px">
+        <div class="card-head"><h3>قائمة الجلسات العليا</h3></div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>رقم الجلسة</th>
+                <th>تاريخ الجلسة</th>
+                <th>عدد التظلمات</th>
+                <th>رئيس اللجنة</th>
+                <th>الحالة</th>
+                <th>الإجراء</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>APP-SESS-001</td>
+                <td>10/04/2026</td>
+                <td>5 تظلمات</td>
+                <td>د. سعيد المعولي</td>
+                <td><span class="status s-pending">مجدولة</span></td>
+                <td><a class="btn secondary" href="5.E-session-detail.html">فتح الجلسة</a></td>
+              </tr>
+              <tr>
+                <td>APP-SESS-022</td>
+                <td>25/03/2026</td>
+                <td>3 تظلمات</td>
+                <td>د. سالم الهنائي</td>
+                <td><span class="status s-approved">مكتملة</span></td>
+                <td><a class="btn secondary" href="5.E-session-detail.html">فتح الجلسة</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

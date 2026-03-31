@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>احتساب وتوزيع عوائد الاستثمار - نظام الادخار</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-user-role="staff">
+    <div id="navbarPlaceholder"></div>
+    <div id="sidebarPlaceholder"></div>
+
+    <main class="spf-main">
+        <div class="page-header">
+            <div>
+                <h4>إدارة عوائد الاستثمار السنوية</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="01-dashboard.html">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">عوائد الاستثمار</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge staff">موظف الصندوق</span>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-7">
+                <div class="spf-card">
+                    <div class="card-header-custom">احتساب العائد لعام 2025</div>
+                    <div class="card-body">
+                        <div class="row g-4 align-items-center">
+                            <div class="col-md-6">
+                                <div class="p-3 bg-spf-light rounded border border-spf">
+                                    <div class="text-muted small mb-1">حالة العائد الحالي</div>
+                                    <div class="h5 fw-800 text-spf-dark mb-0"><i class="fas fa-clock me-2"></i> قيد الإعداد (Pending)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded border">
+                                    <div class="text-muted small mb-1">الموعد النهائي للتوزيع</div>
+                                    <div class="h5 fw-800 mb-0"><i class="fas fa-calendar-times me-2"></i> 31 مارس 2026</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <form id="returnRateForm">
+                            <div class="mb-4">
+                                <label class="form-label fw-700">نسبة عائد الاستثمار المقترحة (%)</label>
+                                <div class="input-group input-group-lg">
+                                    <input type="number" step="0.1" class="form-control" placeholder="0.0" min="2.0">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <div class="form-text text-spf"><i class="fas fa-info-circle me-1"></i> الحد الأدنى القانوني للعائد هو 2% سنوياً.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-700">ملاحظات / تبرير النسبة</label>
+                                <textarea class="form-control" rows="3" placeholder="أدخل ملخص مبررات تحديد هذه النسبة بناءً على أداء المحفظة الاستثمارية..."></textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-800">مسار الاعتماد والتدقيق</label>
+                                <div class="audit-timeline p-4 bg-white rounded border shadow-sm">
+                                    <div class="timeline-item">
+                                        <div class="time">22/02/2026 - 09:15 AM</div>
+                                        <div class="action"><i class="fas fa-file-signature me-2 text-success"></i> تم إنشاء مقترح النسبة</div>
+                                        <div class="user">بواسطة: أحمد البوسعيدي (أخصائي استثمار)</div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="time">22/02/2026 - 11:30 AM</div>
+                                        <div class="action"><i class="fas fa-check-double me-2 text-primary"></i> تم التدقيق والمراجعة من قسم المخاطر</div>
+                                        <div class="user">بواسطة: ناصر الهنائي (مدير المخاطر)</div>
+                                    </div>
+                                    <div class="timeline-item" style="border-right-color: var(--spf-gold);">
+                                        <div class="time">نظام العمل الآلي</div>
+                                        <div class="action"><i class="fas fa-hourglass-half me-2 text-warning"></i> قيد انتظار اعتماد لجنة الاستثمار</div>
+                                        <div class="user">الحالة الحالية</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-start">
+                                <button type="button" class="btn btn-spf px-5" onclick="submitRate()">رفع لطلب الاعتماد</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="spf-card">
+                    <div class="card-header-custom">السجل التاريخي للعوائد</div>
+                    <div class="card-body">
+                        <table class="spf-table">
+                            <thead>
+                                <tr>
+                                    <th>العام</th>
+                                    <th>النسبة</th>
+                                    <th>الحالة</th>
+                                    <th>التفاصيل</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2024</td>
+                                    <td class="fw-700">3.5 %</td>
+                                    <td><span class="badge-status success">تم التوزيع</span></td>
+                                    <td><a href="09-approval-workflow.html" class="text-spf"><i class="fas fa-external-link-alt"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <td>2023</td>
+                                    <td class="fw-700">3.2 %</td>
+                                    <td><span class="badge-status success">تم التوزيع</span></td>
+                                    <td><a href="09-approval-workflow.html" class="text-spf"><i class="fas fa-external-link-alt"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <td>2022</td>
+                                    <td class="fw-700">2.8 %</td>
+                                    <td><span class="badge-status success">تم التوزيع</span></td>
+                                    <td><a href="09-approval-workflow.html" class="text-spf"><i class="fas fa-external-link-alt"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <td>2021</td>
+                                    <td class="fw-700">2.5 %</td>
+                                    <td><span class="badge-status success">تم التوزيع</span></td>
+                                    <td><a href="09-approval-workflow.html" class="text-spf"><i class="fas fa-external-link-alt"></i></a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="common.js"></script>
+    <script>
+        function submitRate() {
+            const rate = document.querySelector('input[type="number"]').value;
+            if (!rate || rate < 2) {
+                spf.showError('يرجى إدخال نسبة صحيحة (لا تقل عن 2%)');
+                return;
+            }
+            spf.showSuccess('تم رفع مقترح نسبة العائد (' + rate + '%) بنجاح إلى لجنة الاستثمار للاعتماد النهائي.');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const role = localStorage.getItem('spf-user-role') || 'staff';
+            if (role !== 'staff') {
+                document.body.innerHTML = '<div class="container mt-5 text-center"><div class="alert alert-danger">عذراً، هذه الصفحة مخصصة لموظفي الصندوق فقط.</div><a href="01-dashboard.html" class="btn btn-spf">العودة للوحة التحكم</a></div>';
+            }
+
+            spf.renderInquiries([
+                "احتساب العائد سنوياً لكن هل يتم توزيع هذا العائد واحتسابه شهرياً أم سنوياً (كانت هناك آراء مختلفة في حين أن المادة القانونية أوضحت أن التوزيع شهرياً).",
+                "ما هي آلية احتساب العائد ؟ هل على إجمالي المبالغ في الحساب أم إجمالي مصادر معينة ؟ وهل يتم احتساب العائد على الإجمالي مشتملاً على العوائد المحتسبة سابقاً أيضاً أم لا؟",
+                "هل كل مصدر من مصادر الإيداع له سقف خاص به 36000 أم أن هذا السقف للحساب ككل بتنوع مصادره ؟",
+                "هل من الممكن أن يتم تحديد عائد الاستثمار لكل مصدر من مصادر الادخار على حدة ؟ أن أنه عائد ثابت دائماً لكل المصادر ؟"
+            ]);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>طلب ترخيص مؤسسة صحية - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m6" data-page="6.B-new-license-request.html" data-title="تقديم طلب ترخيص مؤسسة صحية" data-crumbs="الرئيسية|الترخيص والرقابة|طلب ترخيص">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">تقديم طلب ترخيص مؤسسة صحية</h2>
+          <p>تعبئة بيانات المؤسسة والمرفقات اللازمة للحصول على ترخيص تقييم العجز الطبي من صندوق الحماية الاجتماعية.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>بيانات المنشأة الطبية</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field"><label>اسم المؤسسة بالكامل</label><input placeholder="مثلاً: مستشفى السلام"></div>
+            <div class="field"><label>رقم السجل التجاري</label><input placeholder="1234567"></div>
+            <div class="field"><label>رقم ترخيص وزارة الصحة</label><input placeholder="MOH/LIC/..." ></div>
+            <div class="field"><label>المحافظة</label><select><option>مسقط</option><option>ظفار</option><option>الباطنة</option></select></div>
+            <div class="field" style="grid-column: 1 / -1"><label>العنوان التفصيلي</label><input placeholder="الشارع، البناية، الطابق..."></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><h3>نوع الترخيص والخدمات</h3></div>
+        <div class="card-body">
+           <div class="form-grid">
+             <div class="field">
+               <label>الخدمات المطلوبة</label>
+               <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px">
+                 <label style="display:flex; gap:8px; cursor:pointer"><input type="checkbox"> تقييم العجز المهني (إصابات العمل)</label>
+                 <label style="display:flex; gap:8px; cursor:pointer"><input type="checkbox"> تقييم العجز غير المهني (الأمراض المستديمة)</label>
+                 <label style="display:flex; gap:8px; cursor:pointer"><input type="checkbox"> تقييم الإعاقة (Disability Benefit)</label>
+               </div>
+             </div>
+           </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><h3>المرفقات المطلوبة</h3></div>
+        <div class="card-body">
+           <div class="form-grid">
+             <div class="field"><label>نسخة ترخيص وزارة الصحة</label><input type="file"></div>
+             <div class="field"><label>قائمة الكوادر الطبية المقترحة</label><input type="file"></div>
+             <div class="field"><label>بيان التجهيزات والمكان المخصص</label><input type="file"></div>
+           </div>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top:20px">
+        <button class="btn primary" data-action="تقديم الطلب" data-message="تم تقديم طلب الترخيص بنجاح وبانتظار المراجعة الإدارية" data-redirect="6.A-license-requests-list.html">إرسال طلب الترخيص</button>
+        <a class="btn secondary" href="6.A-license-requests-list.html">إلغاء</a>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

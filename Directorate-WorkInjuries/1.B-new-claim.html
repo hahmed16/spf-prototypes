@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تقديم طلب جديد - بدل الانقطاع عن العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m1" data-page="1.B-new-claim.html" data-title="تقديم طلب جديد - بدل الانقطاع عن العمل" data-crumbs="الرئيسية|تقديم طلب جديد - بدل الانقطاع عن العمل" data-user="أحمد بن سالم البلوشي - موظف الصندوق">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">تقديم طلب جديد - بدل الانقطاع عن العمل</h2>
+          <p>رحلة تشغيلية مترابطة توضح الطلب والحالة والإجراء التالي ضمن نفس النظام.</p>
+        </div>
+        <div class="inline-actions">
+          <a class="btn secondary" href="S.2-home.html">العودة للرئيسية</a>
+        </div>
+      </div>
+      
+    <div class="alert">تتغير الحقول والمرفقات وبيانات الاسترجاع حسب مقدم الطلب ونوع البلاغ.</div>
+    <div class="card" style="margin-top:18px">
+      <div class="card-head"><h3>بيانات الطلب</h3></div>
+      <div class="card-body">
+        <div class="stepper">
+          <a href="#" class="step active" data-step-link="#step1">الخطوة 1: المعلومات الأساسية</a>
+          <a href="#" class="step" data-step-link="#step2">الخطوة 2: بيانات مقدم الطلب</a>
+          <a href="#" class="step" data-step-link="#step3">الخطوة 3: البيانات والمرفقات</a>
+          <a href="#" class="step" data-step-link="#step4">الخطوة 4: المراجعة والإرسال</a>
+        </div>
+        <section id="step1" style="margin-top:18px">
+          <div class="form-grid">
+            <div class="field"><label>نوع الطلب <span class="req">*</span></label><select><option>إصابة عمل</option><option>مرض مهني</option></select></div>
+            <div class="field"><label>تاريخ الواقعة / التأكيد</label><input value="31/03/2026"></div>
+            <div class="field"><label>صفة مقدم الطلب</label><select data-role-switcher data-target="#roleCases"><option value="insured">المؤمن عليه</option><option value="employer">صاحب العمل</option><option value="staff">موظف الصندوق</option></select></div>
+          </div>
+        </section>
+        <section id="step2" style="margin-top:18px">
+          <div id="roleCases">
+            <div data-role-case="insured"><div class="alert ok">عند اختيار المؤمن عليه تظهر الحقول المرتبطة بالعلاقة المباشرة والمرفقات الشخصية.</div></div>
+            <div data-role-case="employer" style="display:none"><div class="alert ok">عند اختيار صاحب العمل تظهر بيانات المنشأة والمسؤول المعتمد.</div></div>
+            <div data-role-case="staff" style="display:none"><div class="alert ok">عند اختيار موظف الصندوق تظهر بيانات السند النظامي أو سبب التقديم نيابةً عن المستفيد.</div></div>
+          </div>
+          <div class="form-grid" style="margin-top:14px">
+            <div class="field"><label>الاسم</label><input value="أحمد بن سالم البلوشي"></div>
+            <div class="field"><label>الرقم المدني</label><input value="10234567"></div>
+            <div class="field"><label>رقم الهاتف</label><input value="92123456"></div>
+          </div>
+        </section>
+        
+    <section id="step3" style="margin-top:18px">
+      <div class="grid cards-2">
+        <div class="card"><div class="card-head"><h3>بيانات المؤمن عليه وجهة العمل</h3></div><div class="card-body"><div class="form-grid"><div class="field"><label>رقم التأمين</label><input value="INS-45872"></div><div class="field"><label>الوظيفة</label><input value="فني تشغيل"></div><div class="field"><label>جهة العمل</label><input value="شركة تنمية عمان"></div></div><div class="actions" style="margin-top:14px"><button class="btn secondary" data-action="استرجاع بيانات المؤمن عليه" data-message="تم جلب بيانات المؤمن عليه">استرجاع بيانات المؤمن عليه</button><button class="btn secondary" data-action="استرجاع بيانات جهة العمل" data-message="تم جلب بيانات جهة العمل">استرجاع بيانات جهة العمل</button></div></div></div>
+        <div class="card"><div class="card-head"><h3>المرفقات والبيانات المسترجعة</h3></div><div class="card-body"><div class="field"><label>المرفقات</label><textarea>التقرير الطبي الأولي
+كشف الحضور والانصراف
+إفادة المشرف</textarea></div><div class="query-box" data-query-box><div class="inline-actions"><button class="btn secondary" data-query="success">استعلام ناجح</button><button class="btn secondary" data-query="loading">جاري التحميل</button><button class="btn secondary" data-query="nodata">لا توجد بيانات</button><button class="btn secondary" data-query="failure">فشل الربط</button></div><div class="query-state active" data-state="success"><div class="alert ok">تم جلب تقريرين طبيين من وزارة الصحة.</div></div><div class="query-state" data-state="loading"><div class="alert">جاري الاستعلام عن التقارير الطبية من وزارة الصحة...</div></div><div class="query-state" data-state="nodata"><div class="alert warn">لا توجد تقارير طبية متاحة للرقم المدني المدخل.</div></div><div class="query-state" data-state="failure"><div class="alert danger">تعذر الاتصال بوزارة الصحة حالياً.</div></div></div></div></div>
+      </div>
+    </section>
+    
+        <section id="step4" style="margin-top:18px">
+          <div class="actions">
+            <a class="btn secondary" href="1.A-claims-list.html">العودة</a>
+            <button class="btn secondary" data-action="حفظ كمسودة" data-message="تم حفظ البيانات كمسودة">حفظ كمسودة</button>
+            <button class="btn primary" data-action="إرسال الطلب" data-message="تم إرسال الطلب وتحويلك إلى شاشة التفاصيل" data-redirect="1.C-claim-detail.html">إرسال الطلب</button>
+          </div>
+        </section>
+      </div>
+    </div>
+    
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

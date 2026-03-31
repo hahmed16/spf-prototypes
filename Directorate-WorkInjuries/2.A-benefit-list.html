@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>قائمة طلبات منفعة الإعاقة - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m2" data-page="2.A-benefit-list.html" data-title="قائمة طلبات منفعة الأشخاص ذوي الإعاقة" data-crumbs="الرئيسية|منفعة الإعاقة|قائمة الطلبات">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">قائمة طلبات منفعة الأشخاص ذوي الإعاقة</h2>
+          <p>استعراض كافة الطلبات المقدمة للحصول على المنفعة أو متابعة المنافع النشطة.</p>
+        </div>
+        <div class="inline-actions">
+           <a class="btn primary" href="2.B-new-benefit.html">إنشاء طلب جديد</a>
+        </div>
+      </div>
+
+      <div class="alert">يظهر للمؤمن عليه طلباته الشخصية، بينما يظهر لموظف الصندوق الطلبات الواقعة ضمن اختصاصه.</div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><h3>البحث</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field"><label>الرقم المدني</label><input value=""></div>
+            <div class="field"><label>رقم البطاقة</label><input value=""></div>
+            <div class="field"><label>حالة البطاقة</label><select><option>الكل</option><option>سارية</option><option>منتهية</option><option>ملغاة</option></select></div>
+          </div>
+          <div class="actions" style="margin-top:14px">
+            <button class="btn primary" data-action="بحث">تطبيق الفلاتر</button>
+            <button class="btn secondary" data-action="إعادة تعيين">إعادة تعيين</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:24px">
+        <div class="card-head"><h3>قائمة الطلبات</h3></div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+               <tr>
+                 <th>رقم الطلب</th>
+                 <th>المستفيد</th>
+                 <th>الرقم المدني</th>
+                 <th>حالة البطاقة</th>
+                 <th>حالة المنفعة</th>
+                 <th>الإجراءات</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr><td>DB-2026-0005</td><td>فاطمة الهنائية</td><td>99887766</td><td><span class="status s-approved">سارية</span></td><td><span class="status s-approved">نشطة (تصرف)</span></td><td><a class="btn secondary" href="2.C-benefit-detail.html">التفاصيل</a></td></tr>
+               <tr><td>DB-2026-0421</td><td>خالد الراشدي</td><td>44556677</td><td><span class="status s-review">معلق</span></td><td><span class="status s-review">موقوفة موقتاً</span></td><td><a class="btn secondary" href="2.C-benefit-detail.html">التفاصيل</a></td></tr>
+               <tr><td>DB-2026-0422</td><td>سعيد المعمري</td><td>11223344</td><td><span class="status s-approved">سارية</span></td><td><span class="status s-approved">نشطة</span></td><td><a class="btn secondary" href="2.C-benefit-detail.html">التفاصيل</a></td></tr>
+               <tr><td>DB-2026-0423</td><td>مريم البلوشية</td><td>55667788</td><td><span class="status s-review">قيد التجديد</span></td><td><span class="status s-approved">نشطة</span></td><td><a class="btn secondary" href="2.C-benefit-detail.html">التفاصيل</a></td></tr>
+               <tr><td>DB-2026-0424</td><td>أحمد الشحي</td><td>22334455</td><td><span class="status s-approved">سارية</span></td><td><span class="status s-approved">نشطة</span></td><td><a class="btn secondary" href="2.C-benefit-detail.html">التفاصيل</a></td></tr>
+               <tr><td>DB-2026-0425</td><td>ليلى العجمية</td><td>66778899</td><td><span class="status s-draft">جديد</span></td><td><span class="status s-review">قيد الدراسة</span></td><td><a class="btn secondary" href="2.C-benefit-detail.html">التفاصيل</a></td></tr>
+               <tr><td>DB-2026-0426</td><td>حمد الوهيبي</td><td>33445566</td><td><span class="status s-approved">سارية</span></td><td><span class="status s-approved">نشطة</span></td><td><a class="btn secondary" href="2.C-benefit-detail.html">التفاصيل</a></td></tr>
+               <tr><td>DB-2026-0427</td><td>بثينة اليعقوبية</td><td>77889900</td><td><span class="status s-approved">سارية</span></td><td><span class="status s-approved">نشطة</span></td><td><a class="btn secondary" href="2.C-benefit-detail.html">التفاصيل</a></td></tr>
+               <tr><td>DB-2026-0428</td><td>فيصل المقبالي</td><td>88990011</td><td><span class="status s-review">مراجعة طبية</span></td><td><span class="status s-approved">نشطة</span></td><td><a class="btn secondary" href="2.C-benefit-detail.html">التفاصيل</a></td></tr>
+               <tr><td>DB-2026-0429</td><td>ريما الفارسية</td><td>99001122</td><td><span class="status s-approved">سارية</span></td><td><span class="status s-approved">نشطة</span></td><td><a class="btn secondary" href="2.C-benefit-detail.html">التفاصيل</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

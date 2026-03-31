@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تفاصيل التظلم الطبي - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m5" data-page="5.C-appeal-detail.html" data-title="تفاصيل طلب التظلم الطبي" data-crumbs="الرئيسية|التظلمات الطبية|تفاصيل الطلب">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">تفاصيل طلب التظلم APP-2026-001</h2>
+          <p>الملف الكامل للتظلم ومتابعة المراجعات الأولية حتى قرار اللجنة العليا للتظلمات.</p>
+        </div>
+        <div class="inline-actions">
+           <span class="status s-review" style="font-size:18px; padding:8px 20px">المرحلة: المراجعة الأولية (موظف الصندوق)</span>
+        </div>
+      </div>
+
+      <div class="split">
+         <div class="drawer">
+            <div class="card summary-card">
+               <div class="card-head"><h3>ملخص التظلم</h3></div>
+               <div class="card-body">
+                 <div class="summary-list">
+                    <div class="summary-item"><span>رقم التظلم</span><b>APP-2026-001</b></div>
+                    <div class="summary-item"><span>المتظلم</span><b>سالم البلوشي</b></div>
+                    <div class="summary-item"><span>تاريخ التقديم</span><b>31/03/2026</b></div>
+                    <div class="summary-item"><span>القرار المطعون فيه</span><b>نسبة عجز 10%</b></div>
+                 </div>
+               </div>
+            </div>
+         </div>
+
+         <div class="main-content">
+            <div class="tabs">
+              <button class="tab active" data-tab="data">بيانات التظلم</button>
+              <button class="tab" data-tab="original">الطلب الأصلي</button>
+              <button class="tab" data-tab="history">السجل الزمني</button>
+            </div>
+
+            <div data-tab-panel="data">
+               <div class="card" style="margin-top:18px">
+                 <div class="card-head"><h3>محتوى التظلم والمرفقات</h3></div>
+                 <div class="card-body">
+                    <div class="field"><label>سبب التظلم</label><textarea readonly>أعترض على نسبة العجز المقدرة بـ 10% حيث أن الإصابة أثرت بشكل كلي على وظيفة اليد ولا أستطيع العودة للعمل الفعلي.</textarea></div>
+                    <div class="field" style="margin-top:14px">
+                       <label>المستندات المرفقة</label>
+                       <table class="table">
+                         <thead><tr><th>الملف</th><th>التاريخ</th><th>الإجراء</th></tr></thead>
+                         <tbody><tr><td>تقرير مستشفى خاص - استشاري عظام.pdf</td><td>31/03/2026</td><td><button class="btn secondary">عرض</button></td></tr></tbody>
+                       </table>
+                    </div>
+                 </div>
+               </div>
+            </div>
+
+            <div data-tab-panel="original" style="display:none">
+               <div class="card" style="margin-top:18px">
+                 <div class="card-head"><h3>بيانات القرار الأصلي</h3></div>
+                 <div class="card-body">
+                    <div class="summary-list">
+                       <div class="summary-item"><span>رقم الطلب الأصلي</span><b>WI-2026-0142</b></div>
+                       <div class="summary-item"><span>اللجنة المصدرة</span><b>لجنة مستشفى خولة</b></div>
+                       <div class="summary-item"><span>تاريخ القرار</span><b>01/03/2026</b></div>
+                    </div>
+                    <button class="btn secondary" style="margin-top:14px">عرض ملف الطلب الأصلي بالكامل</button>
+                 </div>
+               </div>
+            </div>
+
+         </div>
+      </div>
+
+      <!-- Appeal Decision (Full Row) -->
+      <div class="card" style="margin-top:24px; border: 2px solid var(--g2)">
+        <div class="card-head"><h3>قرار المراجعة (Decision Panel)</h3></div>
+        <div class="card-body">
+           <div class="form-grid">
+             <div class="field">
+               <label>الدور الحالي</label>
+               <select data-role-switcher data-target="#appealDecisions">
+                 <option value="staff">موظف الصندوق (مراجعة)</option>
+                 <option value="head">رئيس القسم (اعتماد)</option>
+               </select>
+             </div>
+             <div class="field">
+               <label>الإجراء</label>
+               <div id="appealDecisions">
+                  <select data-role-case="staff">
+                    <option>توصية بالقبول شكلاً وإحالته للجنة</option>
+                    <option>إرجاع للاستيفاء</option>
+                    <option>توصية بالرفض شكلاً</option>
+                  </select>
+                  <select data-role-case="head" style="display:none">
+                    <option>تأكيد القبول والإحالة للجنة العليا</option>
+                    <option>إرجاع للموظف</option>
+                    <option>تأكيد الرفض شكلاً</option>
+                  </select>
+               </div>
+             </div>
+           </div>
+           <div class="field" style="margin-top:14px"><label>ملاحظات المراجعة</label><textarea placeholder="اكتب ملاحظات المراجعة هنا..."></textarea></div>
+           <div class="actions" style="margin-top:18px">
+             <button class="btn primary" data-action="حفظ القرار">حفظ واعتماد الإجراء</button>
+             <a class="btn secondary" href="5.A-appeals-list.html">رجوع</a>
+           </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

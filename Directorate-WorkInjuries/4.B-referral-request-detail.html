@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مراجعة طلب الإحالة - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m4" data-page="4.B-referral-request-detail.html" data-title="مراجعة طلب الإحالة الطبية" data-crumbs="الرئيسية|العرض على المؤسسات الصحية المرخصة|تفاصيل الإحالة">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">مراجعة طلب الإحالة الطبية</h2>
+          <p>مراجعة بيانات الحالة المحالة من وحدة بدلات الانقطاع وتحديد المؤسسة الصحية المناسبة للعرض.</p>
+        </div>
+      </div>
+
+      <div class="split">
+         <div class="drawer">
+            <div class="card summary-card">
+               <div class="card-head"><h3>ملخص الإحالة</h3></div>
+               <div class="card-body">
+                 <div class="summary-list">
+                    <div class="summary-item"><span>رقم الطلب الأصلي</span><b>WI-2026-0142</b></div>
+                    <div class="summary-item"><span>نوع الحالة</span><b>إصابة عمل</b></div>
+                    <div class="summary-item"><span>الغرض</span><b>تقييم نسبة عجز</b></div>
+                    <div class="summary-item"><span>المستفيد</span><b>سالم البلوشي</b></div>
+                 </div>
+               </div>
+            </div>
+         </div>
+
+         <div class="main-content">
+            <div class="card">
+              <div class="card-head"><h3>بيانات المرفقات الطبية للطلب الأصلي</h3></div>
+              <div class="card-body">
+                 <table class="table">
+                   <thead><tr><th>الملف</th><th>النوع</th><th>الإجراء</th></tr></thead>
+                   <tbody>
+                     <tr><td>التقرير الطبي المبدئي.pdf</td><td>طبي</td><td><button class="btn secondary">عرض</button></td></tr>
+                     <tr><td>محضر التحقيق الميداني.pdf</td><td>إداري</td><td><button class="btn secondary">عرض</button></td></tr>
+                   </tbody>
+                 </table>
+              </div>
+            </div>
+
+         </div>
+      </div>
+
+      <!-- Referral Decision (Full Row) -->
+      <div class="card" style="margin-top:24px; border: 2px solid var(--g2)">
+        <div class="card-head"><h3>قرار مسار الإحالة</h3></div>
+        <div class="card-body">
+           <div class="form-grid">
+             <div class="field">
+               <label>المؤسسة الصحية المستهدفة</label>
+               <select>
+                 <option>مستشفى السلطان قابوس (بوشر)</option>
+                 <option>مستشفى خولة (مسقط)</option>
+                 <option>مستشفى صحار (الباطنة)</option>
+               </select>
+             </div>
+             <div class="field">
+               <label>سبب العرض (تصنيف)</label>
+               <select>
+                 <option>تقييم نسبة عجز لأول مرة</option>
+                 <option>إعادة العرض (انتكاس)</option>
+                 <option>تقييم عجز كلي وجزئي</option>
+                 <option>إصابة في الطريق</option>
+               </select>
+             </div>
+           </div>
+           <div class="field" style="margin-top:14px">
+             <label>توجيهات إضافية للجنة</label>
+             <textarea placeholder="يرجى التركيز على تقييم القدرة الحركية للطرف السفلي الأيسر..."></textarea>
+           </div>
+           <div class="actions" style="margin-top:20px">
+             <button class="btn primary" data-action="اعتماد الإحالة" data-message="تمت إحالة الحالة بنجاح للمؤسسة الصحية" data-redirect="4.C-referred-cases-list.html">اعتماد وإرسال للمؤسسة</button>
+             <button class="btn secondary" data-action="إرجاع">إرجاع للوحدة المحيلة</button>
+           </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

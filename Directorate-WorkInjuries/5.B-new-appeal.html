@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تقديم طلب تظلم طبي - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m5" data-page="5.B-new-appeal.html" data-title="تقديم طلب تظلم من قرار لجنة طبية" data-crumbs="الرئيسية|التظلمات الطبية|تقديم تظلم">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">تقديم طلب تظلم من قرار لجنة طبية</h2>
+          <p>يمكن للمؤمن عليه أو جهة العمل التظلم من قرارات اللجان الطبية خلال المدة القانونية المحددة.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>التحقق من أهلية التظلم</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field" style="grid-column: 1 / -1">
+               <label>رقم القرار المتظلم منه</label>
+               <div style="display:flex;gap:8px"><input value="DEC-2026-9902"><button class="btn secondary">التحقق من المدة</button></div>
+            </div>
+          </div>
+          <div class="alert ok" style="margin-top:14px">
+            <b>نتيجة التحقق:</b> الطلب ضمن المدة القانونية (بقي 15 يوماً). لم يسبق تقديم تظلم على هذا القرار.
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><h3>بيانات التظلم</h3></div>
+        <div class="card-body">
+           <div class="form-grid">
+             <div class="field"><label>رقم الطلب الأصلي</label><input value="WI-2026-0082" readonly></div>
+             <div class="field"><label>نوع الحالة</label><input value="إصابة عمل" readonly></div>
+             <div class="field" style="grid-column: 1 / -1"><label>القرار السابق المتظلم منه</label><textarea readonly>اعتماد نسبة عجز 10% بناءً على تقرير مستشفى خولة بتاريخ 01/03/2026.</textarea></div>
+           </div>
+           <div class="field" style="margin-top:14px">
+             <label>أسباب التظلم</label>
+             <textarea placeholder="يرجى ذكر الأسباب الفنية أو الإدارية للتظلم..."></textarea>
+           </div>
+           <div class="field" style="margin-top:14px">
+             <label>المرفقات الداعمة (تقارير جديدة)</label>
+             <input type="file" multiple>
+           </div>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top:20px">
+        <button class="btn primary" data-action="تقديم التظلم" data-message="تم تقديم التظلم بنجاح" data-redirect="5.C-appeal-detail.html">تقديم طلب التظلم</button>
+        <button class="btn secondary">حفظ مسودة</button>
+        <a class="btn secondary" href="5.A-appeals-list.html">إلغاء</a>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

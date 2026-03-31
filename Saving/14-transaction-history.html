@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل المعاملات والإيصالات - نظام الادخار</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-user-role="saver">
+    <div id="navbarPlaceholder"></div>
+    <div id="sidebarPlaceholder"></div>
+
+    <main class="spf-main">
+        <div class="page-header">
+            <div>
+                <h4>سجل المعاملات المالية والإيصالات</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="01-dashboard.html">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">سجل المعاملات</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge saver">المدخر</span>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="insight-card">
+                    <div class="insight-value">1,380.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"></div>
+                    <div class="insight-label">إجمالي الإيداعات</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="insight-card">
+                    <div class="insight-value">260.500 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"></div>
+                    <div class="insight-label">إجمالي السحوبات / السداد</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="insight-card">
+                    <div class="insight-value">1,119.500 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"></div>
+                    <div class="insight-label">صافي الرصيد الحالي</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-panel mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">الفترة من</label>
+                    <input type="date" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">الفترة إلى</label>
+                    <input type="date" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">نوع العملية</label>
+                    <select class="form-select">
+                        <option>الكل</option>
+                        <option>إيداع</option>
+                        <option>خصم / سداد</option>
+                        <option>عائد استثمار</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-spf w-100">تصفية</button>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-spf-outline w-100"><i class="fas fa-file-export me-1"></i> تصدير (Excel)</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="spf-card">
+            <div class="card-header-custom">كافة المعاملات المالية</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="spf-table">
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>نوع العملية</th>
+                                <th>المبلغ</th>
+                                <th>المصدر / الوجهة</th>
+                                <th>رقم المرجع</th>
+                                <th>الحالة</th>
+                                <th>الإيصال</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionBody">
+                            <!-- Role: SAVER Rows -->
+                            <tr class="tx-saver tx-row">
+                                <td>22/02/2026</td>
+                                <td><i class="fas fa-arrow-up text-success me-2"></i> إيداع نقدي (ذاتي)</td>
+                                <td class="fw-700">100.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                <td>عبر البوابة (البطاقة البنكية)</td>
+                                <td>#99812</td>
+                                <td><span class="badge-status success">مكتمل</span></td>
+                                <td><button class="btn btn-sm btn-light border"><i class="fas fa-download text-spf"></i></button></td>
+                            </tr>
+                            <tr class="tx-saver tx-row">
+                                <td>20/02/2026</td>
+                                <td><i class="fas fa-arrow-down text-danger me-2"></i> سداد التزامات</td>
+                                <td class="fw-700 text-danger">- 45.500 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                <td>صندوق الحماية الاجتماعية</td>
+                                <td>#88120</td>
+                                <td><span class="badge-status success">مكتمل</span></td>
+                                <td><button class="btn btn-sm btn-light border"><i class="fas fa-download text-spf"></i></button></td>
+                            </tr>
+                            <tr class="tx-saver tx-row">
+                                <td>15/02/2026</td>
+                                <td><i class="fas fa-arrow-up text-success me-2"></i> إيداع صاحب عمل</td>
+                                <td class="fw-700">150.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                <td>شركة تنمية نفط عمان</td>
+                                <td>#77100</td>
+                                <td><span class="badge-status success">مكتمل</span></td>
+                                <td><button class="btn btn-sm btn-light border"><i class="fas fa-download text-spf"></i></button></td>
+                            </tr>
+                            <!-- Role: EMPLOYER Rows -->
+                            <tr class="tx-employer tx-row d-none">
+                                <td>21/02/2026</td>
+                                <td><i class="fas fa-money-check-alt text-primary me-2"></i> دفعة جماعية لعدد 15 عامل</td>
+                                <td class="fw-700">1,500.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                <td>بنك مسقط - حساب الشركة</td>
+                                <td>#EMP-3321</td>
+                                <td><span class="badge-status success">مكتمل</span></td>
+                                <td><button class="btn btn-sm btn-light border"><i class="fas fa-download text-spf"></i></button></td>
+                            </tr>
+                            <tr class="tx-employer tx-row d-none">
+                                <td>01/02/2026</td>
+                                <td><i class="fas fa-money-check-alt text-primary me-2"></i> دفعة اشتراك شهر يناير</td>
+                                <td class="fw-700">1,200.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                <td>البنك الوطني - حساب الشركة</td>
+                                <td>#EMP-3200</td>
+                                <td><span class="badge-status success">مكتمل</span></td>
+                                <td><button class="btn btn-sm btn-light border"><i class="fas fa-download text-spf"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="common.js"></script>
+</body>
+</html>

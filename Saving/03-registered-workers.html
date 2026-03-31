@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>العمال المسجلين - نظام الادخار</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-user-role="employer">
+    <div id="navbarPlaceholder"></div>
+    <div id="sidebarPlaceholder"></div>
+
+    <main class="spf-main">
+        <div class="page-header">
+            <div>
+                <h4>العمال المسجلين في نظام الادخار الاختياري</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="01-dashboard.html">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">قائمة العمال</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge employer">صاحب العمل</span>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="insight-card">
+                    <div class="insight-icon green"><i class="fas fa-users"></i></div>
+                    <div class="insight-value">345</div>
+                    <div class="insight-label">إجمالي العمال المسجلين</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="insight-card">
+                    <div class="insight-icon gold"><i class="fas fa-coins"></i></div>
+                    <div class="insight-value">25,800 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"></div>
+                    <div class="insight-label">إجمالي المبالغ المدخرة</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="insight-card">
+                    <div class="insight-icon blue"><i class="fas fa-calculator"></i></div>
+                    <div class="insight-value">74.7 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"></div>
+                    <div class="insight-label">متوسط الادخار لكل عامل</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="insight-card">
+                    <div class="insight-icon purple"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="insight-value">12/02/2026</div>
+                    <div class="insight-label">تاريخ آخر إيداع</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="spf-card mb-4">
+            <div class="card-header-custom">
+                <span>تصفية البحث</span>
+                <i class="fas fa-filter"></i>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">الاسم الكامل</label>
+                        <input type="text" class="form-control" placeholder="بحث بالاسم...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">الرقم المدني</label>
+                        <input type="text" class="form-control" placeholder="12345678">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">المهنة</label>
+                        <input type="text" class="form-control" placeholder="المهنة">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">الجنسية</label>
+                        <select class="form-select">
+                            <option>الكل</option>
+                            <option>عماني</option>
+                            <option>غير عماني</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 align-self-end">
+                        <button class="btn btn-spf w-100"><i class="fas fa-search me-1"></i> بحث عمال</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="spf-card">
+            <div class="card-header-custom">
+                <span>قائمة العمال</span>
+                <div class="gap-8 d-flex">
+                    <a href="02-registration.html" class="btn btn-sm btn-spf"><i class="fas fa-user-plus"></i> تسجيل</a>
+                    <a href="05-deposit.html" class="btn btn-sm btn-spf-gold"><i class="fas fa-plus"></i> إيداع</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="spf-table">
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>الرقم المدني</th>
+                                <th>المهنة</th>
+                                <th>الجنسية</th>
+                                <th>السجل التجاري</th>
+                                <th>جهة العمل</th>
+                                <th>الراتب الأساسي</th>
+                                <th>إجمالي المبالغ</th>
+                                <th>آخر إيداع</th>
+                                <th style="width: 100px;">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>عمر بن خالد الهنائي</td>
+                                <td>87654321</td>
+                                <td>محاسب</td>
+                                <td>عماني</td>
+                                <td>1234567</td>
+                                <td>مجموعة بهوان</td>
+                                <td>850 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                <td>1,200.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                <td>12/02/2026</td>
+                                <td>
+                                    <a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2" title="التفاصيل"><i class="fas fa-eye"></i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>سالم بن حمد الجابري</td>
+                                <td>44556677</td>
+                                <td>مهندس كيميائي</td>
+                                <td>عماني</td>
+                                <td>1234567</td>
+                                <td>مجموعة بهوان</td>
+                                <td>1,200 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                <td>3,450.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                <td>10/02/2026</td>
+                                <td>
+                                    <a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2" title="التفاصيل"><i class="fas fa-eye"></i></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>راجيش كومار</td>
+                                <td>99001122</td>
+                                <td>فني مختبر</td>
+                                <td>هندي</td>
+                                <td>1234567</td>
+                                <td>مجموعة بهوان</td>
+                                <td>450 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                <td>900.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                <td>08/02/2026</td>
+                                <td>
+                                    <a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2" title="التفاصيل"><i class="fas fa-eye"></i></a>
+                                </td>
+                            </tr>
+                            <tr><td>محمد أحمد</td><td>10002001</td><td>مهندس</td><td>سوداني</td><td>1234567</td><td>مجموعة بهوان</td><td>900 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>1,500.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>01/02/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>فاطمة علي</td><td>10002002</td><td>إداري</td><td>مصرية</td><td>1234567</td><td>مجموعة بهوان</td><td>600 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>800.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>05/02/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>جون سميث</td><td>10002003</td><td>مستشار</td><td>بريطاني</td><td>1234567</td><td>مجموعة بهوان</td><td>2500 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>5,000.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>10/02/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>لي وانغ</td><td>10002004</td><td>تقني</td><td>صيني</td><td>1234567</td><td>مجموعة بهوان</td><td>1100 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>2,200.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>12/02/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>علي حسن</td><td>10002005</td><td>سائق</td><td>باكستاني</td><td>1234567</td><td>مجموعة بهوان</td><td>400 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>600.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>11/02/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>سارة جلال</td><td>10002006</td><td>محاسب</td><td>عماني</td><td>1234567</td><td>مجموعة بهوان</td><td>950 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>2,000.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>09/02/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>كريستوفر</td><td>10002007</td><td>مدير مشروع</td><td>فلبيني</td><td>1234567</td><td>مجموعة بهوان</td><td>1300 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>3,100.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>08/02/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>ليلى يوسف</td><td>10002008</td><td>مبيعات</td><td>أردنية</td><td>1234567</td><td>مجموعة بهوان</td><td>750 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>1,100.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>07/02/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>كارلوس</td><td>10002009</td><td>لوجستي</td><td>إسباني</td><td>1234567</td><td>مجموعة بهوان</td><td>880 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>1,400.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>06/02/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>شيرين</td><td>10002010</td><td>استقبال</td><td>سورية</td><td>1234567</td><td>مجموعة بهوان</td><td>500 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>700.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>05/02/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>برافين</td><td>10002011</td><td>فني</td><td>هندي</td><td>1234567</td><td>مجموعة بهوان</td><td>550 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>1,000.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>04/02/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>هدى سالم</td><td>10002012</td><td>محللة</td><td>عمانية</td><td>1234567</td><td>مجموعة بهوان</td><td>1050 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>2,500.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>03/02/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>ماركوس</td><td>10002013</td><td>أمن</td><td>نيجيري</td><td>1234567</td><td>مجموعة بهوان</td><td>450 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>500.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>02/02/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>ياسمينا</td><td>10002014</td><td>ترجمة</td><td>تونسية</td><td>1234567</td><td>مجموعة بهوان</td><td>700 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>1,300.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>01/02/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>نيكولاي</td><td>10002015</td><td>صيانة</td><td>روسي</td><td>1234567</td><td>مجموعة بهوان</td><td>800 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>1,600.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>31/01/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>أمال حسن</td><td>10002016</td><td>طبيبة</td><td>عمانية</td><td>1234567</td><td>مجموعة بهوان</td><td>1800 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>4,000.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>30/01/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>كريم أحمد</td><td>10002017</td><td>شيف</td><td>لبناني</td><td>1234567</td><td>مجموعة بهوان</td><td>900 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>1,800.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>29/01/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>يوشيكو</td><td>10002018</td><td>جودة</td><td>ياباني</td><td>1234567</td><td>مجموعة بهوان</td><td>1400 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>3,500.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>28/01/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>فهد ناصر</td><td>10002019</td><td>قانوني</td><td>عماني</td><td>1234567</td><td>مجموعة بهوان</td><td>1200 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>2,800.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>27/01/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                            <tr><td>إيمانويل</td><td>10002020</td><td>فنان</td><td>فرنسي</td><td>1234567</td><td>مجموعة بهوان</td><td>1000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>2,000.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"><td>26/01/2026</td><td><a href="04-account-details.html" class="btn btn-sm btn-spf-outline py-1 px-2"><i class="fas fa-eye"></i></a></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="common.js"></script>
+</body>
+</html>

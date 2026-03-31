@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>قائمة طلبات صرف بدلات الانقطاع عن العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m1" data-page="1.A-claims-list.html" data-title="قائمة طلبات صرف بدلات الانقطاع عن العمل" data-crumbs="الرئيسية|قائمة طلبات صرف بدلات الانقطاع عن العمل" data-user="أحمد بن سالم البلوشي - موظف الصندوق">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">قائمة طلبات صرف بدلات الانقطاع عن العمل</h2>
+          <p>رحلة تشغيلية مترابطة توضح الطلب والحالة والإجراء التالي ضمن نفس النظام.</p>
+        </div>
+        <div class="inline-actions">
+          <a class="btn secondary" href="S.2-home.html">العودة للرئيسية</a>
+        </div>
+      </div>
+      
+    <div class="alert">تختلف البيانات والإجراءات الظاهرة حسب ما إذا كان المستخدم هو المؤمن عليه أو المفوض من جهة العمل أو موظف الصندوق.</div>
+    <div class="card" style="margin-top:18px">
+      <div class="card-head">
+        <h3>البحث</h3>
+        <div class="toolbar">
+          <a class="btn primary" href="1.B-new-claim.html">إنشاء / تقديم جديد</a>
+          <button class="btn secondary" data-action="بحث" data-message="تم تنفيذ البحث داخل النموذج">بحث</button>
+          <button class="btn secondary" data-action="إعادة تعيين">إعادة تعيين</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="field"><label>رقم الطلب</label><input value=""></div>
+          <div class="field"><label>الرقم المدني</label><input value=""></div>
+          <div class="field"><label>الحالة</label><select><option>الكل</option><option>جديد</option><option>قيد المعالجة</option><option>معتمد</option></select></div>
+        </div>
+        <div class="tabs" style="margin-top:16px">
+          <button class="tab active" data-tab="all">الكل</button>
+          <button class="tab" data-tab="pending">قيد العمل</button>
+          <button class="tab" data-tab="done">مكتمل</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <div class="card-head"><h3>قائمة الطلبات</h3></div>
+      <div class="card-body">
+        <table class="table">
+          <thead>
+            <tr><th>رقم الطلب</th><th>نوع البلاغ</th><th>مقدم الطلب</th><th>المؤمن عليه</th><th>جهة العمل</th><th>الحالة</th><th>المرحلة</th><th>الإجراء</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>WI-2026-00142</td><td>إصابة عمل</td><td>صاحب العمل</td><td>سالم البلوشي</td><td>شركة تنمية عمان</td><td><span class="status s-review">قيد التحقيق</span></td><td>التحقيق</td><td><a class="btn secondary" href="1.C-claim-detail.html">عرض التفاصيل</a></td></tr>
+            <tr><td>OD-2026-00089</td><td>مرض مهني</td><td>المؤمن عليه</td><td>مريم المقبالية</td><td>مصنع الخليج</td><td><span class="status s-approval">بانتظار القرار</span></td><td>اعتماد التحقيق</td><td><a class="btn secondary" href="1.C-claim-detail.html">عرض التفاصيل</a></td></tr>
+            <tr><td>WI-2026-00143</td><td>إصابة عمل</td><td>المؤمن عليه</td><td>فهد الحوسني</td><td>أوكيو</td><td><span class="status s-approved">مكتمل</span></td><td>الصرف</td><td><a class="btn secondary" href="1.C-claim-detail.html">عرض التفاصيل</a></td></tr>
+            <tr><td>WI-2026-00144</td><td>مرض مهني</td><td>صاحب العمل</td><td>عصام الزدجالي</td><td>ميناء صحار</td><td><span class="status s-review">مراجعة المستندات</span></td><td>العرض على المؤسسات الصحية المرخصة</td><td><a class="btn secondary" href="1.C-claim-detail.html">عرض التفاصيل</a></td></tr>
+            <tr><td>WI-2026-00145</td><td>إصابة عمل</td><td>المؤمن عليه</td><td>خالد الشعيلي</td><td>مطارات عمان</td><td><span class="status s-draft">مسودة</span></td><td>التقديم</td><td><a class="btn secondary" href="1.C-claim-detail.html">عرض التفاصيل</a></td></tr>
+            <tr><td>WI-2026-00146</td><td>إصابة عمل</td><td>صاحب العمل</td><td>ياسر الهنائي</td><td>نماء للكهرباء</td><td><span class="status s-review">قيد التحليل</span></td><td>اللجنة الطبية</td><td><a class="btn secondary" href="1.C-claim-detail.html">عرض التفاصيل</a></td></tr>
+            <tr><td>WI-2026-00147</td><td>مرض مهني</td><td>المؤمن عليه</td><td>منى المعمرية</td><td>الشركة العمانية للاتصالات</td><td><span class="status s-approved">معتمد</span></td><td>الأرشفة</td><td><a class="btn secondary" href="1.C-claim-detail.html">عرض التفاصيل</a></td></tr>
+            <tr><td>WI-2026-00148</td><td>إصابة عمل</td><td>المؤمن عليه</td><td>سعيد الوهيبي</td><td>بلاد عمان</td><td><span class="status s-approval">بانتظار التوقيع</span></td><td>الاعتماد النهائي</td><td><a class="btn secondary" href="1.C-claim-detail.html">عرض التفاصيل</a></td></tr>
+            <tr><td>WI-2026-00149</td><td>إصابة عمل</td><td>صاحب العمل</td><td>ناصر الكندي</td><td>الأسمنت العمانية</td><td><span class="status s-review">مراجعة فنية</span></td><td>التحقيق الميداني</td><td><a class="btn secondary" href="1.C-claim-detail.html">عرض التفاصيل</a></td></tr>
+            <tr><td>WI-2026-00150</td><td>مرض مهني</td><td>المؤمن عليه</td><td>بشرى الحارثية</td><td>حلول المياه</td><td><span class="status s-approved">مغلق</span></td><td>التسوية</td><td><a class="btn secondary" href="1.C-claim-detail.html">عرض التفاصيل</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

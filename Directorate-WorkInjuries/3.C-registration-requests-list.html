@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>قائمة طلبات التسجيل - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m3" data-page="3.C-registration-requests-list.html" data-title="قائمة طلبات تسجيل الأمراض المستديمة" data-crumbs="الرئيسية|الأمراض المستديمة|طلبات التسجيل">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">قائمة طلبات تسجيل الأمراض المستديمة</h2>
+          <p>استعراض الطلبات المكتملة من قبل المستفيدين وبانتظار قرار الاستحقاق النهائي.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><h3>البحث</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field"><label>رقم الطلب</label><input value=""></div>
+            <div class="field"><label>الرقم المدني</label><input value=""></div>
+            <div class="field"><label>حالة الطلب</label><select><option>الكل</option><option>قيد المراجعة</option><option>بانتظار اللجنة</option><option>معتمد</option></select></div>
+          </div>
+          <div class="actions" style="margin-top:14px"><button class="btn primary">بحث</button></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:24px">
+        <div class="card-head"><h3>قائمة الطلبات</h3></div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>المستفيد</th>
+                <th>التشخيص</th>
+                <th>تاريخ التقديم</th>
+                <th>الحالة</th>
+                <th>الإجراء</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>REQ-2026-001</td><td>ليلى البلوشية</td><td>إصابة عصبية مستديمة</td><td>30/03/2026</td><td><span class="status s-pending">بانتظار اللجنة</span></td><td><a class="btn secondary" href="3.D-request-detail.html">فتح الطلب</a></td></tr>
+              <tr><td>REQ-2026-042</td><td>سالم الحسني</td><td>سرطان المرحلة الرابعة</td><td>31/03/2026</td><td><span class="status s-approved">معتمد (مباشر)</span></td><td><a class="btn secondary" href="3.D-request-detail.html">فتح الطلب</a></td></tr>
+              <tr><td>REQ-2026-043</td><td>أمل العامرية</td><td>فشل كلوي حاد</td><td>29/03/2026</td><td><span class="status s-review">مراجعة طبية</span></td><td><a class="btn secondary" href="3.D-request-detail.html">فتح الطلب</a></td></tr>
+              <tr><td>REQ-2026-044</td><td>ماجد المعولي</td><td>إصابة نخاع شوكي</td><td>28/03/2026</td><td><span class="status s-pending">بانتظار التقييم</span></td><td><a class="btn secondary" href="3.D-request-detail.html">فتح الطلب</a></td></tr>
+              <tr><td>REQ-2026-045</td><td>فاطمة الشبلية</td><td>تصلب لويحي</td><td>27/03/2026</td><td><span class="status s-approved">معتمد</span></td><td><a class="btn secondary" href="3.D-request-detail.html">فتح الطلب</a></td></tr>
+              <tr><td>REQ-2026-046</td><td>يحيى الراشدي</td><td>فقدان بصر كلي</td><td>26/03/2026</td><td><span class="status s-review">قيد الدراسة</span></td><td><a class="btn secondary" href="3.D-request-detail.html">فتح الطلب</a></td></tr>
+              <tr><td>REQ-2026-047</td><td>نورة الزدجالية</td><td>إعاقة حركية دائمة</td><td>25/03/2026</td><td><span class="status s-pending">بانتظار اللجنة العليا</span></td><td><a class="btn secondary" href="3.D-request-detail.html">فتح الطلب</a></td></tr>
+              <tr><td>REQ-2026-048</td><td>خالد الفارسي</td><td>ضمور عضلات</td><td>24/03/2026</td><td><span class="status s-approved">معتمد</span></td><td><a class="btn secondary" href="3.D-request-detail.html">فتح الطلب</a></td></tr>
+              <tr><td>REQ-2026-049</td><td>منى البوسعيدية</td><td>مرض القلب المزمن</td><td>23/03/2026</td><td><span class="status s-review">استكمال بيانات</span></td><td><a class="btn secondary" href="3.D-request-detail.html">فتح الطلب</a></td></tr>
+              <tr><td>REQ-2026-050</td><td>جمعة الهنائي</td><td>إصابة دماغية رضية</td><td>22/03/2026</td><td><span class="status s-approved">معتمد</span></td><td><a class="btn secondary" href="3.D-request-detail.html">فتح الطلب</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

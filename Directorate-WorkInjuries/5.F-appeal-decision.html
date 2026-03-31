@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>قرار لجنة التظلمات العليا - نظام مديرية إصابات العمل</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="m5" data-page="5.F-appeal-decision.html" data-title="قرار لجنة التظلمات العليا للحالة" data-crumbs="الرئيسية|التظلمات الطبية|تفاصيل الجلسة|قرار التظلم">
+  <div id="topbar" class="app-topbar"></div>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main">
+      <div class="crumbs" id="breadcrumbs"></div>
+      <div class="page-head">
+        <div>
+          <h2 id="pageTitle">قرار لجنة التظلمات العليا للحالة: سالم البلوشي</h2>
+          <p>تسجيل البت النهائي غير القابل للطعن في التظلم المقدم على قرار العجز (DEC-2026-9902).</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>القرار المطعون فيه</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field"><label>نسبة العجز الواردة بالقرار</label><input value="10%" readonly></div>
+            <div class="field"><label>اللجنة المصدرة</label><input value="مستشفى خولة" readonly></div>
+            <div class="field" style="grid-column: 1 / -1"><label>خلاصة الاعتراض</label><textarea readonly>أعترض على نسبة العجز المقدرة بـ 10% حيث أن الإصابة أثرت بشكل كلي على وظيفة اليد ولا أستطيع العودة للعمل الفعلي.</textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><h3>رأي اللجنة العليا والبحث الفني</h3></div>
+        <div class="card-body">
+           <div class="field"><label>التشخيص النهائي للجنة العليا</label><input placeholder="تأكيد أو تعديل التشخيص السابق..."></div>
+           <div class="field" style="margin-top:12px"><label>منطوق القرار وأسبابه فنية</label><textarea placeholder="وصف حالة العجز وتفسير التعديل أو التأييد..."></textarea></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px; border: 2px solid var(--g1); background:#f0fdf4">
+         <div class="card-head"><h3>البت في التظلم</h3></div>
+         <div class="card-body">
+            <div class="form-grid">
+               <div class="field"><label>نوع البت</label><select id="appOutcome"><option value="uphold">تأييد قرار اللجنة السابقة</option><option value="modify">تعديل القرار (تغيير النسبة/الحالة)</option><option value="cancel">إلغاء القرار السابق وإعادة التقييم</option></select></div>
+               <div id="newRatioField" class="field" style="display:none"><label>النسبة المعتمدة الجديدة (%)</label><input type="number" value="10"></div>
+            </div>
+            <div class="actions" style="margin-top:20px">
+              <button class="btn primary" data-action="اعتماد القرار النهائي" data-message="تم تسجيل قرار اللجنة العليا بنجاح وتحويله لتوقيع الأعضاء" data-redirect="5.E-session-detail.html">اعتماد القرار النهائي</button>
+              <a class="btn secondary" href="5.E-session-detail.html">رجوع</a>
+            </div>
+         </div>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+  <script>
+    document.getElementById('appOutcome')?.addEventListener('change', function() {
+       const ratio = document.getElementById('newRatioField');
+       if(this.value === 'modify') ratio.style.display = 'block';
+       else ratio.style.display = 'none';
+    });
+  </script>
+</body>
+</html>
