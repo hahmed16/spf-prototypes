@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قائمة طلبات الترخيص — اللجنة الطبية الإشرافية</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'supervisory-committee', activePage: 'licensing-list' });
+setBreadcrumb([{ label: 'التراخيص' }, { label: 'قائمة الطلبات المحالة' }]);
+
+const reqs = WI_DATA.licensing;
+let activeTab = 'all';
+
+document.addEventListener('DOMContentLoaded', render);
+
+function render() {
+  const filtered = activeTab === 'all' ? reqs : reqs.filter(r => {
+    if (activeTab === 'pending') return r.status.includes('بانتظار جدولة');
+    if (activeTab === 'session') return r.status.includes('تم جدولة جلسة');
+    if (activeTab === 'decided') return r.status.includes('تم اتخاذ القرار') || r.status.includes('اعتماد');
+    return true;
+  });
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>طلبات الترخيص المحالة إلى اللجنة الطبية الإشرافية</h1>
+        <p>${reqs.length} طلب محال</p>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="fgrid">
+        <div class="fgrp"><label class="flbl">اسم المؤسسة</label><input type="text" class="fc"></div>
+        <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc"></div>
+        <div class="fgrp"><label class="flbl">نوع الطلب</label>
+          <select class="fc"><option>الكل</option><option>جديد</option><option>تجديد</option></select>
+        </div>
+        <div class="fgrp"><label class="flbl">الحالة</label>
+          <select class="fc"><option>الكل</option>${reqs.map(r=>`<option>${r.status}</option>`).join('')}</select>
+        </div>
+      </div>
+      <div class="facts">
+        <button class="btn btn-primary btn-sm">${ICONS.search} بحث</button>
+        <button class="btn btn-secondary btn-sm">مسح</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ttabs">
+        ${[
+          { key: 'all', label: 'الكل', count: reqs.length },
+          { key: 'pending', label: 'بانتظار جلسة', count: reqs.filter(r=>r.status.includes('بانتظار جدولة')).length },
+          { key: 'session', label: 'جلسة مجدولة', count: reqs.filter(r=>r.status.includes('تم جدولة جلسة')).length },
+          { key: 'decided', label: 'صدر قرار', count: reqs.filter(r=>r.status.includes('تم اتخاذ القرار')||r.status.includes('اعتماد')).length },
+        ].map(t => `<div class="ttab ${activeTab===t.key?'act':''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>المؤسسة الصحية</th>
+                <th>نوع الطلب</th>
+                <th>الأطباء المقدمون</th>
+                <th>الأطباء المؤكدون</th>
+                <th>الحالة</th>
+                <th>تاريخ التقديم</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.map(r => `
+              <tr>
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td style="font-weight:600">${r.institution.name}</td>
+                <td><span class="badge b-direct">${r.requestType}</span></td>
+                <td>${r.verification.totalDoctors}</td>
+                <td>
+                  <span style="font-weight:700;color:${r.verification.confirmedDoctors===r.verification.totalDoctors?'var(--accent)':'var(--warning)'}">
+                    ${r.verification.confirmedDoctors} / ${r.verification.totalDoctors}
+                  </span>
+                </td>
+                <td>${statusBadge(r.status)}</td>
+                <td style="font-size:12px">${r.submitDate}</td>
+                <td>
+                  <button class="ibtn" onclick="window.location.href='licensing-details.html?id=${r.id}'">${ICONS.eye}</button>
+                  <button class="ibtn" onclick="window.location.href='institution-file.html?id=${r.id}'" title="ملف المؤسسة">${ICONS.file}</button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+function setTab(t) { activeTab = t; render(); }
+</script>
+</body>
+</html>

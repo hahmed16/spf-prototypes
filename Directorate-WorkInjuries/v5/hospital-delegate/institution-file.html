@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ملف المؤسسة — المفوض عن المستشفى</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'hospital-delegate', activePage: 'institution-file' });
+setBreadcrumb([{ label: 'ملف المؤسسة' }]);
+
+const inst = WI_DATA.licensing[1];
+const activeLicense = inst.activeLicense;
+const daysToExpiry = activeLicense
+  ? Math.floor((new Date(activeLicense.expiryDate) - new Date()) / (1000*60*60*24))
+  : null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>ملف المؤسسة الصحية</h1>
+        <p>${inst.institution.name}</p>
+      </div>
+      <div class="pg-acts">
+        ${activeLicense && daysToExpiry !== null && daysToExpiry <= 90 ? `
+        <button class="btn btn-warning" onclick="window.location.href='licensing-new.html?type=تجديد'">
+          ${ICONS.warn} تقديم طلب تجديد
+        </button>` : ''}
+        <button class="btn btn-primary" onclick="window.location.href='licensing-new.html'">
+          ${ICONS.plus} طلب ترخيص جديد
+        </button>
+      </div>
+    </div>
+
+    ${daysToExpiry !== null && daysToExpiry <= 90 && daysToExpiry > 0 ? `
+    <div class="alert alert-w">
+      ${ICONS.warn}
+      <span>الترخيص ينتهي خلال <strong>${daysToExpiry} يوماً</strong> — يُنصح بتقديم طلب التجديد في أقرب وقت.</span>
+    </div>` : ''}
+
+    <!-- ملخص المؤسسة -->
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+          <div><div class="flbl" style="margin-bottom:4px">اسم المؤسسة</div><div style="font-size:16px;font-weight:800;color:var(--primary)">${inst.institution.name}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">رقم الترخيص الحالي</div><div style="font-family:monospace;font-weight:700">${activeLicense?.number || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">حالة الترخيص</div>
+            ${activeLicense ? `<span class="badge b-active">نشط</span>` : `<span class="badge b-phead">معلق</span>`}
+          </div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ الانتهاء</div>
+            <div style="${daysToExpiry!==null&&daysToExpiry<=90?'color:var(--warning);font-weight:700':''}">${activeLicense?.expiryDate || '—'}</div>
+          </div>
+          <div><div class="flbl" style="margin-bottom:4px">نوع المؤسسة</div><div>${inst.institution.type}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">المحافظة</div><div>${inst.institution.governorate}</div></div>
+        </div>
+      </div>
+    </div>
+
+    ${renderInstitutionPanel(inst.institution)}
+    ${renderDoctorsPanel(inst.doctors, false)}
+
+    <!-- سجل التراخيص -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico gr">${ICONS.shield}</div>سجل التراخيص</h3></div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>رقم الترخيص</th><th>تاريخ الإصدار</th><th>تاريخ الانتهاء</th><th>المدة</th><th>الحالة</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td style="font-family:monospace;color:var(--text2)">LIC-INST-2022-0045</td>
+                <td>2022-08-15</td>
+                <td>2025-08-14</td>
+                <td>36 شهراً</td>
+                <td><span class="badge b-closed">منتهي</span></td>
+                <td><button class="ibtn" onclick="showToast('عرض وثيقة الترخيص القديمة','i')">${ICONS.download}</button></td>
+              </tr>
+              ${activeLicense ? `
+              <tr style="background:var(--accent-l)">
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${activeLicense.number}</td>
+                <td>${activeLicense.issueDate}</td>
+                <td style="${daysToExpiry!==null&&daysToExpiry<=90?'color:var(--warning);font-weight:700':''}">${activeLicense.expiryDate}</td>
+                <td>${activeLicense.months} شهراً</td>
+                <td><span class="badge b-active">نشط</span></td>
+                <td><button class="ibtn" onclick="showToast('جارٍ تحميل وثيقة الترخيص','i')">${ICONS.download}</button></td>
+              </tr>` : ''}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- طلبات الترخيص -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico gy">${ICONS.list}</div>طلبات الترخيص والتجديد</h3></div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>رقم الطلب</th><th>نوع الطلب</th><th>الحالة</th><th>تاريخ التقديم</th><th></th></tr></thead>
+            <tbody>
+              ${WI_DATA.licensing.map(r=>`
+              <tr>
+                <td style="font-family:monospace;color:var(--primary)">${r.id}</td>
+                <td><span class="badge b-direct">${r.requestType}</span></td>
+                <td>${statusBadge(r.status)}</td>
+                <td>${r.submitDate}</td>
+                <td><button class="ibtn" onclick="window.location.href='licensing-details.html?id=${r.id}'">${ICONS.eye}</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- زيارات رقابية -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico or">${ICONS.map}</div>الزيارات الرقابية</h3></div>
+      <div class="pb">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>رقم الزيارة</th><th>التاريخ</th><th>النوع</th><th>النتيجة</th></tr></thead>
+            <tbody>
+              <tr>
+                <td style="font-family:monospace;color:var(--primary)">INS-2025-0034</td>
+                <td>2025-01-15</td>
+                <td>دورية</td>
+                <td><span class="badge b-approved">مطابقة</span></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;color:var(--primary)">INS-2024-0078</td>
+                <td>2024-06-10</td>
+                <td>دورية</td>
+                <td><span class="badge b-approved">مطابقة</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+});
+</script>
+</body>
+</html>

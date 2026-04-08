@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل الطلب — موظف قسم الإجازات المرضية</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'sickleave-employee', activePage: 'allowances-list' });
+const params = new URLSearchParams(window.location.search);
+const req = WI_DATA.allowances.find(r=>r.id===params.get('id')) || WI_DATA.allowances[2];
+currentRequestId = req.id;
+const me = WI_DATA.users.sickleave_employee.name;
+const isCheckedOutByMe = req.checkedOutBy === me;
+setBreadcrumb([{label:'بدلات الانقطاع',page:'allowances-list'},{label:`تفاصيل ${req.id}`}]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const canAct = req.status === 'قيد المراجعة من موظف قسم الإجازات المرضية' && isCheckedOutByMe;
+  const actions = canAct ? [
+    'توصية بالموافقة مع ترشيح مؤسسة صحية مرخصة',
+    'توصية بالرفض',
+    'توجيه إلى رئيس قسم الإجازات المرضية',
+    'إغلاق مع تحديد السبب',
+  ] : [];
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>تفاصيل الطلب</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
+      </div>
+      <div class="pg-acts">
+        ${req.status==='قيد المراجعة من موظف قسم الإجازات المرضية' && !req.checkedOutBy
+          ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out</button>`
+          : isCheckedOutByMe
+            ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in</button>`
+            : ''}
+        <button class="btn btn-secondary" onclick="window.location.href='allowances-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    ${renderRequestSummary(req)}
+    ${renderApplicantPanel(req.applicant)}
+    ${renderInsuredPersonPanel(req.insured)}
+    ${renderEmployerPanel(req.employer)}
+    ${renderInjuryDataPanel(req.injury, req.type)}
+
+    <!-- الـ Panels التراكمية من مرحلة التحقيق -->
+    ${req.investigation ? renderInvestigationReport(req.investigation, false) : ''}
+    ${req.fieldVisits?.length ? renderFieldVisitsPanel(req.fieldVisits, false) : ''}
+
+    <!-- Panels مرحلة الإجازات المرضية — تُضاف هنا -->
+    ${renderSickLeavePeriodsPanel(req.sickLeavePeriods||[], canAct)}
+    ${renderMedicalQueryPanel(req.insured.civil)}
+
+    <!-- Panels مرحلة اللجان (إن وُجدت) -->
+    ${req.referral ? renderReferralPanel(req.referral) : ''}
+    ${req.session ? renderSessionPanel(req.session) : ''}
+    ${req.committeeDecision ? renderCommitteeDecisionPanel(req.committeeDecision) : ''}
+    ${req.disbursement ? renderDisbursementPanel(req.disbursement) : ''}
+
+    ${renderAttachmentsPanel(req.attachments, true)}
+    ${renderOperationalNotes(req.notes, true)}
+
+    ${canAct ? `
+    <div class="dp">
+      <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>اتخاذ القرار</h3></div>
+      <div class="dp-body">
+        <div id="institution-select" style="display:none">
+          <div class="fgrp">
+            <label class="flbl">اختيار المؤسسة الصحية المرخصة للعرض <span class="req">*</span></label>
+            <select class="fc" id="institution-dropdown">
+              <option>مستشفى النور التخصصي — مسقط</option>
+              <option>مستشفى الأمل التخصصي — السيب</option>
+              <option>مركز الرعاية الصحية المتخصص — بوشر</option>
+            </select>
+          </div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">الملاحظات <span style="font-weight:400;color:var(--text3)">(اختياري)</span></label>
+          <textarea class="fc" id="decision-notes" rows="3" placeholder="أكتب ملاحظاتك..."></textarea>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">إرفاق ملف <span style="font-weight:400;color:var(--text3)">(اختياري)</span></label>
+          <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4">
+        </div>
+        <div class="dp-acts">
+          <button class="btn btn-accent" onclick="sickLeaveDecision('موافقة')">${ICONS.check} توصية بالموافقة + ترشيح مؤسسة</button>
+          <button class="btn btn-danger" onclick="sickLeaveDecision('رفض')">${ICONS.x} توصية بالرفض</button>
+          <button class="btn btn-primary" onclick="sickLeaveDecision('توجيه')">توجيه لرئيس قسم الإجازات المرضية</button>
+          <button class="btn btn-ghost" onclick="sickLeaveDecision('إغلاق')">إغلاق مع تحديد السبب</button>
+        </div>
+      </div>
+    </div>` : ''}
+
+    ${renderTimeline(req.timeline)}`;
+});
+
+function doCheckout() {
+  req.checkedOutBy = WI_DATA.users.sickleave_employee.name;
+  showToast(`تم حجز الطلب ${req.id}`, 's');
+  setTimeout(() => location.reload(), 800);
+}
+
+function doCheckin() {
+  req.checkedOutBy = null;
+  showToast(`تم تحرير الطلب`, 'i');
+  setTimeout(() => window.location.href = 'allowances-list.html', 800);
+}
+
+function sickLeaveDecision(type) {
+  if (type === 'موافقة') {
+    document.getElementById('institution-select').style.display = '';
+    showToast('يرجى اختيار المؤسسة الصحية المرخصة ثم تأكيد التوصية', 'i');
+    return;
+  }
+  const msgs = {
+    'رفض': 'تم إرسال توصية بالرفض لرئيس القسم',
+    'توجيه': 'تم توجيه الطلب لرئيس قسم الإجازات المرضية',
+    'إغلاق': 'تم إغلاق الطلب',
+  };
+  showToast(msgs[type] || 'تم تنفيذ الإجراء', 's');
+  setTimeout(() => window.location.href = 'allowances-list.html', 1500);
+}
+</script>
+</body>
+</html>

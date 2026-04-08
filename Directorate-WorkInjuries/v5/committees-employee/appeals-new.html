@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تقديم تظلم (بإسم الصندوق) — موظف قسم اللجان الطبية</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'committees-employee', activePage: 'appeals-list' });
+setBreadcrumb([{label:'التظلمات',page:'appeals-list'},{label:'تقديم تظلم (بإسم الصندوق)'}]);
+const me = WI_DATA.users.committees_employee;
+const params = new URLSearchParams(window.location.search);
+const refId = params.get('ref');
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تقديم طلب تظلم من قرار مؤسسة صحية مرخصة</h1></div>
+      <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='appeals-list.html'">${ICONS.arrow_left} رجوع</button></div>
+    </div>
+
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div class="alert alert-i" style="margin-bottom:0">
+          ${ICONS.info}
+          <div>
+            <strong>تقديم بإسم الصندوق كطرف أصيل</strong><br>
+            موظف قسم اللجان الطبية يقدم هذا التظلم <strong>بإسم صندوق الحماية الاجتماعية</strong> باعتباره طرفاً أصيلاً في القرار وليس نيابةً عن المؤمن عليه.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم التظلم</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">مقدم التظلم</label><div class="fro" style="font-weight:700;color:var(--primary)">صندوق الحماية الاجتماعية</div></div>
+          <div class="fgrp"><label class="flbl">الموظف المُقدِّم</label><div class="fro">${me.name}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم الوظيفي</label><div class="fro">${me.employeeId}</div></div>
+          <div class="fgrp"><label class="flbl">الدور</label><div class="fro">موظف قسم اللجان الطبية</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico rd">${ICONS.search}</div>اختيار القرار المتظلم منه</h3></div>
+      <div class="pb">
+        <div class="fg fg-2" style="margin-bottom:14px">
+          <div class="fgrp">
+            <label class="flbl">رقم الطلب الأصلي <span class="req">*</span></label>
+            <div class="inp-btn">
+              <input type="text" class="fc" id="req-id" placeholder="WI-YYYY-XXXXXX أو CHR-YYYY-XXXXXX" value="${refId||''}">
+              <button class="btn btn-primary btn-sm" onclick="searchReq()">بحث</button>
+            </div>
+          </div>
+        </div>
+        <div id="req-result"></div>
+      </div>
+    </div>
+
+    <div id="appeal-form" style="display:none">
+      <div class="card">
+        <div class="ph"><h3><div class="pico or">${ICONS.note}</div>بيانات التظلم</h3></div>
+        <div class="pb">
+          <div class="fg" style="gap:14px">
+            <div class="fgrp">
+              <label class="flbl">سبب التظلم <span class="req">*</span></label>
+              <select class="fc">
+                <option>القرار مخالف للأنظمة واللوائح المنظِّمة</option>
+                <option>بيانات ناقصة أو غير مكتملة في الجلسة</option>
+                <option>قرار غير مبرر طبياً</option>
+                <option>تجاوز اللجنة لصلاحياتها</option>
+                <option>سبب آخر</option>
+              </select>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">تفاصيل سبب التظلم <span class="req">*</span></label>
+              <textarea class="fc" rows="5" placeholder="اشرح الأسباب القانونية والطبية للتظلم بالتفصيل..."></textarea>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">تاريخ العلم بالقرار <span class="req">*</span></label>
+              <input type="date" class="fc">
+            </div>
+            <div class="fgrp">
+              <label class="flbl">ملاحظات إضافية</label>
+              <textarea class="fc" rows="3" placeholder="أي معلومات إضافية داعمة..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات الداعمة</h3></div>
+        <div class="pb">
+          <div class="fg fg-2">
+            <div class="fgrp"><label class="flbl">نوع المرفق</label>
+              <select class="fc"><option>مستند داعم</option><option>تقرير طبي مضاد</option><option>مراسلات رسمية</option><option>قرار قانوني</option><option>مستند آخر</option></select>
+            </div>
+            <div class="fgrp"><label class="flbl">الملف</label>
+              <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4">
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm mt8">${ICONS.plus} إضافة مرفق آخر</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;padding:16px 0">
+        <button class="btn btn-primary btn-lg" onclick="submitAppeal()">${ICONS.check} تقديم التظلم بإسم الصندوق</button>
+        <button class="btn btn-secondary btn-lg" onclick="showToast('تم الحفظ كمسودة','i')">حفظ كمسودة</button>
+        <button class="btn btn-ghost" onclick="window.location.href='appeals-list.html'">إلغاء</button>
+      </div>
+    </div>`;
+
+  if(refId) searchReq();
+});
+
+function searchReq() {
+  const id = document.getElementById('req-id').value.trim();
+  if(!id){ showToast('يرجى إدخال رقم الطلب','w'); return; }
+  const r = WI_DATA.allowances.find(x=>x.id===id) || WI_DATA.allowances[3];
+  document.getElementById('req-result').innerHTML = `
+    <div class="alert alert-s" style="margin-bottom:12px">${ICONS.check}<span>تم العثور على الطلب</span></div>
+    <div style="padding:12px;background:var(--g50);border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px">
+      <div class="fg fg-3">
+        <div><div class="flbl" style="margin-bottom:3px">رقم الطلب</div><div style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</div></div>
+        <div><div class="flbl" style="margin-bottom:3px">المؤمن عليه</div><div>${r.insured.name}</div></div>
+        <div><div class="flbl" style="margin-bottom:3px">حالة الطلب</div>${statusBadge(r.status)}</div>
+      </div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        <div class="flbl" style="margin-bottom:6px">القرارات المتاحة للتظلم:</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border:1px solid var(--border);border-radius:var(--rsm)">
+          <span class="badge b-rejected">رفض</span>
+          <span style="font-size:12px">قرار المؤسسة الصحية المرخصة</span>
+          <button class="btn btn-primary btn-xs" style="margin-right:auto" onclick="document.getElementById('appeal-form').style.display='';this.closest('div').innerHTML='<span class=badge b-approved>تم اختيار القرار</span>'">اختيار للتظلم</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function submitAppeal(){
+  showToast('جارٍ تقديم التظلم بإسم الصندوق...','i');
+  setTimeout(()=>{
+    showToast('تم تقديم التظلم بنجاح — رقم التظلم: APP-2025-000090','s',5000);
+    setTimeout(()=>window.location.href='appeals-list.html',2000);
+  },1500);
+}
+</script></body></html>

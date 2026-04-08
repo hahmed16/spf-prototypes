@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قائمة طلبات منفعة الإعاقة — العامل</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'worker', activePage: 'disability-list' });
+setBreadcrumb([{ label: 'منفعة الأشخاص ذوي الإعاقة' }, { label: 'قائمة الطلبات' }]);
+
+const u = WI_DATA.users.worker;
+const myReqs = WI_DATA.disability.filter(r => r.applicant.civil === u.civil);
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>قائمة طلبات منفعة الأشخاص ذوي الإعاقة</h1><p>${myReqs.length} طلب مقدم</p></div>
+      <div class="pg-acts">
+        <button class="btn btn-primary" onclick="window.location.href='disability-new.html'">${ICONS.plus} تقديم طلب جديد</button>
+      </div>
+    </div>
+
+    <div class="alert alert-i">
+      ${ICONS.info}
+      <div>منفعة الأشخاص ذوي الإعاقة مشروطة بامتلاك بطاقة إعاقة سارية صادرة من وزارة التنمية الاجتماعية.</div>
+    </div>
+
+    <div class="card">
+      <div class="pb-0">
+        ${myReqs.length === 0 ? `
+        <div class="empty-st">
+          ${ICONS.shield}
+          <h4>لا توجد طلبات</h4>
+          <p>لم تقدم طلبات منفعة إعاقة بعد</p>
+          <button class="btn btn-primary" style="margin-top:12px" onclick="window.location.href='disability-new.html'">${ICONS.plus} تقديم طلب جديد</button>
+        </div>` : `
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>رقم الطلب</th><th>رقم بطاقة الإعاقة</th><th>حالة البطاقة</th><th>حالة الطلب</th><th>تاريخ التقديم</th><th></th></tr></thead>
+            <tbody>
+              ${myReqs.map(r=>`
+              <tr>
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td style="font-family:monospace">${r.card.number}</td>
+                <td><span class="badge ${r.card.status==='سارية'?'b-card-valid':r.card.status==='منتهية'?'b-card-expired':'b-card-cancelled'}">${r.card.status}</span></td>
+                <td>${statusBadge(r.status)}</td>
+                <td>${r.submitDate}</td>
+                <td><button class="ibtn" onclick="window.location.href='disability-details.html?id=${r.id}'">${ICONS.eye}</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`}
+      </div>
+    </div>`;
+});
+</script>
+</body>
+</html>

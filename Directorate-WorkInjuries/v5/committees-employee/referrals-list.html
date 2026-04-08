@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>طلبات العرض الواردة — موظف قسم اللجان الطبية</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'committees-employee', activePage: 'referrals-list' });
+setBreadcrumb([{ label: 'التنسيق مع المؤسسات الصحية' }, { label: 'طلبات العرض الواردة' }]);
+
+// طلبات العرض: تلك التي وصلت لقسم اللجان الطبية من قسم الإجازات المرضية
+const referralReqs = WI_DATA.allowances.filter(r =>
+  r.status === 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية' ||
+  r.status === 'تم الموافقة على العرض على المؤسسات الصحية المرخصة — بانتظار إحالة المقرر' ||
+  r.status === 'تم الإحالة إلى مقرر المؤسسة الصحية المرخصة — بانتظار جدولة جلسة' ||
+  r.status === 'تم جدولة جلسة للعرض على المؤسسة الصحية المرخصة' ||
+  r.status === 'تم اتخاذ القرار من المؤسسة الصحية المرخصة — بانتظار التنفيذ'
+);
+// Add sample referrals from all allowances for demo
+const allReferrals = WI_DATA.allowances;
+const me = WI_DATA.users.committees_employee.name;
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>طلبات العرض الواردة من قسم الإجازات المرضية</h1>
+        <p>الطلبات التي تحتاج تنسيقاً مع المؤسسات الصحية المرخصة</p></div>
+    </div>
+    <div class="filters">
+      <div class="fgrid">
+        <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc" placeholder="WI-YYYY-XXXXXX"></div>
+        <div class="fgrp"><label class="flbl">اسم المؤمن عليه</label><input type="text" class="fc"></div>
+        <div class="fgrp"><label class="flbl">نوع الطلب</label><select class="fc"><option>الكل</option><option>إصابة عمل</option><option>مرض مهني</option><option>مرض مستديم</option></select></div>
+        <div class="fgrp"><label class="flbl">الحالة</label><select class="fc"><option>الكل</option><option>بانتظار مراجعة الموظف</option><option>تمت الموافقة</option><option>تمت الإحالة</option><option>جلسة مجدولة</option></select></div>
+      </div>
+      <div class="facts"><button class="btn btn-primary btn-sm">${ICONS.search} بحث</button><button class="btn btn-secondary btn-sm">مسح</button></div>
+    </div>
+    <div class="card">
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>المؤمن عليه</th>
+                <th>نوع الطلب</th>
+                <th>الحالة</th>
+                <th>تاريخ الورود</th>
+                <th>الحجز</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${allReferrals.map(r=>`
+              <tr style="${r.checkedOutBy===me?'background:#f0fdf4':''}">
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td>${r.insured.name}</td>
+                <td>${r.type}</td>
+                <td>${statusBadge(r.status)}</td>
+                <td style="font-size:12px">${r.lastUpdate}</td>
+                <td>
+                  ${!r.checkedOutBy
+                    ? `<span class="badge b-avail">متاح</span>`
+                    : r.checkedOutBy===me
+                      ? `<span class="badge b-checkout">محجوز بواسطتي</span>`
+                      : `<span class="badge b-checkout">محجوز</span>`}
+                </td>
+                <td>
+                  <div style="display:flex;gap:4px">
+                    <button class="ibtn" onclick="window.location.href='referrals-details.html?id=${r.id}'" title="عرض التفاصيل">${ICONS.eye}</button>
+                    ${!r.checkedOutBy
+                      ? `<button class="ibtn" onclick="doCheckout('${r.id}')" title="Check-out">${ICONS.lock}</button>`
+                      : r.checkedOutBy===me
+                        ? `<button class="ibtn" onclick="doCheckin('${r.id}')" title="Check-in">${ICONS.unlock}</button>`
+                        : ''}
+                    <button class="ibtn" onclick="openAddNoteModal('${r.id}')">${ICONS.note}</button>
+                  </div>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+});
+
+function doCheckout(id) {
+  const r = WI_DATA.allowances.find(x=>x.id===id);
+  if(r) r.checkedOutBy = me;
+  showToast(`تم حجز الطلب ${id}`, 's');
+  location.reload();
+}
+function doCheckin(id) {
+  const r = WI_DATA.allowances.find(x=>x.id===id);
+  if(r) r.checkedOutBy = null;
+  showToast(`تم تحرير الطلب ${id}`, 'i');
+  location.reload();
+}
+</script></body></html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل التظلم — المفوض عن جهة العمل</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'employer-delegate', activePage: 'appeals-list' });
+const params = new URLSearchParams(window.location.search);
+const appeal = WI_DATA.appeals.find(a=>a.id===params.get('id')) || WI_DATA.appeals[0];
+currentRequestId = appeal.id;
+setBreadcrumb([{label:'التظلمات',page:'appeals-list'},{label:`تفاصيل ${appeal.id}`}]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  let actions = [];
+  if (appeal.status === 'مسودة') actions = ['إرسال التظلم','حذف'];
+  else if (appeal.status === 'تم إعادة التظلم لاستيفاء البيانات') actions = ['استيفاء البيانات المطلوبة وإعادة الإرسال'];
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تفاصيل التظلم</h1><p>رقم التظلم: <strong style="font-family:monospace;color:var(--primary)">${appeal.id}</strong></p></div>
+      <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='appeals-list.html'">${ICONS.arrow_left} رجوع</button></div>
+    </div>
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+          <div><div class="flbl" style="margin-bottom:4px">رقم التظلم</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${appeal.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الحالة الحالية</div>${statusBadge(appeal.status)}</div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div>${appeal.submitDate}</div></div>
+        </div>
+      </div>
+    </div>
+    ${renderApplicantPanel(appeal.applicant)}
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico bl">${ICONS.file}</div>ملخص الطلب الأصلي</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">رقم الطلب الأصلي</label><div class="fro" style="font-family:monospace"><a href="allowances-details.html?id=${appeal.originalRequestId}" style="color:var(--primary);font-weight:700">${appeal.originalRequestId}</a></div></div>
+          <div class="fgrp"><label class="flbl">نوع الطلب</label><div class="fro">${appeal.originalRequestType}</div></div>
+          <div class="fgrp"><label class="flbl">سبب التظلم</label><div class="fro">${appeal.appealReason}</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico rd">${ICONS.warn}</div>القرار المتظلم منه</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">نوع القرار</label><div class="fro"><span class="badge b-rejected">${appeal.decision.type}</span></div></div>
+          <div class="fgrp"><label class="flbl">الجهة مُصدِرة القرار</label><div class="fro">${appeal.decision.issuer}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ القرار</label><div class="fro">${appeal.decision.date}</div></div>
+          <div class="fgrp span-full"><label class="flbl">مضمون القرار</label><div class="fro">${appeal.decision.details}</div></div>
+        </div>
+      </div>
+    </div>
+    ${appeal.session ? renderSessionPanel(appeal.session) : ''}
+    ${appeal.finalDecision ? renderFinalAppealDecisionPanel(appeal.finalDecision) : ''}
+    ${renderAttachmentsPanel(appeal.attachments, true)}
+    ${renderOperationalNotes(appeal.notes, true)}
+    ${actions.length ? renderDecisionPanel({actions, title:'الإجراءات المتاحة'}) : ''}
+    ${renderTimeline(appeal.timeline)}`;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل الطلب — المفوض عن جهة العمل</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'employer-delegate', activePage: 'allowances-list' });
+const params = new URLSearchParams(window.location.search);
+const req = WI_DATA.allowances.find(r=>r.id===params.get('id')) || WI_DATA.allowances[0];
+currentRequestId = req.id;
+setBreadcrumb([{label:'بدلات الانقطاع',page:'allowances-list'},{label:`تفاصيل ${req.id}`}]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  let actions = [];
+  if (req.status === 'مسودة') actions = ['إرسال الطلب','حذف'];
+  else if (req.status === 'تم إعادة الطلب لاستيفاء البيانات') actions = ['استيفاء البيانات المطلوبة وإعادة الإرسال'];
+  else if (req.status === 'تم رفض الطلب') actions = ['تقديم تظلم'];
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تفاصيل الطلب</h1><p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p></div>
+      <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='allowances-list.html'">${ICONS.arrow_left} رجوع</button></div>
+    </div>
+    ${renderRequestSummary(req)}
+    ${renderApplicantPanel(req.applicant)}
+    ${renderInsuredPersonPanel(req.insured)}
+    ${renderEmployerPanel(req.employer)}
+    ${renderInjuryDataPanel(req.injury, req.type)}
+    ${req.investigation ? renderInvestigationReport(req.investigation, false) : ''}
+    ${req.fieldVisits?.length ? renderFieldVisitsPanel(req.fieldVisits, false) : ''}
+    ${req.sickLeavePeriods?.length ? renderSickLeavePeriodsPanel(req.sickLeavePeriods, false) : ''}
+    ${req.referral ? renderReferralPanel(req.referral) : ''}
+    ${req.session ? renderSessionPanel(req.session) : ''}
+    ${req.committeeDecision ? renderCommitteeDecisionPanel(req.committeeDecision) : ''}
+    ${req.disbursement ? renderDisbursementPanel(req.disbursement) : ''}
+    ${renderAttachmentsPanel(req.attachments, true)}
+    ${renderOperationalNotes(req.notes, true)}
+    ${actions.length ? renderDecisionPanel({actions, title:'الإجراءات المتاحة'}) : ''}
+    ${renderTimeline(req.timeline)}`;
+});
+</script>
+</body>
+</html>

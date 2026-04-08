@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تقديم طلب منفعة الأمراض المستديمة — العامل</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'worker', activePage: 'chronic-incoming' });
+setBreadcrumb([{ label: 'الأمراض المستديمة', page: 'chronic-incoming' }, { label: 'تقديم طلب جديد' }]);
+
+const params = new URLSearchParams(window.location.search);
+const refId = params.get('ref');
+const incoming = refId ? WI_DATA.chronicIncoming.find(d => d.refId === refId) : WI_DATA.chronicIncoming[0];
+const u = WI_DATA.users.worker;
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تقديم طلب منفعة الأمراض المستديمة</h1></div>
+      <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='chronic-incoming.html'">${ICONS.arrow_left} رجوع</button></div>
+    </div>
+
+    <!-- ملخص التشخيص الوارد -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>ملخص التشخيص الوارد من وزارة الصحة</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">المؤسسة الصحية المعالجة</label><div class="fro">${incoming?.hospital || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الطبيب المعالج</label><div class="fro">${incoming?.doctor || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">التشخيص</label><div class="fro" style="font-weight:700">${incoming?.diagnosis || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ ثبوت المرض</label><div class="fro">${incoming?.provenDate || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">المسار المتوقع <span style="font-size:9.5px;font-weight:400;color:var(--text3)">(معلومة فقط)</span></label>
+            <div class="fro"><span class="badge ${incoming?.expectedPath==='مسار مباشر'?'b-direct':'b-commpath'}">${incoming?.expectedPath || '—'}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- بيانات المستفيد -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بياناتك الشخصية</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${u.name}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${u.civil}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف <span class="req">*</span></label><input type="tel" class="fc" value="${u.phone}"></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><input type="email" class="fc" value="${u.email}"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- المرفقات -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات الداعمة</h3></div>
+      <div class="pb">
+        <div class="fg fg-2">
+          <div class="fgrp">
+            <label class="flbl">نوع المرفق</label>
+            <select class="fc"><option>تقرير طبي</option><option>نتائج فحوصات</option><option>صور</option><option>تسجيل صوتي</option><option>فيديو</option><option>مستند آخر</option></select>
+          </div>
+          <div class="fgrp">
+            <label class="flbl">الملف</label>
+            <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4">
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm mt8" onclick="showToast('تم إضافة حقل مرفق','i')">${ICONS.plus} إضافة مرفق آخر</button>
+      </div>
+    </div>
+
+    <!-- ملاحظات مقدم الطلب -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico gy">${ICONS.note}</div>ملاحظات إضافية</h3></div>
+      <div class="pb">
+        <div class="fgrp">
+          <label class="flbl">ملاحظاتك الإضافية (اختياري)</label>
+          <textarea class="fc" rows="4" placeholder="أي معلومات إضافية تودّ مشاركتها مع الموظف المختص..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- الأزرار -->
+    <div style="display:flex;gap:10px;padding:16px 0">
+      <button class="btn btn-primary btn-lg" onclick="submitChronicRequest()">${ICONS.check} إرسال الطلب</button>
+      <button class="btn btn-secondary btn-lg" onclick="showToast('تم الحفظ كمسودة','i')">حفظ كمسودة</button>
+      <button class="btn btn-ghost" style="color:var(--danger)" onclick="confirmDecline()">الإقرار بعدم الرغبة في الاستمرار</button>
+    </div>`;
+});
+
+function submitChronicRequest() {
+  showToast('جارٍ تقديم الطلب...', 'i');
+  setTimeout(() => {
+    showToast('تم تقديم الطلب بنجاح — رقم الطلب: CHR-2025-000178', 's', 5000);
+    setTimeout(() => window.location.href = 'chronic-incoming.html', 2000);
+  }, 1500);
+}
+
+function confirmDecline() {
+  confirmAction({
+    title: 'إقرار عدم الرغبة في الاستمرار',
+    msg: 'هل أنت متأكد من إقرارك بعدم الرغبة في الاستفادة من هذا التشخيص؟',
+    confirmLabel: 'نعم، أقر بعدم الرغبة',
+    confirmClass: 'btn-danger',
+    onConfirm: () => {
+      showToast('تم تسجيل إقرارك', 'i');
+      setTimeout(() => window.location.href = 'chronic-incoming.html', 1500);
+    }
+  });
+}
+</script>
+</body>
+</html>

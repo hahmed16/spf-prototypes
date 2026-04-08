@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ملف المؤسسة الصحية — موظف قسم التراخيص والرقابة</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'licensing-employee', activePage: 'licensing-list' });
+
+const params = new URLSearchParams(window.location.search);
+const reqId = params.get('id');
+const req = WI_DATA.licensing.find(r => r.id === reqId) || WI_DATA.licensing[1];
+
+setBreadcrumb([
+  { label: 'التراخيص والرقابة', page: 'licensing-list' },
+  { label: `ملف ${req.institution.name}` }
+]);
+
+const institutionHistory = {
+  licenses: [
+    { number: 'LIC-INST-2022-0045', issueDate: '2022-08-15', expiryDate: '2025-08-14', months: 36, status: 'منتهي' },
+    { number: req.activeLicense?.number || 'LIC-INST-2024-0067', issueDate: req.activeLicense?.issueDate || '2024-08-15', expiryDate: req.activeLicense?.expiryDate || '2027-08-14', months: 36, status: req.activeLicense ? 'نشط' : 'معلق' }
+  ],
+  inspections: [
+    { id: 'INS-2025-0034', date: '2025-01-15', type: 'دورية', result: 'مطابقة', violations: 0 },
+    { id: 'INS-2024-0078', date: '2024-06-10', type: 'دورية', result: 'مطابقة', violations: 0 },
+  ],
+  violations: [],
+  requests: [
+    { id: 'LIC-2022-000045', type: 'جديد', status: 'تم اعتماد الترخيص — الترخيص نشط', submitDate: '2022-06-01' },
+    { id: req.id, type: req.requestType, status: req.status, submitDate: req.submitDate }
+  ]
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>ملف المؤسسة الصحية المرخصة</h1>
+        <p>${req.institution.name}</p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='licensing-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    <!-- ملخص المؤسسة -->
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+          <div>
+            <div class="flbl" style="margin-bottom:4px">اسم المؤسسة</div>
+            <div style="font-size:16px;font-weight:800;color:var(--primary)">${req.institution.name}</div>
+          </div>
+          <div>
+            <div class="flbl" style="margin-bottom:4px">رقم الترخيص الحالي</div>
+            <div style="font-family:monospace;font-weight:700">${req.activeLicense?.number || '—'}</div>
+          </div>
+          <div>
+            <div class="flbl" style="margin-bottom:4px">حالة الترخيص</div>
+            ${req.activeLicense ? `<span class="badge b-active">نشط</span>` : `<span class="badge b-phead">معلق</span>`}
+          </div>
+          <div>
+            <div class="flbl" style="margin-bottom:4px">تاريخ انتهاء الترخيص</div>
+            <div>${req.activeLicense?.expiryDate || '—'}</div>
+          </div>
+          <div>
+            <div class="flbl" style="margin-bottom:4px">نوع المؤسسة</div>
+            <div>${req.institution.type}</div>
+          </div>
+          <div>
+            <div class="flbl" style="margin-bottom:4px">المحافظة</div>
+            <div>${req.institution.governorate}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${renderInstitutionPanel(req.institution)}
+
+    <!-- سجل التراخيص -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.shield}</div>سجل التراخيص</h3></div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>رقم الترخيص</th><th>تاريخ الإصدار</th><th>تاريخ الانتهاء</th><th>المدة</th><th>الحالة</th></tr></thead>
+            <tbody>
+              ${institutionHistory.licenses.map(l => `
+              <tr>
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${l.number}</td>
+                <td>${l.issueDate}</td>
+                <td>${l.expiryDate}</td>
+                <td>${l.months} شهراً</td>
+                <td><span class="badge ${l.status==='نشط'?'b-active':'b-closed'}">${l.status}</span></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- الأطباء الحاليون والسابقون -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico tl">${ICONS.user}</div>أعضاء اللجنة الطبية — الحاليون والسابقون</h3></div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>الاسم</th><th>التخصص</th><th>المنصب</th><th>حالة التأكيد</th><th>تاريخ البداية</th><th>تاريخ النهاية</th></tr></thead>
+            <tbody>
+              ${req.doctors.map(d => `
+              <tr>
+                <td style="font-weight:600">${d.name}</td>
+                <td>${d.specialty}</td>
+                <td>${d.role}</td>
+                <td><span class="badge ${d.confirmStatus==='تم التأكيد'?'b-approved':'b-phead'}">${d.confirmStatus}</span></td>
+                <td>${req.submitDate}</td>
+                <td>—</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- الزيارات الرقابية -->
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico or">${ICONS.map}</div>الزيارات الرقابية</h3>
+        <button class="btn btn-secondary btn-xs" onclick="window.location.href='inspections-list.html'">${ICONS.list} عرض كل الزيارات</button>
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>رقم الزيارة</th><th>التاريخ</th><th>النوع</th><th>النتيجة</th><th>المخالفات</th></tr></thead>
+            <tbody>
+              ${institutionHistory.inspections.map(i => `
+              <tr>
+                <td style="font-family:monospace;color:var(--primary)">${i.id}</td>
+                <td>${i.date}</td>
+                <td>${i.type}</td>
+                <td><span class="badge ${i.result==='مطابقة'?'b-approved':'b-returned'}">${i.result}</span></td>
+                <td>${i.violations > 0 ? `<span class="badge b-rejected">${i.violations}</span>` : `<span class="badge b-approved">لا مخالفات</span>`}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- المخالفات المسجلة -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico rd">${ICONS.warn}</div>المخالفات المسجلة</h3></div>
+      <div class="pb">
+        ${institutionHistory.violations.length === 0
+          ? `<div class="empty-st" style="padding:20px">${ICONS.check}<h4>لا توجد مخالفات مسجلة</h4></div>`
+          : `<div class="tbl-wrap"><table class="dtbl"><thead><tr><th>نوع المخالفة</th><th>الوصف</th><th>التاريخ</th><th>الإجراء المتخذ</th></tr></thead><tbody></tbody></table></div>`}
+      </div>
+    </div>
+
+    <!-- طلبات الترخيص السابقة -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico gy">${ICONS.list}</div>طلبات الترخيص والتجديد</h3></div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>رقم الطلب</th><th>نوع الطلب</th><th>الحالة</th><th>تاريخ التقديم</th><th></th></tr></thead>
+            <tbody>
+              ${institutionHistory.requests.map(r => `
+              <tr>
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td>${r.type}</td>
+                <td>${statusBadge(r.status)}</td>
+                <td>${r.submitDate}</td>
+                <td><button class="ibtn" onclick="window.location.href='licensing-details.html?id=${r.id}'" title="فتح الطلب">${ICONS.eye}</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- القرارات المرتبطة -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico pu">${ICONS.pen}</div>القرارات المرتبطة بالمؤسسة</h3></div>
+      <div class="pb">
+        ${req.committeeDecision ? `
+        <div style="padding:12px;border:1px solid var(--border);border-radius:var(--r);background:var(--g50)">
+          <div style="font-size:12.5px;font-weight:700;margin-bottom:4px">قرار اللجنة الطبية الإشرافية</div>
+          <div style="font-size:12px;color:var(--text2)">${req.committeeDecision.content || 'استوفت المؤسسة جميع الاشتراطات'}</div>
+          <div style="margin-top:6px"><span class="badge b-approved">${req.committeeDecision.type}</span></div>
+        </div>` : `<div class="empty-st" style="padding:20px">${ICONS.info}<h4>لا توجد قرارات مسجلة بعد</h4></div>`}
+      </div>
+    </div>`;
+});
+</script>
+</body>
+</html>

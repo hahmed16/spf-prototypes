@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إدارة الجلسة — مقرر المؤسسة الصحية المرخصة</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'institution-rapporteur', activePage: 'sessions-list' });
+const params = new URLSearchParams(window.location.search);
+const session = WI_DATA.sessions.find(s=>s.id===params.get('id')) || WI_DATA.sessions[0];
+setBreadcrumb([{label:'إدارة الجلسات',page:'sessions-list'},{label:`جلسة ${session.id}`}]);
+
+const attendanceState = {};
+const signatureState = {};
+session.members.forEach(m=>{
+  attendanceState[m.name] = m.attendance || 'مجدول';
+  signatureState[m.name] = 'بانتظار';
+});
+
+const caseDecisions = {};
+session.cases.forEach(c => { caseDecisions[c.requestId] = c.decisionStatus; });
+
+let minutesText = session.minutes || '';
+
+document.addEventListener('DOMContentLoaded', renderPage);
+
+function renderPage() {
+  const confirmedCount = Object.values(attendanceState).filter(v=>v==='حاضر').length;
+  const quorum = confirmedCount >= Math.ceil(session.members.length/2);
+  const allDecisionsDone = session.cases.every(c => caseDecisions[c.requestId] && caseDecisions[c.requestId]!=='بانتظار القرار');
+  const allSigned = Object.values(signatureState).every(v=>v==='تم التوقيع');
+  const signedCount = Object.values(signatureState).filter(v=>v==='تم التوقيع').length;
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>إدارة الجلسة</h1>
+        <p>رقم الجلسة: <strong style="font-family:monospace;color:var(--primary)">${session.id}</strong></p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='sessions-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    <!-- ملخص الجلسة -->
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الجلسة</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${session.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">المؤسسة</div><div style="font-weight:600">${session.institution}</div></div>
+          <div>
+            <div class="flbl" style="margin-bottom:4px">التاريخ والوقت</div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <span>${session.date} — ${session.time}</span>
+              <button class="ibtn" onclick="reschedule()" title="تعديل الموعد">${ICONS.edit}</button>
+            </div>
+          </div>
+          <div><div class="flbl" style="margin-bottom:4px">حالة الجلسة</div><span class="badge b-session">${session.status}</span></div>
+          <div><div class="flbl" style="margin-bottom:4px">النصاب</div>
+            <span class="badge ${quorum?'b-approved':'b-returned'}">${quorum?'مكتمل':'غير مكتمل'} (${confirmedCount}/${session.members.length})</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ① أعضاء الجلسة وتحديث الحضور -->
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico bl">${ICONS.user}</div>① أعضاء الجلسة وتحديث الحضور</h3>
+        ${quorum?`<span class="badge b-approved">النصاب مكتمل</span>`:`<span class="badge b-returned">النصاب غير مكتمل</span>`}
+      </div>
+      <div class="pb-0">
+        <table class="dtbl">
+          <thead><tr><th>الاسم</th><th>التخصص</th><th>المنصب</th><th>حالة الحضور</th><th>وقت الحضور</th><th>تحديث</th></tr></thead>
+          <tbody>
+            ${session.members.map(m=>`
+            <tr>
+              <td style="font-weight:600">${m.name}</td>
+              <td>${m.specialty}</td>
+              <td>${m.role}</td>
+              <td><span class="badge ${attendanceState[m.name]==='حاضر'?'b-approved':attendanceState[m.name]==='غائب'||attendanceState[m.name]==='اعتذار'?'b-rejected':'b-phead'}">${attendanceState[m.name]}</span></td>
+              <td style="font-size:11.5px;color:var(--text3)">${attendanceState[m.name]==='حاضر'?new Date().toLocaleTimeString('ar-OM',{hour:'2-digit',minute:'2-digit'}):'—'}</td>
+              <td>
+                <select class="fc" style="padding:4px 8px;font-size:12px;width:130px"
+                  onchange="updateAttendance('${m.name}',this.value)">
+                  <option ${attendanceState[m.name]==='مجدول'?'selected':''}>مجدول</option>
+                  <option ${attendanceState[m.name]==='حاضر'?'selected':''}>حاضر</option>
+                  <option ${attendanceState[m.name]==='غائب'?'selected':''}>غائب</option>
+                  <option ${attendanceState[m.name]==='اعتذار'?'selected':''}>اعتذار</option>
+                </select>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="pb-c">
+        <div class="facts">
+          <button class="btn btn-accent btn-sm" onclick="showToast('تم حفظ بيانات الحضور','s')">${ICONS.check} حفظ بيانات الحضور</button>
+          ${!quorum?`<button class="btn btn-secondary btn-sm" onclick="showToast('تم إرسال تذكير لجميع الأعضاء','i')">${ICONS.bell} إرسال تذكير للأعضاء</button>`:''}
+        </div>
+      </div>
+    </div>
+
+    <!-- ② الحالات المدرجة وإدخال القرارات -->
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico or">${ICONS.list}</div>② الحالات المدرجة وإدخال القرارات</h3>
+        <span style="font-size:12px;color:var(--text3)">
+          ${Object.values(caseDecisions).filter(v=>v&&v!=='بانتظار القرار').length} / ${session.cases.length} قرارات مُدخَلة
+        </span>
+      </div>
+      <div class="pb-0">
+        <table class="dtbl">
+          <thead><tr><th>#</th><th>رقم الطلب</th><th>المؤمن عليه</th><th>نوع الحالة</th><th>سبب العرض</th><th>حالة القرار</th><th></th></tr></thead>
+          <tbody>
+            ${session.cases.map((c,i)=>`
+            <tr>
+              <td>${i+1}</td>
+              <td style="font-family:monospace;color:var(--primary);font-weight:700">${c.requestId}</td>
+              <td>${c.name}</td>
+              <td>${c.type}</td>
+              <td style="font-size:11.5px">${c.reason}</td>
+              <td><span class="badge ${caseDecisions[c.requestId]==='بانتظار القرار'?'b-phead':caseDecisions[c.requestId]==='تم إدخال القرار'?'b-session':'b-approved'}">${caseDecisions[c.requestId]}</span></td>
+              <td>
+                <button class="btn btn-primary btn-xs"
+                  onclick="window.location.href='case-decision.html?req=${c.requestId}&session=${session.id}'">
+                  ${caseDecisions[c.requestId]==='بانتظار القرار'?'إدخال القرار':'تعديل / عرض'}
+                </button>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ③ محضر الجلسة -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico gy">${ICONS.file}</div>③ محضر الجلسة</h3></div>
+      <div class="pb">
+        <div class="fgrp">
+          <label class="flbl">نص المحضر</label>
+          <textarea class="fc" id="minutes-input" rows="6"
+            placeholder="اكتب محضر الجلسة هنا — الحضور، مجريات الجلسة، القرارات المتخذة...">${minutesText}</textarea>
+        </div>
+        <div class="facts mt8">
+          <button class="btn btn-secondary btn-sm" onclick="saveMinutes()">${ICONS.check} حفظ المحضر</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ④ إعادة إرسال طلبات التوقيع -->
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico gr">${ICONS.pen}</div>④ متابعة التوقيعات الإلكترونية</h3>
+        <span style="font-size:12px;color:var(--text3)">${signedCount} / ${session.members.length} وقّعوا</span>
+      </div>
+      <div class="pb-0">
+        <table class="dtbl">
+          <thead><tr><th>العضو</th><th>المنصب</th><th>حالة التوقيع</th><th>إجراء المقرر</th></tr></thead>
+          <tbody>
+            ${session.members.map(m=>`
+            <tr>
+              <td style="font-weight:600">${m.name}</td>
+              <td>${m.role}</td>
+              <td><span class="badge ${signatureState[m.name]==='تم التوقيع'?'b-approved':'b-phead'}">${signatureState[m.name]}</span></td>
+              <td>
+                ${signatureState[m.name]==='بانتظار' ? `
+                <button class="btn btn-secondary btn-xs" onclick="resendSignRequest('${m.name}')">
+                  ${ICONS.bell} إعادة إرسال طلب التوقيع
+                </button>` : `<span class="badge b-approved">مكتمل</span>`}
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      ${allSigned?`
+      <div class="pb-c">
+        <div class="alert alert-s" style="margin-bottom:0">${ICONS.check}<span>اكتملت جميع التوقيعات — يمكنك الآن إرسال القرارات.</span></div>
+      </div>`:''}
+    </div>
+
+    <!-- ⑤ إجراءات الجلسة النهائية -->
+    <div class="card" style="border:2px solid var(--primary)">
+      <div class="ph" style="background:var(--primary-l)">
+        <h3 style="color:var(--primary)"><div class="pico bl">${ICONS.check}</div>⑤ إجراءات الجلسة النهائية</h3>
+      </div>
+      <div class="pb">
+        <div class="fg fg-2" style="margin-bottom:16px">
+          <div style="padding:12px;border:1px solid var(--border);border-radius:var(--r);text-align:center">
+            <div style="font-size:20px;font-weight:800;color:${quorum?'var(--accent)':'var(--danger)'}">${quorum?'✓':'✗'}</div>
+            <div style="font-size:12px;margin-top:4px">اكتمال النصاب</div>
+          </div>
+          <div style="padding:12px;border:1px solid var(--border);border-radius:var(--r);text-align:center">
+            <div style="font-size:20px;font-weight:800;color:${allDecisionsDone?'var(--accent)':'var(--danger)'}">${allDecisionsDone?'✓':'✗'}</div>
+            <div style="font-size:12px;margin-top:4px">إدخال جميع القرارات</div>
+          </div>
+          <div style="padding:12px;border:1px solid var(--border);border-radius:var(--r);text-align:center">
+            <div style="font-size:20px;font-weight:800;color:${allSigned?'var(--accent)':'var(--danger)'}">${allSigned?'✓':'✗'}</div>
+            <div style="font-size:12px;margin-top:4px">اكتمال التوقيعات</div>
+          </div>
+          <div style="padding:12px;border:1px solid var(--border);border-radius:var(--r);text-align:center">
+            <div style="font-size:20px;font-weight:800;color:${minutesText?'var(--accent)':'var(--danger)'}">${minutesText?'✓':'✗'}</div>
+            <div style="font-size:12px;margin-top:4px">حفظ المحضر</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-accent btn-lg"
+            ${!(quorum&&allDecisionsDone&&allSigned)?'disabled style="opacity:.5;cursor:not-allowed"':''}
+            onclick="sendDecisions()">
+            ${ICONS.check} إرسال القرارات إلى الجهات المعنية
+          </button>
+          ${!(quorum&&allDecisionsDone&&allSigned)?`
+          <span style="font-size:12px;color:var(--text3);align-self:center">
+            يجب اكتمال: النصاب + القرارات + التوقيعات قبل الإرسال
+          </span>`:''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function updateAttendance(name, val) {
+  attendanceState[name] = val;
+  showToast(`تم تحديث حضور ${name} — ${val}`, 'i');
+  renderPage();
+}
+
+function saveMinutes() {
+  minutesText = document.getElementById('minutes-input')?.value || '';
+  showToast('تم حفظ محضر الجلسة', 's');
+}
+
+function resendSignRequest(name) {
+  showToast(`تم إرسال طلب التوقيع إلى ${name}`, 'i');
+}
+
+function reschedule() {
+  openModal({
+    title: 'تعديل موعد الجلسة',
+    body: `
+      <div class="fg fg-2" style="gap:12px">
+        <div class="fgrp"><label class="flbl">التاريخ الجديد <span class="req">*</span></label><input type="date" class="fc" value="${session.date}"></div>
+        <div class="fgrp"><label class="flbl">الوقت الجديد <span class="req">*</span></label><input type="time" class="fc" value="${session.time}"></div>
+        <div class="fgrp span-full"><label class="flbl">سبب التعديل</label><textarea class="fc" rows="2"></textarea></div>
+      </div>`,
+    footer: `<button class="btn btn-primary" onclick="closeModal();showToast('تم تعديل موعد الجلسة وإشعار الأعضاء','s')">${ICONS.check} حفظ</button>
+             <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+
+function sendDecisions() {
+  confirmAction({
+    title: 'تأكيد إرسال القرارات',
+    msg: `هل أنت متأكد من إرسال جميع القرارات الصادرة في الجلسة <strong>${session.id}</strong> إلى الجهات المعنية؟<br>
+          <span style="font-size:12px;color:var(--text3)">سيتم تحديث حالة جميع الطلبات المعنية تلقائياً.</span>`,
+    confirmLabel: 'نعم، إرسال القرارات',
+    confirmClass: 'btn-accent',
+    onConfirm: () => {
+      showToast('تم إرسال القرارات إلى الجهات المعنية بنجاح — تم تحديث حالات الطلبات', 's', 5000);
+      setTimeout(() => window.location.href = 'sessions-list.html', 2000);
+    }
+  });
+}
+</script>
+</body>
+</html>

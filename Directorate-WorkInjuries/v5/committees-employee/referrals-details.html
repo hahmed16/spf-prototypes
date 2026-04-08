@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل طلب العرض — موظف قسم اللجان الطبية</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'committees-employee', activePage: 'referrals-list' });
+const params = new URLSearchParams(window.location.search);
+const req = WI_DATA.allowances.find(r=>r.id===params.get('id')) || WI_DATA.allowances[0];
+currentRequestId = req.id;
+const me = WI_DATA.users.committees_employee.name;
+const isCheckedOutByMe = req.checkedOutBy === me;
+setBreadcrumb([{label:'طلبات العرض',page:'referrals-list'},{label:`تفاصيل ${req.id}`}]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  // موظف قسم اللجان الطبية يتخذ إجراءً عند: بانتظار مراجعة موظف قسم اللجان الطبية
+  const status10 = 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية';
+  const canAct = isCheckedOutByMe;
+  const actions = [
+    'إعادة للاستيفاء',
+    'توصية برفض الإحالة مع تحديد السبب',
+    'توجيه إلى رئيس قسم اللجان الطبية مع تأكيد اختيار المؤسسة الصحية المرخصة',
+  ];
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تفاصيل طلب العرض على مؤسسة صحية مرخصة</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p></div>
+      <div class="pg-acts">
+        ${!req.checkedOutBy?`<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out</button>`:isCheckedOutByMe?`<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in</button>`:''}
+        <button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    ${renderRequestSummary(req)}
+    ${renderApplicantPanel(req.applicant)}
+    ${renderInsuredPersonPanel(req.insured)}
+    ${renderEmployerPanel(req.employer)}
+    ${renderInjuryDataPanel(req.injury, req.type)}
+    ${req.investigation?renderInvestigationReport(req.investigation,false):''}
+    ${req.fieldVisits?.length?renderFieldVisitsPanel(req.fieldVisits,false):''}
+    ${renderSickLeavePeriodsPanel(req.sickLeavePeriods||[],false)}
+    ${renderMedicalQueryPanel(req.insured.civil)}
+
+    ${canAct?`
+    <div class="dp">
+      <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>اتخاذ القرار — موظف قسم اللجان الطبية</h3></div>
+      <div class="dp-body">
+        <div id="institution-select-grp">
+          <div class="fgrp">
+            <label class="flbl">المؤسسة الصحية المرخصة المقترحة للعرض <span class="req">*</span></label>
+            <select class="fc" id="institution-sel">
+              <option value="">— اختر المؤسسة —</option>
+              <option>مستشفى النور التخصصي — مسقط (رقم الترخيص: LIC-INST-2024-0067)</option>
+              <option>مستشفى الأمل التخصصي — السيب (رقم الترخيص: LIC-INST-2024-0034)</option>
+              <option>مركز الرعاية الصحية المتخصص — بوشر (رقم الترخيص: LIC-INST-2023-0089)</option>
+            </select>
+            <div class="fhint">يتم عرض المؤسسات الصحية المرخصة النشطة فقط</div>
+          </div>
+        </div>
+        <div class="fgrp"><label class="flbl">ملاحظات الإحالة</label>
+          <textarea class="fc" rows="3" placeholder="أسباب اختيار المؤسسة، ملاحظات للجلسة..."></textarea>
+        </div>
+        <div class="fgrp"><label class="flbl">إرفاق ملف (اختياري)</label>
+          <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4">
+        </div>
+        <div class="dp-acts">
+          <button class="btn btn-primary" onclick="committeesDecision('توجيه')">${ICONS.arrow_left} توجيه لرئيس القسم + تأكيد المؤسسة</button>
+          <button class="btn btn-warning" onclick="committeesDecision('استيفاء')">إعادة للاستيفاء</button>
+          <button class="btn btn-danger" onclick="committeesDecision('رفض')">توصية برفض الإحالة</button>
+        </div>
+      </div>
+    </div>`:''}
+
+    ${renderAttachmentsPanel(req.attachments,true)}
+    ${renderOperationalNotes(req.notes,true)}
+    ${renderTimeline(req.timeline)}`;
+});
+
+function doCheckout(){ req.checkedOutBy=WI_DATA.users.committees_employee.name; showToast('تم الحجز','s'); setTimeout(()=>location.reload(),800); }
+function doCheckin(){ req.checkedOutBy=null; showToast('تم التحرير','i'); setTimeout(()=>window.location.href='referrals-list.html',800); }
+function committeesDecision(type){
+  if(type==='توجيه'){
+    const sel=document.getElementById('institution-sel');
+    if(!sel?.value){showToast('يرجى اختيار المؤسسة الصحية أولاً','w');return;}
+    showToast('تم توجيه الطلب لرئيس القسم مع تأكيد المؤسسة','s');
+  } else {
+    showToast(type==='استيفاء'?'تم إعادة الطلب للاستيفاء':'تم رفض الإحالة',type==='استيفاء'?'w':'d');
+  }
+  setTimeout(()=>window.location.href='referrals-list.html',1500);
+}
+</script></body></html>

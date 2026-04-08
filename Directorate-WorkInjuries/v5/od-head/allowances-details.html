@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل الطلب — رئيس قسم التحقيق في الأمراض المهنية</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'od-head', activePage: 'allowances-list' });
+const params = new URLSearchParams(window.location.search);
+const req = WI_DATA.allowances.find(r=>r.id===params.get('id')) || WI_DATA.allowances[1];
+currentRequestId = req.id;
+setBreadcrumb([{label:'بدلات الانقطاع',page:'allowances-list'},{label:`تفاصيل ${req.id}`}]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const canAct = req.status === 'بانتظار اعتماد رئيس قسم التحقيق في الأمراض المهنية';
+  const actions = canAct ? [
+    'اعتماد وتوجيه إلى قسم الإجازات المرضية',
+    'إعادة إلى موظف قسم التحقيق',
+    'رفض مع تحديد السبب',
+  ] : [];
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>تفاصيل الطلب</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='allowances-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    ${canAct ? `
+    <div class="alert alert-i">
+      ${ICONS.info}
+      <span>هذا الطلب بانتظار قرارك. راجع تقرير التحقيق المرفوع من الموظف واتخذ القرار المناسب.</span>
+    </div>` : ''}
+
+    ${renderRequestSummary(req)}
+    ${renderApplicantPanel(req.applicant)}
+    ${renderInsuredPersonPanel(req.insured)}
+    ${renderEmployerPanel(req.employer)}
+    ${renderInjuryDataPanel(req.injury, req.type)}
+    ${req.investigation ? renderInvestigationReport(req.investigation, false) : ''}
+    ${req.fieldVisits?.length ? renderFieldVisitsPanel(req.fieldVisits, canAct) : ''}
+    ${renderAttachmentsPanel(req.attachments, true)}
+    ${renderOperationalNotes(req.notes, true)}
+
+    ${canAct ? `
+    <div class="dp">
+      <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>اتخاذ القرار</h3></div>
+      <div class="dp-body">
+        <div class="alert alert-i" style="margin-bottom:0">
+          ${ICONS.info}
+          <div>
+            <strong>توصية الموظف:</strong>
+            <span class="badge ${req.investigation?.employeeRecommendation==='موافقة'?'b-approved':'b-rejected'}" style="margin-right:8px">${req.investigation?.employeeRecommendation||'—'}</span>
+          </div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">ملاحظاتك على تقرير التحقيق</label>
+          <textarea class="fc" id="head-notes" rows="4" placeholder="أكتب ملاحظاتك على تقرير الموظف واسبب قرارك..."></textarea>
+        </div>
+        <div class="fgrp" id="reject-reason-grp" style="display:none">
+          <label class="flbl">سبب الرفض <span class="req">*</span></label>
+          <select class="fc" id="reject-reason">
+            <option>لا تستوفي شروط إصابة العمل</option>
+            <option>غياب الأدلة الكافية</option>
+            <option>الإصابة خارج نطاق العمل</option>
+            <option>الطلب مكرر</option>
+            <option>سبب آخر</option>
+          </select>
+        </div>
+        <div class="dp-acts">
+          <button class="btn btn-accent" onclick="headDecision('اعتماد')">${ICONS.check} اعتماد وتوجيه إلى قسم الإجازات المرضية</button>
+          <button class="btn btn-warning" onclick="headDecision('إعادة')">إعادة إلى موظف قسم التحقيق</button>
+          <button class="btn btn-danger" onclick="headDecision('رفض')">${ICONS.x} رفض مع تحديد السبب</button>
+        </div>
+      </div>
+    </div>` : ''}
+
+    ${renderTimeline(req.timeline)}`;
+});
+
+function headDecision(type) {
+  const notes = document.getElementById('head-notes')?.value;
+  if (type === 'رفض') {
+    document.getElementById('reject-reason-grp').style.display = '';
+    confirmAction({
+      title: 'تأكيد الرفض',
+      msg: 'هل أنت متأكد من رفض هذا الطلب؟ سيتم إشعار مقدم الطلب وتسجيل القرار في السجل الزمني.',
+      confirmLabel: 'نعم، رفض الطلب',
+      confirmClass: 'btn-danger',
+      onConfirm: () => {
+        showToast('تم رفض الطلب وإشعار مقدمه', 's');
+        setTimeout(() => window.location.href = 'allowances-list.html', 1500);
+      }
+    });
+  } else if (type === 'اعتماد') {
+    confirmAction({
+      title: 'تأكيد الاعتماد',
+      msg: `هل أنت متأكد من اعتماد الطلب ${req.id} وتوجيهه إلى قسم الإجازات المرضية؟`,
+      confirmLabel: 'نعم، اعتماد وتوجيه',
+      confirmClass: 'btn-accent',
+      onConfirm: () => {
+        showToast('تم اعتماد الطلب وتوجيهه إلى قسم الإجازات المرضية', 's');
+        setTimeout(() => window.location.href = 'allowances-list.html', 1500);
+      }
+    });
+  } else {
+    showToast('تم إعادة الطلب إلى موظف قسم التحقيق', 'w');
+    setTimeout(() => window.location.href = 'allowances-list.html', 1500);
+  }
+}
+</script>
+</body>
+</html>
+

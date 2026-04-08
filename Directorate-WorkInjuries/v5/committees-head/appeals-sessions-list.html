@@ -1,0 +1,45 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جلسات التظلمات — رئيس قسم اللجان الطبية</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'committees-head', activePage: 'appeals-sessions-list' });
+setBreadcrumb([{ label: 'التظلمات' }, { label: 'جلسات التظلمات' }]);
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head"><div><h1>جلسات لجنة التظلمات</h1>
+      <p>متابعة جلسات لجنة التظلمات — قراءة فقط</p></div>
+    </div>
+    <div class="alert alert-i">${ICONS.info}<span>الجدولة تتم عن طريق مقرر لجنة التظلمات. هذه الشاشة للمتابعة والاطلاع فقط.</span></div>
+    <div class="card">
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>رقم الجلسة</th><th>التاريخ والوقت</th><th>التظلمات المدرجة</th><th>حالة النصاب</th><th>حالة الجلسة</th></tr></thead>
+            <tbody>
+              <tr>
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">APP-SES-2025-0023</td>
+                <td>2025-02-05 — 10:00</td>
+                <td>3 تظلمات</td>
+                <td><span class="badge b-phead">لم يُحسب بعد</span></td>
+                <td><span class="badge b-session">مجدولة</span></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">APP-SES-2025-0019</td>
+                <td>2025-01-20 — 09:00</td>
+                <td>2 تظلمات</td>
+                <td><span class="badge b-approved">مكتمل</span></td>
+                <td><span class="badge b-approved">منعقدة — صدرت قرارات</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+});
+</script></body></html>
+

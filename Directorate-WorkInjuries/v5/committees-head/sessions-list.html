@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الجلسات — رئيس قسم اللجان الطبية</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'committees-head', activePage: 'sessions-list' });
+setBreadcrumb([{ label: 'التنسيق مع المؤسسات الصحية' }, { label: 'الجلسات' }]);
+document.addEventListener('DOMContentLoaded', () => {
+  const sessions = WI_DATA.sessions;
+  getContent().innerHTML = `
+    <div class="pg-head"><div><h1>جلسات المؤسسات الصحية المرخصة</h1>
+      <p>عرض نتائج الجلسات — قراءة فقط</p></div>
+    </div>
+    <div class="alert alert-i">${ICONS.info}<span>رئيس قسم اللجان الطبية يطلع على الجلسات للمتابعة فقط. الجدولة تتم عن طريق المقرر.</span></div>
+    <div class="filters">
+      <div class="fgrid">
+        <div class="fgrp"><label class="flbl">رقم الجلسة</label><input type="text" class="fc" placeholder="SES-YYYY-XXXX"></div>
+        <div class="fgrp"><label class="flbl">تاريخ الجلسة من</label><input type="date" class="fc"></div>
+        <div class="fgrp"><label class="flbl">تاريخ الجلسة إلى</label><input type="date" class="fc"></div>
+        <div class="fgrp"><label class="flbl">حالة الجلسة</label><select class="fc"><option>الكل</option><option>مجدولة</option><option>منعقدة</option><option>مؤجلة</option><option>مغلقة</option></select></div>
+      </div>
+      <div class="facts"><button class="btn btn-primary btn-sm">${ICONS.search} بحث</button><button class="btn btn-secondary btn-sm">مسح</button></div>
+    </div>
+    <div class="card">
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>رقم الجلسة</th><th>المؤسسة</th><th>التاريخ والوقت</th><th>الحالات</th><th>القرارات المكتملة</th><th>حالة النصاب</th><th>حالة الجلسة</th><th></th></tr></thead>
+            <tbody>
+              ${sessions.map(s=>`
+              <tr>
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${s.id}</td>
+                <td>${s.institution}</td>
+                <td>${s.date} — ${s.time}</td>
+                <td>${s.casesCount}</td>
+                <td>${s.completedDecisions} / ${s.casesCount}</td>
+                <td><span class="badge ${s.quorum ? 'b-approved' : 'b-returned'}">${s.quorum ? 'مكتمل' : 'غير مكتمل'}</span></td>
+                <td>${statusBadge(s.status === 'مجدولة' ? 'تم جدولة جلسة للعرض على المؤسسة الصحية المرخصة' : 'معتمد')}</td>
+                <td><button class="ibtn" title="قراءة فقط">${ICONS.eye}</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+});
+</script></body></html>
+

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل جلسة التظلمات — لجنة التظلمات</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'appeals-committee', activePage: 'sessions-list' });
+setBreadcrumb([{ label: 'جلسات التظلمات', page: 'sessions-list' }, { label: 'تفاصيل الجلسة' }]);
+
+const params = new URLSearchParams(window.location.search);
+const sessionId = params.get('id') || 'APP-SES-2025-0023';
+
+const session = {
+  id: sessionId,
+  date: '2025-02-05', time: '10:00',
+  status: sessionId === 'APP-SES-2025-0023' ? 'مجدولة' : 'مغلقة',
+  members: [
+    { name: 'د. خالد بن سالم الهاشمي', role: 'رئيس', specialty: 'جراحة العظام', attendance: 'مجدول' },
+    { name: 'د. ريم بنت أحمد المعولية', role: 'عضو', specialty: 'الطب الباطني', attendance: 'مجدول' },
+    { name: 'د. حسن بن علي السيابي', role: 'عضو', specialty: 'طب الأمراض المهنية', attendance: 'مجدول' },
+  ],
+  cases: WI_DATA.appeals.map(a => ({
+    appealId: a.id, name: a.applicant.name,
+    originalReqId: a.originalRequestId, reason: a.appealReason,
+    decisionStatus: 'بانتظار القرار', decision: null
+  }))
+};
+
+const attendanceState = {};
+const signatureState = {};
+session.members.forEach(m => {
+  attendanceState[m.name] = m.attendance;
+  signatureState[m.name] = 'بانتظار';
+});
+
+document.addEventListener('DOMContentLoaded', renderPage);
+
+function renderPage() {
+  const confirmedCount = Object.values(attendanceState).filter(v => v === 'حاضر').length;
+  const quorum = confirmedCount >= Math.ceil(session.members.length / 2);
+  const allDecisionsDone = session.cases.every(c => c.decisionStatus !== 'بانتظار القرار');
+  const allSigned = Object.values(signatureState).every(v => v === 'تم التوقيع');
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>تفاصيل جلسة لجنة التظلمات</h1>
+        <p>رقم الجلسة: <strong style="font-family:monospace;color:var(--primary)">${session.id}</strong></p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='sessions-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    <!-- ملخص الجلسة -->
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الجلسة</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${session.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">التاريخ والوقت</div><div>${session.date} — ${session.time}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">حالة الجلسة</div><span class="badge ${session.status==='مجدولة'?'b-session':'b-approved'}">${session.status}</span></div>
+          <div><div class="flbl" style="margin-bottom:4px">حالة النصاب</div>
+            <span class="badge ${quorum?'b-approved':'b-returned'}">${quorum?'النصاب مكتمل':'النصاب غير مكتمل'}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- أعضاء اللجنة وتأكيد الحضور -->
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico bl">${ICONS.user}</div>أعضاء لجنة التظلمات — تأكيد الحضور</h3>
+        <span style="font-size:12px;color:var(--text3)">${confirmedCount} / ${session.members.length} أكدوا الحضور</span>
+      </div>
+      <div class="pb-0">
+        <table class="dtbl">
+          <thead><tr><th>الاسم</th><th>التخصص</th><th>المنصب</th><th>حالة الحضور</th><th>الإجراء</th></tr></thead>
+          <tbody>
+            ${session.members.map(m => `
+            <tr>
+              <td style="font-weight:600">${m.name}</td>
+              <td>${m.specialty}</td>
+              <td>${m.role}</td>
+              <td><span class="badge ${attendanceState[m.name]==='حاضر'?'b-approved':attendanceState[m.name]==='اعتذار'?'b-rejected':'b-phead'}">${attendanceState[m.name]}</span></td>
+              <td>
+                ${attendanceState[m.name]==='مجدول' ? `
+                <div style="display:flex;gap:6px">
+                  <button class="btn btn-accent btn-xs" onclick="confirmAtt('${m.name}','حاضر')">${ICONS.check} حاضر</button>
+                  <button class="btn btn-danger btn-xs" onclick="confirmAtt('${m.name}','اعتذار')">${ICONS.x} اعتذار</button>
+                </div>` : `<span style="font-size:11.5px;color:var(--text3)">تم التأكيد</span>`}
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- التظلمات المدرجة -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico pu">${ICONS.list}</div>التظلمات المدرجة في الجلسة</h3></div>
+      <div class="pb-0">
+        <table class="dtbl">
+          <thead><tr><th>#</th><th>رقم التظلم</th><th>مقدم التظلم</th><th>الطلب الأصلي</th><th>سبب التظلم</th><th>حالة القرار</th><th></th></tr></thead>
+          <tbody>
+            ${session.cases.map((c, i) => `
+            <tr>
+              <td>${i+1}</td>
+              <td style="font-family:monospace;color:var(--primary);font-weight:700">${c.appealId}</td>
+              <td>${c.name}</td>
+              <td style="font-family:monospace;font-size:11.5px">${c.originalReqId}</td>
+              <td style="font-size:12px">${c.reason}</td>
+              <td>
+                <span class="badge ${c.decisionStatus==='بانتظار القرار'?'b-phead':c.decisionStatus==='تم التوقيع'?'b-approved':'b-session'}">
+                  ${c.decisionStatus}
+                </span>
+              </td>
+              <td>
+                <button class="btn btn-primary btn-xs" onclick="openAppealDecision('${c.appealId}','${c.name}','${c.reason}')">
+                  ${c.decisionStatus==='بانتظار القرار'?'الاطلاع على التظلم':'عرض القرار'}
+                </button>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- التوقيعات الإلكترونية -->
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico gr">${ICONS.pen}</div>التوقيعات الإلكترونية</h3>
+        <span style="font-size:12px;color:var(--text3)">
+          ${Object.values(signatureState).filter(v=>v==='تم التوقيع').length} / ${session.members.length} وقّعوا
+        </span>
+      </div>
+      <div class="pb-0">
+        <table class="dtbl">
+          <thead><tr><th>العضو</th><th>المنصب</th><th>حالة التوقيع</th><th>الإجراء</th></tr></thead>
+          <tbody>
+            ${session.members.map(m => `
+            <tr>
+              <td style="font-weight:600">${m.name}</td>
+              <td>${m.role}</td>
+              <td><span class="badge ${signatureState[m.name]==='تم التوقيع'?'b-approved':'b-phead'}">${signatureState[m.name]}</span></td>
+              <td>
+                ${signatureState[m.name]==='بانتظار' && allDecisionsDone ? `
+                <button class="btn btn-accent btn-sm" onclick="doSign('${m.name}')">${ICONS.pen} توقيع إلكتروني</button>`
+                : signatureState[m.name]==='تم التوقيع' ? `<span class="badge b-approved">تم التوقيع</span>`
+                : `<span style="font-size:11.5px;color:var(--text3)">بانتظار إدخال القرارات أولاً</span>`}
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      ${!allDecisionsDone ? `
+      <div class="pb-c">
+        <div class="alert alert-i" style="margin-bottom:0">${ICONS.info}<span>يجب إدخال جميع القرارات أولاً قبل التوقيع — يقوم مقرر لجنة التظلمات بإدخال القرارات.</span></div>
+      </div>` : ''}
+      ${allSigned ? `
+      <div class="pb-c">
+        <div class="alert alert-s" style="margin-bottom:0">${ICONS.check}<span>اكتملت جميع التوقيعات — سيقوم المقرر بإرسال القرارات النهائية.</span></div>
+      </div>` : ''}
+    </div>`;
+}
+
+function confirmAtt(name, status) {
+  attendanceState[name] = status;
+  showToast(`تم تسجيل ${status==='حاضر'?'حضورك':'اعتذارك'}`, status==='حاضر'?'s':'w');
+  renderPage();
+}
+
+function doSign(name) {
+  confirmAction({
+    title: 'تأكيد التوقيع الإلكتروني',
+    msg: `هل أنت متأكد من توقيعك الإلكتروني على قرارات جلسة التظلمات ${session.id}؟<br>
+          <span style="font-size:12px;color:var(--text3)">التوقيع نهائي ولا يمكن التراجع عنه.</span>`,
+    confirmLabel: 'نعم، توقيع إلكتروني',
+    confirmClass: 'btn-accent',
+    onConfirm: () => {
+      signatureState[name] = 'تم التوقيع';
+      showToast('تم تسجيل توقيعك الإلكتروني بنجاح', 's');
+      renderPage();
+    }
+  });
+}
+
+function openAppealDecision(appealId, name, reason) {
+  const appeal = WI_DATA.appeals.find(a => a.id === appealId);
+  openModal({
+    title: `ملخص التظلم — ${appealId}`,
+    size: 'md-lg',
+    body: `
+      <div class="alert alert-i" style="margin-bottom:14px">
+        ${ICONS.info}
+        <span>القرار يُدخَل عبر مقرر لجنة التظلمات — هذه الشاشة للاطلاع فقط.</span>
+      </div>
+
+      ${appeal ? `
+      <div class="fg fg-2" style="gap:12px">
+        <div class="fgrp"><label class="flbl">رقم التظلم</label><div class="fro" style="font-family:monospace;color:var(--primary)">${appeal.id}</div></div>
+        <div class="fgrp"><label class="flbl">مقدم التظلم</label><div class="fro">${appeal.applicant.name}</div></div>
+        <div class="fgrp"><label class="flbl">الطلب الأصلي</label><div class="fro" style="font-family:monospace">${appeal.originalRequestId}</div></div>
+        <div class="fgrp"><label class="flbl">نوع الطلب الأصلي</label><div class="fro">${appeal.originalRequestType}</div></div>
+        <div class="fgrp"><label class="flbl">سبب التظلم</label><div class="fro">${appeal.appealReason}</div></div>
+        <div class="fgrp"><label class="flbl">القرار المتظلم منه</label><div class="fro"><span class="badge b-rejected">${appeal.decision.type}</span> — ${appeal.decision.issuer}</div></div>
+        <div class="fgrp span-full"><label class="flbl">تفاصيل سبب التظلم</label><div class="fro" style="min-height:50px;align-items:flex-start;padding-top:8px">${appeal.appealDetails}</div></div>
+      </div>` : `<p style="color:var(--text3)">لا توجد بيانات</p>`}`,
+    footer: `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`
+  });
+}
+</script>
+</body>
+</html>

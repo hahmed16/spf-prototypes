@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة البيانات — المفوض عن المستشفى</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'hospital-delegate', activePage: 'dashboard' });
+setBreadcrumb([{ label: 'لوحة البيانات' }]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const u = WI_DATA.users.hospital_delegate;
+  // بيانات طلبات هذا المفوض
+  const myReqs = WI_DATA.licensing.filter(r =>
+    r.delegate?.civil === '9066663333' || r.id === 'LIC-2025-000034'
+  );
+  const activeReq = myReqs.find(r => r.status.includes('تم اعتماد'));
+  const pendingReq = myReqs.find(r => !r.status.includes('تم اعتماد'));
+  const activeLicense = WI_DATA.licensing[1].activeLicense;
+  const daysToExpiry = activeLicense ? Math.floor((new Date(activeLicense.expiryDate) - new Date()) / (1000*60*60*24)) : null;
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>مرحباً، ${u.name}</h1>
+        <p>المفوض عن المستشفيات والمؤسسات الصحية المختلفة</p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-primary" onclick="window.location.href='licensing-new.html'">
+          ${ICONS.plus} تقديم طلب ترخيص / تجديد
+        </button>
+      </div>
+    </div>
+
+    ${daysToExpiry !== null && daysToExpiry <= 90 && daysToExpiry > 0 ? `
+    <div class="alert alert-w">
+      ${ICONS.warn}
+      <div>
+        <strong>تنبيه: الترخيص ينتهي خلال ${daysToExpiry} يوماً</strong> — يُنصح بتقديم طلب تجديد في أقرب وقت.
+      </div>
+      <button class="btn btn-warning btn-sm" style="flex-shrink:0;margin-right:auto"
+        onclick="window.location.href='licensing-new.html?type=تجديد'">
+        تقديم طلب تجديد
+      </button>
+    </div>` : ''}
+
+    <div class="stats-grid">
+      <div class="scard p" onclick="window.location.href='licensing-list.html'">
+        <div class="sc-lbl">إجمالي طلباتي</div>
+        <div class="sc-val">${myReqs.length}</div>
+        <div class="sc-sub">طلبات مقدمة</div>
+      </div>
+      <div class="scard s" onclick="window.location.href='institution-file.html'">
+        <div class="sc-lbl">حالة الترخيص الحالي</div>
+        <div class="sc-val" style="font-size:16px">${activeLicense ? 'نشط' : 'غير مرخص'}</div>
+        <div class="sc-sub">${activeLicense ? `ينتهي: ${activeLicense.expiryDate}` : '—'}</div>
+      </div>
+      <div class="scard i" onclick="window.location.href='institution-file.html'">
+        <div class="sc-lbl">عدد الأطباء المؤكدون</div>
+        <div class="sc-val">${WI_DATA.licensing[1].verification.confirmedDoctors}</div>
+        <div class="sc-sub">من أصل ${WI_DATA.licensing[1].verification.totalDoctors} مرشح</div>
+      </div>
+      <div class="scard w" onclick="window.location.href='licensing-list.html'">
+        <div class="sc-lbl">طلبات قيد المعالجة</div>
+        <div class="sc-val">${myReqs.filter(r=>!r.status.includes('تم اعتماد')).length}</div>
+        <div class="sc-sub">بانتظار المراجعة والقرار</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <!-- الترخيص الحالي -->
+      <div class="card">
+        <div class="ph">
+          <h3><div class="pico gr">${ICONS.shield}</div>الترخيص الحالي</h3>
+          <a href="institution-file.html" style="font-size:12px;color:var(--primary)">ملف المؤسسة</a>
+        </div>
+        <div class="pb">
+          ${activeLicense ? `
+          <div class="fg fg-2" style="gap:10px">
+            <div class="fgrp"><label class="flbl">رقم الترخيص</label>
+              <div class="fro" style="font-family:monospace;font-weight:700;color:var(--primary)">${activeLicense.number}</div>
+            </div>
+            <div class="fgrp"><label class="flbl">حالة الترخيص</label>
+              <div class="fro"><span class="badge b-active">نشط</span></div>
+            </div>
+            <div class="fgrp"><label class="flbl">تاريخ الإصدار</label>
+              <div class="fro">${activeLicense.issueDate}</div>
+            </div>
+            <div class="fgrp"><label class="flbl">تاريخ الانتهاء</label>
+              <div class="fro" style="${daysToExpiry!==null&&daysToExpiry<=90?'color:var(--warning);font-weight:700':''}">${activeLicense.expiryDate}</div>
+            </div>
+          </div>
+          <div class="facts mt12">
+            <button class="btn btn-secondary btn-sm" onclick="window.location.href='licensing-new.html?type=تجديد'">${ICONS.plus} طلب تجديد</button>
+          </div>` : `
+          <div class="empty-st" style="padding:20px">
+            ${ICONS.shield}
+            <h4>لا يوجد ترخيص نشط</h4>
+            <p>قدّم طلب ترخيص جديد</p>
+            <button class="btn btn-primary" style="margin-top:10px" onclick="window.location.href='licensing-new.html'">${ICONS.plus} تقديم طلب جديد</button>
+          </div>`}
+        </div>
+      </div>
+
+      <!-- آخر الطلبات -->
+      <div class="card">
+        <div class="ph">
+          <h3><div class="pico bl">${ICONS.list}</div>آخر طلباتي</h3>
+          <a href="licensing-list.html" style="font-size:12px;color:var(--primary)">عرض الكل</a>
+        </div>
+        <div class="pb-0">
+          <table class="dtbl">
+            <thead><tr><th>رقم الطلب</th><th>النوع</th><th>الحالة</th><th></th></tr></thead>
+            <tbody>
+              ${myReqs.map(r=>`
+              <tr>
+                <td style="font-family:monospace;font-size:11.5px;color:var(--primary)">${r.id}</td>
+                <td><span class="badge b-direct">${r.requestType}</span></td>
+                <td>${statusBadge(r.status)}</td>
+                <td><button class="ibtn" onclick="window.location.href='licensing-details.html?id=${r.id}'">${ICONS.eye}</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+});
+</script>
+</body>
+</html>

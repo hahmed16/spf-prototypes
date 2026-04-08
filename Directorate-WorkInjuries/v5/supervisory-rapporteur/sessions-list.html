@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قائمة الجلسات — مقرر اللجنة الطبية الإشرافية</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'supervisory-rapporteur', activePage: 'sessions-list' });
+setBreadcrumb([{ label: 'إدارة جلسات اللجنة الإشرافية' }, { label: 'قائمة الجلسات' }]);
+
+const allSessions = [
+  {
+    id: 'LIC-SES-2025-0012', date: '2025-02-10', time: '11:00',
+    status: 'مجدولة', casesCount: WI_DATA.licensing.length, completedDecisions: 0,
+    quorum: false, signedCount: 0, totalMembers: 5,
+    cases: WI_DATA.licensing.map(r=>({ licReqId: r.id, institutionName: r.institution.name, requestType: r.requestType, decisionStatus: 'بانتظار القرار' }))
+  },
+  {
+    id: 'LIC-SES-2024-0089', date: '2024-08-10', time: '10:00',
+    status: 'مغلقة', casesCount: 1, completedDecisions: 1,
+    quorum: true, signedCount: 5, totalMembers: 5,
+    cases: [{ licReqId: 'LIC-2024-000198', institutionName: 'مستشفى النور التخصصي', requestType: 'تجديد', decisionStatus: 'تم التوقيع' }]
+  }
+];
+
+let activeTab = 'all';
+document.addEventListener('DOMContentLoaded', render);
+
+function render() {
+  const filtered = activeTab==='all' ? allSessions
+    : allSessions.filter(s => activeTab==='scheduled' ? s.status==='مجدولة' : s.status==='مغلقة');
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>قائمة جلسات اللجنة الطبية الإشرافية</h1><p>${allSessions.length} جلسة</p></div>
+      <div class="pg-acts">
+        <button class="btn btn-primary" onclick="openNewSessionModal()">${ICONS.plus} إنشاء جلسة جديدة</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ttabs">
+        ${[{key:'all',label:'الكل',count:allSessions.length},{key:'scheduled',label:'مجدولة',count:allSessions.filter(s=>s.status==='مجدولة').length},{key:'closed',label:'مغلقة',count:allSessions.filter(s=>s.status==='مغلقة').length}]
+          .map(t=>`<div class="ttab ${activeTab===t.key?'act':''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>رقم الجلسة</th><th>التاريخ والوقت</th><th>الطلبات</th><th>القرارات</th><th>النصاب</th><th>التوقيعات</th><th>الحالة</th><th></th></tr></thead>
+            <tbody>
+              ${filtered.map(s=>`
+              <tr style="${s.status==='مجدولة'?'background:var(--primary-l)':''}">
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${s.id}</td>
+                <td>${s.date} — ${s.time}</td>
+                <td>${s.casesCount}</td>
+                <td><span style="font-weight:700;color:${s.completedDecisions===s.casesCount?'var(--accent)':'var(--text2)'}">${s.completedDecisions}/${s.casesCount}</span></td>
+                <td><span class="badge ${s.quorum?'b-approved':'b-returned'}">${s.quorum?'مكتمل':'غير مكتمل'}</span></td>
+                <td>${s.signedCount}/${s.totalMembers}</td>
+                <td><span class="badge ${s.status==='مجدولة'?'b-session':'b-approved'}">${s.status}</span></td>
+                <td>
+                  <div style="display:flex;gap:4px">
+                    <button class="btn btn-primary btn-xs" onclick="window.location.href='session-details.html?id=${s.id}'">إدارة الجلسة</button>
+                    ${s.status==='مجدولة'?`<button class="ibtn" onclick="openReschedule('${s.id}')">${ICONS.edit}</button>`:''}
+                  </div>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function setTab(t) { activeTab=t; render(); }
+
+function openNewSessionModal() {
+  openModal({
+    title: 'إنشاء جلسة جديدة — اللجنة الطبية الإشرافية',
+    size: 'md-lg',
+    body: `
+      <div class="fg" style="gap:14px">
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">تاريخ الجلسة <span class="req">*</span></label><input type="date" class="fc"></div>
+          <div class="fgrp"><label class="flbl">وقت الجلسة <span class="req">*</span></label><input type="time" class="fc" value="11:00"></div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">طلبات الترخيص المدرجة</label>
+          <div style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            ${WI_DATA.licensing.map(r=>`
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border)">
+              <input type="checkbox" checked>
+              <span style="font-size:12.5px">
+                <span style="font-family:monospace;color:var(--primary)">${r.id}</span> —
+                ${r.institution.name} (${r.requestType})
+              </span>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>`,
+    footer: `
+      <button class="btn btn-primary" onclick="closeModal();showToast('تم إنشاء الجلسة وإرسال الدعوات لأعضاء اللجنة الإشرافية','s')">${ICONS.check} إنشاء الجلسة</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+
+function openReschedule(id) {
+  openModal({
+    title: `تعديل موعد الجلسة — ${id}`,
+    body: `<div class="fg fg-2" style="gap:12px">
+      <div class="fgrp"><label class="flbl">التاريخ الجديد</label><input type="date" class="fc"></div>
+      <div class="fgrp"><label class="flbl">الوقت الجديد</label><input type="time" class="fc"></div>
+      <div class="fgrp span-full"><label class="flbl">سبب التعديل</label><textarea class="fc" rows="2"></textarea></div>
+    </div>`,
+    footer: `<button class="btn btn-primary" onclick="closeModal();showToast('تم تعديل الموعد','s')">${ICONS.check} حفظ</button>
+             <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل طلب الترخيص — المفوض عن المستشفى</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'hospital-delegate', activePage: 'licensing-list' });
+const params = new URLSearchParams(window.location.search);
+const req = WI_DATA.licensing.find(r=>r.id===params.get('id')) || WI_DATA.licensing[0];
+currentRequestId = req.id;
+setBreadcrumb([{label:'الترخيص والتجديد',page:'licensing-list'},{label:`تفاصيل ${req.id}`}]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const needsFulfillment = req.status.includes('استيفاء');
+  const isApproved = req.status.includes('تم اعتماد');
+  const isRejected = req.status.includes('رفض');
+
+  // الإجراءات المتاحة للمفوض
+  let actions = [];
+  if (req.status === 'مسودة') actions = ['إرسال الطلب','حذف'];
+  else if (needsFulfillment) actions = ['استيفاء البيانات المطلوبة وإعادة الإرسال'];
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تفاصيل طلب ${req.requestType==='جديد'?'الترخيص':'التجديد'}</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p></div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='licensing-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    ${needsFulfillment?`<div class="alert alert-w">${ICONS.warn}<div><strong>تم إعادة طلبك لاستيفاء البيانات</strong> — يرجى مراجعة الملاحظات أدناه وإرفاق المستندات المطلوبة.</div></div>`:''}
+    ${isApproved?`<div class="alert alert-s">${ICONS.check}<span>تهانينا! تم اعتماد الترخيص وإصداره بنجاح.</span></div>`:''}
+    ${isRejected?`<div class="alert alert-d">${ICONS.x}<span>تم رفض الطلب. يمكنك الاطلاع على سبب الرفض أدناه.</span></div>`:''}
+
+    <!-- ملخص -->
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">نوع الطلب</div><span class="badge b-direct">${req.requestType}</span></div>
+          <div><div class="flbl" style="margin-bottom:4px">الحالة</div>${statusBadge(req.status)}</div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div>${req.submitDate}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر تحديث</div><div style="font-size:12px;color:var(--text2)">${req.lastUpdate}</div></div>
+        </div>
+      </div>
+    </div>
+
+    ${renderApplicantPanel(req.delegate)}
+    ${renderInstitutionPanel(req.institution)}
+    ${renderDoctorsPanel(req.doctors, false)}
+
+    <!-- التحقق من الاشتراطات -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico ${req.verification.minMet?'gr':'rd'}">${req.verification.minMet?ICONS.check:ICONS.warn}</div>التحقق من اشتراطات الترخيص</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">إجمالي الأطباء المقدمين</label><div class="fro"><strong>${req.verification.totalDoctors}</strong></div></div>
+          <div class="fgrp"><label class="flbl">الأطباء المؤكدون</label>
+            <div class="fro"><strong style="color:${req.verification.confirmedDoctors===req.verification.totalDoctors?'var(--accent)':'var(--warning)'}">${req.verification.confirmedDoctors}/${req.verification.totalDoctors}</strong></div>
+          </div>
+          <div class="fgrp"><label class="flbl">استيفاء الحد الأدنى</label>
+            <div class="fro"><span class="badge ${req.verification.minMet?'b-approved':'b-returned'}">${req.verification.minMet?'مستوفى':'غير مستوفى'}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${req.session?renderSessionPanel(req.session):''}
+    ${req.committeeDecision?renderCommitteeDecisionPanel(req.committeeDecision,'قرار اللجنة الطبية الإشرافية'):''}
+    ${req.activeLicense?renderActiveLicensePanel(req.activeLicense):''}
+    ${renderAttachmentsPanel(req.attachments, needsFulfillment)}
+    ${renderOperationalNotes(req.notes, needsFulfillment)}
+
+    ${actions.length ? renderDecisionPanel({actions, title:'الإجراءات المتاحة لك'}) : ''}
+
+    ${renderTimeline(req.timeline)}`;
+});
+</script>
+</body>
+</html>

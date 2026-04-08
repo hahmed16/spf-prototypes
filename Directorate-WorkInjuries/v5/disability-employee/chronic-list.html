@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قائمة طلبات الأمراض المستديمة — موظف قسم الإعاقة</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'disability-employee', activePage: 'chronic-list' });
+setBreadcrumb([{ label: 'منفعة الأمراض المستديمة' }, { label: 'قائمة الطلبات' }]);
+const me = WI_DATA.users.disability_employee.name;
+document.addEventListener('DOMContentLoaded', () => {
+  const reqs = WI_DATA.chronicIncoming.filter(d=>d.hasRequest);
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>قائمة طلبات منفعة الأمراض المستديمة</h1><p>${reqs.length} طلب مقدم</p></div>
+    </div>
+    <div class="filters">
+      <div class="fgrid">
+        <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc"></div>
+        <div class="fgrp"><label class="flbl">الرقم المدني</label><input type="text" class="fc"></div>
+        <div class="fgrp"><label class="flbl">التشخيص</label><input type="text" class="fc"></div>
+        <div class="fgrp"><label class="flbl">المسار</label><select class="fc"><option>الكل</option><option>مسار مباشر</option><option>مسار اللجان الطبية</option></select></div>
+        <div class="fgrp"><label class="flbl">الحالة</label><select class="fc"><option>جميع الحالات</option><option>تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة</option><option>تم إعادة الطلب لاستيفاء البيانات</option><option>بانتظار اعتماد رئيس قسم الإعاقة والأمراض المستديمة — المسار المباشر</option></select></div>
+      </div>
+      <div class="facts"><button class="btn btn-primary btn-sm">${ICONS.search} بحث</button><button class="btn btn-secondary btn-sm">مسح</button></div>
+    </div>
+    <div class="card">
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>رقم الطلب</th><th>المستفيد</th><th>التشخيص</th><th>المسار</th><th>الحالة</th><th>تاريخ التقديم</th><th>الحجز</th><th></th></tr></thead>
+            <tbody>
+              ${reqs.map(d=>`
+              <tr>
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${d.requestId}</td>
+                <td>${d.applicantName}</td>
+                <td>${d.diagnosis}</td>
+                <td><span class="badge ${d.expectedPath==='مسار مباشر'?'b-direct':'b-commpath'}">${d.expectedPath}</span></td>
+                <td><span class="badge b-submitted">قيد المراجعة</span></td>
+                <td>${d.provenDate}</td>
+                <td><span class="badge b-avail">متاح</span></td>
+                <td>
+                  <button class="ibtn" onclick="window.location.href='chronic-details.html?id=${d.requestId}'">${ICONS.eye}</button>
+                  <button class="ibtn" onclick="showToast('تم حجز الطلب','s')">${ICONS.lock}</button>
+                  <button class="ibtn" onclick="openAddNoteModal('${d.requestId}')">${ICONS.note}</button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+});
+</script></body></html>

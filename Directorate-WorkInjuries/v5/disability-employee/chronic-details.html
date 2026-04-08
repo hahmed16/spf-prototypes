@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل طلب الأمراض المستديمة — موظف قسم الإعاقة</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'disability-employee', activePage: 'chronic-list' });
+const params = new URLSearchParams(window.location.search);
+const refData = WI_DATA.chronicIncoming.find(d=>d.requestId===params.get('id')) || WI_DATA.chronicIncoming[1];
+currentRequestId = refData?.requestId || 'CHR-2025-000156';
+const me = WI_DATA.users.disability_employee.name;
+setBreadcrumb([{label:'الأمراض المستديمة',page:'chronic-list'},{label:`تفاصيل ${currentRequestId}`}]);
+
+const req = {
+  id: currentRequestId,
+  status: 'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة',
+  path: refData?.expectedPath || 'مسار اللجان الطبية',
+  submitDate: refData?.provenDate || '2025-01-05',
+  lastUpdate: '2025-01-05 14:00',
+  applicant: { name: refData?.applicantName||'سعيد بن علي الحبسي', civil: refData?.civil||'9001234567', role:'العامل / المؤمن عليه / المواطن', phone:'96891234567', email:'' },
+  insured: { name: refData?.applicantName||'سعيد بن علي الحبسي', civil: refData?.civil||'9001234567', insurance:'IN-20180090123', dob:'1975-03-10', gender:'ذكر', nationality:'عُماني', insuranceStatus:'نشط', regDate:'2018-01-01', subType:'إلزامي' },
+  insurance: { status:'نشط', subType:'إلزامي', otherBenefits:'لا يوجد' },
+  medical: { hospital: refData?.hospital||'مستشفى ابن سينا — نزوى', doctor: refData?.doctor||'د. فاطمة الخروصية', diagnosis: refData?.diagnosis||'الفشل الكلوي المزمن', provenDate: refData?.provenDate||'2024-11-20', expectedPath: refData?.expectedPath||'مسار اللجان الطبية' },
+  attachments:[], notes:[],
+  timeline:[
+    {action:'تم استلام التشخيص من وزارة الصحة',actor:'وزارة الصحة',role:'آلي',time:'2024-11-22 08:00',fromStatus:'',toStatus:'تم استلام التشخيص من المؤسسة الصحية المعالجة',note:'',type:'default'},
+    {action:'تم تقديم الطلب من قِبل المؤمن عليه',actor:refData?.applicantName||'سعيد الحبسي',role:'العامل',time:'2025-01-05 14:00',fromStatus:'تم استلام التشخيص',toStatus:'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة',note:'',type:'default'},
+  ]
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  const statusPending = 'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة';
+  const canAct = req.status === statusPending;
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تفاصيل طلب منفعة الأمراض المستديمة</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p></div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='chronic-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">المسار</div><span class="badge ${req.path==='مسار مباشر'?'b-direct':'b-commpath'}">${req.path}</span></div>
+          <div><div class="flbl" style="margin-bottom:4px">الحالة</div>${statusBadge(req.status)}</div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div>${req.submitDate}</div></div>
+        </div>
+      </div>
+    </div>
+
+    ${renderApplicantPanel(req.applicant)}
+    ${renderInsuredPersonPanel(req.insured)}
+    ${renderChronicMedicalPanel(req.medical)}
+
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico gr">${ICONS.shield}</div>بيانات التأمين</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">${req.insurance.status}</span></div></div>
+          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${req.insurance.subType}</div></div>
+          <div class="fgrp"><label class="flbl">منافع أخرى</label><div class="fro">${req.insurance.otherBenefits}</div></div>
+        </div>
+      </div>
+    </div>
+
+    ${renderAttachmentsPanel(req.attachments, true)}
+    ${renderOperationalNotes(req.notes, true)}
+
+    ${canAct?`
+    <div class="dp">
+      <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>اتخاذ القرار</h3></div>
+      <div class="dp-body">
+        <div class="alert alert-i" style="margin-bottom:0">
+          ${ICONS.info}
+          <span>المسار المتوقع: <span class="badge ${req.path==='مسار مباشر'?'b-direct':'b-commpath'}">${req.path}</span> — هذه معلومة استرشادية فقط. القرار النهائي للتوجيه يعود لك.</span>
+        </div>
+        <div class="fgrp"><label class="flbl">الملاحظات</label><textarea class="fc" rows="3" placeholder="أكتب ملاحظاتك وتوصيتك..."></textarea></div>
+        <div class="fgrp"><label class="flbl">إرفاق ملف (اختياري)</label><input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4"></div>
+        <div class="dp-acts">
+          <button class="btn btn-primary" onclick="chronicDecision('رئيس')">${ICONS.arrow_left} توجيه لرئيس القسم (المسار المباشر)</button>
+          <button class="btn btn-secondary" onclick="chronicDecision('لجان')">توجيه لقسم اللجان الطبية (مسار اللجان)</button>
+          <button class="btn btn-warning" onclick="chronicDecision('استيفاء')">طلب استيفاء بيانات من المواطن</button>
+          <button class="btn btn-danger" onclick="chronicDecision('رفض')">رفض</button>
+        </div>
+      </div>
+    </div>`:''}
+    ${renderTimeline(req.timeline)}`;
+});
+
+function chronicDecision(type){
+  const msgs={رئيس:'تم توجيه الطلب لرئيس القسم — المسار المباشر',لجان:'تم توجيه الطلب لقسم اللجان الطبية',استيفاء:'تم إعادة الطلب للمواطن لاستيفاء البيانات',رفض:'تم رفض الطلب'};
+  showToast(msgs[type],type==='رفض'?'w':'s');
+  setTimeout(()=>window.location.href='chronic-list.html',1500);
+}
+</script></body></html>

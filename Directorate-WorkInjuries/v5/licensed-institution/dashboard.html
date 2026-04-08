@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة البيانات — المؤسسة الصحية المرخصة</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'licensed-institution', activePage: 'dashboard' });
+setBreadcrumb([{ label: 'لوحة البيانات' }]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const sessions = WI_DATA.sessions;
+  const inst = WI_DATA.licensing[1];
+  const upcoming = sessions.filter(s => s.status === 'مجدولة');
+  const pendingDecision = sessions.reduce((acc, s) => acc + s.cases.filter(c => c.decisionStatus === 'بانتظار القرار').length, 0);
+  const pendingSign = sessions.reduce((acc, s) => acc + s.signatures.filter(sig => sig.status === 'بانتظار').length, 0);
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>لوحة البيانات</h1>
+        <p>${inst?.institution.name || 'مستشفى النور التخصصي'} — المؤسسة الصحية المرخصة</p>
+      </div>
+    </div>
+
+    ${pendingSign > 0 ? `
+    <div class="alert alert-w">
+      ${ICONS.warn}
+      <div>
+        <strong>يوجد قرارات بانتظار توقيعك الإلكتروني</strong> — يرجى التوقيع في أقرب وقت.
+      </div>
+      <button class="btn btn-warning btn-sm" style="flex-shrink:0;margin-right:auto" onclick="window.location.href='sessions-list.html'">
+        عرض الجلسات
+      </button>
+    </div>` : ''}
+
+    <div class="stats-grid">
+      <div class="scard p" onclick="window.location.href='sessions-list.html'">
+        <div class="sc-lbl">الجلسات المجدولة</div>
+        <div class="sc-val">${upcoming.length}</div>
+        <div class="sc-sub">هذا الشهر</div>
+      </div>
+      <div class="scard w">
+        <div class="sc-lbl">حالات بانتظار القرار</div>
+        <div class="sc-val">${pendingDecision || 4}</div>
+        <div class="sc-sub">في الجلسات القادمة</div>
+      </div>
+      <div class="scard d">
+        <div class="sc-lbl">توقيعات معلّقة</div>
+        <div class="sc-val">${pendingSign || 2}</div>
+        <div class="sc-sub">تحتاج توقيعك الإلكتروني</div>
+      </div>
+      <div class="scard s">
+        <div class="sc-lbl">قرارات اكتملت هذا الشهر</div>
+        <div class="sc-val">8</div>
+        <div class="sc-sub">تم الإرسال للجهات المعنية</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="card">
+        <div class="ph">
+          <h3><div class="pico bl">${ICONS.calendar}</div>الجلسات القادمة</h3>
+          <a href="sessions-list.html" style="font-size:12px;color:var(--primary)">عرض الكل</a>
+        </div>
+        <div class="pb-0">
+          <table class="dtbl">
+            <thead><tr><th>رقم الجلسة</th><th>التاريخ</th><th>الحالات</th><th>النصاب</th><th></th></tr></thead>
+            <tbody>
+              ${sessions.map(s => `
+              <tr>
+                <td style="font-family:monospace;color:var(--primary);font-weight:700">${s.id}</td>
+                <td>${s.date} — ${s.time}</td>
+                <td>${s.casesCount}</td>
+                <td><span class="badge ${s.quorum ? 'b-approved' : 'b-returned'}">${s.quorum ? 'مكتمل' : 'غير مكتمل'}</span></td>
+                <td><button class="ibtn" onclick="window.location.href='session-details.html?id=${s.id}'">${ICONS.eye}</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ph"><h3><div class="pico or">${ICONS.bell}</div>التنبيهات والإشعارات</h3></div>
+        <div class="pb">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="padding:10px 12px;border:1px solid var(--warning-l);background:var(--warning-l);border-radius:var(--rsm)">
+              <p style="font-size:12.5px;font-weight:600">جلسة ${sessions[0]?.id} بتاريخ ${sessions[0]?.date}</p>
+              <p style="font-size:11px;color:var(--text3)">تأكيد الحضور مطلوب — ${sessions[0]?.casesCount} حالة مدرجة</p>
+            </div>
+            <div style="padding:10px 12px;border:1px solid var(--border);background:var(--g50);border-radius:var(--rsm)">
+              <p style="font-size:12.5px;font-weight:600">قرارات بانتظار التوقيع الإلكتروني</p>
+              <p style="font-size:11px;color:var(--text3)">يرجى الدخول على تفاصيل الجلسة والتوقيع</p>
+            </div>
+            <div style="padding:10px 12px;border:1px solid var(--border);background:var(--g50);border-radius:var(--rsm)">
+              <p style="font-size:12.5px;font-weight:600">الترخيص ساري — ينتهي ${inst?.activeLicense?.expiryDate || '2027-08-14'}</p>
+              <p style="font-size:11px;color:var(--text3)">لا يزال هناك وقت كافٍ قبل انتهاء الصلاحية</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+});
+</script>
+</body>
+</html>

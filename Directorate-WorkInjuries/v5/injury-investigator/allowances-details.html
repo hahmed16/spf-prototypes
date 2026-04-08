@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل الطلب — موظف قسم التحقيق في إصابات العمل</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'injury-investigator', activePage: 'allowances-list' });
+const params = new URLSearchParams(window.location.search);
+const req = WI_DATA.allowances.find(r=>r.id===params.get('id')) || WI_DATA.allowances[0];
+currentRequestId = req.id;
+const me = WI_DATA.users.injury_investigator.name;
+const isCheckedOutByMe = req.checkedOutBy === me;
+setBreadcrumb([{label:'بدلات الانقطاع',page:'allowances-list'},{label:`تفاصيل ${req.id}`}]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  // الإجراءات المتاحة — فقط إذا كان الطلب قيد التحقيق في إصابات العمل + محجوز من هذا الموظف
+  const canAct = req.status === 'قيد التحقيق — إصابات العمل' && isCheckedOutByMe;
+  const actions = canAct ? [
+    'طلب استيفاء بيانات من مقدم الطلب',
+    'تحويل إلى قسم الأمراض المهنية للاختصاص',
+    'توصية بالموافقة وتوجيه لرئيس القسم',
+    'توصية بالرفض وتوجيه لرئيس القسم',
+  ] : [];
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>تفاصيل الطلب</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
+      </div>
+      <div class="pg-acts">
+        ${!req.checkedOutBy && req.status === 'قيد التحقيق — إصابات العمل'
+          ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out — حجز الطلب</button>`
+          : isCheckedOutByMe
+            ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in — تحرير الطلب</button>`
+            : req.checkedOutBy
+              ? `<span style="font-size:12px;color:var(--warning);padding:8px 14px;border:1px solid var(--warning-l);border-radius:var(--rsm);background:var(--warning-l)">${ICONS.lock} محجوز بواسطة: ${req.checkedOutBy}</span>`
+              : ''}
+        <button class="btn btn-secondary" onclick="window.location.href='allowances-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    ${!isCheckedOutByMe && req.status === 'قيد التحقيق — إصابات العمل' ? `
+    <div class="alert alert-w">
+      ${ICONS.warn}
+      <span>يجب عمل <strong>Check-out</strong> أولاً لتتمكن من اتخاذ إجراء على هذا الطلب وتجنب العمل المتزامن.</span>
+    </div>` : ''}
+
+    ${renderRequestSummary(req)}
+    ${renderApplicantPanel(req.applicant)}
+    ${renderInsuredPersonPanel(req.insured)}
+    ${renderEmployerPanel(req.employer)}
+    ${renderInjuryDataPanel(req.injury, req.type)}
+
+    <!-- Panel تقرير التحقيق — قابل للتعديل من هذا الموظف -->
+    ${canAct ? `
+    <div class="card">
+      <div class="ph"><h3><div class="pico pu">${ICONS.search}</div>تقرير التحقيق</h3>
+        <span style="font-size:11px;background:#ede9fe;color:#7c3aed;padding:1px 7px;border-radius:10px">قابل للتعديل</span>
+      </div>
+      <div class="pb">
+        <div class="fg" style="gap:14px">
+          <div class="fgrp">
+            <label class="flbl">ملخص التحقيق</label>
+            <textarea class="fc" id="inv-summary" rows="5" placeholder="اكتب ملخص تحقيقك...">${req.investigation?.summary||''}</textarea>
+          </div>
+          <div class="fgrp">
+            <label class="flbl">نتائج التحقق من البيانات</label>
+            <textarea class="fc" id="inv-findings" rows="4" placeholder="ما هي نتائجك؟">${req.investigation?.findings||''}</textarea>
+          </div>
+          <div class="fg fg-2">
+            <div class="fgrp">
+              <label class="flbl">مدى انطباق شروط إصابة العمل</label>
+              <select class="fc" id="inv-eligibility">
+                <option value="">— اختر —</option>
+                <option ${req.investigation?.employeeRecommendation==='موافقة'?'selected':''}>مستوفية</option>
+                <option>غير مستوفية</option>
+                <option>تحتاج مراجعة إضافية</option>
+              </select>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">ملاحظات إضافية</label>
+              <textarea class="fc" rows="3">${req.investigation?.employeeNotes||''}</textarea>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('تم حفظ تقرير التحقيق','s')">${ICONS.check} حفظ التقرير</button>
+        </div>
+      </div>
+    </div>` : req.investigation ? renderInvestigationReport(req.investigation, false) : ''}
+
+    ${renderFieldVisitsPanel(req.fieldVisits, canAct)}
+    ${renderAttachmentsPanel(req.attachments, true)}
+    ${renderOperationalNotes(req.notes, true)}
+    ${actions.length ? renderDecisionPanel({actions, title:'الإجراءات المتاحة'}) : ''}
+    ${renderTimeline(req.timeline)}`;
+});
+
+function doCheckout() {
+  req.checkedOutBy = WI_DATA.users.injury_investigator.name;
+  showToast(`تم حجز الطلب ${req.id} — Check-out`, 's');
+  setTimeout(() => location.reload(), 800);
+}
+
+function doCheckin() {
+  req.checkedOutBy = null;
+  showToast(`تم تحرير الطلب ${req.id} — Check-in`, 'i');
+  setTimeout(() => window.location.href = 'allowances-list.html', 800);
+}
+</script>
+</body>
+</html>

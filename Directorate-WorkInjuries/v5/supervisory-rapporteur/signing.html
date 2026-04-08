@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>التوقيعات المعلّقة — مقرر اللجنة الطبية الإشرافية</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'supervisory-rapporteur', activePage: 'signing' });
+setBreadcrumb([{ label: 'إدارة جلسات اللجنة الإشرافية' }, { label: 'التوقيعات المعلّقة' }]);
+
+const pendingSigns = [
+  {
+    sessionId: 'LIC-SES-2025-0012', date: '2025-02-10', totalMembers: 5, signedCount: 2,
+    pendingMembers: [
+      { name: 'د. أسامة بن سالم الغيلاني', role: 'عضو', lastReminder: '2025-02-08' },
+      { name: 'د. لميس بنت خميس الرئيسية', role: 'عضو', lastReminder: null },
+      { name: 'د. وائل بن صالح الحوسني',  role: 'عضو', lastReminder: null },
+    ]
+  }
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>التوقيعات المعلّقة</h1>
+        <p>متابعة توقيعات أعضاء اللجنة الطبية الإشرافية</p></div>
+    </div>
+
+    ${pendingSigns.map(ps=>`
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico w">${ICONS.pen}</div>الجلسة ${ps.sessionId}</h3>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;color:var(--text3)">${ps.signedCount}/${ps.totalMembers} وقّعوا</span>
+          <button class="btn btn-secondary btn-xs" onclick="window.location.href='session-details.html?id=${ps.sessionId}'">فتح الجلسة</button>
+        </div>
+      </div>
+      <div class="pb">
+        <div class="fg fg-2" style="margin-bottom:14px">
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ الجلسة</div><div>${ps.date}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">تقدم التوقيعات</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="flex:1;background:var(--g200);border-radius:10px;height:8px;overflow:hidden">
+                <div style="width:${(ps.signedCount/ps.totalMembers)*100}%;background:var(--accent);height:100%;border-radius:10px;transition:width .3s"></div>
+              </div>
+              <span style="font-size:12px;font-weight:700">${ps.signedCount}/${ps.totalMembers}</span>
+            </div>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>العضو</th><th>المنصب</th><th>آخر تذكير</th><th></th></tr></thead>
+            <tbody>
+              ${ps.pendingMembers.map(m=>`
+              <tr>
+                <td style="font-weight:600">${m.name}</td>
+                <td>${m.role}</td>
+                <td style="font-size:11.5px;color:var(--text3)">${m.lastReminder?`تم الإرسال: ${m.lastReminder}`:'لم يُرسَل بعد'}</td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" onclick="showToast('تم إرسال تذكير إلى ${m.name}','i')">${ICONS.bell} إرسال تذكير</button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="facts mt12">
+          <button class="btn btn-primary btn-sm" onclick="showToast('تم إرسال تذكير لجميع غير الموقّعين','i')">${ICONS.bell} إرسال تذكير للجميع</button>
+        </div>
+      </div>
+    </div>`).join('')}`;
+});
+</script>
+</body>
+</html>

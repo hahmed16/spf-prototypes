@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قائمة التظلمات — العامل</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'worker', activePage: 'appeals-list' });
+setBreadcrumb([{ label: 'التظلمات' }, { label: 'قائمة تظلماتي' }]);
+
+const u = WI_DATA.users.worker;
+const myAppeals = WI_DATA.appeals.filter(a => a.applicant.civil === u.civil);
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>قائمة تظلماتي</h1><p>${myAppeals.length} تظلم مقدم</p></div>
+      <div class="pg-acts">
+        <button class="btn btn-primary" onclick="window.location.href='appeals-new.html'">${ICONS.plus} تقديم تظلم جديد</button>
+      </div>
+    </div>
+
+    <div class="alert alert-i">
+      ${ICONS.info}
+      <div>يمكنك تقديم تظلم على قرارات المؤسسات الصحية المرخصة المتعلقة بطلباتك. يجب أن تقدم التظلم خلال 30 يوماً من تاريخ علمك بالقرار.</div>
+    </div>
+
+    <div class="card">
+      <div class="pb-0">
+        ${myAppeals.length === 0 ? `
+        <div class="empty-st">
+          ${ICONS.shield}
+          <h4>لا توجد تظلمات</h4>
+          <p>لم تقدم أي تظلمات بعد</p>
+        </div>` : `
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>رقم التظلم</th><th>الطلب الأصلي</th><th>سبب التظلم</th><th>الحالة</th><th>تاريخ التقديم</th><th></th></tr></thead>
+            <tbody>
+              ${myAppeals.map(a=>`
+              <tr>
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${a.id}</td>
+                <td style="font-family:monospace"><a href="allowances-details.html?id=${a.originalRequestId}" style="color:var(--primary)">${a.originalRequestId}</a></td>
+                <td>${a.appealReason}</td>
+                <td>${statusBadge(a.status)}</td>
+                <td>${a.submitDate}</td>
+                <td><button class="ibtn" onclick="window.location.href='appeals-details.html?id=${a.id}'">${ICONS.eye}</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`}
+      </div>
+    </div>`;
+});
+</script>
+</body>
+</html>

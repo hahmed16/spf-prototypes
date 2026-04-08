@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل الطلب — العامل</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'worker', activePage: 'allowances-list' });
+
+const params = new URLSearchParams(window.location.search);
+const reqId = params.get('id') || 'WI-2025-001234';
+const req = WI_DATA.allowances.find(r => r.id === reqId) || WI_DATA.allowances[0];
+currentRequestId = req.id;
+
+setBreadcrumb([
+  { label: 'بدلات الانقطاع عن العمل', page: 'allowances-list' },
+  { label: `تفاصيل الطلب ${req.id}` }
+]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const ct = getContent();
+
+  // تحديد الإجراءات المتاحة للعامل بناءً على الحالة
+  let workerActions = [];
+  let returnReason = null;
+
+  if (req.status === 'مسودة') {
+    workerActions = ['إرسال الطلب', 'حذف'];
+  } else if (req.status === 'تم إعادة الطلب لاستيفاء البيانات') {
+    workerActions = ['استيفاء البيانات المطلوبة وإعادة الإرسال'];
+    returnReason = req.returnReason;
+  } else if (req.status === 'معتمد') {
+    workerActions = ['طلب إضافة فترة جديدة'];
+  } else if (req.status === 'تم رفض الطلب') {
+    workerActions = ['تقديم تظلم'];
+  }
+
+  ct.innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>تفاصيل الطلب</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='allowances-list.html'">${ICONS.arrow_left} رجوع للقائمة</button>
+      </div>
+    </div>
+
+    ${returnReason ? `
+    <div class="alert alert-w">
+      ${ICONS.warn}
+      <div>
+        <strong>تم إعادة طلبك لاستيفاء البيانات التالية:</strong><br>
+        <span style="white-space:pre-line;font-size:12.5px">${returnReason}</span>
+      </div>
+    </div>` : ''}
+
+    ${renderRequestSummary(req)}
+    ${renderApplicantPanel(req.applicant)}
+    ${renderInsuredPersonPanel(req.insured)}
+    ${renderEmployerPanel(req.employer)}
+    ${renderInjuryDataPanel(req.injury, req.type)}
+
+    ${req.investigation ? renderInvestigationReport(req.investigation, false) : ''}
+    ${req.fieldVisits?.length ? renderFieldVisitsPanel(req.fieldVisits, false) : ''}
+    ${req.sickLeavePeriods?.length ? renderSickLeavePeriodsPanel(req.sickLeavePeriods, false) : ''}
+    ${req.referral ? renderReferralPanel(req.referral) : ''}
+    ${req.session ? renderSessionPanel(req.session) : ''}
+    ${req.committeeDecision ? renderCommitteeDecisionPanel(req.committeeDecision) : ''}
+    ${req.disbursement ? renderDisbursementPanel(req.disbursement) : ''}
+
+    ${renderAttachmentsPanel(req.attachments, true)}
+    ${renderOperationalNotes(req.notes, true)}
+
+    ${workerActions.length > 0 ? renderDecisionPanel({ actions: workerActions, title: 'الإجراءات المتاحة لك' }) : ''}
+
+    ${renderTimeline(req.timeline)}`;
+
+  // تفعيل زر التظلم المباشر
+  if (req.status === 'تم رفض الطلب') {
+    const dp = ct.querySelector('.dp');
+    if (dp) {
+      const btn = dp.querySelector('button');
+      if (btn) btn.onclick = () => {
+        window.location.href = `appeals-new.html?ref=${req.id}`;
+      };
+    }
+  }
+
+  // تفعيل استيفاء البيانات
+  if (req.status === 'تم إعادة الطلب لاستيفاء البيانات') {
+    const dp = ct.querySelector('.dp');
+    if (dp) {
+      const btn = dp.querySelector('button');
+      if (btn) btn.onclick = () => {
+        window.location.href = `allowances-new.html?id=${req.id}&mode=fulfill`;
+      };
+    }
+  }
+});
+</script>
+</body>
+</html>

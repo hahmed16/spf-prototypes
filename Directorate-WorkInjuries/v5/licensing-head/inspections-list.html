@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الزيارات الرقابية — رئيس قسم التراخيص والرقابة</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'licensing-head', activePage: 'inspections-list' });
+setBreadcrumb([{ label: 'التراخيص والرقابة' }, { label: 'الزيارات الرقابية' }]);
+
+const sampleInspections = [
+  {
+    id: 'INS-2025-0034', institution: 'مستشفى النور التخصصي', licenseNo: 'LIC-INST-2024-0067',
+    date: '2025-01-15', time: '10:00', type: 'دورية', status: 'مكتملة',
+    result: 'مطابقة', inspector: 'هدى بنت ناصر الوهيبية',
+    notes: 'تم التحقق من جميع الاشتراطات. المؤسسة مطابقة.',
+    recommendation: 'الاستمرار في الترخيص', violations: 0
+  },
+  {
+    id: 'INS-2025-0021', institution: 'مستشفى الأمل التخصصي', licenseNo: 'LIC-INST-2024-0034',
+    date: '2025-01-08', time: '09:00', type: 'مفاجئة', status: 'مكتملة',
+    result: 'مخالفة بسيطة', inspector: 'هدى بنت ناصر الوهيبية',
+    notes: 'وُجد طبيب واحد غائب دون إشعار مسبق.',
+    recommendation: 'إنذار رسمي + متابعة خلال 30 يوم', violations: 1
+  },
+  {
+    id: 'INS-2025-0045', institution: 'مستشفى النور التخصصي', licenseNo: 'LIC-INST-2024-0067',
+    date: '2025-02-10', time: '11:00', type: 'دورية', status: 'مجدولة',
+    result: '—', inspector: 'هدى بنت ناصر الوهيبية',
+    notes: '', recommendation: '—', violations: 0
+  }
+];
+
+let activeTab = 'all';
+
+document.addEventListener('DOMContentLoaded', render);
+
+function render() {
+  const filtered = activeTab === 'all' ? sampleInspections : sampleInspections.filter(i => {
+    if (activeTab === 'scheduled') return i.status === 'مجدولة';
+    if (activeTab === 'completed') return i.status === 'مكتملة';
+    if (activeTab === 'violations') return i.violations > 0;
+    return true;
+  });
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>الزيارات الرقابية على المؤسسات الصحية المرخصة</h1>
+        <p>${sampleInspections.length} زيارة مسجلة</p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-primary" onclick="openScheduleModal()">
+          ${ICONS.plus} جدولة زيارة رقابية جديدة
+        </button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="fgrid">
+        <div class="fgrp">
+          <label class="flbl">اسم المؤسسة</label>
+          <input type="text" class="fc" placeholder="ابحث باسم المؤسسة...">
+        </div>
+        <div class="fgrp">
+          <label class="flbl">نوع الزيارة</label>
+          <select class="fc">
+            <option>الكل</option>
+            <option>دورية</option>
+            <option>مفاجئة</option>
+            <option>متابعة</option>
+          </select>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">نتيجة الزيارة</label>
+          <select class="fc">
+            <option>الكل</option>
+            <option>مطابقة</option>
+            <option>مخالفة بسيطة</option>
+            <option>مخالفة جوهرية</option>
+          </select>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">تاريخ الزيارة من</label>
+          <input type="date" class="fc">
+        </div>
+        <div class="fgrp">
+          <label class="flbl">تاريخ الزيارة إلى</label>
+          <input type="date" class="fc">
+        </div>
+      </div>
+      <div class="facts">
+        <button class="btn btn-primary btn-sm" onclick="showToast('تم تطبيق الفلاتر','i')">${ICONS.search} بحث</button>
+        <button class="btn btn-secondary btn-sm" onclick="showToast('تم مسح الفلاتر','i')">مسح</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ttabs">
+        ${[
+          { key: 'all', label: 'الكل', count: sampleInspections.length },
+          { key: 'scheduled', label: 'مجدولة', count: sampleInspections.filter(i=>i.status==='مجدولة').length },
+          { key: 'completed', label: 'مكتملة', count: sampleInspections.filter(i=>i.status==='مكتملة').length },
+          { key: 'violations', label: 'بها مخالفات', count: sampleInspections.filter(i=>i.violations>0).length },
+        ].map(t => `<div class="ttab ${activeTab===t.key?'act':''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الزيارة</th>
+                <th>المؤسسة الصحية</th>
+                <th>نوع الزيارة</th>
+                <th>تاريخ الزيارة</th>
+                <th>حالة الزيارة</th>
+                <th>النتيجة</th>
+                <th>المخالفات</th>
+                <th>التوصية</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.map(i => `
+              <tr style="${i.violations>0?'background:var(--warning-l)':''}">
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${i.id}</td>
+                <td style="font-weight:600">${i.institution}</td>
+                <td><span class="badge ${i.type==='مفاجئة'?'b-returned':'b-direct'}">${i.type}</span></td>
+                <td>${i.date} — ${i.time}</td>
+                <td><span class="badge ${i.status==='مكتملة'?'b-approved':i.status==='مجدولة'?'b-session':'b-phead'}">${i.status}</span></td>
+                <td>${i.result !== '—' ? `<span class="badge ${i.result==='مطابقة'?'b-approved':'b-returned'}">${i.result}</span>` : '—'}</td>
+                <td>${i.violations > 0 ? `<span class="badge b-rejected">${i.violations} مخالفة</span>` : `<span class="badge b-approved">لا مخالفات</span>`}</td>
+                <td style="font-size:11.5px">${i.recommendation}</td>
+                <td>
+                  <button class="ibtn" onclick="showInspectionDetails('${i.id}')" title="عرض تفاصيل الزيارة">${ICONS.eye}</button>
+                  <button class="ibtn" onclick="window.location.href='institution-file.html?inst=${encodeURIComponent(i.institution)}'" title="ملف المؤسسة">${ICONS.file}</button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function setTab(t) { activeTab = t; render(); }
+
+function openScheduleModal() {
+  openModal({
+    title: 'جدولة زيارة رقابية جديدة',
+    size: 'md-lg',
+    body: `
+      <div class="fg fg-2" style="gap:14px">
+        <div class="fgrp">
+          <label class="flbl">المؤسسة الصحية المرخصة <span class="req">*</span></label>
+          <select class="fc">
+            <option>مستشفى النور التخصصي — مسقط</option>
+            <option>مستشفى الأمل التخصصي — السيب</option>
+          </select>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">نوع الزيارة <span class="req">*</span></label>
+          <select class="fc">
+            <option>دورية</option>
+            <option>مفاجئة</option>
+            <option>متابعة مخالفة</option>
+          </select>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">تاريخ الزيارة <span class="req">*</span></label>
+          <input type="date" class="fc">
+        </div>
+        <div class="fgrp">
+          <label class="flbl">وقت الزيارة</label>
+          <input type="time" class="fc">
+        </div>
+        <div class="fgrp span-full">
+          <label class="flbl">أهداف الزيارة</label>
+          <textarea class="fc" rows="3" placeholder="ما الذي سيتم التحقق منه في هذه الزيارة..."></textarea>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">المفتشون المشاركون</label>
+          <input type="text" class="fc" placeholder="أسماء الموظفين القائمين بالزيارة">
+        </div>
+      </div>`,
+    footer: `
+      <button class="btn btn-primary" onclick="closeModal();showToast('تم جدولة الزيارة الرقابية بنجاح','s')">${ICONS.check} جدولة الزيارة</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+
+function showInspectionDetails(id) {
+  const ins = sampleInspections.find(i => i.id === id);
+  if (!ins) return;
+  openModal({
+    title: `تفاصيل الزيارة الرقابية — ${ins.id}`,
+    size: 'md-lg',
+    body: `
+      <div class="fg fg-2" style="gap:12px">
+        <div class="fgrp"><label class="flbl">المؤسسة الصحية</label><div class="fro" style="font-weight:700">${ins.institution}</div></div>
+        <div class="fgrp"><label class="flbl">رقم الترخيص</label><div class="fro" style="font-family:monospace">${ins.licenseNo}</div></div>
+        <div class="fgrp"><label class="flbl">نوع الزيارة</label><div class="fro">${ins.type}</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ الزيارة</label><div class="fro">${ins.date} — ${ins.time}</div></div>
+        <div class="fgrp"><label class="flbl">المفتش</label><div class="fro">${ins.inspector}</div></div>
+        <div class="fgrp"><label class="flbl">النتيجة</label><div class="fro"><span class="badge ${ins.result==='مطابقة'?'b-approved':'b-returned'}">${ins.result}</span></div></div>
+        <div class="fgrp span-full"><label class="flbl">ملاحظات الزيارة</label><div class="fro" style="min-height:50px;align-items:flex-start;padding-top:8px">${ins.notes || '—'}</div></div>
+        <div class="fgrp span-full"><label class="flbl">التوصية</label><div class="fro">${ins.recommendation}</div></div>
+      </div>`,
+    footer: `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`
+  });
+}
+</script>
+</body>
+</html>

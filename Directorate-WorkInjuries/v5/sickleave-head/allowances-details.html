@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل الطلب — رئيس قسم الإجازات المرضية</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'sickleave-head', activePage: 'allowances-list' });
+const params = new URLSearchParams(window.location.search);
+const req = WI_DATA.allowances.find(r=>r.id===params.get('id')) || WI_DATA.allowances[2];
+currentRequestId = req.id;
+setBreadcrumb([{label:'بدلات الانقطاع',page:'allowances-list'},{label:`تفاصيل ${req.id}`}]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const canAct = req.status === 'بانتظار اعتماد رئيس قسم الإجازات المرضية';
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تفاصيل الطلب</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='allowances-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+    ${canAct?`<div class="alert alert-i">${ICONS.info}<span>هذا الطلب بانتظار قرارك — راجع توصية الموظف وفترات الإجازة.</span></div>`:''}
+    ${renderRequestSummary(req)}
+    ${renderApplicantPanel(req.applicant)}
+    ${renderInsuredPersonPanel(req.insured)}
+    ${renderEmployerPanel(req.employer)}
+    ${renderInjuryDataPanel(req.injury, req.type)}
+    ${req.investigation?renderInvestigationReport(req.investigation,false):''}
+    ${req.fieldVisits?.length?renderFieldVisitsPanel(req.fieldVisits,false):''}
+    ${renderSickLeavePeriodsPanel(req.sickLeavePeriods||[],false)}
+    ${renderMedicalQueryPanel(req.insured.civil)}
+    ${req.referral?renderReferralPanel(req.referral):''}
+    ${req.session?renderSessionPanel(req.session):''}
+    ${req.committeeDecision?renderCommitteeDecisionPanel(req.committeeDecision):''}
+    ${req.disbursement?renderDisbursementPanel(req.disbursement):''}
+    ${renderAttachmentsPanel(req.attachments,true)}
+    ${renderOperationalNotes(req.notes,true)}
+    ${canAct?`
+    <div class="dp">
+      <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>اتخاذ القرار — رئيس قسم الإجازات المرضية</h3></div>
+      <div class="dp-body">
+        <div style="padding:12px;background:var(--g50);border:1px solid var(--border);border-radius:var(--r);margin-bottom:4px">
+          <div class="flbl" style="margin-bottom:6px">توصية موظف القسم</div>
+          <div style="font-size:12.5px">${req.investigation?.employeeNotes||'توصية بالموافقة مع ترشيح مؤسسة صحية مرخصة'}</div>
+        </div>
+        <div id="institution-confirm" style="display:none">
+          <div class="fgrp">
+            <label class="flbl">تأكيد المؤسسة الصحية المرخصة <span class="req">*</span></label>
+            <select class="fc"><option>مستشفى النور التخصصي — مسقط</option><option>مستشفى الأمل التخصصي — السيب</option></select>
+          </div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">ملاحظاتك</label>
+          <textarea class="fc" rows="3" placeholder="أكتب ملاحظاتك..."></textarea>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">إرفاق ملف (اختياري)</label>
+          <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4">
+        </div>
+        <div class="dp-acts">
+          <button class="btn btn-accent" onclick="showToast('تم اعتماد الفترات','s');setTimeout(()=>window.location.href='allowances-list.html',1500)">${ICONS.check} اعتماد الفترات</button>
+          <button class="btn btn-primary" onclick="document.getElementById('institution-confirm').style.display='';showToast('يرجى تأكيد المؤسسة','i')">طلب عرض على مؤسسة صحية مرخصة</button>
+          <button class="btn btn-warning" onclick="showToast('تم الإعادة للموظف','w');setTimeout(()=>window.location.href='allowances-list.html',1500)">إعادة للموظف</button>
+          <button class="btn btn-ghost" onclick="showToast('تم إغلاق الطلب','i');setTimeout(()=>window.location.href='allowances-list.html',1500)">إغلاق مع تحديد السبب</button>
+        </div>
+      </div>
+    </div>`:''}
+    ${renderTimeline(req.timeline)}`;
+});
+</script>
+</body>
+</html>
+

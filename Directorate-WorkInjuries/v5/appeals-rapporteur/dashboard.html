@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة البيانات — مقرر لجنة التظلمات</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'appeals-rapporteur', activePage: 'dashboard' });
+setBreadcrumb([{ label: 'لوحة البيانات' }]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appeals = WI_DATA.appeals;
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>لوحة البيانات</h1>
+        <p>مقرر لجنة التظلمات — ${WI_DATA.users.institution_rapporteur.name}</p>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="scard p" onclick="window.location.href='sessions-list.html'">
+        <div class="sc-lbl">الجلسات المجدولة</div>
+        <div class="sc-val">2</div>
+        <div class="sc-sub">هذا الشهر</div>
+      </div>
+      <div class="scard w" onclick="window.location.href='sessions-list.html'">
+        <div class="sc-lbl">تظلمات بانتظار القرار</div>
+        <div class="sc-val">${appeals.length}</div>
+        <div class="sc-sub">في الجلسات القادمة</div>
+      </div>
+      <div class="scard d">
+        <div class="sc-lbl">توقيعات معلّقة</div>
+        <div class="sc-val">2</div>
+        <div class="sc-sub">تحتاج متابعة</div>
+      </div>
+      <div class="scard s">
+        <div class="sc-lbl">قرارات نهائية صدرت</div>
+        <div class="sc-val">5</div>
+        <div class="sc-sub">هذا الشهر</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="card">
+        <div class="ph"><h3><div class="pico pu">${ICONS.list}</div>التظلمات المحالة للجلسة القادمة</h3></div>
+        <div class="pb-0">
+          <table class="dtbl">
+            <thead><tr><th>رقم التظلم</th><th>مقدم التظلم</th><th>سبب التظلم</th><th></th></tr></thead>
+            <tbody>
+              ${appeals.map(a=>`
+              <tr>
+                <td style="font-family:monospace;color:var(--primary);font-weight:700">${a.id}</td>
+                <td>${a.applicant.name}</td>
+                <td style="font-size:11.5px">${a.appealReason}</td>
+                <td><button class="ibtn" onclick="window.location.href='session-details.html?id=APP-SES-2025-0023'">${ICONS.eye}</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ph"><h3><div class="pico or">${ICONS.bell}</div>مهامي العاجلة</h3></div>
+        <div class="pb">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="padding:10px 12px;border:1px solid var(--warning-l);background:var(--warning-l);border-radius:var(--rsm)">
+              <p style="font-size:12.5px;font-weight:600">جلسة APP-SES-2025-0023 — 2025-02-05</p>
+              <p style="font-size:11px;color:var(--text3)">${appeals.length} تظلمات بانتظار إدخال القرارات</p>
+            </div>
+            <div style="padding:10px 12px;border:1px solid var(--border);background:var(--g50);border-radius:var(--rsm)">
+              <p style="font-size:12.5px;font-weight:600">2 توقيعات معلّقة في الجلسة السابقة</p>
+              <p style="font-size:11px;color:var(--text3)">يرجى إرسال تذكير للأعضاء</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+});
+</script>
+</body>
+</html>

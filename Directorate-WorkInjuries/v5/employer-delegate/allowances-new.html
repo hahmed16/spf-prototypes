@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تقديم طلب بدلات — المفوض عن جهة العمل</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'employer-delegate', activePage: 'allowances-list' });
+setBreadcrumb([{ label: 'بدلات الانقطاع', page: 'allowances-list' }, { label: 'تقديم طلب لموظف' }]);
+
+const u = WI_DATA.users.employer_delegate;
+const employees = [
+  { name: 'سالم بن ناصر الحارثي', civil: '9012345678', insurance: 'IN-20190045678', title: 'مهندس مدني' },
+  { name: 'حمد بن سلطان العزري', civil: '9023456789', insurance: 'IN-20170056789', title: 'فني تشغيل' },
+  { name: 'راشد بن محمد الجابري', civil: '9067890123', insurance: 'IN-20180090123', title: 'مدير فرع' },
+];
+let selectedEmployee = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تقديم طلب بدلات الانقطاع عن العمل لموظف</h1></div>
+      <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='allowances-list.html'">${ICONS.arrow_left} رجوع</button></div>
+    </div>
+
+    <!-- بيانات جهة العمل / المفوض -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات جهة العمل والمفوض</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">اسم جهة العمل</label><div class="fro">${u.company}</div></div>
+          <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro" style="font-family:monospace">${u.cr}</div></div>
+          <div class="fgrp"><label class="flbl">اسم المفوض</label><div class="fro">${u.name}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني للمفوض</label><div class="fro" style="font-family:monospace">${u.civil}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- اختيار الموظف -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>اختيار الموظف المتضرر</h3></div>
+      <div class="pb">
+        <div class="fg fg-2" style="margin-bottom:14px">
+          <div class="fgrp">
+            <label class="flbl">بحث بالاسم أو الرقم المدني <span class="req">*</span></label>
+            <div class="inp-btn">
+              <input type="text" class="fc" id="emp-search" placeholder="ابحث عن الموظف...">
+              <button class="btn btn-primary btn-sm" onclick="searchEmployee()">بحث</button>
+            </div>
+          </div>
+        </div>
+        <div id="emp-results">
+          <div class="tbl-wrap">
+            <table class="dtbl">
+              <thead><tr><th>الاسم</th><th>الرقم المدني</th><th>الرقم التأميني</th><th>المسمى الوظيفي</th><th></th></tr></thead>
+              <tbody>
+                ${employees.map(e=>`
+                <tr>
+                  <td>${e.name}</td>
+                  <td style="font-family:monospace">${e.civil}</td>
+                  <td style="font-family:monospace">${e.insurance}</td>
+                  <td>${e.title}</td>
+                  <td><button class="btn btn-primary btn-xs" onclick="selectEmployee('${e.civil}')">اختيار</button></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- بيانات الموظف المختار -->
+    <div id="selected-emp-card" style="display:none">
+      <div class="card card-ro">
+        <div class="ph"><h3><div class="pico gr">${ICONS.check}</div>الموظف المختار</h3></div>
+        <div class="pb" id="selected-emp-body"></div>
+      </div>
+
+      <!-- معلومات الطلب -->
+      <div class="card">
+        <div class="ph"><h3><div class="pico or">${ICONS.medical}</div>معلومات الطلب</h3></div>
+        <div class="pb">
+          <div class="fg fg-3">
+            <div class="fgrp">
+              <label class="flbl">نوع الطلب <span class="req">*</span></label>
+              <select class="fc"><option>إصابة عمل</option><option>مرض مهني</option></select>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">نوع الحالة <span class="req">*</span></label>
+              <select class="fc"><option>حادث طريق</option><option>إصابة في موقع العمل</option><option>إجهاد وإرهاق</option></select>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">تاريخ الواقعة <span class="req">*</span></label>
+              <input type="date" class="fc">
+            </div>
+            <div class="fgrp span-full">
+              <label class="flbl">وصف الواقعة <span class="req">*</span></label>
+              <textarea class="fc" rows="4" placeholder="صف ما حدث بالتفصيل..."></textarea>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">مكان الواقعة <span class="req">*</span></label>
+              <input type="text" class="fc" placeholder="الموقع الدقيق للحادثة">
+            </div>
+            <div class="fgrp">
+              <label class="flbl">الجزء المصاب</label>
+              <select class="fc"><option>الرأس</option><option>الطرف العلوي الأيسر</option><option>الطرف العلوي الأيمن</option><option>الطرف السفلي الأيسر</option><option>الطرف السفلي الأيمن</option><option>الجذع / الضلوع</option><option>متعدد</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- المرفقات -->
+      <div class="card">
+        <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات</h3></div>
+        <div class="pb">
+          <div class="fg fg-2">
+            <div class="fgrp">
+              <label class="flbl">نوع المرفق</label>
+              <select class="fc"><option>تقرير طبي</option><option>تقرير شرطة</option><option>كشف حضور وانصراف</option><option>تقرير السلامة والصحة المهنية</option><option>صور</option><option>مستند آخر</option></select>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">الملف</label>
+              <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4">
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm mt8">${ICONS.plus} إضافة مرفق آخر</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;padding:16px 0">
+        <button class="btn btn-primary btn-lg" onclick="submitRequest()">${ICONS.check} إرسال الطلب</button>
+        <button class="btn btn-secondary btn-lg" onclick="showToast('تم الحفظ كمسودة','i')">حفظ كمسودة</button>
+        <button class="btn btn-ghost" onclick="window.location.href='allowances-list.html'">إلغاء</button>
+      </div>
+    </div>`;
+});
+
+function searchEmployee() {
+  showToast('تم البحث — عرض جميع موظفي الجهة', 'i');
+}
+
+function selectEmployee(civil) {
+  const e = employees.find(emp => emp.civil === civil);
+  selectedEmployee = e;
+  document.getElementById('selected-emp-card').style.display = '';
+  document.getElementById('selected-emp-body').innerHTML = `
+    <div class="fg fg-3">
+      <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${e.name}</div></div>
+      <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${e.civil}</div></div>
+      <div class="fgrp"><label class="flbl">الرقم التأميني</label><div class="fro" style="font-family:monospace">${e.insurance}</div></div>
+      <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${e.title}</div></div>
+      <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">نشط</span></div></div>
+    </div>`;
+  document.getElementById('selected-emp-card').scrollIntoView({ behavior: 'smooth' });
+}
+
+function submitRequest() {
+  if (!selectedEmployee) { showToast('يرجى اختيار الموظف أولاً', 'w'); return; }
+  showToast('جارٍ تقديم الطلب...', 'i');
+  setTimeout(() => {
+    showToast('تم تقديم الطلب بنجاح — رقم الطلب: WI-2025-001351', 's', 5000);
+    setTimeout(() => window.location.href = 'allowances-list.html', 2000);
+  }, 1500);
+}
+</script>
+</body>
+</html>

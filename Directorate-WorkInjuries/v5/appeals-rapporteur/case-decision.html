@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إدخال القرار النهائي — مقرر لجنة التظلمات</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'appeals-rapporteur', activePage: 'sessions-list' });
+const params = new URLSearchParams(window.location.search);
+const appealId = params.get('appeal') || 'APP-2025-000067';
+const sessionId = params.get('session') || 'APP-SES-2025-0023';
+const appeal = WI_DATA.appeals.find(a=>a.id===appealId) || WI_DATA.appeals[0];
+const origReq = WI_DATA.allowances.find(r=>r.id===appeal?.originalRequestId);
+currentRequestId = appealId;
+setBreadcrumb([
+  {label:'إدارة الجلسات',page:'sessions-list'},
+  {label:`جلسة ${sessionId}`,page:`session-details.html?id=${sessionId}`},
+  {label:`قرار ${appealId}`}
+]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>إدخال القرار النهائي للتظلم</h1>
+        <p>جلسة: <strong style="font-family:monospace;color:var(--primary)">${sessionId}</strong> —
+           تظلم: <strong style="font-family:monospace;color:var(--primary)">${appealId}</strong></p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.history.back()">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    <!-- ملخص التظلم -->
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+          <div><div class="flbl" style="margin-bottom:4px">رقم التظلم</div><div style="font-family:monospace;font-weight:800;color:var(--primary)">${appeal.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">مقدم التظلم</div><div style="font-weight:600">${appeal.applicant.name}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">سبب التظلم</div><div>${appeal.appealReason}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">حالة التظلم</div>${statusBadge(appeal.status)}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- بيانات الطلب الأصلي والقرار المتظلم منه -->
+    <div style="border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;margin-bottom:16px">
+      <div style="padding:10px 18px;background:var(--g100);border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:space-between"
+        onclick="toggleData()">
+        <span style="font-size:13px;font-weight:700">عرض / إخفاء كامل بيانات التظلم والطلب الأصلي</span>
+        <span id="toggle-icon">${ICONS.arrow_left}</span>
+      </div>
+      <div id="appeal-data-body" style="display:none">
+        ${renderApplicantPanel(appeal.applicant)}
+        <div class="card card-ro" style="margin:0;border-radius:0;border-left:none;border-right:none">
+          <div class="ph"><h3><div class="pico rd">${ICONS.warn}</div>القرار المتظلم منه</h3></div>
+          <div class="pb">
+            <div class="fg fg-3">
+              <div class="fgrp"><label class="flbl">نوع القرار</label><div class="fro"><span class="badge b-rejected">${appeal.decision.type}</span></div></div>
+              <div class="fgrp"><label class="flbl">الجهة مُصدِرة القرار</label><div class="fro">${appeal.decision.issuer}</div></div>
+              <div class="fgrp"><label class="flbl">تاريخ القرار</label><div class="fro">${appeal.decision.date}</div></div>
+              <div class="fgrp span-full"><label class="flbl">مضمون القرار</label><div class="fro">${appeal.decision.details}</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card card-ro" style="margin:0;border-radius:0;border-left:none;border-right:none">
+          <div class="ph"><h3><div class="pico or">${ICONS.note}</div>أسباب وتفاصيل التظلم</h3></div>
+          <div class="pb">
+            <div class="fgrp"><label class="flbl">تفاصيل سبب التظلم</label><div class="fro" style="min-height:50px;align-items:flex-start;padding-top:8px">${appeal.appealDetails}</div></div>
+          </div>
+        </div>
+        ${origReq ? `
+        ${renderInsuredPersonPanel(origReq.insured)}
+        ${renderInjuryDataPanel(origReq.injury, origReq.type)}
+        ${renderAttachmentsPanel(origReq.attachments, false)}` : ''}
+      </div>
+    </div>
+
+    <!-- نموذج القرار النهائي -->
+    <div class="dp">
+      <div class="ph"><h3><div class="pico pu">${ICONS.pen}</div>إدخال القرار النهائي للجنة التظلمات</h3></div>
+      <div class="dp-body">
+        <div class="alert alert-w" style="margin-bottom:0">
+          ${ICONS.warn}
+          <span>القرار النهائي لهذه اللجنة هو القرار الأخير في المسألة — يجب أن يكون مدعوماً بالأسباب القانونية والطبية الكافية.</span>
+        </div>
+
+        <div class="fgrp">
+          <label class="flbl">نوع القرار النهائي <span class="req">*</span></label>
+          <select class="fc" id="final-decision-type" onchange="onTypeChange()">
+            <option value="">— اختر القرار النهائي —</option>
+            <option value="تأييد القرار الأصلي">تأييد القرار الأصلي</option>
+            <option value="تعديل القرار الأصلي">تعديل القرار الأصلي</option>
+            <option value="إلغاء القرار الأصلي">إلغاء القرار الأصلي</option>
+          </select>
+        </div>
+
+        <!-- تفاصيل التعديل -->
+        <div id="modify-section" style="display:none">
+          <div class="fgrp">
+            <label class="flbl">وصف التعديل المقترح <span class="req">*</span></label>
+            <textarea class="fc" rows="3" placeholder="ما الذي سيتم تعديله في القرار الأصلي..."></textarea>
+          </div>
+        </div>
+
+        <div class="fgrp">
+          <label class="flbl">مضمون القرار التفصيلي <span class="req">*</span></label>
+          <textarea class="fc" id="decision-content" rows="6"
+            placeholder="اكتب مضمون القرار بالتفصيل — الأسباب القانونية والطبية والإجراءات المترتبة..."></textarea>
+        </div>
+
+        <div class="fgrp">
+          <label class="flbl">أثر القرار على الطلب الأصلي <span class="req">*</span></label>
+          <textarea class="fc" id="decision-effect" rows="3"
+            placeholder="ما هو أثر هذا القرار على الطلب الأصلي؟ ماذا سيحدث للطلب بعد صدور هذا القرار؟"></textarea>
+        </div>
+
+        <div class="fgrp">
+          <label class="flbl">إرفاق ملف (اختياري)</label>
+          <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4">
+        </div>
+
+        <div class="dp-acts">
+          <button class="btn btn-accent btn-lg" onclick="saveFinalDecision()">${ICONS.check} اعتماد القرار النهائي</button>
+          <button class="btn btn-secondary" onclick="showToast('تم حفظ المسودة','i')">حفظ كمسودة</button>
+          <button class="btn btn-ghost" onclick="window.history.back()">إلغاء</button>
+        </div>
+      </div>
+    </div>`;
+});
+
+function toggleData() {
+  const body = document.getElementById('appeal-data-body');
+  const icon = document.getElementById('toggle-icon');
+  body.style.display = body.style.display==='none' ? '' : 'none';
+  icon.style.transform = body.style.display===''?'rotate(-90deg)':'';
+}
+
+function onTypeChange() {
+  const type = document.getElementById('final-decision-type').value;
+  document.getElementById('modify-section').style.display = type==='تعديل القرار الأصلي' ? '' : 'none';
+}
+
+function saveFinalDecision() {
+  const type = document.getElementById('final-decision-type').value;
+  const content = document.getElementById('decision-content').value.trim();
+  const effect = document.getElementById('decision-effect').value.trim();
+  if (!type) { showToast('يرجى اختيار نوع القرار النهائي','w'); return; }
+  if (!content) { showToast('يرجى كتابة مضمون القرار التفصيلي','w'); return; }
+  if (!effect) { showToast('يرجى تحديد أثر القرار على الطلب الأصلي','w'); return; }
+
+  confirmAction({
+    title: 'تأكيد اعتماد القرار النهائي',
+    msg: `هل أنت متأكد من اعتماد هذا القرار النهائي؟<br><br>
+          <strong>القرار: ${type}</strong><br>
+          <span style="font-size:12px;color:var(--text3)">هذا القرار نهائي وسيُبلَّغ به جميع الأطراف المعنية.</span>`,
+    confirmLabel: 'نعم، اعتماد القرار النهائي',
+    confirmClass: 'btn-accent',
+    onConfirm: () => {
+      showToast(`تم اعتماد القرار النهائي — ${type}`, 's', 5000);
+      setTimeout(() => window.location.href = `session-details.html?id=${sessionId}`, 2000);
+    }
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تقديم طلب بدلات الانقطاع — العامل</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'worker', activePage: 'allowances-list' });
+setBreadcrumb([
+  { label: 'بدلات الانقطاع عن العمل', page: 'allowances-list' },
+  { label: 'تقديم طلب جديد' }
+]);
+
+const u = WI_DATA.users.worker;
+const emp = WI_DATA.allowances[0].employer;
+let attachments = [];
+let requestType = '';
+
+document.addEventListener('DOMContentLoaded', renderForm);
+
+function renderForm() {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>تقديم طلب صرف بدلات الانقطاع عن العمل</h1>
+        <p>يرجى استيفاء جميع الحقول الإلزامية قبل الإرسال</p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='allowances-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    <div class="alert alert-i">
+      ${ICONS.info}
+      <div>
+        <strong>تعليمات مهمة:</strong> يُقدَّم هذا الطلب في حال الغياب عن العمل بسبب إصابة عمل أو مرض مهني.
+        تأكد من إرفاق جميع المستندات الداعمة.
+      </div>
+    </div>
+
+    <!-- بيانات مقدم الطلب -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">العامل / المؤمن عليه / المواطن</div></div>
+          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${u.name}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${u.civil}</div></div>
+          <div class="fgrp">
+            <label class="flbl">رقم الهاتف <span class="req">*</span></label>
+            <input type="tel" class="fc" id="phone" value="${u.phone}">
+          </div>
+          <div class="fgrp">
+            <label class="flbl">البريد الإلكتروني</label>
+            <input type="email" class="fc" id="email" value="${u.email}">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- بيانات المؤمن عليه -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات المؤمن عليه</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
+      <div class="pb">
+        <div class="fg fg-4">
+          <div class="fgrp"><label class="flbl">الرقم التأميني</label><div class="fro" style="font-family:monospace">IN-20190045678</div></div>
+          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">نشط</span></div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التسجيل</label><div class="fro">2019-03-01</div></div>
+          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">إلزامي</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- بيانات جهة العمل -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات جهة العمل</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">اسم جهة العمل</label><div class="fro">${emp.name}</div></div>
+          <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro" style="font-family:monospace">${emp.cr}</div></div>
+          <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${emp.jobTitle}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الالتحاق</label><div class="fro">${emp.joinDate}</div></div>
+          <div class="fgrp"><label class="flbl">موقع العمل</label><input type="text" class="fc" value="${emp.location}"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- معلومات الطلب -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico or">${ICONS.medical}</div>معلومات الطلب</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp">
+            <label class="flbl">نوع الطلب <span class="req">*</span></label>
+            <select class="fc" id="req-type" onchange="onTypeChange()">
+              <option value="">— اختر نوع الطلب —</option>
+              <option value="إصابة عمل">إصابة عمل</option>
+              <option value="مرض مهني">مرض مهني</option>
+            </select>
+          </div>
+          <div class="fgrp" id="subtype-group" style="display:none">
+            <label class="flbl">نوع الحالة <span class="req">*</span></label>
+            <select class="fc" id="req-subtype"></select>
+          </div>
+          <div class="fgrp">
+            <label class="flbl">هل الطلب انتكاسة أو مضاعفة؟ <span class="req">*</span></label>
+            <select class="fc" id="relapse" onchange="onRelapseChange()">
+              <option value="لا">لا</option>
+              <option value="انتكاسة">انتكاسة</option>
+              <option value="مضاعفة">مضاعفة</option>
+            </select>
+          </div>
+          <div class="fgrp" id="orig-req-group" style="display:none">
+            <label class="flbl">رقم الطلب الأصلي <span class="req">*</span></label>
+            <input type="text" class="fc" id="orig-req" placeholder="WI-YYYY-XXXXXX">
+          </div>
+          <div class="fgrp">
+            <label class="flbl">تاريخ الواقعة أو الاشتباه بالمرض <span class="req">*</span></label>
+            <input type="date" class="fc" id="incident-date">
+          </div>
+          <div class="fgrp span-full">
+            <label class="flbl">ملاحظات أولية</label>
+            <textarea class="fc" id="initial-notes" rows="3" placeholder="أي معلومات إضافية تودّ إضافتها..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- بيانات الإصابة أو المرض -->
+    <div class="card" id="injury-card" style="display:none">
+      <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>بيانات الإصابة / المرض</h3></div>
+      <div class="pb" id="injury-fields"></div>
+    </div>
+
+    <!-- المرفقات -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات</h3></div>
+      <div class="pb">
+        <div class="fg fg-2" style="margin-bottom:14px" id="att-rows"></div>
+        <button class="btn btn-secondary btn-sm" onclick="addAttachment()">${ICONS.plus} إضافة مرفق</button>
+        <div class="fhint mt8">الأنواع المقبولة: PDF, Word, صور (JPG/PNG), تسجيل صوتي (MP3/WAV), فيديو (MP4) — الحجم الأقصى 20MB</div>
+      </div>
+    </div>
+
+    <!-- الإرشادات -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico gy">${ICONS.info}</div>الإرشادات والمستندات المطلوبة</h3></div>
+      <div class="pb" id="instructions">
+        <div class="alert alert-i">${ICONS.info}<span>اختر نوع الطلب لعرض المستندات المطلوبة.</span></div>
+      </div>
+    </div>
+
+    <!-- أزرار الإجراءات -->
+    <div style="display:flex;gap:10px;padding:16px 0">
+      <button class="btn btn-primary btn-lg" onclick="submitRequest()">
+        ${ICONS.check} إرسال الطلب
+      </button>
+      <button class="btn btn-secondary btn-lg" onclick="saveDraft()">
+        ${ICONS.edit} حفظ كمسودة
+      </button>
+      <button class="btn btn-ghost" onclick="window.location.href='allowances-list.html'">إلغاء</button>
+    </div>`;
+
+  addAttachment();
+}
+
+function onTypeChange() {
+  requestType = document.getElementById('req-type').value;
+  const subtypeGroup = document.getElementById('subtype-group');
+  const subtypeEl = document.getElementById('req-subtype');
+  const injuryCard = document.getElementById('injury-card');
+  const injuryFields = document.getElementById('injury-fields');
+  const instr = document.getElementById('instructions');
+
+  if (!requestType) {
+    subtypeGroup.style.display = 'none';
+    injuryCard.style.display = 'none';
+    return;
+  }
+
+  subtypeGroup.style.display = '';
+  injuryCard.style.display = '';
+
+  if (requestType === 'إصابة عمل') {
+    subtypeEl.innerHTML = `<option>حادث طريق</option><option>إصابة في موقع العمل</option><option>إجهاد وإرهاق</option>`;
+    injuryFields.innerHTML = `
+      <div class="fg fg-2">
+        <div class="fgrp span-full"><label class="flbl">وصف تفصيلي للواقعة <span class="req">*</span></label><textarea class="fc" rows="4" placeholder="صف ما حدث بالتفصيل — كيف وأين ومتى..."></textarea></div>
+        <div class="fgrp"><label class="flbl">مكان الواقعة <span class="req">*</span></label><input type="text" class="fc" placeholder="الموقع الدقيق للحادثة"></div>
+        <div class="fgrp"><label class="flbl">الجزء المصاب من الجسم <span class="req">*</span></label>
+          <select class="fc"><option>الرأس</option><option>الطرف العلوي الأيسر</option><option>الطرف العلوي الأيمن</option><option>الطرف السفلي الأيسر</option><option>الطرف السفلي الأيمن</option><option>الجذع / الضلوع</option><option>متعدد</option><option>أخرى</option></select>
+        </div>
+        <div class="fgrp"><label class="flbl">هل كانت هناك شهود؟</label>
+          <select class="fc" id="wit-sel" onchange="document.getElementById('wit-names').style.display=this.value==='نعم'?'':'none'"><option value="لا">لا</option><option value="نعم">نعم</option></select>
+        </div>
+        <div class="fgrp span-2" id="wit-names" style="display:none"><label class="flbl">أسماء الشهود</label><textarea class="fc" rows="2" placeholder="اسم الشاهد — صفته — رقم هاتفه"></textarea></div>
+      </div>`;
+    instr.innerHTML = `
+      <strong style="font-size:13px;display:block;margin-bottom:10px">المستندات المطلوبة لطلب إصابة العمل:</strong>
+      <ul style="font-size:12.5px;color:var(--text2);padding-right:18px;line-height:2">
+        <li>التقرير الطبي الأولي من المستشفى أو المركز الصحي</li>
+        <li>تقرير الشرطة (في حالة حوادث الطريق)</li>
+        <li>كشف الحضور والانصراف للفترة المعنية</li>
+        <li>تقرير جهة العمل عن الحادثة (إن وُجد)</li>
+        <li>صور من موقع الحادثة (اختياري)</li>
+      </ul>`;
+  } else {
+    subtypeEl.innerHTML = `<option>ربو مهني</option><option>تسمم بالرصاص</option><option>التهاب الجلد التماسي</option><option>فقدان السمع المهني</option><option>داء الغبار الرئوي</option><option>الإجهاد الحراري المهني</option><option>مرض مهني آخر</option>`;
+    injuryFields.innerHTML = `
+      <div class="fg fg-2">
+        <div class="fgrp span-full"><label class="flbl">المواد أو العوامل المسببة للمرض</label><textarea class="fc" rows="3" placeholder="المواد الكيميائية، الغبار، الضوضاء، إلخ..."></textarea></div>
+        <div class="fgrp"><label class="flbl">مدة التعرض المهني</label><input type="text" class="fc" placeholder="مثال: 5 سنوات متواصلة"></div>
+        <div class="fgrp"><label class="flbl">تاريخ الاشتباه الأول بالمرض</label><input type="date" class="fc"></div>
+        <div class="fgrp span-full"><label class="flbl">وصف بيئة العمل</label><textarea class="fc" rows="3" placeholder="صف بيئة العمل والمخاطر الموجودة..."></textarea></div>
+      </div>`;
+    instr.innerHTML = `
+      <strong style="font-size:13px;display:block;margin-bottom:10px">المستندات المطلوبة لطلب المرض المهني:</strong>
+      <ul style="font-size:12.5px;color:var(--text2);padding-right:18px;line-height:2">
+        <li>التقرير الطبي من طبيب متخصص في الأمراض المهنية</li>
+        <li>نتائج الفحوصات والتحاليل الطبية</li>
+        <li>قياسات بيئة العمل (إن توفرت)</li>
+        <li>سجل الفحوصات الطبية الدورية من جهة العمل</li>
+      </ul>`;
+  }
+}
+
+function onRelapseChange() {
+  const v = document.getElementById('relapse').value;
+  document.getElementById('orig-req-group').style.display = v !== 'لا' ? '' : 'none';
+}
+
+let attCount = 0;
+function addAttachment() {
+  attCount++;
+  const container = document.getElementById('att-rows');
+  const div = document.createElement('div');
+  div.className = 'fgrp';
+  div.id = `att-row-${attCount}`;
+  div.innerHTML = `
+    <label class="flbl">مرفق ${attCount}</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center">
+      <select class="fc">
+        <option>تقرير طبي</option><option>تقرير شرطة</option><option>كشف حضور وانصراف</option>
+        <option>صور</option><option>تسجيل صوتي</option><option>فيديو</option><option>مستند آخر</option>
+      </select>
+      <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4">
+      <button class="ibtn d" onclick="document.getElementById('att-row-${attCount}').remove()" title="حذف">${ICONS.trash}</button>
+    </div>`;
+  container.appendChild(div);
+}
+
+function saveDraft() {
+  showToast('تم حفظ الطلب كمسودة', 'i');
+  setTimeout(() => window.location.href = 'allowances-list.html', 1200);
+}
+
+function submitRequest() {
+  const type = document.getElementById('req-type').value;
+  const date = document.getElementById('incident-date').value;
+  if (!type) { showToast('يرجى اختيار نوع الطلب', 'w'); return; }
+  if (!date) { showToast('يرجى تحديد تاريخ الواقعة أو الاشتباه بالمرض', 'w'); return; }
+
+  showToast('جارٍ تقديم الطلب...', 'i');
+  setTimeout(() => {
+    showToast('تم تقديم الطلب بنجاح — رقم الطلب: WI-2025-001350', 's', 5000);
+    setTimeout(() => window.location.href = 'allowances-list.html', 2000);
+  }, 1500);
+}
+</script>
+</body>
+</html>

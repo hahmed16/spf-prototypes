@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الجلسات المجدولة — المؤسسة الصحية المرخصة</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'licensed-institution', activePage: 'sessions-list' });
+setBreadcrumb([{ label: 'الجلسات' }, { label: 'الجلسات المجدولة' }]);
+
+let activeTab = 'all';
+const sessions = WI_DATA.sessions;
+
+const allSessions = [
+  ...sessions,
+  {
+    id: 'SES-2025-0098', type: 'عرض على مؤسسة صحية مرخصة',
+    institution: 'مستشفى النور التخصصي', date: '2025-01-10', time: '09:00',
+    status: 'مغلقة', casesCount: 3, completedDecisions: 3, quorum: true,
+    members: [], minutes: 'تمت الجلسة بنجاح وصدرت جميع القرارات.',
+    cases: [
+      { requestId: 'WI-2025-001089', name: 'سيف المحروقي', type: 'بدلات انقطاع', reason: 'تحديد فترة إجازة', decisionStatus: 'تم التوقيع', decision: { type: 'موافقة' } }
+    ],
+    signatures: []
+  }
+];
+
+document.addEventListener('DOMContentLoaded', render);
+
+function render() {
+  const filtered = activeTab === 'all' ? allSessions : allSessions.filter(s => {
+    if (activeTab === 'upcoming') return s.status === 'مجدولة';
+    if (activeTab === 'pending-sign') return s.cases?.some(c => c.decisionStatus === 'تم إدخال القرار');
+    if (activeTab === 'closed') return s.status === 'مغلقة';
+    return true;
+  });
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>الجلسات المجدولة للمؤسسة</h1>
+        <p>مستشفى النور التخصصي — ${allSessions.length} جلسة</p>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="fgrid">
+        <div class="fgrp"><label class="flbl">رقم الجلسة</label><input type="text" class="fc" placeholder="SES-YYYY-XXXX"></div>
+        <div class="fgrp"><label class="flbl">تاريخ الجلسة من</label><input type="date" class="fc"></div>
+        <div class="fgrp"><label class="flbl">تاريخ الجلسة إلى</label><input type="date" class="fc"></div>
+        <div class="fgrp"><label class="flbl">حالة الجلسة</label>
+          <select class="fc">
+            <option>الكل</option><option>مجدولة</option><option>منعقدة</option><option>مغلقة</option>
+          </select>
+        </div>
+      </div>
+      <div class="facts">
+        <button class="btn btn-primary btn-sm">${ICONS.search} بحث</button>
+        <button class="btn btn-secondary btn-sm">مسح</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ttabs">
+        ${[
+          { key: 'all', label: 'الكل', count: allSessions.length },
+          { key: 'upcoming', label: 'مجدولة', count: allSessions.filter(s=>s.status==='مجدولة').length },
+          { key: 'pending-sign', label: 'بانتظار التوقيع', count: allSessions.filter(s=>s.cases?.some(c=>c.decisionStatus==='تم إدخال القرار')).length },
+          { key: 'closed', label: 'مغلقة', count: allSessions.filter(s=>s.status==='مغلقة').length },
+        ].map(t => `<div class="ttab ${activeTab===t.key?'act':''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الجلسة</th>
+                <th>التاريخ والوقت</th>
+                <th>عدد الحالات</th>
+                <th>القرارات المكتملة</th>
+                <th>حالة النصاب</th>
+                <th>حالة الجلسة</th>
+                <th>التوقيعات</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.map(s => {
+                const pendingSig = s.signatures?.filter(sig => sig.status === 'بانتظار').length || 0;
+                return `
+                <tr style="${s.status==='مجدولة'?'background:var(--primary-l)':''}">
+                  <td style="font-family:monospace;font-weight:700;color:var(--primary)">${s.id}</td>
+                  <td>${s.date} — ${s.time}</td>
+                  <td>${s.casesCount}</td>
+                  <td>${s.completedDecisions} / ${s.casesCount}</td>
+                  <td><span class="badge ${s.quorum?'b-approved':'b-returned'}">${s.quorum?'مكتمل':'غير مكتمل'}</span></td>
+                  <td><span class="badge ${s.status==='مجدولة'?'b-session':s.status==='مغلقة'?'b-closed':'b-approved'}">${s.status}</span></td>
+                  <td>${pendingSig > 0 ? `<span class="badge b-returned">${pendingSig} بانتظار</span>` : `<span class="badge b-approved">مكتملة</span>`}</td>
+                  <td>
+                    <button class="btn btn-primary btn-xs" onclick="window.location.href='session-details.html?id=${s.id}'">
+                      ${s.status==='مجدولة' ? 'تأكيد الحضور / إدخال قرار' : 'عرض التفاصيل'}
+                    </button>
+                  </td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function setTab(t) { activeTab = t; render(); }
+</script>
+</body>
+</html>

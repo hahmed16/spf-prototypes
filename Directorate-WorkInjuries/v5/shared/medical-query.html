@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استعلام التقارير الطبية — وزارة الصحة</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script src="layout.js"></script>
+<script src="components.js"></script>
+<script>
+  const role = localStorage.getItem('wi-current-role') || 'injury-investigator';
+  initLayout({ role, activePage: 'medical-query' });
+  setBreadcrumb([{ label: 'استعلام التقارير الطبية' }]);
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const ct = getContent();
+  ct.innerHTML = `
+    <div class="pg-head">
+      <div class="pg-head-text">
+        <h1>استعلام التقارير الطبية</h1>
+        <p>استعلام مباشر من بيانات وزارة الصحة — للمستخدمين الداخليين فقط — للاطلاع فقط ولا يُعدّ إجراءً</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.search}</div>معاملات الاستعلام</h3></div>
+      <div class="pb">
+        <div class="alert alert-i" style="margin-bottom:16px">
+          ${ICONS.info}
+          <span>هذه الشاشة للاطلاع على السجلات الطبية من وزارة الصحة فقط. النتائج لا تُعدّ إجراءً رسمياً على أي طلب.</span>
+        </div>
+        <div class="fg fg-3" style="margin-bottom:16px">
+          <div class="fgrp">
+            <label class="flbl">الرقم المدني <span class="req">*</span></label>
+            <input type="text" class="fc" id="q-civil" placeholder="أدخل الرقم المدني" maxlength="10">
+            <div class="fhint">10 أرقام</div>
+          </div>
+          <div class="fgrp">
+            <label class="flbl">من تاريخ</label>
+            <input type="date" class="fc" id="q-from">
+          </div>
+          <div class="fgrp">
+            <label class="flbl">إلى تاريخ</label>
+            <input type="date" class="fc" id="q-to">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="runQuery()">
+          ${ICONS.search} استعلام
+        </button>
+        <button class="btn btn-secondary" onclick="clearQuery()" style="margin-right:8px">
+          مسح
+        </button>
+      </div>
+    </div>
+
+    <div id="query-results"></div>
+  `;
+});
+
+function runQuery() {
+  const civil = document.getElementById('q-civil').value.trim();
+  if (!civil) { showToast('يرجى إدخال الرقم المدني', 'w'); return; }
+  const resultsEl = document.getElementById('query-results');
+  resultsEl.innerHTML = `<div class="loading">${ICONS.clock} جارٍ الاستعلام من وزارة الصحة...</div>`;
+
+  setTimeout(() => {
+    resultsEl.innerHTML = `
+      <div class="card">
+        <div class="ph">
+          <h3><div class="pico gr">${ICONS.medical}</div>نتائج الاستعلام — ${civil}</h3>
+          <span style="font-size:12px;color:var(--text3)">تاريخ الاستعلام: ${new Date().toLocaleString('ar-OM')}</span>
+        </div>
+        <div class="pb-0">
+          <div class="tbl-wrap">
+            <table class="dtbl">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>رقم التقرير</th>
+                  <th>الجهة الصحية المُصدِرة</th>
+                  <th>تاريخ التقرير</th>
+                  <th>نوع التقرير</th>
+                  <th>التشخيص</th>
+                  <th>فترة الإجازة (من)</th>
+                  <th>فترة الإجازة (إلى)</th>
+                  <th>عدد الأيام</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td style="font-family:monospace">RPT-2025-089123</td>
+                  <td>مستشفى السلطاني — مسقط</td>
+                  <td>2025-01-08</td>
+                  <td>إجازة مرضية</td>
+                  <td>الربو الحاد — وصف مهني</td>
+                  <td>2025-01-08</td>
+                  <td>2025-01-22</td>
+                  <td><strong>14</strong></td>
+                  <td><button class="ibtn" onclick="showReportDetails('RPT-2025-089123')" title="عرض تفاصيل التقرير">${ICONS.eye}</button></td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td style="font-family:monospace">RPT-2024-076540</td>
+                  <td>مستشفى خولة — مسقط</td>
+                  <td>2024-10-05</td>
+                  <td>فحص دوري</td>
+                  <td>وظائف الرئة — نتائج مختبر</td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td><button class="ibtn" onclick="showReportDetails('RPT-2024-076540')" title="عرض تفاصيل التقرير">${ICONS.eye}</button></td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td style="font-family:monospace">RPT-2024-065211</td>
+                  <td>مركز السيب الصحي</td>
+                  <td>2024-07-20</td>
+                  <td>إجازة مرضية</td>
+                  <td>التهاب الجهاز التنفسي</td>
+                  <td>2024-07-20</td>
+                  <td>2024-07-27</td>
+                  <td><strong>7</strong></td>
+                  <td><button class="ibtn" onclick="showReportDetails('RPT-2024-065211')" title="عرض تفاصيل التقرير">${ICONS.eye}</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>`;
+  }, 1200);
+}
+
+function clearQuery() {
+  document.getElementById('q-civil').value = '';
+  document.getElementById('q-from').value = '';
+  document.getElementById('q-to').value = '';
+  document.getElementById('query-results').innerHTML = '';
+}
+
+function showReportDetails(reportId) {
+  openModal({
+    title: `تفاصيل التقرير الطبي — ${reportId}`,
+    size: 'md-lg',
+    body: `
+      <div class="fg fg-2" style="gap:12px">
+        <div class="fgrp"><label class="flbl">رقم التقرير</label><div class="fro" style="font-family:monospace">${reportId}</div></div>
+        <div class="fgrp"><label class="flbl">الجهة الصحية</label><div class="fro">مستشفى السلطاني — مسقط</div></div>
+        <div class="fgrp"><label class="flbl">الطبيب المُصدِر</label><div class="fro">د. محمد بن حسين المنذري</div></div>
+        <div class="fgrp"><label class="flbl">التخصص</label><div class="fro">الأمراض الصدرية والمهنية</div></div>
+        <div class="fgrp span-full"><label class="flbl">التشخيص التفصيلي</label><div class="fro" style="min-height:50px;align-items:flex-start;padding-top:8px">الربو الحاد ذو المنشأ المهني — الإصابة ناجمة عن التعرض لمواد كيميائية في بيئة العمل لفترة طويلة. يستدعي إجازة مرضية مع علاج متخصص.</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ الإجازة من</label><div class="fro">2025-01-08</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ الإجازة إلى</label><div class="fro">2025-01-22</div></div>
+        <div class="fgrp"><label class="flbl">عدد أيام الإجازة</label><div class="fro"><strong>14 يوماً</strong></div></div>
+        <div class="fgrp"><label class="flbl">التوصيات الطبية</label><div class="fro">راحة تامة مع متابعة دورية كل أسبوعين. تجنب التعرض للعوامل المسببة.</div></div>
+      </div>`,
+    footer: `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قائمة الطلبات والمؤسسات — رئيس قسم التراخيص والرقابة</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'licensing-head', activePage: 'licensing-list' });
+setBreadcrumb([{ label: 'التراخيص والرقابة' }, { label: 'قائمة الطلبات والمؤسسات' }]);
+const me = WI_DATA.users.licensing_head.name;
+const reqs = WI_DATA.licensing;
+let activeTab = 'all';
+document.addEventListener('DOMContentLoaded', render);
+function render() {
+  const filtered = activeTab==='all' ? reqs : reqs.filter(r=>{
+    if(activeTab==='new') return r.requestType==='جديد' && !r.status.includes('اعتماد');
+    if(activeTab==='renew') return r.requestType==='تجديد';
+    if(activeTab==='active') return r.status.includes('اعتماد');
+    if(activeTab==='pending') return r.status.includes('بانتظار مراجعة موظف');
+    return true;
+  });
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>قائمة طلبات الترخيص والمؤسسات الصحية</h1><p>${reqs.length} طلب / مؤسسة</p></div>
+    </div>
+    <div class="filters">
+      <div class="fgrid">
+        <div class="fgrp"><label class="flbl">اسم المؤسسة</label><input type="text" class="fc"></div>
+        <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc"></div>
+        <div class="fgrp"><label class="flbl">نوع الطلب</label><select class="fc"><option>الكل</option><option>جديد</option><option>تجديد</option></select></div>
+        <div class="fgrp"><label class="flbl">حالة الطلب</label><select class="fc"><option>جميع الحالات</option>${reqs.map(r=>`<option>${r.status}</option>`).join('')}</select></div>
+        <div class="fgrp"><label class="flbl">انتهاء الترخيص من</label><input type="date" class="fc"></div>
+        <div class="fgrp"><label class="flbl">انتهاء الترخيص إلى</label><input type="date" class="fc"></div>
+      </div>
+      <div class="facts"><button class="btn btn-primary btn-sm">${ICONS.search} بحث</button><button class="btn btn-secondary btn-sm">مسح</button></div>
+    </div>
+    <div class="card">
+      <div class="ttabs">
+        ${[
+          {key:'all',label:'الكل',count:reqs.length},
+          {key:'pending',label:'بانتظار مراجعتي',count:reqs.filter(r=>r.status.includes('بانتظار مراجعة موظف')).length},
+          {key:'new',label:'طلبات جديدة',count:reqs.filter(r=>r.requestType==='جديد').length},
+          {key:'renew',label:'طلبات تجديد',count:reqs.filter(r=>r.requestType==='تجديد').length},
+          {key:'active',label:'مؤسسات نشطة',count:reqs.filter(r=>r.status.includes('اعتماد')).length},
+        ].map(t=>`<div class="ttab ${activeTab===t.key?'act':''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>اسم المؤسسة</th>
+                <th>نوع الطلب</th>
+                <th>حالة الطلب</th>
+                <th>حالة الترخيص</th>
+                <th>تاريخ الانتهاء</th>
+                <th>تاريخ التقديم</th>
+                <th>الحجز</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.map(r=>`
+              <tr style="${r.checkedOutBy===me?'background:#f0fdf4':''}">
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td style="font-weight:600">${r.institution.name}</td>
+                <td><span class="badge b-direct">${r.requestType}</span></td>
+                <td>${statusBadge(r.status)}</td>
+                <td>${r.activeLicense?`<span class="badge b-active">نشط</span>`:r.status.includes('رفض')?`<span class="badge b-rejected">مرفوض</span>`:`<span class="badge b-phead">معلق</span>`}</td>
+                <td style="font-size:12px">${r.activeLicense?.expiryDate||'—'}</td>
+                <td style="font-size:12px">${r.submitDate}</td>
+                <td>
+                  ${!r.checkedOutBy?`<span class="badge b-avail">متاح</span>`:r.checkedOutBy===me?`<span class="badge b-checkout">محجوز بواسطتي</span>`:`<span class="badge b-checkout">محجوز</span>`}
+                </td>
+                <td>
+                  <div style="display:flex;gap:4px">
+                    <button class="ibtn" onclick="window.location.href='licensing-details.html?id=${r.id}'">${ICONS.eye}</button>
+                    <button class="ibtn" onclick="window.location.href='institution-file.html?id=${r.id}'" title="ملف المؤسسة">${ICONS.file}</button>
+                    ${!r.checkedOutBy?`<button class="ibtn" onclick="doCheckout('${r.id}')">${ICONS.lock}</button>`:r.checkedOutBy===me?`<button class="ibtn" onclick="doCheckin('${r.id}')">${ICONS.unlock}</button>`:''}
+                  </div>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+function setTab(t){ activeTab=t; render(); }
+function doCheckout(id){ const r=WI_DATA.licensing.find(x=>x.id===id); if(r)r.checkedOutBy=me; showToast('تم الحجز','s'); render(); }
+function doCheckin(id){ const r=WI_DATA.licensing.find(x=>x.id===id); if(r)r.checkedOutBy=null; showToast('تم التحرير','i'); render(); }
+</script></body></html>

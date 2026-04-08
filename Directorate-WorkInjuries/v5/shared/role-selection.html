@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اختيار الدور — نظام إدارة إصابات العمل</title>
+<link rel="stylesheet" href="style.css">
+<style>body{overflow:auto}</style>
+</head>
+<body>
+<div id="role-pg">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:42px;height:42px;background:var(--primary);border-radius:var(--r);display:flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="22" height="22"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <div style="font-size:15px;font-weight:800;color:var(--primary)">صندوق الحماية الاجتماعية</div>
+        <div style="font-size:11px;color:var(--text3)">نظام إدارة إصابات العمل والأمراض المهنية</div>
+      </div>
+    </div>
+    <button onclick="window.location.href='../index.html'" style="display:flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--border);border-radius:var(--rsm);background:#fff;color:var(--text2);cursor:pointer;font-size:12px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      تسجيل الخروج
+    </button>
+  </div>
+
+  <!-- Page Header -->
+  <div class="rp-hd">
+    <h1>اختيار الدور</h1>
+    <p>اختر الدور المناسب للبدء — يمكنك التنقل بين الأدوار في أي وقت</p>
+  </div>
+
+  <div id="roles-container"></div>
+
+</div>
+
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script>
+const PENDING = {
+  allowances: 7, disability: 6, chronic: 5, 'chronic-incoming': 3,
+  appeals: 3, referrals: 4, sessions: 2, licensing: 5, signing: 2
+};
+
+function getTotalPending(role) {
+  const r = WI_CONFIG.roles[role];
+  if (!r) return 0;
+  return r.sidebar.filter(i => i.badge && PENDING[i.badge]).reduce((s, i) => s + (PENDING[i.badge] || 0), 0);
+}
+
+const categories = [
+  {
+    title: 'مقدمو الطلبات',
+    roles: ['worker', 'employer-delegate', 'hospital-delegate']
+  },
+  {
+    title: 'أقسام صندوق الحماية الاجتماعية',
+    roles: [
+      'injury-investigator', 'injury-head',
+      'od-investigator', 'od-head',
+      'sickleave-employee', 'sickleave-head',
+      'disability-employee', 'disability-head',
+      'committees-employee', 'committees-head',
+      'licensing-employee', 'licensing-head'
+    ]
+  },
+  {
+    title: 'اللجان الطبية والمؤسسات',
+    roles: ['licensed-institution', 'supervisory-committee', 'appeals-committee']
+  },
+  {
+    title: 'المقررون',
+    roles: ['institution-rapporteur', 'appeals-rapporteur', 'supervisory-rapporteur']
+  }
+];
+
+function renderRoleCards() {
+  const ct = document.getElementById('roles-container');
+  ct.innerHTML = categories.map(cat => {
+    const cardsHtml = cat.roles.map(roleKey => {
+      const r = WI_CONFIG.roles[roleKey];
+      if (!r) return '';
+      const pending = getTotalPending(roleKey);
+      return `
+        <div class="rcard" onclick="enterRole('${roleKey}')">
+          <div class="rc-type ${r.type}">${r.type === 'external' ? 'مستخدم خارجي' : 'موظف داخلي'}</div>
+          <div class="rc-name">${r.nameAr}</div>
+          <div class="rc-cnt">
+            ${pending > 0 ? `<span class="rc-pend">${pending}</span><span>مهمة معلّقة</span>` : '<span>لا توجد مهام معلّقة</span>'}
+          </div>
+          <div class="rc-arr">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg>
+          </div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="rcat">
+        <div class="rcat-t">${cat.title}</div>
+        <div class="rcards">${cardsHtml}</div>
+      </div>`;
+  }).join('');
+}
+
+function enterRole(roleKey) {
+  const r = WI_CONFIG.roles[roleKey];
+  if (!r) return;
+  window.location.href = `../${r.folder}/dashboard.html`;
+}
+
+renderRoleCards();
+</script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل طلب منفعة الإعاقة — موظف قسم الإعاقة</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'disability-employee', activePage: 'disability-list' });
+const params = new URLSearchParams(window.location.search);
+const req = WI_DATA.disability.find(r=>r.id===params.get('id')) || WI_DATA.disability[0];
+currentRequestId = req.id;
+const me = WI_DATA.users.disability_employee.name;
+const isCheckedOutByMe = req.checkedOutBy === me;
+setBreadcrumb([{label:'منفعة الإعاقة',page:'disability-list'},{label:`تفاصيل ${req.id}`}]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const statusPending = 'تم تقديم طلب منفعة الأشخاص ذوي الإعاقة — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة';
+  const canAct = req.status === statusPending && isCheckedOutByMe;
+  const canActReturn = req.status === 'تم إعادة الطلب لاستيفاء البيانات' && isCheckedOutByMe;
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تفاصيل طلب منفعة الأشخاص ذوي الإعاقة</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p></div>
+      <div class="pg-acts">
+        ${req.status===statusPending&&!req.checkedOutBy?`<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out</button>`:isCheckedOutByMe?`<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in</button>`:''}
+        <button class="btn btn-secondary" onclick="window.location.href='disability-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الحالة</div>${statusBadge(req.status)}</div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div>${req.submitDate}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر تحديث</div><div style="font-size:12px;color:var(--text2)">${req.lastUpdate}</div></div>
+        </div>
+      </div>
+    </div>
+
+    ${renderApplicantPanel(req.applicant)}
+    ${renderDisabilityCardPanel(req.card, true)}
+
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico gr">${ICONS.shield}</div>بيانات التأمين</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">${req.insurance.status}</span></div></div>
+          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${req.insurance.subType}</div></div>
+          <div class="fgrp"><label class="flbl">منافع أخرى</label><div class="fro">${req.insurance.otherBenefits}</div></div>
+        </div>
+      </div>
+    </div>
+
+    ${req.disbursement?`
+    <div class="card card-cum">
+      <div class="ph"><h3><div class="pico gr">${ICONS.chart}</div>بيانات الصرف</h3><span class="stg-lbl">معتمد</span></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">حالة الصرف</label><div class="fro"><span class="badge b-approved">${req.disbursement.status}</span></div></div>
+          <div class="fgrp"><label class="flbl">يوم الصرف الشهري</label><div class="fro">اليوم ${req.disbursement.monthlyDay}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ انتهاء الاستحقاق</label><div class="fro">${req.disbursement.expiryDate}</div></div>
+          <div class="fgrp"><label class="flbl">آخر تحقق تلقائي</label><div class="fro tx3">${req.disbursement.lastCheck}</div></div>
+        </div>
+      </div>
+    </div>`:''}
+
+    ${renderAttachmentsPanel(req.attachments, true)}
+    ${renderOperationalNotes(req.notes, true)}
+
+    ${canAct||canActReturn?`
+    <div class="dp">
+      <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>اتخاذ القرار</h3></div>
+      <div class="dp-body">
+        <div class="fgrp"><label class="flbl">الملاحظات</label><textarea class="fc" rows="3" placeholder="أكتب ملاحظاتك وتوصيتك..."></textarea></div>
+        <div class="fgrp"><label class="flbl">إرفاق ملف (اختياري)</label><input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4"></div>
+        <div class="dp-acts">
+          ${canAct?`
+          <button class="btn btn-primary" onclick="decision('رفع')">${ICONS.arrow_left} توجيه إلى رئيس القسم</button>
+          <button class="btn btn-warning" onclick="decision('استيفاء')">طلب استيفاء بيانات</button>
+          <button class="btn btn-danger" onclick="decision('رفض')">${ICONS.x} رفض</button>`:''}
+          ${canActReturn?`<button class="btn btn-primary" onclick="decision('إعادة')">استيفاء وإعادة الإرسال</button>`:''}
+        </div>
+      </div>
+    </div>`:''}
+    ${renderTimeline(req.timeline)}`;
+});
+
+function doCheckout(){ req.checkedOutBy=WI_DATA.users.disability_employee.name; showToast('تم الحجز','s'); setTimeout(()=>location.reload(),800); }
+function doCheckin(){ req.checkedOutBy=null; showToast('تم التحرير','i'); setTimeout(()=>window.location.href='disability-list.html',800); }
+function decision(type){
+  const msgs={رفع:'تم توجيه الطلب لرئيس القسم',استيفاء:'تم إعادة الطلب لمقدمه لاستيفاء البيانات',رفض:'تم رفض الطلب',إعادة:'تم إرسال الطلب بعد الاستيفاء'};
+  showToast(msgs[type],'s'); setTimeout(()=>window.location.href='disability-list.html',1500);
+}
+</script></body></html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إدارة جلسة اللجنة الإشرافية — مقرر اللجنة الطبية الإشرافية</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'supervisory-rapporteur', activePage: 'sessions-list' });
+const params = new URLSearchParams(window.location.search);
+const sessionId = params.get('id') || 'LIC-SES-2025-0012';
+setBreadcrumb([{label:'إدارة الجلسات',page:'sessions-list'},{label:`جلسة ${sessionId}`}]);
+
+const session = {
+  id: sessionId, date: '2025-02-10', time: '11:00', status: 'مجدولة',
+  members: [
+    { name: 'د. سيف بن حمد المسكري',   role: 'رئيس',       specialty: 'جراحة العظام' },
+    { name: 'د. هند بنت علي الحارثية', role: 'نائب رئيس', specialty: 'طب الأمراض المهنية' },
+    { name: 'د. أسامة بن سالم الغيلاني',role: 'عضو',       specialty: 'الطب الباطني' },
+    { name: 'د. لميس بنت خميس الرئيسية',role: 'عضو',       specialty: 'إعادة التأهيل' },
+    { name: 'د. وائل بن صالح الحوسني', role: 'عضو',       specialty: 'الطب النفسي المهني' },
+  ],
+  cases: WI_DATA.licensing.map(r=>({
+    licReqId: r.id, institutionName: r.institution.name,
+    requestType: r.requestType, totalDoctors: r.verification.totalDoctors,
+    confirmedDoctors: r.verification.confirmedDoctors,
+    decisionStatus: 'بانتظار القرار'
+  }))
+};
+
+const attendanceState = {};
+const signatureState = {};
+session.members.forEach(m=>{ attendanceState[m.name]='مجدول'; signatureState[m.name]='بانتظار'; });
+const caseDecisions = {};
+session.cases.forEach(c=>{ caseDecisions[c.licReqId]='بانتظار القرار'; });
+let minutesText = '';
+
+document.addEventListener('DOMContentLoaded', renderPage);
+
+function renderPage() {
+  const confirmedCount = Object.values(attendanceState).filter(v=>v==='حاضر').length;
+  const quorum = confirmedCount >= Math.ceil(session.members.length/2);
+  const allDecisionsDone = session.cases.every(c=>caseDecisions[c.licReqId]!=='بانتظار القرار');
+  const allSigned = Object.values(signatureState).every(v=>v==='تم التوقيع');
+  const signedCount = Object.values(signatureState).filter(v=>v==='تم التوقيع').length;
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>إدارة جلسة اللجنة الطبية الإشرافية</h1>
+        <p>رقم الجلسة: <strong style="font-family:monospace;color:var(--primary)">${session.id}</strong></p></div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='sessions-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الجلسة</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${session.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">التاريخ والوقت</div>
+            <div style="display:flex;gap:6px;align-items:center">
+              ${session.date} — ${session.time}
+              <button class="ibtn" onclick="reschedule()" title="تعديل الموعد">${ICONS.edit}</button>
+            </div>
+          </div>
+          <div><div class="flbl" style="margin-bottom:4px">حالة الجلسة</div><span class="badge b-session">${session.status}</span></div>
+          <div><div class="flbl" style="margin-bottom:4px">النصاب</div>
+            <span class="badge ${quorum?'b-approved':'b-returned'}">${quorum?'مكتمل':'غير مكتمل'} (${confirmedCount}/${session.members.length})</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ① الحضور -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>① تحديث حضور أعضاء اللجنة الطبية الإشرافية</h3></div>
+      <div class="pb-0">
+        <table class="dtbl">
+          <thead><tr><th>الاسم</th><th>التخصص</th><th>المنصب</th><th>حالة الحضور</th><th>تحديث</th></tr></thead>
+          <tbody>
+            ${session.members.map(m=>`
+            <tr>
+              <td style="font-weight:600">${m.name}</td>
+              <td>${m.specialty}</td>
+              <td>${m.role}</td>
+              <td><span class="badge ${attendanceState[m.name]==='حاضر'?'b-approved':attendanceState[m.name]==='اعتذار'?'b-rejected':'b-phead'}">${attendanceState[m.name]}</span></td>
+              <td>
+                <select class="fc" style="padding:4px 8px;font-size:12px;width:130px"
+                  onchange="updateAtt('${m.name}',this.value)">
+                  <option ${attendanceState[m.name]==='مجدول'?'selected':''}>مجدول</option>
+                  <option ${attendanceState[m.name]==='حاضر'?'selected':''}>حاضر</option>
+                  <option ${attendanceState[m.name]==='غائب'?'selected':''}>غائب</option>
+                  <option ${attendanceState[m.name]==='اعتذار'?'selected':''}>اعتذار</option>
+                </select>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="pb-c">
+        <button class="btn btn-accent btn-sm" onclick="showToast('تم حفظ بيانات الحضور','s')">${ICONS.check} حفظ بيانات الحضور</button>
+      </div>
+    </div>
+
+    <!-- ② طلبات الترخيص وإدخال القرارات -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico tl">${ICONS.shield}</div>② طلبات الترخيص وإدخال قرارات اللجنة</h3>
+        <span style="font-size:12px;color:var(--text3)">${Object.values(caseDecisions).filter(v=>v!=='بانتظار القرار').length}/${session.cases.length} قرارات مُدخَلة</span>
+      </div>
+      <div class="pb-0">
+        <table class="dtbl">
+          <thead><tr><th>#</th><th>رقم الطلب</th><th>المؤسسة الصحية</th><th>نوع الطلب</th><th>الأطباء</th><th>حالة القرار</th><th></th></tr></thead>
+          <tbody>
+            ${session.cases.map((c,i)=>`
+            <tr>
+              <td>${i+1}</td>
+              <td style="font-family:monospace;color:var(--primary);font-weight:700">${c.licReqId}</td>
+              <td style="font-weight:600">${c.institutionName}</td>
+              <td><span class="badge b-direct">${c.requestType}</span></td>
+              <td><span style="font-weight:700;color:${c.confirmedDoctors===c.totalDoctors?'var(--accent)':'var(--warning)'}">${c.confirmedDoctors}/${c.totalDoctors}</span></td>
+              <td><span class="badge ${caseDecisions[c.licReqId]==='بانتظار القرار'?'b-phead':caseDecisions[c.licReqId]==='تم التوقيع'?'b-approved':'b-session'}">${caseDecisions[c.licReqId]}</span></td>
+              <td>
+                <button class="btn btn-primary btn-xs"
+                  onclick="window.location.href='case-decision.html?req=${c.licReqId}&session=${session.id}'">
+                  ${caseDecisions[c.licReqId]==='بانتظار القرار'?'إدخال القرار':'عرض / تعديل'}
+                </button>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ③ محضر الجلسة -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico gy">${ICONS.file}</div>③ محضر الجلسة</h3></div>
+      <div class="pb">
+        <div class="fgrp">
+          <label class="flbl">نص محضر جلسة اللجنة الطبية الإشرافية</label>
+          <textarea class="fc" id="minutes-input" rows="5" placeholder="اكتب محضر الجلسة...">${minutesText}</textarea>
+        </div>
+        <button class="btn btn-secondary btn-sm mt8" onclick="saveMinutes()">${ICONS.check} حفظ المحضر</button>
+      </div>
+    </div>
+
+    <!-- ④ متابعة التوقيعات -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico gr">${ICONS.pen}</div>④ متابعة التوقيعات الإلكترونية</h3>
+        <span style="font-size:12px;color:var(--text3)">${signedCount}/${session.members.length} وقّعوا</span>
+      </div>
+      <div class="pb-0">
+        <table class="dtbl">
+          <thead><tr><th>العضو</th><th>المنصب</th><th>حالة التوقيع</th><th>إجراء المقرر</th></tr></thead>
+          <tbody>
+            ${session.members.map(m=>`
+            <tr>
+              <td style="font-weight:600">${m.name}</td>
+              <td>${m.role}</td>
+              <td><span class="badge ${signatureState[m.name]==='تم التوقيع'?'b-approved':'b-phead'}">${signatureState[m.name]}</span></td>
+              <td>
+                ${signatureState[m.name]==='بانتظار'&&allDecisionsDone
+                  ? `<button class="btn btn-secondary btn-xs" onclick="showToast('تم إرسال طلب التوقيع إلى ${m.name}','i')">${ICONS.bell} إرسال طلب التوقيع</button>`
+                  : signatureState[m.name]==='تم التوقيع'
+                    ? `<span class="badge b-approved">مكتمل</span>`
+                    : `<span style="font-size:11.5px;color:var(--text3)">يتطلب إدخال القرارات أولاً</span>`}
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ⑤ إرسال القرارات لرئيس التراخيص -->
+    <div class="card" style="border:2px solid var(--primary)">
+      <div class="ph" style="background:var(--primary-l)">
+        <h3 style="color:var(--primary)"><div class="pico bl">${ICONS.check}</div>⑤ إرسال القرارات إلى رئيس قسم التراخيص والرقابة</h3>
+      </div>
+      <div class="pb">
+        <div class="alert alert-i" style="margin-bottom:16px">
+          ${ICONS.info}
+          <span>بعد اكتمال التوقيعات، تُرسَل القرارات إلى <strong>رئيس قسم التراخيص والرقابة</strong> لتنفيذها وإصدار التراخيص.</span>
+        </div>
+        <div class="fg fg-4" style="margin-bottom:16px">
+          ${[{label:'النصاب',done:quorum},{label:'القرارات',done:allDecisionsDone},{label:'التوقيعات',done:allSigned},{label:'المحضر',done:!!minutesText}]
+            .map(c=>`<div style="padding:10px;border:1px solid var(--border);border-radius:var(--r);text-align:center">
+              <div style="font-size:20px;font-weight:800;color:${c.done?'var(--accent)':'var(--danger)'}">${c.done?'✓':'✗'}</div>
+              <div style="font-size:11.5px;margin-top:4px">${c.label}</div>
+            </div>`).join('')}
+        </div>
+        <button class="btn btn-accent btn-lg"
+          ${!(quorum&&allDecisionsDone&&allSigned)?'disabled style="opacity:.5;cursor:not-allowed"':''}
+          onclick="sendToLicensingHead()">
+          ${ICONS.check} إرسال القرارات إلى رئيس قسم التراخيص والرقابة
+        </button>
+        ${!(quorum&&allDecisionsDone&&allSigned)?`<p style="font-size:12px;color:var(--text3);margin-top:8px">يجب اكتمال: النصاب + القرارات + التوقيعات</p>`:''}
+      </div>
+    </div>`;
+}
+
+function updateAtt(name,val){ attendanceState[name]=val; showToast(`تم تحديث حضور ${name}`,'i'); renderPage(); }
+function saveMinutes(){ minutesText=document.getElementById('minutes-input')?.value||''; showToast('تم حفظ المحضر','s'); }
+function reschedule(){
+  openModal({
+    title:'تعديل موعد الجلسة',
+    body:`<div class="fg fg-2" style="gap:12px">
+      <div class="fgrp"><label class="flbl">التاريخ الجديد</label><input type="date" class="fc" value="${session.date}"></div>
+      <div class="fgrp"><label class="flbl">الوقت الجديد</label><input type="time" class="fc" value="${session.time}"></div>
+      <div class="fgrp span-full"><label class="flbl">سبب التعديل</label><textarea class="fc" rows="2"></textarea></div>
+    </div>`,
+    footer:`<button class="btn btn-primary" onclick="closeModal();showToast('تم تعديل موعد الجلسة وإشعار الأعضاء','s')">${ICONS.check} حفظ</button>
+            <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+function sendToLicensingHead(){
+  confirmAction({
+    title:'تأكيد إرسال القرارات لرئيس قسم التراخيص والرقابة',
+    msg:`هل أنت متأكد من إرسال قرارات جلسة <strong>${session.id}</strong> إلى رئيس قسم التراخيص والرقابة؟<br>
+         <span style="font-size:12px;color:var(--text3)">سيتولى الرئيس تنفيذ القرارات وإصدار التراخيص.</span>`,
+    confirmLabel:'نعم، إرسال القرارات',
+    confirmClass:'btn-accent',
+    onConfirm:()=>{ showToast('تم إرسال القرارات إلى رئيس قسم التراخيص والرقابة بنجاح','s',5000); setTimeout(()=>window.location.href='sessions-list.html',2000); }
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استعلام بطاقة الإعاقة — رئيس قسم الإعاقة</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'disability-head', activePage: 'disability-card-query' });
+setBreadcrumb([{ label: 'منفعة الإعاقة' }, { label: 'استعلام بطاقة الإعاقة' }]);
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head"><div><h1>استعلام بطاقة الإعاقة</h1>
+      <p>تكامل مباشر مع وزارة التنمية الاجتماعية</p></div></div>
+    <div class="alert alert-i">${ICONS.info}<span>هذا الاستعلام للاطلاع فقط — يُستخدم للتحقق من صلاحية بطاقة الإعاقة قبل معالجة الطلبات.</span></div>
+    <div class="card">
+      <div class="ph"><h3><div class="pico pu">${ICONS.search}</div>معاملات الاستعلام</h3></div>
+      <div class="pb">
+        <div class="fg fg-2" style="margin-bottom:14px">
+          <div class="fgrp">
+            <label class="flbl">الرقم المدني <span class="req">*</span></label>
+            <div class="inp-btn">
+              <input type="text" class="fc" id="civil-input" placeholder="10 أرقام" maxlength="10">
+              <button class="btn btn-primary btn-sm" onclick="queryCard()">${ICONS.search} استعلام</button>
+            </div>
+          </div>
+        </div>
+        <div id="card-result"></div>
+      </div>
+    </div>`;
+});
+
+function queryCard() {
+  const civil = document.getElementById('civil-input').value.trim();
+  if (!civil) { showToast('يرجى إدخال الرقم المدني', 'w'); return; }
+  const result = document.getElementById('card-result');
+  result.innerHTML = `<div class="loading">${ICONS.clock} جارٍ الاستعلام من وزارة التنمية الاجتماعية...</div>`;
+  setTimeout(() => {
+    const card = WI_DATA.disability[1]?.card;
+    result.innerHTML = `
+      <div class="alert alert-s" style="margin-bottom:14px">${ICONS.check}<span>تم العثور على بيانات البطاقة</span></div>
+      <div class="card card-ro">
+        <div class="ph"><h3><div class="pico pu">${ICONS.shield}</div>بيانات بطاقة الإعاقة — ${civil}</h3>
+          <span style="font-size:11px;color:var(--text3)">تاريخ الاستعلام: ${new Date().toLocaleString('ar-OM')}</span>
+        </div>
+        <div class="pb">
+          <div class="fg fg-3">
+            <div class="fgrp"><label class="flbl">رقم البطاقة</label><div class="fro" style="font-family:monospace">${card.number}</div></div>
+            <div class="fgrp"><label class="flbl">حالة البطاقة</label><div class="fro"><span class="badge ${card.status==='سارية'?'b-card-valid':'b-card-expired'}">${card.status}</span></div></div>
+            <div class="fgrp"><label class="flbl">تاريخ الانتهاء</label><div class="fro">${card.expiryDate}</div></div>
+            <div class="fgrp"><label class="flbl">طبيعة الإعاقة (وزارة التنمية)</label><div class="fro">${card.typeSD}</div></div>
+            <div class="fgrp"><label class="flbl">طبيعة الإعاقة (وزارة الصحة)</label><div class="fro">${card.typeMOH}</div></div>
+            <div class="fgrp"><label class="flbl">تاريخ ثبوت الإعاقة</label><div class="fro">${card.provenDate}</div></div>
+          </div>
+        </div>
+      </div>`;
+  }, 1200);
+}
+</script></body></html>
+

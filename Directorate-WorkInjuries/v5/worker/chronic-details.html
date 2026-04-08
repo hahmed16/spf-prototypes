@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل طلب الأمراض المستديمة — العامل</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'worker', activePage: 'chronic-list' });
+setBreadcrumb([{ label: 'الأمراض المستديمة', page: 'chronic-list' }, { label: 'تفاصيل الطلب' }]);
+
+// بيانات عينة مجمّعة للعرض
+const req = {
+  id: 'CHR-2025-000156',
+  status: 'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة',
+  path: 'مسار اللجان الطبية',
+  submitDate: '2025-01-05',
+  lastUpdate: '2025-01-05 14:00',
+  applicant: { name: WI_DATA.users.worker.name, civil: WI_DATA.users.worker.civil, role: 'العامل / المؤمن عليه / المواطن', phone: WI_DATA.users.worker.phone, email: '' },
+  insured: { name: WI_DATA.users.worker.name, civil: WI_DATA.users.worker.civil, insurance: 'IN-20190045678', dob: '1985-06-15', gender: 'ذكر', nationality: 'عُماني', insuranceStatus: 'نشط', regDate: '2019-03-01', subType: 'إلزامي' },
+  insurance: { status: 'نشط', subType: 'إلزامي', otherBenefits: 'لا يوجد' },
+  medical: { hospital: 'مستشفى ابن سينا — نزوى', doctor: 'د. فاطمة بنت خلفان الخروصية', diagnosis: 'الفشل الكلوي المزمن', provenDate: '2024-11-20', expectedPath: 'مسار اللجان الطبية' },
+  attachments: [],
+  notes: [],
+  timeline: [
+    { action: 'تم استلام التشخيص من المؤسسة الصحية المعالجة', actor: 'وزارة الصحة', role: 'آلي', time: '2024-11-22 08:00', fromStatus: '', toStatus: 'تم استلام التشخيص من المؤسسة الصحية المعالجة', note: '', type: 'default' },
+    { action: 'تم تقديم الطلب من قِبل المؤمن عليه', actor: WI_DATA.users.worker.name, role: 'العامل', time: '2025-01-05 14:00', fromStatus: 'تم استلام التشخيص', toStatus: 'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة', note: '', type: 'default' },
+  ]
+};
+currentRequestId = req.id;
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تفاصيل طلب منفعة الأمراض المستديمة</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
+      </div>
+      <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='chronic-list.html'">${ICONS.arrow_left} رجوع</button></div>
+    </div>
+
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">المسار</div><span class="badge ${req.path==='مسار مباشر'?'b-direct':'b-commpath'}">${req.path}</span></div>
+          <div><div class="flbl" style="margin-bottom:4px">الحالة الحالية</div>${statusBadge(req.status)}</div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div style="font-size:12.5px">${req.submitDate}</div></div>
+        </div>
+      </div>
+    </div>
+
+    ${renderApplicantPanel(req.applicant)}
+    ${renderInsuredPersonPanel(req.insured)}
+    ${renderChronicMedicalPanel(req.medical)}
+
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico gr">${ICONS.shield}</div>بيانات التأمين</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">${req.insurance.status}</span></div></div>
+          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${req.insurance.subType}</div></div>
+          <div class="fgrp"><label class="flbl">منافع أخرى</label><div class="fro">${req.insurance.otherBenefits}</div></div>
+        </div>
+      </div>
+    </div>
+
+    ${renderAttachmentsPanel(req.attachments, true)}
+    ${renderOperationalNotes(req.notes, true)}
+    ${renderTimeline(req.timeline)}`;
+});
+</script>
+</body>
+</html>

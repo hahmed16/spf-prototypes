@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قائمة الجلسات — مقرر المؤسسة الصحية المرخصة</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'institution-rapporteur', activePage: 'sessions-list' });
+setBreadcrumb([{ label: 'إدارة الجلسات' }, { label: 'قائمة الجلسات' }]);
+
+const allSessions = [
+  ...WI_DATA.sessions,
+  {
+    id: 'SES-2025-0098', type: 'عرض على مؤسسة صحية مرخصة',
+    institution: 'مستشفى النور التخصصي',
+    date: '2025-01-10', time: '09:00',
+    status: 'مغلقة', casesCount: 3, completedDecisions: 3,
+    quorum: true, members: [], cases: [], signatures: [], minutes: 'تمت الجلسة بنجاح.'
+  }
+];
+
+let activeTab = 'all';
+document.addEventListener('DOMContentLoaded', render);
+
+function render() {
+  const filtered = activeTab === 'all' ? allSessions : allSessions.filter(s => {
+    if (activeTab === 'scheduled') return s.status === 'مجدولة';
+    if (activeTab === 'pending-decisions') return s.cases?.some(c => c.decisionStatus === 'بانتظار القرار');
+    if (activeTab === 'pending-sign') return s.status === 'مجدولة' && s.completedDecisions > 0;
+    if (activeTab === 'closed') return s.status === 'مغلقة';
+    return true;
+  });
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>قائمة الجلسات</h1><p>${allSessions.length} جلسة</p></div>
+      <div class="pg-acts">
+        <button class="btn btn-primary" onclick="openNewSessionModal()">${ICONS.plus} إنشاء جلسة جديدة</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="fgrid">
+        <div class="fgrp"><label class="flbl">رقم الجلسة</label><input type="text" class="fc" placeholder="SES-YYYY-XXXX"></div>
+        <div class="fgrp"><label class="flbl">تاريخ الجلسة من</label><input type="date" class="fc"></div>
+        <div class="fgrp"><label class="flbl">تاريخ الجلسة إلى</label><input type="date" class="fc"></div>
+        <div class="fgrp"><label class="flbl">حالة الجلسة</label>
+          <select class="fc"><option>الكل</option><option>مجدولة</option><option>مغلقة</option></select>
+        </div>
+      </div>
+      <div class="facts">
+        <button class="btn btn-primary btn-sm">${ICONS.search} بحث</button>
+        <button class="btn btn-secondary btn-sm">مسح</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ttabs">
+        ${[
+          { key: 'all', label: 'الكل', count: allSessions.length },
+          { key: 'scheduled', label: 'مجدولة', count: allSessions.filter(s=>s.status==='مجدولة').length },
+          { key: 'pending-decisions', label: 'بانتظار قرارات', count: allSessions.filter(s=>s.cases?.some(c=>c.decisionStatus==='بانتظار القرار')).length },
+          { key: 'closed', label: 'مغلقة', count: allSessions.filter(s=>s.status==='مغلقة').length },
+        ].map(t=>`<div class="ttab ${activeTab===t.key?'act':''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الجلسة</th>
+                <th>المؤسسة الصحية</th>
+                <th>التاريخ والوقت</th>
+                <th>الحالات</th>
+                <th>القرارات</th>
+                <th>النصاب</th>
+                <th>الحالة</th>
+                <th>التوقيعات</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.map(s => {
+                const signedCount = s.signatures?.filter(sig=>sig.status==='تم التوقيع').length || 0;
+                const totalMembers = s.members?.length || 0;
+                return `
+                <tr style="${s.status==='مجدولة'?'background:var(--primary-l)':''}">
+                  <td style="font-family:monospace;font-weight:700;color:var(--primary)">${s.id}</td>
+                  <td>${s.institution}</td>
+                  <td>${s.date} — ${s.time}</td>
+                  <td>${s.casesCount}</td>
+                  <td><span style="font-weight:700;color:${s.completedDecisions===s.casesCount?'var(--accent)':'var(--text2)'}">${s.completedDecisions} / ${s.casesCount}</span></td>
+                  <td><span class="badge ${s.quorum?'b-approved':'b-returned'}">${s.quorum?'مكتمل':'غير مكتمل'}</span></td>
+                  <td><span class="badge ${s.status==='مجدولة'?'b-session':'b-approved'}">${s.status}</span></td>
+                  <td>${totalMembers>0?`${signedCount}/${totalMembers}`:'—'}</td>
+                  <td>
+                    <div style="display:flex;gap:4px">
+                      <button class="btn btn-primary btn-xs" onclick="window.location.href='session-details.html?id=${s.id}'">إدارة الجلسة</button>
+                      ${s.status==='مجدولة'?`<button class="ibtn" onclick="openReschedule('${s.id}')" title="تعديل الموعد">${ICONS.edit}</button>`:''}
+                    </div>
+                  </td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function setTab(t) { activeTab = t; render(); }
+
+function openNewSessionModal() {
+  openModal({
+    title: 'إنشاء جلسة جديدة',
+    size: 'md-lg',
+    body: `
+      <div class="fg" style="gap:14px">
+        <div class="fgrp">
+          <label class="flbl">المؤسسة الصحية المرخصة <span class="req">*</span></label>
+          <select class="fc">
+            <option>مستشفى النور التخصصي — مسقط</option>
+            <option>مستشفى الأمل التخصصي — السيب</option>
+          </select>
+        </div>
+        <div class="fg fg-2">
+          <div class="fgrp">
+            <label class="flbl">تاريخ الجلسة <span class="req">*</span></label>
+            <input type="date" class="fc">
+          </div>
+          <div class="fgrp">
+            <label class="flbl">وقت الجلسة <span class="req">*</span></label>
+            <input type="time" class="fc" value="09:00">
+          </div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">الحالات المدرجة</label>
+          <div style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            ${WI_DATA.allowances.filter(r=>r.referral||r.status.includes('جلسة')||r.status.includes('إحالة')).slice(0,3).map(r=>`
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border)">
+              <input type="checkbox" id="case-${r.id}" checked>
+              <label for="case-${r.id}" style="font-size:12.5px;cursor:pointer">
+                <span style="font-family:monospace;color:var(--primary)">${r.id}</span> — ${r.insured.name}
+              </label>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>`,
+    footer: `
+      <button class="btn btn-primary" onclick="closeModal();showToast('تم إنشاء الجلسة وإرسال الدعوات للأعضاء','s')">${ICONS.check} إنشاء الجلسة</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+
+function openReschedule(id) {
+  openModal({
+    title: `تعديل موعد الجلسة — ${id}`,
+    body: `
+      <div class="fg fg-2" style="gap:12px">
+        <div class="fgrp"><label class="flbl">التاريخ الجديد <span class="req">*</span></label><input type="date" class="fc"></div>
+        <div class="fgrp"><label class="flbl">الوقت الجديد <span class="req">*</span></label><input type="time" class="fc" value="09:00"></div>
+        <div class="fgrp span-full"><label class="flbl">سبب التعديل</label><textarea class="fc" rows="2"></textarea></div>
+      </div>`,
+    footer: `
+      <button class="btn btn-primary" onclick="closeModal();showToast('تم تعديل موعد الجلسة','s')">${ICONS.check} حفظ التعديل</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+</script>
+</body>
+</html>

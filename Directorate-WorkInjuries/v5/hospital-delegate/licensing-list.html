@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قائمة طلباتي — المفوض عن المستشفى</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'hospital-delegate', activePage: 'licensing-list' });
+setBreadcrumb([{ label: 'الترخيص والتجديد' }, { label: 'قائمة الطلبات' }]);
+
+const myReqs = WI_DATA.licensing;
+let activeTab = 'all';
+
+document.addEventListener('DOMContentLoaded', render);
+
+function render() {
+  const filtered = activeTab === 'all' ? myReqs : myReqs.filter(r => {
+    if (activeTab === 'new') return r.requestType === 'جديد';
+    if (activeTab === 'renew') return r.requestType === 'تجديد';
+    if (activeTab === 'active') return r.status.includes('تم اعتماد');
+    if (activeTab === 'pending') return !r.status.includes('تم اعتماد') && !r.status.includes('رفض');
+    return true;
+  });
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>قائمة طلبات الترخيص والتجديد</h1>
+        <p>${myReqs.length} طلب مقدم</p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-primary" onclick="window.location.href='licensing-new.html'">
+          ${ICONS.plus} تقديم طلب جديد
+        </button>
+      </div>
+    </div>
+
+    <div class="alert alert-i">
+      ${ICONS.info}
+      <div>
+        يمكنك تقديم طلب <strong>ترخيص جديد</strong> أو <strong>تجديد الترخيص</strong> القائم.
+        يُنصح بتقديم طلب التجديد قبل 90 يوماً من انتهاء صلاحية الترخيص الحالي.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ttabs">
+        ${[
+          { key: 'all',     label: 'الكل',         count: myReqs.length },
+          { key: 'pending', label: 'قيد المعالجة', count: myReqs.filter(r=>!r.status.includes('تم اعتماد')&&!r.status.includes('رفض')).length },
+          { key: 'new',     label: 'طلبات جديدة',  count: myReqs.filter(r=>r.requestType==='جديد').length },
+          { key: 'renew',   label: 'طلبات تجديد',  count: myReqs.filter(r=>r.requestType==='تجديد').length },
+          { key: 'active',  label: 'تراخيص نشطة', count: myReqs.filter(r=>r.status.includes('تم اعتماد')).length },
+        ].map(t=>`<div class="ttab ${activeTab===t.key?'act':''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>المؤسسة الصحية</th>
+                <th>نوع الطلب</th>
+                <th>حالة الطلب</th>
+                <th>رقم الترخيص الصادر</th>
+                <th>تاريخ الانتهاء</th>
+                <th>تاريخ التقديم</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.map(r => `
+              <tr style="${r.status.includes('استيفاء')?'background:var(--warning-l)':r.status.includes('تم اعتماد')?'background:var(--accent-l)':''}">
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td style="font-weight:600">${r.institution.name}</td>
+                <td><span class="badge b-direct">${r.requestType}</span></td>
+                <td>${statusBadge(r.status)}</td>
+                <td style="font-family:monospace;font-size:11.5px">${r.activeLicense?.number || '—'}</td>
+                <td style="font-size:12px;${r.activeLicense?.expiryDate&&new Date(r.activeLicense.expiryDate)-new Date()<90*24*60*60*1000?'color:var(--warning);font-weight:700':''}">${r.activeLicense?.expiryDate || '—'}</td>
+                <td style="font-size:12px">${r.submitDate}</td>
+                <td>
+                  <div style="display:flex;gap:4px">
+                    <button class="ibtn" onclick="window.location.href='licensing-details.html?id=${r.id}'" title="عرض التفاصيل">${ICONS.eye}</button>
+                    ${r.status.includes('استيفاء') ? `<button class="btn btn-warning btn-xs" onclick="window.location.href='licensing-details.html?id=${r.id}'">استيفاء</button>` : ''}
+                    ${r.activeLicense ? `<button class="ibtn" onclick="window.location.href='institution-file.html?id=${r.id}'" title="ملف المؤسسة">${ICONS.file}</button>` : ''}
+                  </div>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function setTab(t) { activeTab = t; render(); }
+</script>
+</body>
+</html>

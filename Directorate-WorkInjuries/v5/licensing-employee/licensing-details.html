@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل طلب الترخيص — موظف قسم التراخيص والرقابة</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'licensing-employee', activePage: 'licensing-list' });
+const params = new URLSearchParams(window.location.search);
+const req = WI_DATA.licensing.find(r=>r.id===params.get('id')) || WI_DATA.licensing[0];
+currentRequestId = req.id;
+const me = WI_DATA.users.licensing_employee.name;
+const isCheckedOutByMe = req.checkedOutBy === me;
+setBreadcrumb([{label:'التراخيص والرقابة',page:'licensing-list'},{label:`تفاصيل ${req.id}`}]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const statusPending = 'تم تقديم طلب الترخيص / التجديد — بانتظار مراجعة موظف قسم التراخيص والرقابة';
+  const canAct = (req.status === statusPending || req.status === 'تم إعادة الطلب لاستيفاء البيانات') && isCheckedOutByMe;
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تفاصيل طلب ${req.requestType==='جديد'?'الترخيص':'التجديد'}</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p></div>
+      <div class="pg-acts">
+        ${!req.checkedOutBy&&req.status===statusPending?`<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out</button>`:isCheckedOutByMe?`<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in</button>`:''}
+        <button class="btn btn-secondary" onclick="window.location.href='licensing-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">نوع الطلب</div><span class="badge b-direct">${req.requestType}</span></div>
+          <div><div class="flbl" style="margin-bottom:4px">الحالة</div>${statusBadge(req.status)}</div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div>${req.submitDate}</div></div>
+        </div>
+      </div>
+    </div>
+
+    ${renderInstitutionPanel(req.institution)}
+    ${renderApplicantPanel(req.delegate)}
+    ${renderDoctorsPanel(req.doctors, false)}
+
+    <!-- التحقق من اشتراطات الترخيص -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico ${req.verification.minMet?'gr':'rd'}">${req.verification.minMet?ICONS.check:ICONS.warn}</div>التحقق من اشتراطات الترخيص</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">إجمالي الأطباء المقدمين</label><div class="fro"><strong>${req.verification.totalDoctors}</strong> طبيب</div></div>
+          <div class="fgrp"><label class="flbl">الأطباء المؤكدون</label><div class="fro"><strong style="color:${req.verification.confirmedDoctors===req.verification.totalDoctors?'var(--accent)':'var(--warning)'}">${req.verification.confirmedDoctors}</strong> / ${req.verification.totalDoctors}</div></div>
+          <div class="fgrp"><label class="flbl">استيفاء الحد الأدنى</label><div class="fro"><span class="badge ${req.verification.minMet?'b-approved':'b-returned'}">${req.verification.minMet?'مستوفى':'غير مستوفى'}</span></div></div>
+        </div>
+        ${!req.verification.minMet?`<div class="alert alert-w mt12">${ICONS.warn}<span>لم يتأكد جميع الأطباء المرشحين بعد. الطلب لا يمكن رفعه للرئيس حتى اكتمال التأكيد.</span></div>`:''}
+      </div>
+    </div>
+
+    ${req.session?renderSessionPanel(req.session):''}
+    ${req.committeeDecision?renderCommitteeDecisionPanel(req.committeeDecision,'قرار اللجنة الطبية الإشرافية'):''}
+    ${req.activeLicense?renderActiveLicensePanel(req.activeLicense):''}
+    ${renderAttachmentsPanel(req.attachments, true)}
+    ${renderOperationalNotes(req.notes, true)}
+
+    ${canAct?`
+    <div class="dp">
+      <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>اتخاذ القرار — موظف قسم التراخيص والرقابة</h3></div>
+      <div class="dp-body">
+        <div class="fgrp"><label class="flbl">الملاحظات</label><textarea class="fc" rows="3" placeholder="أكتب ملاحظاتك وتوصيتك..."></textarea></div>
+        <div class="fgrp"><label class="flbl">إرفاق ملف (اختياري)</label><input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4"></div>
+        <div class="dp-acts">
+          <button class="btn btn-primary" onclick="licensingDecision('رفع')">${ICONS.arrow_left} توجيه لرئيس القسم</button>
+          <button class="btn btn-warning" onclick="licensingDecision('استيفاء')">طلب استيفاء بيانات</button>
+          <button class="btn btn-danger" onclick="licensingDecision('رفض')">رفض</button>
+        </div>
+      </div>
+    </div>`:''}
+
+    ${renderTimeline(req.timeline)}`;
+});
+
+function doCheckout(){ req.checkedOutBy=WI_DATA.users.licensing_employee.name; showToast('تم الحجز','s'); setTimeout(()=>location.reload(),800); }
+function doCheckin(){ req.checkedOutBy=null; showToast('تم التحرير','i'); setTimeout(()=>window.location.href='licensing-list.html',800); }
+function licensingDecision(type){
+  const msgs={رفع:'تم توجيه الطلب لرئيس القسم',استيفاء:'تم إعادة الطلب لاستيفاء البيانات',رفض:'تم رفض الطلب'};
+  showToast(msgs[type],type==='رفض'?'d':'s');
+  setTimeout(()=>window.location.href='licensing-list.html',1500);
+}
+</script></body></html>

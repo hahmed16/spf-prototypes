@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل طلب منفعة الإعاقة — العامل</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'worker', activePage: 'disability-list' });
+
+const params = new URLSearchParams(window.location.search);
+const reqId = params.get('id') || 'DIS-2024-000198';
+const req = WI_DATA.disability.find(r => r.id === reqId) || WI_DATA.disability[0];
+currentRequestId = req.id;
+
+setBreadcrumb([
+  { label: 'منفعة الأشخاص ذوي الإعاقة', page: 'disability-list' },
+  { label: `تفاصيل الطلب ${req.id}` }
+]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  let workerActions = [];
+  if (req.status === 'مسودة') workerActions = ['إرسال الطلب', 'حذف'];
+  else if (req.status === 'تم إعادة الطلب لاستيفاء البيانات') workerActions = ['استيفاء البيانات المطلوبة وإعادة الإرسال'];
+  else if (req.status === 'تم رفض الطلب') workerActions = ['تقديم تظلم'];
+  else if (req.status === 'تم إيقاف الصرف — بطاقة الإعاقة منتهية أو ملغاة') workerActions = ['تجديد البطاقة والتحقق من وزارة التنمية الاجتماعية ثم تحريك الطلب تلقائياً إلى قيد المراجعة'];
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تفاصيل طلب منفعة الأشخاص ذوي الإعاقة</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='disability-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الحالة الحالية</div>${statusBadge(req.status)}</div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div style="font-size:12.5px">${req.submitDate}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر تحديث</div><div style="font-size:12px;color:var(--text2)">${req.lastUpdate}</div></div>
+        </div>
+      </div>
+    </div>
+
+    ${renderApplicantPanel(req.applicant)}
+    ${renderDisabilityCardPanel(req.card, false)}
+    ${renderInsurancePanel ? '' : ''}
+
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico gr">${ICONS.shield}</div>بيانات التأمين</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">${req.insurance.status}</span></div></div>
+          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${req.insurance.subType}</div></div>
+          <div class="fgrp"><label class="flbl">منافع أخرى</label><div class="fro">${req.insurance.otherBenefits}</div></div>
+        </div>
+      </div>
+    </div>
+
+    ${req.disbursement ? `
+    <div class="card card-cum">
+      <div class="ph"><h3><div class="pico gr">${ICONS.chart}</div>بيانات الصرف</h3><span class="stg-lbl">مرحلة الصرف</span></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">حالة الصرف</label><div class="fro"><span class="badge b-approved">${req.disbursement.status}</span></div></div>
+          <div class="fgrp"><label class="flbl">يوم الصرف الشهري</label><div class="fro">اليوم ${req.disbursement.monthlyDay} من كل شهر</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ انتهاء الاستحقاق</label><div class="fro">${req.disbursement.expiryDate}</div></div>
+          <div class="fgrp"><label class="flbl">آخر تحقق من وزارة التنمية</label><div class="fro tx3">${req.disbursement.lastCheck}</div></div>
+        </div>
+      </div>
+    </div>` : ''}
+
+    ${renderAttachmentsPanel(req.attachments, true)}
+    ${renderOperationalNotes(req.notes, true)}
+    ${workerActions.length ? renderDecisionPanel({ actions: workerActions, title: 'الإجراءات المتاحة لك' }) : ''}
+    ${renderTimeline(req.timeline)}`;
+});
+</script>
+</body>
+</html>

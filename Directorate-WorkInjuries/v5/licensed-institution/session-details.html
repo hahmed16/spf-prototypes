@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل الجلسة — المؤسسة الصحية المرخصة</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'licensed-institution', activePage: 'sessions-list' });
+const params = new URLSearchParams(window.location.search);
+const session = WI_DATA.sessions.find(s => s.id === params.get('id')) || WI_DATA.sessions[0];
+setBreadcrumb([{ label: 'الجلسات', page: 'sessions-list' }, { label: `جلسة ${session.id}` }]);
+
+// بيانات الحضور والتوقيعات للمحاكاة
+const attendanceState = {};
+const signatureState = {};
+session.members.forEach(m => {
+  attendanceState[m.name] = m.attendance || 'مجدول';
+  signatureState[m.name] = 'بانتظار';
+});
+
+document.addEventListener('DOMContentLoaded', renderPage);
+
+function renderPage() {
+  const confirmedCount = Object.values(attendanceState).filter(v => v === 'حاضر').length;
+  const quorum = confirmedCount >= Math.ceil(session.members.length / 2);
+  const allSigned = Object.values(signatureState).every(v => v === 'تم التوقيع');
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>تفاصيل الجلسة</h1>
+        <p>رقم الجلسة: <strong style="font-family:monospace;color:var(--primary)">${session.id}</strong></p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='sessions-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    <!-- ملخص الجلسة -->
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الجلسة</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${session.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">المؤسسة</div><div style="font-weight:600">${session.institution}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">التاريخ والوقت</div><div>${session.date} — ${session.time}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">حالة الجلسة</div><span class="badge b-session">${session.status}</span></div>
+          <div><div class="flbl" style="margin-bottom:4px">حالة النصاب</div>
+            <span class="badge ${quorum?'b-approved':'b-returned'}">${quorum?'النصاب مكتمل':'النصاب غير مكتمل'}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- أعضاء الجلسة وتأكيد الحضور -->
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico bl">${ICONS.user}</div>أعضاء اللجنة وتأكيد الحضور</h3>
+        <span style="font-size:12px;color:var(--text3)">${confirmedCount} / ${session.members.length} أكدوا الحضور</span>
+      </div>
+      <div class="pb-0">
+        <table class="dtbl">
+          <thead><tr><th>الاسم</th><th>التخصص</th><th>المنصب</th><th>حالة الحضور</th><th>تأكيد الحضور</th></tr></thead>
+          <tbody id="attendance-tbody">
+            ${session.members.map(m => `
+            <tr id="att-row-${m.name.replace(/\s/g,'_')}">
+              <td style="font-weight:600">${m.name}</td>
+              <td>${m.specialty}</td>
+              <td>${m.role}</td>
+              <td>
+                <span class="badge ${attendanceState[m.name]==='حاضر'?'b-approved':attendanceState[m.name]==='غائب'?'b-rejected':'b-phead'}">
+                  ${attendanceState[m.name]}
+                </span>
+              </td>
+              <td>
+                ${attendanceState[m.name] === 'مجدول' ? `
+                <div style="display:flex;gap:6px">
+                  <button class="btn btn-accent btn-xs" onclick="confirmAttendance('${m.name}','حاضر')">${ICONS.check} حاضر</button>
+                  <button class="btn btn-danger btn-xs" onclick="confirmAttendance('${m.name}','اعتذار')">${ICONS.x} اعتذار</button>
+                </div>` : `<span class="badge ${attendanceState[m.name]==='حاضر'?'b-approved':'b-rejected'}">${attendanceState[m.name]==='حاضر'?'تم التأكيد':'اعتذر'}</span>`}
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- الحالات المدرجة في الجلسة -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico or">${ICONS.list}</div>الحالات المدرجة في الجلسة</h3></div>
+      <div class="pb-0">
+        <table class="dtbl">
+          <thead><tr><th>#</th><th>رقم الطلب</th><th>المؤمن عليه</th><th>نوع الحالة</th><th>سبب العرض</th><th>حالة القرار</th><th></th></tr></thead>
+          <tbody>
+            ${session.cases.map((c, i) => `
+            <tr>
+              <td>${i+1}</td>
+              <td style="font-family:monospace;color:var(--primary);font-weight:700">${c.requestId}</td>
+              <td>${c.name}</td>
+              <td>${c.type}</td>
+              <td style="font-size:11.5px">${c.reason}</td>
+              <td>
+                <span class="badge ${c.decisionStatus==='بانتظار القرار'?'b-phead':c.decisionStatus==='تم التوقيع'?'b-approved':'b-session'}">
+                  ${c.decisionStatus}
+                </span>
+              </td>
+              <td>
+                <button class="btn btn-primary btn-xs" onclick="openCaseDecision('${c.requestId}','${c.name}','${c.type}')">
+                  ${c.decisionStatus==='بانتظار القرار'?'إدخال القرار':'عرض القرار'}
+                </button>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- التوقيعات الإلكترونية -->
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico gr">${ICONS.pen}</div>التوقيعات الإلكترونية على القرارات</h3>
+        <span style="font-size:12px;color:var(--text3)">
+          ${Object.values(signatureState).filter(v=>v==='تم التوقيع').length} / ${session.members.length} وقّعوا
+        </span>
+      </div>
+      <div class="pb-0">
+        <table class="dtbl">
+          <thead><tr><th>العضو</th><th>المنصب</th><th>حالة التوقيع</th><th>وقت التوقيع</th><th>الإجراء</th></tr></thead>
+          <tbody id="sign-tbody">
+            ${session.members.map(m => `
+            <tr id="sign-row-${m.name.replace(/\s/g,'_')}">
+              <td style="font-weight:600">${m.name}</td>
+              <td>${m.role}</td>
+              <td>
+                <span class="badge ${signatureState[m.name]==='تم التوقيع'?'b-approved':'b-phead'}">
+                  ${signatureState[m.name]}
+                </span>
+              </td>
+              <td id="sign-time-${m.name.replace(/\s/g,'_')}" style="font-size:11.5px;color:var(--text3)">—</td>
+              <td>
+                ${signatureState[m.name]==='بانتظار' ? `
+                <button class="btn btn-accent btn-sm" onclick="doSign('${m.name}')">
+                  ${ICONS.pen} توقيع إلكتروني
+                </button>` : `<span class="badge b-approved">تم التوقيع</span>`}
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      ${allSigned ? `
+      <div class="pb-c">
+        <div class="alert alert-s" style="margin-bottom:0">
+          ${ICONS.check}
+          <span>اكتملت جميع التوقيعات — سيقوم المقرر بإرسال القرارات للجهات المعنية.</span>
+        </div>
+      </div>` : ''}
+    </div>
+
+    <!-- محضر الجلسة -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico gy">${ICONS.file}</div>محضر الجلسة</h3></div>
+      <div class="pb">
+        <div class="fro" style="min-height:60px;align-items:flex-start;padding-top:8px">
+          ${session.minutes || 'لم يُدوَّن المحضر بعد — يقوم المقرر بإدخال المحضر.'}
+        </div>
+      </div>
+    </div>`;
+}
+
+function confirmAttendance(name, status) {
+  attendanceState[name] = status;
+  showToast(`تم تسجيل ${status==='حاضر'?'حضورك':'اعتذارك'} — ${name}`, status==='حاضر'?'s':'w');
+  renderPage();
+}
+
+function doSign(name) {
+  confirmAction({
+    title: 'تأكيد التوقيع الإلكتروني',
+    msg: `هل أنت متأكد من توقيعك الإلكتروني على قرارات هذه الجلسة؟<br><span style="font-size:12px;color:var(--text3)">التوقيع نهائي ولا يمكن التراجع عنه.</span>`,
+    confirmLabel: 'نعم، توقيع إلكتروني',
+    confirmClass: 'btn-accent',
+    onConfirm: () => {
+      signatureState[name] = 'تم التوقيع';
+      showToast(`تم تسجيل توقيعك الإلكتروني بنجاح`, 's');
+      renderPage();
+    }
+  });
+}
+
+function openCaseDecision(requestId, caseName, caseType) {
+  const req = WI_DATA.allowances.find(r => r.id === requestId);
+  openModal({
+    title: `إدخال قرار الجلسة — ${requestId}`,
+    size: 'md-lg',
+    body: `
+      <div class="alert alert-i" style="margin-bottom:14px">
+        ${ICONS.info}
+        <div>
+          <strong>الحالة المعروضة:</strong> ${caseName} — ${caseType}
+        </div>
+      </div>
+
+      ${req ? `
+      <div style="padding:12px;background:var(--g50);border:1px solid var(--border);border-radius:var(--r);margin-bottom:14px">
+        <div class="fg fg-2" style="gap:8px">
+          <div><div class="flbl" style="margin-bottom:2px">المؤمن عليه</div><div style="font-size:12.5px">${req.insured.name}</div></div>
+          <div><div class="flbl" style="margin-bottom:2px">نوع الطلب</div><div style="font-size:12.5px">${req.type}</div></div>
+          <div><div class="flbl" style="margin-bottom:2px">الحالة</div>${statusBadge(req.status)}</div>
+        </div>
+      </div>` : ''}
+
+      <div class="fg" style="gap:14px">
+        <div class="fgrp">
+          <label class="flbl">نوع القرار <span class="req">*</span></label>
+          <select class="fc" id="modal-decision-type" onchange="toggleDecisionFields()">
+            <option value="">— اختر نوع القرار —</option>
+            <option value="موافقة">موافقة</option>
+            <option value="رفض">رفض</option>
+            <option value="تأجيل">تأجيل</option>
+            <option value="إعادة للتصحيح">إعادة للتصحيح</option>
+          </select>
+        </div>
+
+        <div id="approval-fields" style="display:none">
+          <div class="fg fg-2" style="gap:12px">
+            <div class="fgrp">
+              <label class="flbl">فترة الإجازة الموصى بها — من</label>
+              <input type="date" class="fc" id="leave-from">
+            </div>
+            <div class="fgrp">
+              <label class="flbl">فترة الإجازة الموصى بها — إلى</label>
+              <input type="date" class="fc" id="leave-to">
+            </div>
+            <div class="fgrp">
+              <label class="flbl">نسبة العجز (إن انطبقت) %</label>
+              <input type="number" class="fc" id="disability-pct" min="0" max="100" placeholder="0-100">
+            </div>
+            <div class="fgrp">
+              <label class="flbl">نوع العجز</label>
+              <select class="fc">
+                <option>—</option>
+                <option>مؤقت</option>
+                <option>دائم جزئي</option>
+                <option>دائم كلي</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="rejection-fields" style="display:none">
+          <div class="fgrp">
+            <label class="flbl">سبب الرفض <span class="req">*</span></label>
+            <textarea class="fc" rows="3" placeholder="اذكر السبب الطبي للرفض..."></textarea>
+          </div>
+        </div>
+
+        <div class="fgrp">
+          <label class="flbl">الملاحظات الطبية</label>
+          <textarea class="fc" rows="4" placeholder="الملاحظات الطبية التفصيلية للجلسة..."></textarea>
+        </div>
+      </div>`,
+    footer: `
+      <button class="btn btn-accent" onclick="saveDecision('${requestId}')">${ICONS.check} اعتماد القرار</button>
+      <button class="btn btn-secondary" onclick="showToast('تم الحفظ كمسودة','i');closeModal()">حفظ كمسودة</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+
+function toggleDecisionFields() {
+  const type = document.getElementById('modal-decision-type')?.value;
+  const appFields = document.getElementById('approval-fields');
+  const rejFields = document.getElementById('rejection-fields');
+  if (appFields) appFields.style.display = type === 'موافقة' ? '' : 'none';
+  if (rejFields) rejFields.style.display = type === 'رفض' ? '' : 'none';
+}
+
+function saveDecision(requestId) {
+  const type = document.getElementById('modal-decision-type')?.value;
+  if (!type) { showToast('يرجى اختيار نوع القرار', 'w'); return; }
+  closeModal();
+  const c = session.cases.find(x => x.requestId === requestId);
+  if (c) c.decisionStatus = 'تم إدخال القرار';
+  showToast(`تم اعتماد قرار الحالة ${requestId} — ${type}`, 's');
+  renderPage();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة البيانات — العامل</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'worker', activePage: 'dashboard' });
+setBreadcrumb([{ label: 'لوحة البيانات' }]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const u = WI_DATA.users.worker;
+  const myAllowances = WI_DATA.allowances.filter(r =>
+    r.applicant.civil === u.civil || r.insured.civil === u.civil
+  );
+  const myDisability = WI_DATA.disability.filter(r => r.applicant.civil === u.civil);
+
+  const active   = myAllowances.filter(r => r.status === 'معتمد').length;
+  const pending  = myAllowances.filter(r => !['معتمد','تم رفض الطلب','تم إغلاق الطلب'].includes(r.status)).length;
+  const rejected = myAllowances.filter(r => r.status === 'تم رفض الطلب').length;
+  const needsAction = myAllowances.filter(r => r.status === 'تم إعادة الطلب لاستيفاء البيانات').length;
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>مرحباً، ${u.name}</h1>
+        <p>لوحة البيانات الخاصة بك — نظرة عامة على جميع طلباتك</p>
+      </div>
+    </div>
+
+    ${needsAction > 0 ? `
+    <div class="alert alert-w" style="margin-bottom:16px">
+      ${ICONS.warn}
+      <div>
+        <strong>يوجد ${needsAction} طلب يحتاج استيفاء بيانات</strong><br>
+        <span style="font-size:12px">يرجى مراجعة قائمة الطلبات واستيفاء البيانات المطلوبة في أقرب وقت.</span>
+      </div>
+      <button class="btn btn-warning btn-sm" style="margin-right:auto;flex-shrink:0" onclick="window.location.href='allowances-list.html'">عرض الطلبات</button>
+    </div>` : ''}
+
+    <div class="stats-grid">
+      <div class="scard p" onclick="window.location.href='allowances-list.html'">
+        <div class="sc-lbl">طلبات بدلات الانقطاع</div>
+        <div class="sc-val">${myAllowances.length}</div>
+        <div class="sc-sub">${pending} قيد المعالجة</div>
+      </div>
+      <div class="scard s" onclick="window.location.href='allowances-list.html'">
+        <div class="sc-lbl">طلبات معتمدة ومصروفة</div>
+        <div class="sc-val">${active}</div>
+        <div class="sc-sub">آخر صرف: يناير 2025</div>
+      </div>
+      <div class="scard d" onclick="window.location.href='allowances-list.html'">
+        <div class="sc-lbl">طلبات مرفوضة</div>
+        <div class="sc-val">${rejected}</div>
+        <div class="sc-sub">يمكن تقديم تظلم</div>
+      </div>
+      <div class="scard w" onclick="window.location.href='disability-list.html'">
+        <div class="sc-lbl">طلبات منفعة الإعاقة</div>
+        <div class="sc-val">${myDisability.length}</div>
+        <div class="sc-sub">${myDisability.filter(r=>r.status.includes('اعتماد')).length} معتمد</div>
+      </div>
+      <div class="scard i" onclick="window.location.href='chronic-incoming.html'">
+        <div class="sc-lbl">تشخيصات أمراض مستديمة واردة</div>
+        <div class="sc-val">${WI_DATA.chronicIncoming.filter(r=>!r.hasRequest).length}</div>
+        <div class="sc-sub">تنتظر استكمال بياناتك</div>
+      </div>
+      <div class="scard pu" onclick="window.location.href='appeals-list.html'">
+        <div class="sc-lbl">التظلمات المقدمة</div>
+        <div class="sc-val">${WI_DATA.appeals.filter(r=>r.applicant.civil===u.civil).length}</div>
+        <div class="sc-sub">قيد المراجعة</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="card">
+        <div class="ph"><h3><div class="pico bl">${ICONS.list}</div>آخر طلبات بدلات الانقطاع</h3>
+          <a href="allowances-list.html" style="font-size:12px;color:var(--primary)">عرض الكل</a>
+        </div>
+        <div class="pb-0">
+          <table class="dtbl">
+            <thead><tr><th>رقم الطلب</th><th>النوع</th><th>الحالة</th><th>التاريخ</th><th></th></tr></thead>
+            <tbody>
+              ${myAllowances.slice(0,4).map(r=>`
+              <tr>
+                <td style="font-family:monospace;font-size:11.5px">${r.id}</td>
+                <td>${r.type}</td>
+                <td>${statusBadge(r.status)}</td>
+                <td style="font-size:11.5px">${r.submitDate}</td>
+                <td><button class="ibtn" onclick="window.location.href='allowances-details.html?id=${r.id}'" title="عرض التفاصيل">${ICONS.eye}</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ph"><h3><div class="pico or">${ICONS.bell}</div>التنبيهات والإشعارات</h3></div>
+        <div class="pb">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            ${needsAction > 0 ? `
+            <div style="display:flex;gap:10px;padding:10px 12px;border:1px solid var(--warning-l);border-radius:var(--rsm);background:var(--warning-l)">
+              <div style="color:var(--warning);flex-shrink:0;margin-top:1px">${ICONS.warn}</div>
+              <div>
+                <p style="font-size:12.5px;font-weight:600;color:var(--text)">الطلب WI-2025-001301 يحتاج استيفاء</p>
+                <p style="font-size:11px;color:var(--text3)">منذ يوم واحد</p>
+              </div>
+            </div>` : ''}
+            <div style="display:flex;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rsm);background:var(--g50)">
+              <div style="color:var(--accent);flex-shrink:0;margin-top:1px">${ICONS.check}</div>
+              <div>
+                <p style="font-size:12.5px;font-weight:600;color:var(--text)">تم صرف مستحقاتك للطلب WI-2025-001089</p>
+                <p style="font-size:11px;color:var(--text3)">5 يناير 2025</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rsm);background:var(--g50)">
+              <div style="color:var(--info);flex-shrink:0;margin-top:1px">${ICONS.info}</div>
+              <div>
+                <p style="font-size:12.5px;font-weight:600;color:var(--text)">ورد تشخيص طبي جديد من وزارة الصحة</p>
+                <p style="font-size:11px;color:var(--text3)">10 يناير 2025 — <a href="chronic-incoming.html" style="color:var(--primary)">اضغط للاطلاع</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+});
+</script>
+</body>
+</html>

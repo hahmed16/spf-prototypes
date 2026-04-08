@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الحالات المحالة للمؤسسات — موظف قسم اللجان الطبية</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'committees-employee', activePage: 'referred-list' });
+setBreadcrumb([{ label: 'التنسيق مع المؤسسات الصحية' }, { label: 'الحالات المحالة للمؤسسات' }]);
+document.addEventListener('DOMContentLoaded', () => {
+  const referred = WI_DATA.allowances.filter(r =>
+    ['تم الموافقة على العرض على المؤسسات الصحية المرخصة — بانتظار إحالة المقرر',
+     'تم الإحالة إلى مقرر المؤسسة الصحية المرخصة — بانتظار جدولة جلسة',
+     'تم جدولة جلسة للعرض على المؤسسة الصحية المرخصة',
+     'تم اتخاذ القرار من المؤسسة الصحية المرخصة — بانتظار التنفيذ'].includes(r.status)
+  );
+  const all = referred.length ? referred : WI_DATA.allowances;
+  getContent().innerHTML = `
+    <div class="pg-head"><div><h1>الحالات المحالة للمؤسسات الصحية المرخصة</h1>
+      <p>متابعة مسار الإحالة حتى صدور القرار</p></div>
+    </div>
+    <div class="card">
+      <div class="ttabs">
+        <div class="ttab act">جميع الحالات <span class="tc">${all.length}</span></div>
+        <div class="ttab">بانتظار الجدولة <span class="tc">2</span></div>
+        <div class="ttab">جلسة مجدولة <span class="tc">1</span></div>
+        <div class="ttab">صدر قرار <span class="tc">1</span></div>
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>رقم الطلب</th><th>المؤمن عليه</th><th>المؤسسة الصحية</th><th>الحالة</th><th>تاريخ الإحالة</th><th></th></tr></thead>
+            <tbody>
+              ${all.map(r=>`
+              <tr>
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td>${r.insured.name}</td>
+                <td>${r.referral?.institution || 'مستشفى النور التخصصي'}</td>
+                <td>${statusBadge(r.status)}</td>
+                <td style="font-size:12px">${r.lastUpdate}</td>
+                <td><button class="ibtn" onclick="window.location.href='referrals-details.html?id=${r.id}'">${ICONS.eye}</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+});
+</script></body></html>

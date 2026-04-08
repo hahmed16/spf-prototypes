@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل طلب منفعة الإعاقة — رئيس قسم الإعاقة</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'disability-head', activePage: 'disability-list' });
+const params = new URLSearchParams(window.location.search);
+const req = WI_DATA.disability.find(r=>r.id===params.get('id')) || WI_DATA.disability[0];
+currentRequestId = req.id;
+setBreadcrumb([{label:'منفعة الإعاقة',page:'disability-list'},{label:`تفاصيل ${req.id}`}]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const canAct = req.status.includes('بانتظار اعتماد رئيس قسم الإعاقة');
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تفاصيل طلب منفعة الأشخاص ذوي الإعاقة</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p></div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='disability-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    ${canAct?`<div class="alert alert-i">${ICONS.info}<span>هذا الطلب بانتظار قرارك كرئيس قسم الإعاقة والأمراض المستديمة.</span></div>`:''}
+
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الحالة</div>${statusBadge(req.status)}</div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div>${req.submitDate}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر تحديث</div><div style="font-size:12px;color:var(--text2)">${req.lastUpdate}</div></div>
+        </div>
+      </div>
+    </div>
+
+    ${renderApplicantPanel(req.applicant)}
+    ${renderDisabilityCardPanel(req.card, true)}
+
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico gr">${ICONS.shield}</div>بيانات التأمين</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">${req.insurance.status}</span></div></div>
+          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${req.insurance.subType}</div></div>
+          <div class="fgrp"><label class="flbl">منافع أخرى</label><div class="fro">${req.insurance.otherBenefits}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- توصية الموظف — يراها رئيس القسم دائماً -->
+    <div class="card" style="border:1px solid var(--primary-l);background:var(--primary-l)">
+      <div class="pb-c">
+        <div class="flbl" style="margin-bottom:6px;color:var(--primary)">توصية موظف القسم</div>
+        <div style="font-size:12.5px">تم التحقق من بطاقة الإعاقة وصلاحيتها. الطلب مستوفٍ للشروط. التوصية بالموافقة.</div>
+        <div style="margin-top:8px"><span class="badge b-approved">توصية بالموافقة</span></div>
+      </div>
+    </div>
+
+    ${req.disbursement?`
+    <div class="card card-cum">
+      <div class="ph"><h3><div class="pico gr">${ICONS.chart}</div>بيانات الصرف</h3><span class="stg-lbl">معتمد</span></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">حالة الصرف</label><div class="fro"><span class="badge b-approved">${req.disbursement.status}</span></div></div>
+          <div class="fgrp"><label class="flbl">يوم الصرف الشهري</label><div class="fro">اليوم ${req.disbursement.monthlyDay}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ انتهاء الاستحقاق</label><div class="fro">${req.disbursement.expiryDate}</div></div>
+        </div>
+      </div>
+    </div>`:''}
+
+    ${renderAttachmentsPanel(req.attachments, true)}
+    ${renderOperationalNotes(req.notes, true)}
+
+    ${canAct?`
+    <div class="dp">
+      <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>اتخاذ القرار — رئيس قسم الإعاقة والأمراض المستديمة</h3></div>
+      <div class="dp-body">
+        <div class="fgrp"><label class="flbl">ملاحظاتك على التوصية</label>
+          <textarea class="fc" rows="3" placeholder="أكتب ملاحظاتك وقرارك..."></textarea>
+        </div>
+        <div class="fgrp"><label class="flbl">إرفاق ملف (اختياري)</label>
+          <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4">
+        </div>
+        <div class="dp-acts">
+          <button class="btn btn-accent" onclick="headDecision('اعتماد')">${ICONS.check} اعتماد الطلب</button>
+          <button class="btn btn-warning" onclick="headDecision('إعادة')">إعادة إلى موظف القسم</button>
+          <button class="btn btn-danger" onclick="headDecision('رفض')">${ICONS.x} رفض الطلب</button>
+        </div>
+      </div>
+    </div>`:''}
+
+    ${renderTimeline(req.timeline)}`;
+});
+
+function headDecision(type){
+  const msgs={اعتماد:'تم اعتماد الطلب — سيبدأ الصرف الشهري',إعادة:'تم إعادة الطلب للموظف للمراجعة',رفض:'تم رفض الطلب'};
+  const types={اعتماد:'s',إعادة:'w',رفض:'d'};
+  showToast(msgs[type],types[type]);
+  setTimeout(()=>window.location.href='disability-list.html',1500);
+}
+</script></body></html>

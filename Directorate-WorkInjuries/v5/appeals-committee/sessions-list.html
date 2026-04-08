@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جلسات لجنة التظلمات</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'appeals-committee', activePage: 'sessions-list' });
+setBreadcrumb([{ label: 'جلسات التظلمات' }, { label: 'قائمة الجلسات' }]);
+
+const appealsSessions = [
+  {
+    id: 'APP-SES-2025-0023',
+    date: '2025-02-05', time: '10:00',
+    status: 'مجدولة', casesCount: 3, completedDecisions: 0,
+    quorum: false,
+    members: [
+      { name: 'د. خالد بن سالم الهاشمي', role: 'رئيس', specialty: 'جراحة العظام', attendance: 'مجدول' },
+      { name: 'د. ريم بنت أحمد المعولية', role: 'عضو', specialty: 'الطب الباطني', attendance: 'مجدول' },
+      { name: 'د. حسن بن علي السيابي', role: 'عضو', specialty: 'طب الأمراض المهنية', attendance: 'مجدول' },
+    ],
+    cases: WI_DATA.appeals.map(a => ({
+      appealId: a.id,
+      name: a.applicant.name,
+      originalReqId: a.originalRequestId,
+      reason: a.appealReason,
+      decisionStatus: 'بانتظار القرار',
+      decision: null
+    }))
+  },
+  {
+    id: 'APP-SES-2025-0019',
+    date: '2025-01-20', time: '09:00',
+    status: 'مغلقة', casesCount: 2, completedDecisions: 2,
+    quorum: true,
+    members: [
+      { name: 'د. خالد بن سالم الهاشمي', role: 'رئيس', specialty: 'جراحة العظام', attendance: 'حاضر' },
+      { name: 'د. ريم بنت أحمد المعولية', role: 'عضو', specialty: 'الطب الباطني', attendance: 'حاضر' },
+      { name: 'د. حسن بن علي السيابي', role: 'عضو', specialty: 'طب الأمراض المهنية', attendance: 'حاضر' },
+    ],
+    cases: [
+      { appealId: 'APP-2024-000045', name: 'أحمد بن سيف الكندي', originalReqId: 'WI-2024-000789', reason: 'القرار مخالف للأنظمة', decisionStatus: 'تم التوقيع', decision: { type: 'تأييد القرار الأصلي' } }
+    ]
+  }
+];
+
+let activeTab = 'all';
+
+document.addEventListener('DOMContentLoaded', render);
+
+function render() {
+  const filtered = activeTab === 'all' ? appealsSessions
+    : appealsSessions.filter(s => s.status === (activeTab === 'upcoming' ? 'مجدولة' : 'مغلقة'));
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>جلسات لجنة التظلمات</h1>
+        <p>${appealsSessions.length} جلسة</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ttabs">
+        ${[
+          { key: 'all', label: 'الكل', count: appealsSessions.length },
+          { key: 'upcoming', label: 'مجدولة', count: appealsSessions.filter(s=>s.status==='مجدولة').length },
+          { key: 'closed', label: 'مغلقة', count: appealsSessions.filter(s=>s.status==='مغلقة').length },
+        ].map(t => `<div class="ttab ${activeTab===t.key?'act':''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الجلسة</th>
+                <th>التاريخ والوقت</th>
+                <th>التظلمات المدرجة</th>
+                <th>القرارات المكتملة</th>
+                <th>حالة النصاب</th>
+                <th>حالة الجلسة</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.map(s => `
+              <tr style="${s.status==='مجدولة'?'background:var(--primary-l)':''}">
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${s.id}</td>
+                <td>${s.date} — ${s.time}</td>
+                <td>${s.casesCount}</td>
+                <td>${s.completedDecisions} / ${s.casesCount}</td>
+                <td><span class="badge ${s.quorum?'b-approved':'b-returned'}">${s.quorum?'مكتمل':'غير مكتمل'}</span></td>
+                <td><span class="badge ${s.status==='مجدولة'?'b-session':'b-approved'}">${s.status}</span></td>
+                <td>
+                  <button class="btn btn-primary btn-xs"
+                    onclick="window.location.href='session-details.html?id=${s.id}'">
+                    ${s.status==='مجدولة'?'تأكيد الحضور / توقيع':'عرض التفاصيل'}
+                  </button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function setTab(t) { activeTab = t; render(); }
+</script>
+</body>
+</html>

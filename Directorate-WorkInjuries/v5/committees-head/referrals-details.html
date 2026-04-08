@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل طلب العرض — رئيس قسم اللجان الطبية</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'committees-head', activePage: 'referrals-list' });
+const params = new URLSearchParams(window.location.search);
+const req = WI_DATA.allowances.find(r=>r.id===params.get('id')) || WI_DATA.allowances[0];
+currentRequestId = req.id;
+setBreadcrumb([{label:'طلبات العرض',page:'referrals-list'},{label:`تفاصيل ${req.id}`}]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const canAct = req.status === 'تم الموافقة على العرض على المؤسسات الصحية المرخصة — بانتظار إحالة المقرر';
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تفاصيل طلب العرض على مؤسسة صحية مرخصة</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p></div>
+      <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.arrow_left} رجوع</button></div>
+    </div>
+    ${canAct?`<div class="alert alert-i">${ICONS.info}<span>هذا الطلب بانتظار قرارك لتوجيهه إلى المقرر أو الرفض.</span></div>`:''}
+
+    ${renderRequestSummary(req)}
+    ${renderApplicantPanel(req.applicant)}
+    ${renderInsuredPersonPanel(req.insured)}
+    ${renderEmployerPanel(req.employer)}
+    ${renderInjuryDataPanel(req.injury, req.type)}
+    ${req.investigation?renderInvestigationReport(req.investigation,false):''}
+    ${renderSickLeavePeriodsPanel(req.sickLeavePeriods||[],false)}
+    ${renderMedicalQueryPanel(req.insured.civil)}
+
+    <!-- توصية الموظف -->
+    <div class="card" style="border:1px solid var(--primary-l);background:var(--primary-l)">
+      <div class="pb-c">
+        <div class="flbl" style="margin-bottom:6px;color:var(--primary)">توصية موظف القسم</div>
+        <div style="font-size:12.5px">المؤسسة المقترحة: مستشفى النور التخصصي — مسقط</div>
+        <div style="margin-top:6px"><span class="badge b-approved">توصية بالموافقة والإحالة</span></div>
+      </div>
+    </div>
+
+    ${canAct?`
+    <div class="dp">
+      <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>اتخاذ القرار — رئيس قسم اللجان الطبية</h3></div>
+      <div class="dp-body">
+        <div id="rapporteur-grp">
+          <div class="fgrp">
+            <label class="flbl">تأكيد المؤسسة الصحية المرخصة <span class="req">*</span></label>
+            <select class="fc" id="institution-final">
+              <option>مستشفى النور التخصصي — مسقط (موصى به من الموظف)</option>
+              <option>مستشفى الأمل التخصصي — السيب</option>
+            </select>
+          </div>
+        </div>
+        <div class="fgrp"><label class="flbl">ملاحظات الرئيس</label>
+          <textarea class="fc" rows="3" placeholder="أكتب ملاحظاتك..."></textarea>
+        </div>
+        <div class="fgrp"><label class="flbl">إرفاق ملف (اختياري)</label>
+          <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4">
+        </div>
+        <div class="dp-acts">
+          <button class="btn btn-accent" onclick="headReferralDecision('توجيه')">${ICONS.check} توجيه إلى مقرر المؤسسة الصحية المرخصة</button>
+          <button class="btn btn-warning" onclick="headReferralDecision('إعادة')">إعادة لموظف القسم</button>
+          <button class="btn btn-danger" onclick="headReferralDecision('رفض')">رفض الإحالة</button>
+        </div>
+      </div>
+    </div>`:''}
+
+    ${renderAttachmentsPanel(req.attachments,true)}
+    ${renderOperationalNotes(req.notes,true)}
+    ${renderTimeline(req.timeline)}`;
+});
+
+function headReferralDecision(type){
+  const msgs={توجيه:'تم توجيه الطلب لمقرر المؤسسة الصحية المرخصة',إعادة:'تم إعادة الطلب لموظف القسم',رفض:'تم رفض الإحالة'};
+  const types={توجيه:'s',إعادة:'w',رفض:'d'};
+  showToast(msgs[type],types[type]);
+  setTimeout(()=>window.location.href='referrals-list.html',1500);
+}
+</script></body></html>

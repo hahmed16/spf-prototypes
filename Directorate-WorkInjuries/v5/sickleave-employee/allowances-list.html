@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قائمة الطلبات — موظف قسم الإجازات المرضية</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'sickleave-employee', activePage: 'allowances-list' });
+setBreadcrumb([{ label: 'بدلات الانقطاع عن العمل' }, { label: 'قائمة الطلبات' }]);
+const me = WI_DATA.users.sickleave_employee.name;
+const reqs = WI_DATA.allowances;
+let activeTab = 'all';
+document.addEventListener('DOMContentLoaded', render);
+function render() {
+  const filtered = activeTab==='all' ? reqs : reqs.filter(r=>{
+    if(activeTab==='mine') return r.status==='قيد المراجعة من موظف قسم الإجازات المرضية' && r.checkedOutBy===me;
+    if(activeTab==='pending') return r.status==='قيد المراجعة من موظف قسم الإجازات المرضية';
+    if(activeTab==='head') return r.status==='بانتظار اعتماد رئيس قسم الإجازات المرضية';
+    if(activeTab==='approved') return r.status==='معتمد';
+    return true;
+  });
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>قائمة طلبات صرف بدلات الانقطاع</h1><p>قسم الإجازات المرضية</p></div>
+      <div class="pg-acts"><button class="btn btn-secondary btn-sm" onclick="window.location.href='../shared/medical-query.html'">${ICONS.medical} استعلام طبي</button></div>
+    </div>
+    <div class="filters">
+      <div class="fgrid">
+        <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc" placeholder="WI-YYYY-XXXXXX"></div>
+        <div class="fgrp"><label class="flbl">اسم المؤمن عليه</label><input type="text" class="fc"></div>
+        <div class="fgrp"><label class="flbl">نوع الطلب</label><select class="fc"><option>الكل</option><option>إصابة عمل</option><option>مرض مهني</option></select></div>
+        <div class="fgrp"><label class="flbl">الحالة</label><select class="fc"><option>جميع الحالات</option><option>قيد المراجعة من موظف قسم الإجازات المرضية</option><option>بانتظار اعتماد رئيس قسم الإجازات المرضية</option><option>معتمد</option></select></div>
+      </div>
+      <div class="facts"><button class="btn btn-primary btn-sm">${ICONS.search} بحث</button><button class="btn btn-secondary btn-sm">مسح</button></div>
+    </div>
+    <div class="card">
+      <div class="ttabs">
+        ${[
+          {key:'all',label:'الكل',count:reqs.length},
+          {key:'pending',label:'قيد المراجعة',count:reqs.filter(r=>r.status==='قيد المراجعة من موظف قسم الإجازات المرضية').length},
+          {key:'mine',label:'محجوزة بواسطتي',count:reqs.filter(r=>r.checkedOutBy===me).length},
+          {key:'head',label:'بانتظار رئيس القسم',count:reqs.filter(r=>r.status==='بانتظار اعتماد رئيس قسم الإجازات المرضية').length},
+          {key:'approved',label:'معتمدة',count:reqs.filter(r=>r.status==='معتمد').length},
+        ].map(t=>`<div class="ttab ${activeTab===t.key?'act':''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>رقم الطلب</th><th>المؤمن عليه</th><th>النوع</th><th>الحالة</th><th>الفترات</th><th>تاريخ التقديم</th><th>الحجز</th><th></th></tr></thead>
+            <tbody>
+              ${filtered.map(r=>`
+              <tr style="${r.checkedOutBy===me?'background:#f0fdf4':''}">
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td>${r.insured.name}</td>
+                <td>${r.type}</td>
+                <td>${statusBadge(r.status)}</td>
+                <td>${r.sickLeavePeriods?.length ? `<strong>${r.sickLeavePeriods.length}</strong> فترة` : '—'}</td>
+                <td style="font-size:12px">${r.submitDate}</td>
+                <td>
+                  ${!r.checkedOutBy
+                    ? `<span class="badge b-avail">متاح</span>`
+                    : r.checkedOutBy===me
+                      ? `<span class="badge b-checkout">محجوز بواسطتي</span>`
+                      : `<span class="badge b-checkout">محجوز</span>`}
+                </td>
+                <td>
+                  <div style="display:flex;gap:4px">
+                    <button class="ibtn" onclick="window.location.href='allowances-details.html?id=${r.id}'">${ICONS.eye}</button>
+                    ${!r.checkedOutBy?`<button class="ibtn" onclick="doCheckout('${r.id}')" title="Check-out">${ICONS.lock}</button>`:r.checkedOutBy===me?`<button class="ibtn" onclick="doCheckin('${r.id}')" title="Check-in">${ICONS.unlock}</button>`:''}
+                    <button class="ibtn" onclick="openAddNoteModal('${r.id}')">${ICONS.note}</button>
+                  </div>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+function setTab(t){ activeTab=t; render(); }
+function doCheckout(id){ const r=reqs.find(x=>x.id===id); if(r){r.checkedOutBy=me;} showToast(`تم حجز ${id}`,'s'); render(); }
+function doCheckin(id){ const r=reqs.find(x=>x.id===id); if(r){r.checkedOutBy=null;} showToast(`تم تحرير ${id}`,'i'); render(); }
+</script>
+</body>
+</html>

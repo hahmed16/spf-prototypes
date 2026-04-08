@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>التوقيعات المعلّقة — مقرر المؤسسة الصحية المرخصة</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'institution-rapporteur', activePage: 'signing' });
+setBreadcrumb([{ label: 'إدارة الجلسات' }, { label: 'التوقيعات المعلّقة' }]);
+
+const pendingSigns = [
+  {
+    sessionId: 'SES-2025-0112',
+    institution: 'مستشفى النور التخصصي',
+    date: '2025-01-28',
+    totalMembers: 5,
+    signedCount: 2,
+    pendingMembers: [
+      { name: 'د. سيف المسكري', role: 'رئيس', lastReminder: '2025-01-26' },
+      { name: 'د. أسامة الغيلاني', role: 'عضو', lastReminder: '2025-01-26' },
+      { name: 'د. لميس الرئيسية', role: 'عضو', lastReminder: null },
+    ]
+  }
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>التوقيعات المعلّقة</h1>
+        <p>الجلسات التي تحتاج متابعة التوقيعات الإلكترونية</p>
+      </div>
+    </div>
+
+    ${pendingSigns.length === 0 ? `
+    <div class="alert alert-s">${ICONS.check}<span>لا توجد توقيعات معلّقة — جميع الجلسات مكتملة.</span></div>` : ''}
+
+    ${pendingSigns.map(ps => `
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico w">${ICONS.pen}</div>الجلسة ${ps.sessionId} — ${ps.institution}</h3>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;color:var(--text3)">${ps.signedCount} / ${ps.totalMembers} وقّعوا</span>
+          <button class="btn btn-secondary btn-xs"
+            onclick="window.location.href='session-details.html?id=${ps.sessionId}'">
+            فتح الجلسة
+          </button>
+        </div>
+      </div>
+      <div class="pb">
+        <div class="fg fg-2" style="margin-bottom:14px">
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ الجلسة</div><div>${ps.date}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">حالة التوقيعات</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div style="flex:1;background:var(--g200);border-radius:10px;height:8px;overflow:hidden">
+                <div style="width:${(ps.signedCount/ps.totalMembers)*100}%;background:var(--accent);height:100%;border-radius:10px"></div>
+              </div>
+              <span style="font-size:12px;font-weight:700">${ps.signedCount}/${ps.totalMembers}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flbl" style="margin-bottom:8px">الأعضاء الذين لم يوقّعوا بعد:</div>
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>العضو</th><th>المنصب</th><th>آخر تذكير</th><th>الإجراء</th></tr></thead>
+            <tbody>
+              ${ps.pendingMembers.map(m=>`
+              <tr>
+                <td style="font-weight:600">${m.name}</td>
+                <td>${m.role}</td>
+                <td style="font-size:11.5px;color:var(--text3)">${m.lastReminder ? `تم الإرسال: ${m.lastReminder}` : 'لم يُرسَل بعد'}</td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" onclick="sendReminder('${m.name}','${ps.sessionId}')">
+                    ${ICONS.bell} إرسال تذكير
+                  </button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="facts mt12">
+          <button class="btn btn-primary btn-sm" onclick="sendAllReminders('${ps.sessionId}')">
+            ${ICONS.bell} إرسال تذكير لجميع غير الموقّعين
+          </button>
+        </div>
+      </div>
+    </div>`).join('')}
+
+    <!-- جلسات مكتملة التوقيعات بانتظار الإرسال -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico s">${ICONS.check}</div>جلسات مكتملة التوقيعات — جاهزة للإرسال</h3></div>
+      <div class="pb">
+        <div class="empty-st" style="padding:20px">
+          ${ICONS.check}
+          <h4>لا توجد جلسات جاهزة للإرسال الآن</h4>
+          <p>ستظهر هنا الجلسات التي اكتملت فيها جميع التوقيعات</p>
+        </div>
+      </div>
+    </div>`;
+});
+
+function sendReminder(name, sessionId) {
+  showToast(`تم إرسال تذكير التوقيع إلى ${name}`, 'i');
+}
+
+function sendAllReminders(sessionId) {
+  showToast('تم إرسال تذكير التوقيع لجميع الأعضاء غير الموقّعين', 'i');
+}
+</script>
+</body>
+</html>

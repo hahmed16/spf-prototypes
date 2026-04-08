@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إدخال قرار الحالة — مقرر المؤسسة الصحية المرخصة</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'institution-rapporteur', activePage: 'sessions-list' });
+const params = new URLSearchParams(window.location.search);
+const reqId = params.get('req') || 'WI-2025-001156';
+const sessionId = params.get('session') || 'SES-2025-0112';
+const req = WI_DATA.allowances.find(r=>r.id===reqId) || WI_DATA.allowances[2];
+currentRequestId = req.id;
+setBreadcrumb([
+  {label:'إدارة الجلسات',page:'sessions-list'},
+  {label:`جلسة ${sessionId}`,page:`session-details.html?id=${sessionId}`},
+  {label:`قرار ${reqId}`}
+]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>إدخال قرار الحالة</h1>
+        <p>جلسة: <strong style="font-family:monospace;color:var(--primary)">${sessionId}</strong> — طلب: <strong style="font-family:monospace;color:var(--primary)">${reqId}</strong></p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.history.back()">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    <!-- ملخص الحالة المعروضة -->
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div class="flbl" style="margin-bottom:8px">ملخص الحالة المعروضة</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-family:monospace;font-weight:700;color:var(--primary)">${req.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">المؤمن عليه</div><div style="font-weight:600">${req.insured.name}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">نوع الطلب</div><div>${req.type} — ${req.subtype||''}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الحالة</div>${statusBadge(req.status)}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- كامل بيانات الحالة — للاطلاع -->
+    <div style="border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;margin-bottom:16px">
+      <div style="padding:10px 18px;background:var(--g100);border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:space-between"
+        onclick="toggleCaseData()">
+        <span style="font-size:13px;font-weight:700">عرض / إخفاء كامل بيانات الحالة للاطلاع</span>
+        <span id="toggle-icon">${ICONS.arrow_left}</span>
+      </div>
+      <div id="case-data-body" style="display:none;padding:0">
+        ${renderApplicantPanel(req.applicant)}
+        ${renderInsuredPersonPanel(req.insured)}
+        ${renderEmployerPanel(req.employer)}
+        ${renderInjuryDataPanel(req.injury, req.type)}
+        ${req.investigation ? renderInvestigationReport(req.investigation, false) : ''}
+        ${renderSickLeavePeriodsPanel(req.sickLeavePeriods||[], false)}
+        ${renderAttachmentsPanel(req.attachments, false)}
+      </div>
+    </div>
+
+    <!-- نموذج إدخال القرار -->
+    <div class="dp">
+      <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>إدخال قرار الجلسة</h3></div>
+      <div class="dp-body">
+        <div class="fgrp">
+          <label class="flbl">نوع القرار <span class="req">*</span></label>
+          <select class="fc" id="decision-type" onchange="onDecisionTypeChange()">
+            <option value="">— اختر نوع القرار —</option>
+            <option value="موافقة">موافقة</option>
+            <option value="رفض">رفض</option>
+            <option value="تأجيل">تأجيل</option>
+            <option value="إعادة للتصحيح">إعادة للتصحيح</option>
+          </select>
+        </div>
+
+        <!-- حقول الموافقة -->
+        <div id="approval-section" style="display:none">
+          <div class="fg fg-2" style="gap:14px">
+            <div class="fgrp">
+              <label class="flbl">فترة الإجازة الموصى بها — من</label>
+              <input type="date" class="fc" id="leave-from">
+            </div>
+            <div class="fgrp">
+              <label class="flbl">فترة الإجازة الموصى بها — إلى</label>
+              <input type="date" class="fc" id="leave-to">
+            </div>
+            <div class="fgrp">
+              <label class="flbl">نسبة العجز (إن انطبقت) %</label>
+              <input type="number" class="fc" id="disability-pct" min="0" max="100" placeholder="0">
+            </div>
+            <div class="fgrp">
+              <label class="flbl">نوع العجز</label>
+              <select class="fc" id="disability-type">
+                <option>—</option>
+                <option>مؤقت</option>
+                <option>دائم جزئي</option>
+                <option>دائم كلي</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- حقول الرفض -->
+        <div id="rejection-section" style="display:none">
+          <div class="fgrp">
+            <label class="flbl">سبب الرفض الطبي <span class="req">*</span></label>
+            <textarea class="fc" id="rejection-reason" rows="3"
+              placeholder="اذكر الأسباب الطبية التي تستند إليها في الرفض..."></textarea>
+          </div>
+        </div>
+
+        <div class="fgrp">
+          <label class="flbl">الملاحظات الطبية التفصيلية</label>
+          <textarea class="fc" id="medical-notes" rows="5"
+            placeholder="مضمون القرار التفصيلي، الملاحظات الطبية، التوصيات..."></textarea>
+        </div>
+
+        <div class="fgrp">
+          <label class="flbl">إرفاق ملف (اختياري)</label>
+          <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4">
+        </div>
+
+        <div class="dp-acts">
+          <button class="btn btn-accent btn-lg" onclick="saveDecision()">${ICONS.check} اعتماد القرار</button>
+          <button class="btn btn-secondary" onclick="saveDraft()">حفظ كمسودة</button>
+          <button class="btn btn-warning" onclick="postponeCase()">تأجيل البت</button>
+          <button class="btn btn-ghost" onclick="window.history.back()">إلغاء</button>
+        </div>
+      </div>
+    </div>`;
+});
+
+function toggleCaseData() {
+  const body = document.getElementById('case-data-body');
+  const icon = document.getElementById('toggle-icon');
+  if (body.style.display === 'none') {
+    body.style.display = '';
+    icon.style.transform = 'rotate(-90deg)';
+  } else {
+    body.style.display = 'none';
+    icon.style.transform = '';
+  }
+}
+
+function onDecisionTypeChange() {
+  const type = document.getElementById('decision-type').value;
+  document.getElementById('approval-section').style.display = type === 'موافقة' ? '' : 'none';
+  document.getElementById('rejection-section').style.display = type === 'رفض' ? '' : 'none';
+}
+
+function saveDecision() {
+  const type = document.getElementById('decision-type').value;
+  if (!type) { showToast('يرجى اختيار نوع القرار', 'w'); return; }
+  const notes = document.getElementById('medical-notes').value.trim();
+  if (!notes) { showToast('يرجى إدخال الملاحظات الطبية التفصيلية', 'w'); return; }
+  confirmAction({
+    title: 'تأكيد اعتماد القرار',
+    msg: `هل أنت متأكد من اعتماد القرار التالي على الطلب ${reqId}؟<br><br>
+          <strong>نوع القرار: ${type}</strong><br>
+          <span style="font-size:12px;color:var(--text3)">بعد الاعتماد لن يتاح التعديل إلا عبر المقرر.</span>`,
+    confirmLabel: 'نعم، اعتماد القرار',
+    confirmClass: 'btn-accent',
+    onConfirm: () => {
+      showToast(`تم اعتماد قرار ${type} على الطلب ${reqId} بنجاح`, 's');
+      setTimeout(() => window.location.href = `session-details.html?id=${sessionId}`, 1500);
+    }
+  });
+}
+
+function saveDraft() {
+  showToast('تم حفظ مسودة القرار', 'i');
+}
+
+function postponeCase() {
+  confirmAction({
+    title: 'تأجيل البت في الحالة',
+    msg: `هل تريد تأجيل البت في الطلب ${reqId} لجلسة لاحقة؟`,
+    confirmLabel: 'نعم، تأجيل',
+    confirmClass: 'btn-warning',
+    onConfirm: () => {
+      showToast('تم تأجيل البت في الحالة لجلسة لاحقة', 'w');
+      setTimeout(() => window.location.href = `session-details.html?id=${sessionId}`, 1500);
+    }
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الحالات الواردة — رئيس قسم الإعاقة</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'disability-head', activePage: 'chronic-incoming' });
+setBreadcrumb([{ label: 'منفعة الأمراض المستديمة' }, { label: 'الحالات الواردة' }]);
+document.addEventListener('DOMContentLoaded', () => {
+  const incoming = WI_DATA.chronicIncoming;
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>الحالات الواردة من المؤسسات الصحية المعالجة</h1>
+        <p>تشخيصات أمراض مستديمة واردة إلكترونياً من وزارة الصحة — ${incoming.length} حالة</p></div>
+    </div>
+    <div class="filters">
+      <div class="fgrid">
+        <div class="fgrp"><label class="flbl">الرقم المدني</label><input type="text" class="fc"></div>
+        <div class="fgrp"><label class="flbl">المؤسسة الصحية</label><input type="text" class="fc"></div>
+        <div class="fgrp"><label class="flbl">التشخيص الطبي</label><input type="text" class="fc"></div>
+        <div class="fgrp"><label class="flbl">هل تم تقديم طلب؟</label><select class="fc"><option>الكل</option><option>نعم</option><option>لا</option></select></div>
+        <div class="fgrp"><label class="flbl">المسار المتوقع</label><select class="fc"><option>الكل</option><option>مسار مباشر</option><option>مسار اللجان الطبية</option></select></div>
+      </div>
+      <div class="facts"><button class="btn btn-primary btn-sm">${ICONS.search} بحث</button><button class="btn btn-secondary btn-sm">مسح</button></div>
+    </div>
+    <div class="card">
+      <div class="pb-0">
+        ${incoming.map(d=>`
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;gap:14px;align-items:flex-start">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <span style="font-size:13px;font-weight:700">${d.diagnosis}</span>
+              <span class="badge ${d.expectedPath==='مسار مباشر'?'b-direct':'b-commpath'}">${d.expectedPath}</span>
+              ${d.hasRequest?`<span class="badge b-approved">تم التقديم</span>`:`<span class="badge b-returned">لم يُقدَّم بعد</span>`}
+            </div>
+            <div style="font-size:12px;color:var(--text2);display:flex;flex-wrap:wrap;gap:16px">
+              <span>المستفيد: ${d.applicantName}</span>
+              <span>الرقم المدني: ${d.civil}</span>
+              <span>المستشفى: ${d.hospital}</span>
+              <span>الطبيب: ${d.doctor}</span>
+              <span>تاريخ ثبوت المرض: ${d.provenDate}</span>
+            </div>
+          </div>
+          <div>
+            ${d.hasRequest
+              ? `<a href="chronic-details.html?id=${d.requestId}" class="btn btn-secondary btn-sm">${ICONS.eye} عرض الطلب</a>`
+              : `<span class="badge b-phead">بانتظار تقديم المواطن</span>`}
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+});
+</script></body></html>
+

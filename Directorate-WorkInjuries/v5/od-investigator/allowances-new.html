@@ -1,0 +1,167 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تقديم طلب (حالات خاصة) — موظف التحقيق في مرض مهني</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'od-investigator', activePage: 'allowances-list' });
+setBreadcrumb([{label:'بدلات الانقطاع',page:'allowances-list'},{label:'تقديم طلب — حالات خاصة'}]);
+
+const me = WI_DATA.users.od_investigator;
+let foundWorker = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تقديم طلب بدلات الانقطاع — حالات خاصة</h1>
+        <p>يستخدم هذا النموذج فقط في الحالات التي يتعذر فيها على العامل أو جهة العمل التقديم مباشرةً</p>
+      </div>
+      <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='allowances-list.html'">${ICONS.arrow_left} رجوع</button></div>
+    </div>
+
+    <div class="alert alert-w">
+      ${ICONS.warn}
+      <div><strong>تنبيه:</strong> يجب تحديد سبب التقديم عن طريق موظف الصندوق بدلاً من مقدم الطلب الأصلي. جميع الطلبات المقدمة عبر هذه الشاشة تُسجَّل باسمك.</div>
+    </div>
+
+    <!-- بيانات الموظف -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات الموظف المقدِّم</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">موظف قسم التحقيق في مرض مهني</div></div>
+          <div class="fgrp"><label class="flbl">اسم الموظف</label><div class="fro">${me.name}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم الوظيفي</label><div class="fro">${me.employeeId}</div></div>
+        </div>
+        <div class="fg fg-2 mt12">
+          <div class="fgrp">
+            <label class="flbl">سبب التقديم عن طريق الموظف <span class="req">*</span></label>
+            <select class="fc" id="entry-reason">
+              <option value="">— اختر السبب —</option>
+              <option>بناءً على حكم محكمة</option>
+              <option>عجز العامل عن التقديم بسبب الحالة الصحية</option>
+              <option>غياب جهة العمل وعدم التعاون</option>
+              <option>وفاة العامل وتقديم الطلب من قِبل الصندوق</option>
+              <option>سبب آخر</option>
+            </select>
+          </div>
+          <div class="fgrp">
+            <label class="flbl">تفاصيل السبب <span class="req">*</span></label>
+            <textarea class="fc" rows="3" placeholder="اشرح السبب بالتفصيل..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- استعلام عن بيانات المؤمن عليه -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.search}</div>الاستعلام عن بيانات المؤمن عليه</h3></div>
+      <div class="pb">
+        <div class="fg fg-2" style="margin-bottom:14px">
+          <div class="fgrp">
+            <label class="flbl">الرقم المدني للعامل <span class="req">*</span></label>
+            <input type="text" class="fc" id="worker-civil" placeholder="10 أرقام" maxlength="10">
+          </div>
+          <div class="fgrp">
+            <label class="flbl">رقم السجل التجاري لجهة العمل <span class="req">*</span></label>
+            <input type="text" class="fc" id="employer-cr" placeholder="رقم السجل التجاري">
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="queryWorker()">${ICONS.search} استعلام</button>
+        <div id="worker-result" style="margin-top:14px"></div>
+      </div>
+    </div>
+
+    <!-- باقي نموذج الطلب -->
+    <div id="rest-form" style="display:none">
+      <div class="card">
+        <div class="ph"><h3><div class="pico or">${ICONS.medical}</div>معلومات الطلب</h3></div>
+        <div class="pb">
+          <div class="fg fg-3">
+            <div class="fgrp">
+              <label class="flbl">نوع الطلب <span class="req">*</span></label>
+              <select class="fc"><option>إصابة عمل</option></select>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">نوع الحالة <span class="req">*</span></label>
+              <select class="fc"><option>حادث طريق</option><option>إصابة في موقع العمل</option><option>إجهاد وإرهاق</option></select>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">تاريخ الواقعة <span class="req">*</span></label>
+              <input type="date" class="fc">
+            </div>
+            <div class="fgrp span-full">
+              <label class="flbl">وصف الواقعة <span class="req">*</span></label>
+              <textarea class="fc" rows="4" placeholder="صف الواقعة بالتفصيل..."></textarea>
+            </div>
+            <div class="fgrp"><label class="flbl">مكان الواقعة</label><input type="text" class="fc"></div>
+            <div class="fgrp"><label class="flbl">الجزء المصاب</label>
+              <select class="fc"><option>الرأس</option><option>الطرف العلوي الأيمن</option><option>الطرف العلوي الأيسر</option><option>الطرف السفلي الأيمن</option><option>الطرف السفلي الأيسر</option><option>الجذع</option><option>متعدد</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات</h3></div>
+        <div class="pb">
+          <div class="fg fg-2">
+            <div class="fgrp"><label class="flbl">نوع المرفق</label><select class="fc"><option>تقرير طبي</option><option>حكم محكمة</option><option>مراسلات رسمية</option><option>صور</option><option>مستند آخر</option></select></div>
+            <div class="fgrp"><label class="flbl">الملف</label><input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4"></div>
+          </div>
+          <button class="btn btn-secondary btn-sm mt8">${ICONS.plus} إضافة مرفق آخر</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;padding:16px 0">
+        <button class="btn btn-primary btn-lg" onclick="submitSpecialRequest()">${ICONS.check} إرسال الطلب</button>
+        <button class="btn btn-secondary btn-lg" onclick="showToast('تم الحفظ كمسودة','i')">حفظ كمسودة</button>
+        <button class="btn btn-ghost" onclick="window.location.href='allowances-list.html'">إلغاء</button>
+      </div>
+    </div>`;
+});
+
+function queryWorker() {
+  const civil = document.getElementById('worker-civil').value.trim();
+  const cr = document.getElementById('employer-cr').value.trim();
+  if (!civil || !cr) { showToast('يرجى إدخال الرقم المدني ورقم السجل التجاري', 'w'); return; }
+
+  const result = document.getElementById('worker-result');
+  result.innerHTML = `<div class="loading">${ICONS.clock} جارٍ الاستعلام...</div>`;
+
+  setTimeout(() => {
+    foundWorker = WI_DATA.allowances[0].insured;
+    const emp = WI_DATA.allowances[0].employer;
+    result.innerHTML = `
+      <div class="alert alert-s" style="margin-bottom:14px">${ICONS.check}<span>تم العثور على بيانات المؤمن عليه وجهة العمل</span></div>
+      <div class="fg fg-3" style="margin-bottom:0">
+        <div class="fgrp"><label class="flbl">اسم العامل</label><div class="fro">${foundWorker.name}</div></div>
+        <div class="fgrp"><label class="flbl">الرقم التأميني</label><div class="fro" style="font-family:monospace">${foundWorker.insurance}</div></div>
+        <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">${foundWorker.insuranceStatus}</span></div></div>
+        <div class="fgrp"><label class="flbl">جهة العمل</label><div class="fro">${emp.name}</div></div>
+        <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${emp.jobTitle}</div></div>
+      </div>`;
+    document.getElementById('rest-form').style.display = '';
+  }, 1200);
+}
+
+function submitSpecialRequest() {
+  const reason = document.getElementById('entry-reason').value;
+  if (!reason) { showToast('يرجى اختيار سبب التقديم', 'w'); return; }
+  if (!foundWorker) { showToast('يرجى الاستعلام عن بيانات المؤمن عليه أولاً', 'w'); return; }
+  showToast('جارٍ تقديم الطلب...', 'i');
+  setTimeout(() => {
+    showToast('تم تقديم الطلب بنجاح — WI-2025-001355', 's', 5000);
+    setTimeout(() => window.location.href = 'allowances-list.html', 2000);
+  }, 1500);
+}
+</script>
+</body>
+</html>
+
