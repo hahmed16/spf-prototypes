@@ -1735,391 +1735,406 @@
                 </ul>
             </section>
 
-            <section id="plantuml">
+                        <section id="plantuml">
                 <h2>الرسوم النصية PlantUML</h2>
-                <h3>رسم تسلسلي لرحلة التسجيل عبر منصة ثقة ثم إنشاء الحساب الشخصي</h3>
+
+                <h3>1) رسم تسلسلي — الدخول عبر ثقة والتحقق من الهوية</h3>
                 <pre>@startuml
-title Saving System - Registration through THEQA
+title 1) Login and Identity Verification via THEQA
 actor "المستخدم" as User
 participant "منصة ثقة THEQA" as THEQA
-participant "نظام الادخار" as Saving
-participant "وزارة العمل" as MOL
 participant "الأحوال المدنية" as Civil
+participant "نظام الادخار" as Saving
 
 User -> THEQA : بدء تسجيل الدخول
-THEQA -> Civil : التحقق من الهوية
-Civil --> THEQA : بيانات الهوية
-THEQA --> Saving : هوية موثقة + رقم مدني
-Saving -> Saving : تحديد الدور والفئة
-Saving -> MOL : التحقق من علاقة العمل عند الحاجة
-MOL --> Saving : حالة العقد / جهة العمل
-Saving -> Saving : التحقق من الأهلية
-Saving -> Saving : إنشاء أو تفعيل الحساب الشخصي
-Saving --> User : فتح لوحة التحكم المناسبة
+THEQA -> Civil : التحقق من الهوية الرقمية
+Civil --> THEQA : بيانات الهوية المعتمدة
+THEQA --> Saving : هوية موثقة + الرقم المدني + بيانات المستخدم
+Saving --> User : فتح لوحة التحكم حسب الصلاحية
 @enduml</pre>
 
                 <hr class="grp-sep">
-                <h3>رسم نشاط لمسار التسجيل الاختياري</h3>
+                <h3>2) رسم نشاط — التسجيل الاختياري وإنشاء الحساب الشخصي</h3>
                 <pre>@startuml
-title Optional Saving Registration Activity
+title 2) Optional Registration and Personal Account Creation
 start
-:الدخول عبر منصة ثقة;
-:قراءة بيانات الهوية;
-:تحديد الفئة المستهدفة;
-if (هل الفئة مؤهلة؟) then (نعم)
-  :عرض الشروط والأحكام;
-  :تأكيد التسجيل وتحصيل مبلغ الإيداع;
-  :إنشاء الحساب الشخصي;
-  :تفعيل مصادر الإيداع المسموح بها;
-  stop
+:الدخول عبر ثقة;
+:عرض الفئات المؤهلة (المادة 136);
+:اختيار الفئة;
+:جلب بيانات المستخدم تلقائيا;
+if (الفئة غير مؤمن عليها؟) then (نعم)
+  :إدخال وسائل تواصل إضافية;
+endif
+:عرض الشروط والأحكام;
+if (الموافقة على الشروط؟) then (نعم)
+  :إدخال مبلغ الإيداع الأولي;
+  if (المبلغ >= 100 ر.ع؟) then (نعم)
+    :اختيار طريقة الدفع;
+    :تنفيذ الدفع;
+    if (نجاح الدفع؟) then (نعم)
+      :إنشاء الحساب الشخصي;
+      :إيداع المبلغ الأولي بالحساب;
+      :تفعيل العضوية الاختيارية;
+      stop
+    else (لا)
+      :إظهار فشل الدفع وإتاحة إعادة المحاولة;
+      stop
+    endif
+  else (لا)
+    :رفض الطلب لعدم استيفاء الحد الأدنى;
+    stop
+  endif
 else (لا)
-  :إشعار بعدم الأهلية;
+  :إلغاء التسجيل;
   stop
 endif
 @enduml</pre>
 
                 <hr class="grp-sep">
-                <h3>رسم تسلسلي مقترح لرحلة الإيداع وسداد الالتزامات</h3>
+                <h3>3) رسم تسلسلي — الإيداع الذاتي الاختياري</h3>
                 <pre>@startuml
-title Saving System - Deposit and Obligation Settlement
+title 3) Voluntary Self Deposit
 actor "المدخر" as Saver
 participant "نظام الادخار" as Saving
-participant "ملاءة" as Malaa
-participant "نظام المستحقات" as Dues
 participant "قناة الدفع الوطنية" as Pay
+participant "الحساب الشخصي" as Account
 
-Saver -> Saving : بدء إيداع اختياري
-Saving -> Malaa : جلب الحسابات البنكية المحلية
-Malaa --> Saving : قائمة الحسابات
-Saver -> Saving : اختيار المصدر والمبلغ
-Saving -> Saving : التحقق من الحد الأدنى والسقف السنوي للمصدر
+Saver -> Saving : بدء إيداع جديد
+Saving --> Saver : عرض الرصيد الحالي وضوابط الإيداع
+Saver -> Saving : إدخال المبلغ واختيار طريقة الدفع
+Saving -> Saving : التحقق من الحد الأدنى والسقف السنوي
 Saving -> Pay : تنفيذ عملية الدفع
 Pay --> Saving : نتيجة الدفع
-Saving -> Dues : جلب الالتزامات المالية
-Dues --> Saving : قائمة الالتزامات
-Saving -> Saving : ترتيب الالتزامات حسب تاريخ الاستحقاق
-Saving -> Saving : سداد الالتزامات التي يغطيها الرصيد بالكامل
-Saving -> Dues : تحديث حالة السداد والمرجع والمبلغ والمتبقي
-Dues --> Saving : تأكيد التحديث
-Saving --> Saver : تحديث الرصيد وإظهار النتيجة
+alt الدفع ناجح
+    Saving -> Account : قيد مبلغ الإيداع
+    Saving --> Saver : تأكيد العملية + رقم مرجعي
+else الدفع فشل
+    Saving --> Saver : إشعار بالفشل + سبب الرفض
+end
 @enduml</pre>
 
                 <hr class="grp-sep">
-                <h3>رسم نشاط لاحتساب وتوزيع عوائد الاستثمار</h3>
+                <h3>4) رسم تسلسلي — الإيداع الجماعي من جهة العمل</h3>
                 <pre>@startuml
-title Investment Return Distribution Activity
+title 4) Employer Bulk Deposit
+actor "مفوض جهة العمل" as Emp
+participant "نظام الادخار" as Saving
+participant "قناة الدفع الوطنية" as Pay
+participant "حسابات العمال" as Accounts
+
+Emp -> Saving : اختيار العمال المستهدفين
+Emp -> Saving : تحديد آلية التوزيع (ثابت/نسبة/إجمالي/مبالغ فردية)
+Saving -> Saving : التحقق من الحد الأدنى لكل عامل (>=100)
+alt توجد مخالفة
+    Saving --> Emp : إيقاف العملية وطلب تصحيح المبالغ
+else جميع القيم صحيحة
+    Saving --> Emp : عرض ملخص العملية للاعتماد
+    Emp -> Saving : اعتماد الإيداع الجماعي
+    Saving -> Pay : تنفيذ دفع إجمالي العملية
+    Pay --> Saving : تأكيد السداد
+    Saving -> Accounts : توزيع المبالغ على حسابات العمال
+    Accounts --> Saving : تأكيد القيود
+    Saving --> Emp : إيصال جماعي + مراجع تفصيلية
+end
+@enduml</pre>
+
+                <hr class="grp-sep">
+                <h3>5) رسم تسلسلي — سداد الالتزامات من رصيد المدخرات</h3>
+                <pre>@startuml
+title 5) Dues Settlement from Savings
+actor "المدخر" as Saver
+participant "نظام الادخار" as Saving
+participant "نظام المستحقات" as Dues
+participant "الحساب الشخصي" as Account
+
+Saver -> Saving : فتح صفحة سداد الالتزامات
+Saving -> Dues : جلب الالتزامات المستحقة
+Dues --> Saving : قائمة الالتزامات (مبلغ/تاريخ/حالة)
+Saving --> Saver : عرض الالتزامات
+Saver -> Saving : اختيار الالتزامات المراد سدادها
+Saving -> Account : التحقق من الرصيد المتاح
+alt الرصيد يغطي المبالغ المختارة
+    Saving -> Account : خصم المبلغ
+    Saving -> Dues : تحديث حالة السداد + مرجع العملية
+    Dues --> Saving : تأكيد التحديث
+    Saving --> Saver : سداد ناجح وتحديث الرصيد
+else الرصيد غير كاف
+    Saving --> Saver : رفض السداد أو طلب تعديل الاختيار
+end
+@enduml</pre>
+
+                <hr class="grp-sep">
+                <h3>6) رسم تسلسلي — اعتماد نسبة العائد السنوي (حوكمة)</h3>
+                <pre>@startuml
+title 6) Annual Return Rate Approval (Governance)
+actor "أخصائي الاستثمار" as Analyst
+actor "مدير المخاطر" as RiskMgr
+actor "لجنة الاستثمار" as Committee
+participant "نظام الادخار" as Saving
+
+Analyst -> Saving : إدخال نسبة العائد المقترحة + المبررات
+Saving --> RiskMgr : إحالة للمراجعة
+RiskMgr -> Saving : قبول أو طلب تعديل
+alt طلب تعديل
+    Saving --> Analyst : إعادة العمل على المقترح
+    Analyst -> Saving : إعادة تقديم النسبة
+end
+Saving --> Committee : الرفع للاعتماد النهائي
+Committee -> Saving : اعتماد النسبة الرسمية
+Saving -> Saving : حفظ النسبة المعتمدة لسنة العائد
+Saving --> Analyst : إشعار باعتماد النسبة
+@enduml</pre>
+
+                <hr class="grp-sep">
+                <h3>7) رسم نشاط — احتساب وتوزيع عوائد الاستثمار السنوية</h3>
+                <pre>@startuml
+title 7) Annual Investment Return Calculation and Distribution
 start
-:إدخال أو اعتماد نسبة العائد السنوي;
-:التحقق من الحد الأدنى للعائد;
-if (هل العائد الفعلي أقل من الحد الأدنى؟) then (نعم)
-  :استكمال الفرق من الاحتياطيات;
-else (لا)
-  :اعتماد العائد الفعلي;
-endif
-:احتساب العائد شهريًا على الأرصدة;
-:توزيع العوائد على الحسابات حسب المسار والمصدر;
-:تحديث الحسابات الشخصية وسجلات التدقيق;
+:قراءة نسبة العائد السنوي المعتمدة;
+:تحديد فترة الاحتساب;
+:احتساب العائد لكل حساب حسب الرصيد والزمن;
+:إنشاء قيود توزيع العوائد;
+:ترحيل العوائد إلى الحسابات الشخصية;
+:تحديث كشف الحساب وسجل التدقيق;
+:إشعار المستفيدين بإتمام التوزيع;
 stop
 @enduml</pre>
 
                 <hr class="grp-sep">
-                <h3>رسم تسلسلي لتحويل فائض الاشتراكات السنوي</h3>
+                <h3>8) رسم تسلسلي — تحويل فائض الاشتراكات السنوي (العمانيون)</h3>
                 <pre>@startuml
-title Surplus Transfer Sequence
+title 8) Annual Surplus Transfer (Omani)
 participant "نظام الاشتراكات" as Subs
 participant "نظام الادخار" as Saving
 participant "الحساب الشخصي" as Account
-actor "المدخر" as Saver
+actor "المدخر العماني" as Saver
 
-Subs -> Saving : بيانات الفائض السنوي
-Saving -> Saving : احتساب قيمة الفائض المستحقة
-Saving -> Account : إضافة الفائض كمصدر مستقل
-Saving --> Saver : إشعار بتحويل الفائض
-Saver -> Saving : طلب صرف الفائض عند نهاية العام
-Saving -> Saving : تطبيق قواعد الاستحقاق
-Saving --> Saver : نتيجة الطلب
+Subs -> Saving : إرسال بيانات الفائض السنوي المعتمد
+Saving -> Account : قيد الفائض كمصدر مستقل
+Saving --> Saver : إشعار بإضافة الفائض
 @enduml</pre>
 
                 <hr class="grp-sep">
-                <h3>رسم نشاط مقترح لطلب صرف غير العماني بعد انتهاء علاقة العمل</h3>
+                <h3>9) رسم نشاط — طلب صرف المدخرات (المسار الاختياري)</h3>
                 <pre>@startuml
-title Saving System - Mandatory Disbursement Activity
+title 9) Optional Disbursement Request
 start
-:استلام طلب صرف;
-:التحقق من هوية المدخر;
-:التحقق من انتهاء علاقة العمل;
-if (هل يوجد عقد جديد؟) then (نعم)
-  :رفض الاستحقاق الحالي;
+:تقديم طلب الصرف;
+:عرض ملخص الرصيد القابل للصرف;
+:اختيار سبب الصرف;
+if (سبب استحقاق صحيح؟) then (نعم)
+  :فحص الالتزامات المالية القائمة;
+  if (توجد التزامات؟) then (نعم)
+    :عرض خيار السداد أو الخصم قبل الصرف;
+  endif
+  :اختيار طريقة الصرف (دفعة/تقسيط);
+  :اختيار الحساب البنكي;
+  :إرسال الطلب للمراجعة;
   stop
 else (لا)
-  :التحقق من المغادرة أو مرور 3 أشهر;
-  :التحقق من عدم وجود التزامات مالية قائمة;
-  if (هل البيانات البنكية محدثة وصحيحة؟) then (نعم)
-    :مراجعة موظف الصندوق;
-    :اعتماد الطلب;
-    :تنفيذ التحويل;
-    if (نجح التحويل؟) then (نعم)
-      :إغلاق الطلب كمدفوع;
-      stop
-    else (لا)
-      :تحويل الحالة إلى معالجة يدوية;
-      stop
-    endif
-  else (لا)
-    :تحويل الحالة إلى معالجة يدوية لاحقة;
-    stop
-  endif
+  :رفض الطلب مع توضيح السبب;
+  stop
 endif
 @enduml</pre>
 
-                <hr class="sec-sep">
-                <h3>رسم تسلسلي للتسجيل الإلزامي للعامل غير العماني</h3>
+                <hr class="grp-sep">
+                <h3>10) رسم تسلسلي — معالجة طلب الصرف الاختياري بواسطة موظف الصندوق</h3>
                 <pre>@startuml
-title Saving System - Mandatory Registration (Non-Omani Worker)
-actor "العامل غير العماني" as Worker
-participant "وزارة العمل" as MOL
+title 10) Optional Disbursement Processing by Fund Officer
+actor "المدخر" as Saver
 participant "نظام الادخار" as Saving
-participant "نظام الاشتراكات" as Subs
-participant "الصندوق (موظف)" as Officer
+participant "موظف الصندوق" as Officer
+participant "نظام المستحقات" as Dues
+participant "قناة الدفع" as Pay
 
-MOL -> Saving : اعتماد عقد العمل — تفعيل التسجيل التلقائي
-Saving -> Saving : التحقق من هوية العامل وجهة العمل
-Saving -> Saving : إنشاء الحساب الشخصي (رصيد ابتدائي صفر)
-Saving -> Subs : ربط الحساب بالاشتراكات الإلزامية
-Saving --> Worker : إشعار بإنشاء الحساب والبيانات الأساسية
-
-note over Saving, MOL
-  التسجيل يبدأ خلال ٣٠ يوماً من تاريخ الالتحاق
-  وإلا فعّل الصندوق التسجيل بأثر رجعي
-end note
-
-alt حالة التسجيل اليدوي من الصندوق
-    Officer -> Saving : تسجيل يدوي للحالات غير الواردة من وزارة العمل
-    Saving -> Saving : التحقق من البيانات وإنشاء الحساب
+Saver -> Saving : تقديم طلب الصرف
+Saving -> Dues : التحقق من الالتزامات المالية
+Dues --> Saving : حالة الالتزامات
+Saving -> Officer : إحالة الطلب للمراجعة
+Officer -> Saving : اعتماد / رفض / طلب استكمال
+alt اعتماد
+    Saving -> Pay : تنفيذ التحويل البنكي
+    Pay --> Saving : نتيجة التحويل
+    Saving --> Saver : إشعار بإتمام الصرف
+else رفض
+    Saving --> Saver : إشعار بالرفض وأسبابه
+else استكمال
+    Saving --> Saver : طلب مستندات أو بيانات إضافية
 end
+@enduml</pre>
 
-Saving --> Officer : تأكيد إنشاء الحساب وجاهزيته للفوترة الشهرية
+                <hr class="sec-sep">
+                <h3>11) رسم نشاط — التسجيل الإلزامي لغير العماني (3 آليات)</h3>
+                <pre>@startuml
+title 11) Mandatory Registration for Non-Omani (3 Mechanisms)
+start
+if (مصدر التسجيل؟) then (اعتماد عقد العمل)
+  :تسجيل تلقائي عند اعتماد العقد;
+elseif (أثر رجعي)
+  :تسجيل بأثر رجعي ضمن المدة النظامية;
+else (قرار النظام)
+  :تسجيل مباشر بقرار الصندوق;
+endif
+:التحقق من بيانات العامل وجهة العمل;
+:إنشاء الحساب الشخصي الإلزامي;
+:ربط الحساب بمسار الاشتراكات الإلزامية;
+:إشعار العامل وجهة العمل;
+stop
 @enduml</pre>
 
                 <hr class="grp-sep">
-                <h3>رسم تسلسلي لمسار الاعتراض على الأجر المسجل</h3>
+                <h3>12) رسم تسلسلي — الاشتراكات الإلزامية الشهرية والغرامات عند التأخر</h3>
                 <pre>@startuml
-title Saving System - Salary Objection Workflow
+title 12) Mandatory Monthly Contributions and Delay Penalties
+actor "جهة العمل" as Employer
+participant "نظام الاشتراكات" as Subs
+participant "نظام الادخار" as Saving
+participant "قناة الدفع" as Pay
+
+Employer -> Subs : رفع بيانات الأجور الأساسية الشهرية
+Subs -> Subs : احتساب 9% لكل عامل غير عماني
+Subs --> Employer : إجمالي الاشتراكات المستحقة
+Employer -> Pay : سداد الاشتراكات
+Pay --> Subs : نتيجة السداد
+alt سداد متأخر أو أجر غير حقيقي
+    Subs -> Subs : احتساب المبالغ الإضافية/الغرامات حسب القواعد
+    Subs --> Employer : إشعار بالمبالغ الإضافية
+end
+Subs -> Saving : ترحيل المبالغ المسددة إلى حسابات الادخار
+Saving --> Employer : تأكيد الترحيل
+@enduml</pre>
+
+                <hr class="grp-sep">
+                <h3>13) رسم تسلسلي — الاعتراض على الأجر الأساسي المسجل</h3>
+                <pre>@startuml
+title 13) Salary Objection Workflow
 actor "العامل غير العماني" as Worker
 participant "نظام الادخار" as Saving
 participant "جهة العمل" as Employer
 participant "وزارة العمل" as MOL
 participant "نظام الاشتراكات" as Subs
 
-Worker -> Saving : تقديم اعتراض على الأجر المسجل (خلال ٩٠ يوماً)
-Saving -> Saving : تسجيل الاعتراض وحفظ تاريخ التقديم
-Saving --> Employer : إشعار فوري بوجود اعتراض من العامل
-Saving --> Worker : تأكيد استلام الاعتراض
-
-note right of Employer
-  مهلة الرد: ٣٠ يوماً
-end note
-
-alt جهة العمل تُقرّ بصحة الاعتراض
-    Employer -> Saving : إقرار صحة الأجر المعترَض به
-    Saving -> Saving : تحديث الأجر المعتمد في الملف
-    Saving -> Subs : إعادة احتساب الاشتراكات على الأجر الجديد
-    Saving --> Worker : إشعار باعتماد الاعتراض
-else جهة العمل لم تردّ خلال ٣٠ يوماً
-    Saving -> Saving : اعتماد الاعتراض حكماً (تلقائي)
+Worker -> Saving : تقديم اعتراض خلال 90 يوما
+Saving --> Employer : إشعار بالاعتراض
+alt جهة العمل لم تثبت عدم الصحة خلال 30 يوما
+    Saving -> Saving : اعتماد الاعتراض تلقائيا
     Saving -> Subs : إعادة احتساب الاشتراكات
-    Saving --> Worker : إشعار باعتماد الاعتراض حكماً
-else جهة العمل تُثبت عدم صحة الاعتراض
-    Employer -> Saving : رفض الاعتراض مع المستندات
-    Saving --> Worker : إشعار بالرفض وتوجيه لوزارة العمل
-    Worker -> MOL : تقديم شكوى رسمية
-    Saving -> Saving : حفظ مرجع الإحالة لأغراض المتابعة
+    Saving --> Worker : إشعار بقبول الاعتراض
+else جهة العمل أثبتت عدم صحة الاعتراض
+    Employer -> Saving : مستندات الرفض
+    Saving --> Worker : إشعار بالرفض
+    Worker -> MOL : تصعيد شكوى رسمية
 end
 @enduml</pre>
 
                 <hr class="grp-sep">
-                <h3>رسم تسلسلي لتسوية مكافأة نهاية الخدمة السابقة (المادة ١٣٨)</h3>
+                <h3>14) رسم تسلسلي — تسوية مكافأة نهاية الخدمة السابقة (المادة 138)</h3>
                 <pre>@startuml
-title Prior Gratuity Settlement - Article 138
-participant "نظام الادخار" as Saving
-actor "صاحب العمل" as Employer
+title 14) Prior Service Gratuity Settlement (Article 138)
+actor "جهة العمل" as Employer
 actor "العامل غير العماني" as Worker
+participant "نظام الادخار" as Saving
 participant "موظف الصندوق" as Officer
 
-Saving --> Employer : إشعار بضرورة تحديد الإجراء لكل عامل
-note right of Employer
-  خياران:
-  ١. تسوية مباشرة مع العامل
-  ٢. ترحيل المبلغ إلى نظام الادخار
-end note
-
-Employer -> Saving : اختيار الإجراء لكل عامل على حدة + توثيق هوية المنفذ
-Saving --> Worker : إشعار بالخيار المتخذ من قِبَل جهة العمل
-
-alt العامل يُقرّ بصحة الخيار
-    Worker -> Saving : إقرار الخيار
-    Saving -> Saving : حفظ السجل التدقيقي الكامل
-    Saving -> Officer : إحالة للمراجعة النهائية
+Saving --> Employer : طلب تحديد خيار التسوية لكل عامل
+Employer -> Saving : اختيار (سداد مباشر/تحويل للنظام) + التوثيق
+Saving --> Worker : إشعار بالخيار المختار
+alt العامل موافق
+    Worker -> Saving : إقرار الموافقة
+    Saving -> Officer : مراجعة واعتماد
     Officer -> Saving : اعتماد التسوية
-    Saving --> Employer : تأكيد اكتمال التسوية
-    Saving --> Worker : إشعار باكتمال التسوية
-else العامل يُسجّل عدم الموافقة
-    Worker -> Saving : تسجيل الاعتراض
+    Saving --> Employer : تأكيد الإغلاق
+    Saving --> Worker : إشعار نهائي
+else العامل غير موافق
+    Worker -> Saving : تسجيل اعتراض
     Saving -> Officer : إحالة للمعالجة اليدوية
-    Officer -> Saving : إدخال قرار الحل
-end
-
-note over Saving
-  السجل يشمل: خيار جهة العمل، هوية المنفذ،
-  تاريخ الإشعار، إقرار العامل، حالة المعالجة
-end note
-@enduml</pre>
-
-                <hr class="grp-sep">
-                <h3>رسم تسلسلي للإيداع الجماعي من جهة العمل</h3>
-                <pre>@startuml
-title Employer Bulk Deposit Sequence
-actor "مفوض جهة العمل" as Emp
-participant "نظام الادخار" as Saving
-participant "قناة الدفع الوطنية" as Pay
-participant "حسابات العمال" as Accounts
-
-Emp -> Saving : بدء إيداع جماعي — اختيار العمال
-Emp -> Saving : تحديد آلية التوزيع (مبلغ ثابت / إجمالي مقسّم / نسبة من الأجر / منفرد لكل عامل)
-Saving -> Saving : التحقق من الحد الأدنى لكل عامل (١٠٠ ر.ع)
-
-alt أحد العمال دون الحد الأدنى
-    Saving --> Emp : تنبيه بالحالة المخالفة — وقف العملية
-else جميع العمال ضمن الضوابط
-    Saving -> Saving : احتساب الإجمالي الكلي تلقائياً
-    Saving --> Emp : عرض ملخص الإيداع للمراجعة
-    Emp -> Saving : تأكيد العملية
-    Saving -> Pay : تنفيذ عملية الدفع الإجمالية
-    Pay --> Saving : تأكيد الدفع
-    Saving -> Accounts : توزيع المبالغ على حسابات العمال
-    Accounts --> Saving : تأكيد قيد المبالغ
-    Saving --> Emp : إيصال جماعي + أرقام مرجعية لكل عامل
-    note right of Saving
-      المبالغ تنتقل فوراً لملكية العمال
-      بعد إتمام العملية
-    end note
+    Officer -> Saving : إدخال القرار النهائي
 end
 @enduml</pre>
 
                 <hr class="grp-sep">
-                <h3>رسم نشاط لاحتساب المبالغ الإضافية والغرامات</h3>
+                <h3>15) رسم نشاط — طلب صرف المدخرات الإلزامية لغير العماني</h3>
                 <pre>@startuml
-title Penalty and Additional Amount Calculation Activity
+title 15) Mandatory Disbursement Eligibility (Non-Omani)
 start
-:اكتشاف حالة تأخر أو سداد على أجر غير حقيقي;
-:التحقق من تاريخ الاستحقاق وتاريخ السداد الفعلي;
-if (هل تم السداد على أجر غير حقيقي؟) then (نعم)
-  :احتساب فرق الاشتراكات على الأجر الحقيقي;
-  :إضافة مبلغ إضافي ٨٪ سنوياً تراكمياً على الفرق;
-else (لا — تأخر فقط)
-  :احتساب غرامة التأخر ٨٪ سنوياً تراكمياً
-بين تاريخ الاستحقاق وتاريخ السداد;
-endif
-if (هل ثمة أسباب قهرية موثقة؟) then (نعم)
-  :مراجعة الطلب من قِبَل موظف الصندوق;
-  if (اعتماد الإعفاء؟) then (نعم)
-    :إعفاء من المبلغ الإضافي؛ الاحتفاظ بالأصل;
-    stop
-  else (لا)
-    :تثبيت المبلغ الإضافي المحتسب;
-  endif
+:تقديم طلب الصرف;
+if (انتهاء العمل + مغادرة السلطنة؟) then (نعم)
+  :مؤهل للصرف;
 else (لا)
-  :تثبيت المبلغ الإضافي المحتسب;
+  if (انتهاء العمل + مرور 3 أشهر دون عقد جديد؟) then (نعم)
+    :مؤهل للصرف;
+  else (لا)
+    if (وفاة أو عجز دائم أو 180 شهرا؟) then (نعم)
+      :مؤهل للصرف;
+    else (لا)
+      :رفض الطلب لعدم تحقق شرط الاستحقاق;
+      stop
+    endif
+  endif
 endif
-:ترحيل نتيجة الاحتساب وحالة السداد إلى نظام الاشتراكات;
-:إشعار جهة العمل بالمبالغ المستحقة;
+:الانتقال لمسار المعالجة;
 stop
 @enduml</pre>
 
                 <hr class="grp-sep">
-                <h3>رسم تسلسلي لاعتماد نسبة العائد السنوي</h3>
+                <h3>16) رسم تسلسلي — معالجة طلب الصرف الإلزامي والتحقق من المغادرة</h3>
                 <pre>@startuml
-title Annual Investment Return Approval Sequence
-actor "أخصائي الاستثمار" as Analyst
+title 16) Mandatory Disbursement Processing and Exit Verification
+actor "المدخر غير العماني" as Worker
 participant "نظام الادخار" as Saving
-actor "مدير المخاطر" as RiskMgr
-actor "لجنة الاستثمار" as Committee
-participant "الحسابات الشخصية" as Accounts
-
-Analyst -> Saving : إدخال نسبة العائد المقترحة + المبررات
-Saving -> Saving : التحقق من أن النسبة ≥ ٢٪
-Saving --> RiskMgr : إحالة للمراجعة
-RiskMgr -> Saving : تأكيد المراجعة / طلب تعديل
-Saving --> Committee : رفع للاعتماد النهائي
-Committee -> Saving : اعتماد النسبة الرسمية
-
-alt نسبة العائد الفعلية ≥ ٢٪
-    Saving -> Accounts : توزيع العائد آلياً على جميع الحسابات
-else نسبة العائد الفعلية < ٢٪
-    Saving -> Saving : استكمال الفرق من احتياطيات الصندوق
-    Saving -> Accounts : توزيع الحد الأدنى ٢٪ على جميع الحسابات
-end
-
-Saving -> Saving : حفظ نسبة العائد في السجل التاريخي السنوي
-Saving --> Analyst : تأكيد اكتمال التوزيع
-note over Saving
-  الإعلان عن النسبة قبل ٣١ مارس من العام التالي
-  العائد محتسب شهرياً على أساس الرصيد
-end note
-@enduml</pre>
-
-                <hr class="grp-sep">
-                <h3>رسم نشاط لمسار الصرف الاختياري للمدخر العماني</h3>
-                <pre>@startuml
-title Omani Voluntary Disbursement Activity
-start
-:تقديم طلب صرف من المدخر العماني;
-:عرض أسباب الاستحقاق المتاحة للعماني;
-if (سبب الصرف؟) then (استحقاق المعاش)
-  :التحقق من اعتماد المعاش من نظام التقاعد;
-else if (١٨٠ شهراً اشتراك)
-  :التحقق من إجمالي أشهر الاشتراك;
-else if (عجز دائم)
-  :التحقق من اعتماد العجز طبياً;
-else (صرف فائض الاشتراكات السنوي)
-  :التحقق من رصيد الفائض المحوَّل في الحساب;
-  :تطبيق قاعدة عدم احتساب العائد على الفائض عند الصرف;
-  stop
-endif
-:فحص خلو الحساب من الالتزامات المالية;
-if (توجد التزامات مالية؟) then (نعم)
-  :عرض الالتزامات — اختيار الخصم من الرصيد أو السداد أولاً;
-endif
-if (خيار الصرف؟) then (دفعة واحدة)
-  :إعداد تحويل الرصيد الكامل;
-else (أقساط)
-  :تحديد الجدول الزمني للأقساط;
-  :استمرار احتساب العوائد على الرصيد المتبقي;
-endif
-:مراجعة موظف الصندوق واعتماد الطلب;
-:تنفيذ التحويل البنكي;
-:تحديث حالة الطلب وإشعار المدخر;
-stop
-@enduml</pre>
-
-                <hr class="sec-sep">
-                <h3>رسم تسلسلي لمعالجة طلب الصرف من قبل موظف الصندوق (مُحدَّث)</h3>
-                <pre>@startuml
-title Disbursement Processing by Fund Officer
-actor "المدخر" as Saver
-participant "نظام الادخار" as Saving
-participant "موظف الصندوق" as Officer
 participant "وزارة العمل" as MOL
+participant "شرطة عمان السلطانية" as ROP
+participant "نظام المستحقات" as Dues
 participant "ملاءة" as Malaa
+participant "موظف الصندوق" as Officer
+participant "قناة الدفع" as Pay
 
-Saver -> Saving : تقديم طلب صرف
-Saving -> MOL : التحقق من حالة العامل (ملغي) في منظومة وزارة العمل
-MOL --> Saving : حالة العمل (ملغي / نشط)
+Worker -> Saving : تقديم طلب الصرف
+Saving -> MOL : التحقق من حالة علاقة العمل
+MOL --> Saving : حالة العلاقة
+Saving -> ROP : التحقق من المغادرة عند الحاجة
+ROP --> Saving : حالة المغادرة
+Saving -> Dues : التحقق من الالتزامات القائمة
+Dues --> Saving : نتيجة الالتزامات
 Saving -> Malaa : جلب الحسابات البنكية المحلية
 Malaa --> Saving : الحسابات المتاحة
-Saving -> Officer : إحالة الطلب للمراجعة
-Officer -> Saving : اعتماد / رفض / طلب استكمال
-Saving --> Saver : تحديث حالة الطلب
+Saving -> Officer : إحالة الطلب للمراجعة النهائية
+Officer -> Saving : اعتماد / رفض / إحالة يدوية
+alt اعتماد
+    Saving -> Pay : تنفيذ التحويل
+    Pay --> Saving : نتيجة التحويل
+    Saving --> Worker : إشعار بإتمام الصرف
+else رفض
+    Saving --> Worker : إشعار بالرفض
+else إحالة يدوية
+    Saving --> Worker : إشعار بتحويل الحالة للمعالجة اليدوية
+end
+@enduml</pre>
+
+                <hr class="grp-sep">
+                <h3>17) رسم نشاط — الإخطار عند الخروج أو فقدان الشرط + مسار الاستثناء اليدوي</h3>
+                <pre>@startuml
+title 17) Exit Notification, Delay Consequences, and Manual Exception Path
+start
+:تسجيل واقعة الخروج أو فقدان شرط العضوية;
+if (تم الإخطار خلال شهر؟) then (نعم)
+  :استمرار المعالجة الطبيعية;
+else (لا)
+  if (التأخير ضمن السنة الأولى؟) then (نعم)
+    :تطبيق حد أدنى للعائد فقط;
+  else (لا)
+    :إيقاف احتساب العوائد على المدخرات;
+  endif
+endif
+:فحص اكتمال البيانات والتكاملات;
+if (تعذر الإكمال آليا؟) then (نعم)
+  :فتح حالة معالجة يدوية;
+  :تعيين موظف مسؤول وتتبع SLA;
+  :إغلاق الحالة بعد القرار التنفيذي;
+else (لا)
+  :إتمام الإجراء آليا;
+endif
+stop
 @enduml</pre>
 
             </section>
