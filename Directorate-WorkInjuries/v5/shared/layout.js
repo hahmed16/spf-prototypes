@@ -93,7 +93,12 @@ function getUserData(role) {
 }
 
 function buildHeader(roleConfig, userData) {
-  const notifCount = 3;
+  const notifications = [
+    { text: 'تم إعادة الطلب WI-2025-001301 لاستيفاء البيانات', time: 'منذ ساعة', unread: true },
+    { text: 'طلب جديد WI-2025-001234 يحتاج مراجعتك', time: 'منذ ساعتين', unread: true },
+    { text: 'تم اعتماد الطلب WI-2025-001089 وصرف المستحقات', time: 'أمس', unread: false },
+  ];
+  const notifCount = notifications.filter(n => n.unread).length;
   return `
   <div id="app-header">
     <div class="h-logo" onclick="goHome()">
@@ -112,7 +117,7 @@ function buildHeader(roleConfig, userData) {
       <button class="hbtn" onclick="showMedicalQuery()" title="استعلام التقارير الطبية" ${roleConfig.type === 'external' ? 'style="display:none"' : ''}>
         ${ICONS.medical}
       </button>
-      <button class="hbtn" onclick="showNotifications()">
+      <button class="hbtn" onclick="showNotifications(event)">
         ${ICONS.bell}
         ${notifCount > 0 ? `<span class="nbadge">${notifCount}</span>` : ''}
       </button>
@@ -122,6 +127,20 @@ function buildHeader(roleConfig, userData) {
           <div class="u-name">${userData.name}</div>
           <div class="u-role">${roleConfig.nameAr}</div>
         </div>
+      </div>
+    </div>
+    <div class="notification-panel" id="notification-panel" onclick="event.stopPropagation()">
+      <div class="panel-header">
+        <span>الإشعارات</span>
+        <span style="font-size:.72rem;color:var(--text3);font-weight:600;cursor:pointer">عرض الكل</span>
+      </div>
+      <div class="panel-body">
+        ${notifications.map(n => `
+          <div class="notif-item ${n.unread ? 'unread' : ''}">
+            <div class="notif-title">${n.text}</div>
+            <div class="notif-time">${n.time}</div>
+          </div>
+        `).join('')}
       </div>
     </div>
   </div>`;
@@ -234,7 +253,9 @@ function showMedicalQuery() {
   window.location.href = '../shared/medical-query.html';
 }
 
-function bindHeaderEvents() { /* placeholder */ }
+function bindHeaderEvents() {
+  document.addEventListener('click', () => closeNotifications());
+}
 
 /* ── Toast Notifications ── */
 function showToast(msg, type = 'i', duration = 3500) {
@@ -319,27 +340,17 @@ function saveNote(requestId, cb) {
 }
 
 /* ── Notifications Panel ── */
-function showNotifications() {
-  openModal({
-    title: 'الإشعارات',
-    size: '',
-    body: `
-      <div style="display:flex;flex-direction:column;gap:8px">
-        ${[
-          { text: 'تم إعادة الطلب WI-2025-001301 لاستيفاء البيانات', time: 'منذ ساعة', type: 'w' },
-          { text: 'طلب جديد WI-2025-001234 يحتاج مراجعتك', time: 'منذ ساعتين', type: 'i' },
-          { text: 'تم اعتماد الطلب WI-2025-001089 وصرف المستحقات', time: 'أمس', type: 's' },
-        ].map(n => `
-          <div style="display:flex;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--g50)">
-            <div style="flex-shrink:0;margin-top:2px;color:${n.type === 'w' ? 'var(--warning)' : n.type === 's' ? 'var(--accent)' : 'var(--info)'}">${ICONS[n.type === 'w' ? 'warn' : n.type === 's' ? 'check' : 'info']}</div>
-            <div style="flex:1">
-              <p style="font-size:12.5px;color:var(--text);line-height:1.5">${n.text}</p>
-              <p style="font-size:11px;color:var(--text3);margin-top:3px">${n.time}</p>
-            </div>
-          </div>`).join('')}
-      </div>`,
-    footer: `<button class="btn btn-ghost btn-sm" onclick="closeModal()">إغلاق</button>`
-  });
+function closeNotifications() {
+  const panel = document.getElementById('notification-panel');
+  if (!panel) return;
+  panel.classList.remove('show');
+}
+
+function showNotifications(event) {
+  if (event) event.stopPropagation();
+  const panel = document.getElementById('notification-panel');
+  if (!panel) return;
+  panel.classList.toggle('show');
 }
 
 function showUserMenu() {

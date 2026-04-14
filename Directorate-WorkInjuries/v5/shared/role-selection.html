@@ -40,17 +40,6 @@
 <script src="config.js"></script>
 <script src="data.js"></script>
 <script>
-const PENDING = {
-  allowances: 7, disability: 6, chronic: 5, 'chronic-incoming': 3,
-  appeals: 3, referrals: 4, sessions: 2, licensing: 5, signing: 2
-};
-
-function getTotalPending(role) {
-  const r = WI_CONFIG.roles[role];
-  if (!r) return 0;
-  return r.sidebar.filter(i => i.badge && PENDING[i.badge]).reduce((s, i) => s + (PENDING[i.badge] || 0), 0);
-}
-
 const categories = [
   {
     title: 'مقدمو الطلبات',
@@ -83,14 +72,10 @@ function renderRoleCards() {
     const cardsHtml = cat.roles.map(roleKey => {
       const r = WI_CONFIG.roles[roleKey];
       if (!r) return '';
-      const pending = getTotalPending(roleKey);
       return `
         <div class="rcard" onclick="enterRole('${roleKey}')">
           <div class="rc-type ${r.type}">${r.type === 'external' ? 'مستخدم خارجي' : 'موظف داخلي'}</div>
           <div class="rc-name">${r.nameAr}</div>
-          <div class="rc-cnt">
-            ${pending > 0 ? `<span class="rc-pend">${pending}</span><span>مهمة معلّقة</span>` : '<span>لا توجد مهام معلّقة</span>'}
-          </div>
           <div class="rc-arr">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg>
           </div>

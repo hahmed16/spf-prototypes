@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <textarea class="fc" rows="3">${req.investigation?.employeeNotes||''}</textarea>
             </div>
           </div>
-          <button class="btn btn-secondary btn-sm" onclick="showToast('تم حفظ تقرير التحقيق','s')">${ICONS.check} حفظ التقرير</button>
+          <button class="btn btn-secondary btn-sm" style="width:auto;justify-self:start;align-self:flex-start" onclick="showToast('تم حفظ تقرير التحقيق','s')">${ICONS.check} حفظ التقرير</button>
         </div>
       </div>
     </div>` : req.investigation ? renderInvestigationReport(req.investigation, false) : ''}

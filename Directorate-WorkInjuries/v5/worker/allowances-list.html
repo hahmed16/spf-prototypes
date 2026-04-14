@@ -94,7 +94,7 @@ function render() {
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='allowances-details.html?id=${r.id}'" title="عرض التفاصيل">${ICONS.eye}</button>
                     ${r.status==='مسودة'?`<button class="ibtn" onclick="window.location.href='allowances-new.html?id=${r.id}'" title="تعديل">${ICONS.edit}</button>`:''}
-                    ${r.status==='تم رفض الطلب'?`<button class="btn btn-warning btn-xs" onclick="window.location.href='../appeals/appeals-new.html?ref=${r.id}'">تظلم</button>`:''}
+                    ${r.status==='تم رفض الطلب'?`<button class="btn btn-warning btn-xs" onclick="window.location.href='../worker/appeals-new.html?ref=${r.id}'">تظلم</button>`:''}
                   </div>
                 </td>
               </tr>`).join('')}

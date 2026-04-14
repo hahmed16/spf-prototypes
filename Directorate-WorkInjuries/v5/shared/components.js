@@ -886,10 +886,13 @@ function renderOperationalNotes(notes = [], canAdd = true) {
       </div>`).join('');
 
   return `
-  <div class="card">
-    <div class="ph">
+  <div class="card op-notes-card collapsed" data-notes-init="0">
+    <div class="ph op-notes-head" onclick="toggleOperationalNotes(this.closest('.op-notes-card'))">
       <h3><div class="pico gy">${ICONS.note}</div>الملاحظات التشغيلية <span style="font-size:11px;font-weight:400;color:var(--text3)">(لا تغيّر حالة الطلب)</span></h3>
-      ${canAdd ? `<button class="btn btn-secondary btn-xs" onclick="openAddNoteModal(currentRequestId)">${ICONS.plus} إضافة ملاحظة</button>` : ''}
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="op-notes-chevron">${ICONS.arrow_left}</span>
+        ${canAdd ? `<button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();openAddNoteModal(currentRequestId)">${ICONS.plus} إضافة ملاحظة</button>` : ''}
+      </div>
     </div>
     <div class="pb">
       ${notesHtml}
@@ -922,14 +925,53 @@ function renderDecisionPanel({ actions = [], title = 'اتخاذ قرار', note
       </div>
       <div class="fgrp">
         <label class="flbl">إرفاق ملف <span style="font-weight:400;color:var(--text3)">(اختياري)</span></label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input type="file" id="decision-file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4" style="font-size:12px;flex:1">
-          <span style="font-size:11px;color:var(--text3)">PDF, Word, صور, صوت, فيديو</span>
+        <div class="decision-upload-area" onclick="document.getElementById('decision-file')?.click()">
+          <input type="file" id="decision-file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4" style="display:none" onchange="renderDecisionFiles(this)">
+          <div class="decision-upload-icon">${ICONS.upload}</div>
+          <p>اسحب الملفات هنا أو انقر للاختيار</p>
+          <small>يمكن رفع عدة ملفات دفعة واحدة (PDF, Word, صور, صوت, فيديو)</small>
         </div>
+        <div id="decision-files-list" class="decision-files-list"></div>
+        <div style="margin-top:6px;font-size:.74rem;color:var(--text3)">الحد الأقصى لكل ملف: 20 ميغابايت</div>
       </div>
       <div class="dp-acts">${actionsHtml}</div>
     </div>
   </div>`;
+}
+
+function formatFileSize(bytes) {
+  if (!bytes) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let size = bytes;
+  let i = 0;
+  while (size >= 1024 && i < units.length - 1) {
+    size /= 1024;
+    i++;
+  }
+  return `${size.toFixed(size >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+function renderDecisionFiles(input) {
+  const listEl = document.getElementById('decision-files-list');
+  if (!listEl) return;
+  const files = Array.from(input?.files || []);
+  if (!files.length) {
+    listEl.innerHTML = '';
+    return;
+  }
+  listEl.innerHTML = files.map((file) => {
+    const ext = (file.name.split('.').pop() || '').toUpperCase();
+    const type = ext || (file.type ? file.type.split('/').pop().toUpperCase() : 'FILE');
+    return `
+      <div class="decision-file-item">
+        <div class="decision-file-main">
+          <span class="decision-file-title">${file.name}</span>
+          <span class="decision-file-type">${type}</span>
+        </div>
+        <div class="decision-file-meta">${formatFileSize(file.size)}</div>
+      </div>
+    `;
+  }).join('');
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -1033,12 +1075,51 @@ function quickAddNote() {
   inp.value = '';
 }
 
+function toggleOperationalNotes(card) {
+  if (!card) return;
+  const willExpand = card.classList.contains('collapsed');
+  card.classList.toggle('collapsed', !willExpand);
+  card.classList.toggle('expanded', willExpand);
+}
+
+function placeAndCollapseOperationalNotes() {
+  const content = document.getElementById('app-content');
+  if (!content) return;
+
+  const decisionPanel = content.querySelector('.dp');
+  const notesCards = content.querySelectorAll('.op-notes-card');
+
+  notesCards.forEach((card) => {
+    if (card.dataset.notesInit !== '1') {
+      card.classList.add('collapsed');
+      card.classList.remove('expanded');
+      card.dataset.notesInit = '1';
+    }
+
+    if (decisionPanel && card.previousElementSibling !== decisionPanel) {
+      decisionPanel.insertAdjacentElement('afterend', card);
+    }
+  });
+}
+
 /* رفع ملف (محاكاة) */
 function handleFileUpload(input) {
   if (input.files.length > 0) {
     showToast(`تم رفع الملف: ${input.files[0].name}`, 's');
   }
 }
+
+(function setupOperationalNotesObserver() {
+  const run = () => setTimeout(placeAndCollapseOperationalNotes, 0);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+
+  const observer = new MutationObserver(() => run());
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+})();
 
 /* فتح نافذة إضافة زيارة ميدانية */
 function openAddVisitModal() {
