@@ -158,7 +158,31 @@ function showReportDetails(reportId) {
         <div class="fgrp"><label class="flbl">تاريخ الإجازة من</label><div class="fro">2025-01-08</div></div>
         <div class="fgrp"><label class="flbl">تاريخ الإجازة إلى</label><div class="fro">2025-01-22</div></div>
         <div class="fgrp"><label class="flbl">عدد أيام الإجازة</label><div class="fro"><strong>14 يوماً</strong></div></div>
-        <div class="fgrp"><label class="flbl">التوصيات الطبية</label><div class="fro">راحة تامة مع متابعة دورية كل أسبوعين. تجنب التعرض للعوامل المسببة.</div></div>
+        <div class="fgrp span-full"><label class="flbl">التوصيات الطبية</label><div class="fro">راحة تامة مع متابعة دورية كل أسبوعين. تجنب التعرض للعوامل المسببة.</div></div>
+        
+        <div class="fgrp span-full" style="margin-top:12px">
+          <label class="flbl">المرفقات من وزارة الصحة</label>
+          <div class="dz-list">
+            <div class="dz-item">
+              <div class="dz-item-icon">${ICONS.file}</div>
+              <div class="dz-item-info">
+                <div class="dz-item-name">نسخة التقرير الطبي المعتمد.pdf</div>
+                <div class="dz-item-size">1.2 MB</div>
+              </div>
+              <button class="ibtn" title="عرض" onclick="showToast('جارٍ عرض الملف من نظام وزارة الصحة...','i')">${ICONS.eye}</button>
+              <button class="ibtn" title="تحميل" onclick="showToast('جارٍ تحميل الملف...','i')">${ICONS.download}</button>
+            </div>
+            <div class="dz-item">
+              <div class="dz-item-icon">${ICONS.file}</div>
+              <div class="dz-item-info">
+                <div class="dz-item-name">نتائج فحوصات المختبر — وظائف الرئة.pdf</div>
+                <div class="dz-item-size">850 KB</div>
+              </div>
+              <button class="ibtn" title="عرض" onclick="showToast('جارٍ عرض الملف من نظام وزارة الصحة...','i')">${ICONS.eye}</button>
+              <button class="ibtn" title="تحميل" onclick="showToast('جارٍ تحميل الملف...','i')">${ICONS.download}</button>
+            </div>
+          </div>
+        </div>
       </div>`,
     footer: `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`
   });

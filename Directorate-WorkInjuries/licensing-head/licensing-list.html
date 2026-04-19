@@ -79,7 +79,6 @@ function render() {
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='licensing-details.html?id=${r.id}'">${ICONS.eye}</button>
                     <button class="ibtn" onclick="window.location.href='institution-file.html?id=${r.id}'" title="ملف المؤسسة">${ICONS.file}</button>
-                    ${!r.checkedOutBy?`<button class="ibtn" onclick="doCheckout('${r.id}')">${ICONS.lock}</button>`:r.checkedOutBy===me?`<button class="ibtn" onclick="doCheckin('${r.id}')">${ICONS.unlock}</button>`:''}
                   </div>
                 </td>
               </tr>`).join('')}

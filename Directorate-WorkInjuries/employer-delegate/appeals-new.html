@@ -59,7 +59,10 @@ document.addEventListener('DOMContentLoaded', () => {
               <label class="flbl">تاريخ العلم بالقرار <span class="req">*</span></label>
               <input type="date" class="fc">
             </div>
-            <div class="fgrp"><label class="flbl">المرفقات</label><input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4"></div>
+            <div class="fgrp">
+              <label class="flbl">المرفقات</label>
+              ${renderModernUploadComponent({ idPrefix: 'appeal-att' })}
+            </div>
           </div>
           <div style="display:flex;gap:10px;margin-top:16px">
             <button class="btn btn-primary" onclick="showToast('تم تقديم التظلم بنجاح','s');setTimeout(()=>window.location.href='appeals-list.html',1500)">${ICONS.check} تقديم التظلم</button>

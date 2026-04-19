@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
       </div>
       <div class="pg-acts">
-        ${!req.checkedOutBy && req.status === 'قيد التحقيق — إصابات العمل'
+        ${!req.checkedOutBy && (req.status === 'قيد التحقيق — إصابات العمل' || req.status.includes('بانتظار تعيين'))
           ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out — حجز الطلب</button>`
           : isCheckedOutByMe
             ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in — تحرير الطلب</button>`

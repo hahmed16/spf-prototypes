@@ -1,92 +1,100 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة البيانات — موظف قسم التحقيق في الأمراض المهنية</title>
-<link rel="stylesheet" href="../shared/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة البيانات — موظف قسم التحقيق في الأمراض المهنية</title>
+  <link rel="stylesheet" href="../shared/style.css">
 </head>
 <body>
-<script src="../shared/config.js"></script>
-<script src="../shared/data.js"></script>
-<script src="../shared/layout.js"></script>
-<script src="../shared/components.js"></script>
-<script>
-initLayout({ role: 'od-investigator', activePage: 'dashboard' });
-setBreadcrumb([{ label: 'لوحة البيانات' }]);
+  <script src="../shared/config.js"></script>
+  <script src="../shared/data.js"></script>
+  <script src="../shared/layout.js"></script>
+  <script src="../shared/components.js"></script>
+  <script>
+    initLayout({ role: 'od-investigator', activePage: 'dashboard' });
+    setBreadcrumb([{ label: 'لوحة البيانات' }]);
 
-document.addEventListener('DOMContentLoaded', () => {
-  const stats = WI_DATA.dashboardStats['od-investigator'];
-  const myReqs = WI_DATA.allowances.filter(r =>
-    ['قيد التحقيق — الأمراض المهنية','تم تقديم الطلب — بانتظار تعيين المحقق المختص'].includes(r.status)
-  );
-  const checkedOut = WI_DATA.allowances.filter(r => r.checkedOutBy === WI_DATA.users.od_investigator.name);
+    document.addEventListener('DOMContentLoaded', () => {
+      const stats = WI_DATA.dashboardStats['od-investigator'];
+      // Filter for OD requests only
+      const myReqs = WI_DATA.allowances.filter(r => 
+        r.type === 'مرض مهني' && 
+        ['تم تقديم الطلب — بانتظار تعيين المحقق المختص', 'قيد التحقيق — الأمراض المهنية'].includes(r.status)
+      );
+      const checkedOut = WI_DATA.allowances.filter(r => r.type === 'مرض مهني' && r.checkedOutBy === WI_DATA.users.od_investigator.name);
 
-  getContent().innerHTML = `
-    <div class="pg-head">
-      <div>
-        <h1>لوحة البيانات</h1>
-        <p>موظف قسم التحقيق في الأمراض المهنية — ${WI_DATA.users.od_investigator.name}</p>
-      </div>
-    </div>
-    <div class="stats-grid">
-      ${stats.map(s=>`
-      <div class="scard ${s.type}" onclick="window.location.href='allowances-list.html'">
-        <div class="sc-lbl">${s.label}</div>
-        <div class="sc-val">${s.value}</div>
-      </div>`).join('')}
-    </div>
-
-    ${checkedOut.length ? `
-    <div class="alert alert-i">
-      ${ICONS.lock}
-      <div><strong>الطلبات التي حجزتها حالياً:</strong> ${checkedOut.map(r=>`<a href="allowances-details.html?id=${r.id}" style="color:var(--primary)">${r.id}</a>`).join(' ، ')}</div>
-    </div>` : ''}
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div class="card">
-        <div class="ph"><h3><div class="pico bl">${ICONS.list}</div>الطلبات الجديدة — بانتظار الحجز</h3>
-          <a href="allowances-list.html" style="font-size:12px;color:var(--primary)">عرض الكل</a>
-        </div>
-        <div class="pb-0">
-          <table class="dtbl">
-            <thead><tr><th>رقم الطلب</th><th>المؤمن عليه</th><th>الحالة</th><th>التاريخ</th><th></th></tr></thead>
-            <tbody>
-              ${myReqs.slice(0,5).map(r=>`
-              <tr>
-                <td style="font-family:monospace;font-size:11.5px;color:var(--primary)">${r.id}</td>
-                <td>${r.insured.name}</td>
-                <td>${statusBadge(r.status)}</td>
-                <td style="font-size:11.5px">${r.submitDate}</td>
-                <td>
-                  ${!r.checkedOutBy
-                    ? `<button class="btn btn-primary btn-xs" onclick="checkOut('${r.id}')">Check-out</button>`
-                    : `<span style="font-size:11px;color:var(--warning)">محجوز</span>`}
-                </td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="card">
-        <div class="ph"><h3><div class="pico or">${ICONS.bell}</div>التنبيهات</h3></div>
-        <div class="pb">
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <div style="padding:10px 12px;border:1px solid var(--border);border-radius:var(--rsm);background:var(--g50)">
-              <p style="font-size:12.5px;font-weight:600">طلب WI-2025-001234 منذ يومين</p>
-              <p style="font-size:11px;color:var(--text3)">قيد التحقيق — يحتاج إجراءً</p>
-            </div>
+      getContent().innerHTML = `
+        <div class="pg-head">
+          <div>
+            <h1>لوحة البيانات</h1>
+            <p>موظف قسم التحقيق في الأمراض المهنية — ${WI_DATA.users.od_investigator.name}</p>
           </div>
         </div>
-      </div>
-    </div>`;
-});
+        
+        <div class="stats-grid">
+          ${stats.map(s => `
+          <div class="scard ${s.type}" onclick="window.location.href='allowances-list.html'">
+            <div class="sc-lbl">${s.label}</div>
+            <div class="sc-val">${s.value}</div>
+          </div>`).join('')}
+        </div>
 
-function checkOut(id) {
-  showToast(`تم حجز الطلب ${id} بنجاح`, 's');
-  setTimeout(() => window.location.href = `allowances-details.html?id=${id}`, 1000);
-}
-</script>
+        ${checkedOut.length ? `
+        <div class="alert alert-i">
+          ${ICONS.lock}
+          <div><strong>الطلبات التي حجزتها حالياً:</strong> ${checkedOut.map(r => `<a href="allowances-details.html?id=${r.id}" style="color:var(--primary)">${r.id}</a>`).join(' ، ')}</div>
+        </div>` : ''}
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div class="ph">
+              <h3><div class="pico bl">${ICONS.list}</div>الطلبات الجديدة — بانتظار الحجز</h3>
+              <a href="allowances-list.html" style="font-size:12px;color:var(--primary)">عرض الكل</a>
+            </div>
+            <div class="pb-0">
+              <table class="dtbl">
+                <thead><tr><th>رقم الطلب</th><th>المؤمن عليه</th><th>الحالة</th><th></th></tr></thead>
+                <tbody>
+                  ${myReqs.slice(0, 5).map(r => `
+                  <tr>
+                    <td style="font-family:monospace;font-size:11.5px;color:var(--primary)">${r.id}</td>
+                    <td>${r.insured.name}</td>
+                    <td>${statusBadge(r.status)}</td>
+                    <td>
+                      ${!r.checkedOutBy
+                        ? `<button class="btn btn-primary btn-xs" onclick="checkOut('${r.id}')">Check-out</button>`
+                        : `<span style="font-size:11px;color:var(--warning)">محجوز</span>`}
+                    </td>
+                  </tr>`).join('')}
+                  ${!myReqs.length ? `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">لا توجد طلبات جديدة موجهة للقسم حالياً</td></tr>` : ''}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="ph"><h3><div class="pico or">${ICONS.bell}</div>التنبيهات والمهام</h3></div>
+            <div class="pb">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="padding:10px 12px;border:1px solid var(--border);border-radius:var(--rsm);background:var(--g50)">
+                  <p style="font-size:12.5px;font-weight:600">زيارة ميدانية مجدولة غداً</p>
+                  <p style="font-size:11px;color:var(--text3)">مصنع الخليج للنسيج — فحص بيئة العمل</p>
+                </div>
+                <div style="padding:10px 12px;border:1px solid var(--border);border-radius:var(--rsm);background:var(--g50)">
+                  <p style="font-size:12.5px;font-weight:600">طلب WI-2025-001156</p>
+                  <p style="font-size:11px;color:var(--text3)">تم استلام الرد من اللجنة الطبية</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    });
+
+    function checkOut(id) {
+      showToast(`تم حجز الطلب ${id} بنجاح`, 's');
+      setTimeout(() => window.location.href = `allowances-details.html?id=${id}`, 1000);
+    }
+  </script>
 </body>
 </html>
-

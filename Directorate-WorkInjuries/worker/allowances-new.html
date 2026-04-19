@@ -143,9 +143,8 @@ function renderForm() {
     <div class="card">
       <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات</h3></div>
       <div class="pb">
-        <div class="fg fg-2" style="margin-bottom:14px" id="att-rows"></div>
-        <button class="btn btn-secondary btn-sm" onclick="addAttachment()">${ICONS.plus} إضافة مرفق</button>
-        <div class="fhint mt8">الأنواع المقبولة: PDF, Word, صور (JPG/PNG), تسجيل صوتي (MP3/WAV), فيديو (MP4) — الحجم الأقصى 20MB</div>
+        ${renderModernUploadComponent({ idPrefix: 'allowance-att' })}
+        <div class="fhint mt8">الأنواع المقبولة: PDF, Word, صور, تسجيل صوتي, فيديو — الحجم الأقصى 20MB</div>
       </div>
     </div>
 
@@ -168,7 +167,7 @@ function renderForm() {
       <button class="btn btn-ghost" onclick="window.location.href='allowances-list.html'">إلغاء</button>
     </div>`;
 
-  addAttachment();
+  // No need to init attachments manually anymore
 }
 
 function onTypeChange() {
@@ -198,9 +197,25 @@ function onTypeChange() {
           <select class="fc"><option>الرأس</option><option>الطرف العلوي الأيسر</option><option>الطرف العلوي الأيمن</option><option>الطرف السفلي الأيسر</option><option>الطرف السفلي الأيمن</option><option>الجذع / الضلوع</option><option>متعدد</option><option>أخرى</option></select>
         </div>
         <div class="fgrp"><label class="flbl">هل كانت هناك شهود؟</label>
-          <select class="fc" id="wit-sel" onchange="document.getElementById('wit-names').style.display=this.value==='نعم'?'':'none'"><option value="لا">لا</option><option value="نعم">نعم</option></select>
+          <select class="fc" id="wit-sel" onchange="document.getElementById('wit-table-container').style.display=this.value==='نعم'?'':'none'; if(this.value==='نعم' && document.getElementById('wit-tbody').children.length===0) addWitnessRow();"><option value="لا">لا</option><option value="نعم">نعم</option></select>
         </div>
-        <div class="fgrp span-2" id="wit-names" style="display:none"><label class="flbl">أسماء الشهود</label><textarea class="fc" rows="2" placeholder="اسم الشاهد — صفته — رقم هاتفه"></textarea></div>
+        <div class="fgrp span-full" id="wit-table-container" style="display:none">
+          <label class="flbl">بيانات الشهود</label>
+          <div class="tbl-wrap">
+            <table class="dtbl">
+              <thead>
+                <tr>
+                  <th>الاسم الكامل <span class="req">*</span></th>
+                  <th>الصفة / المنصب</th>
+                  <th>رقم الهاتف</th>
+                  <th style="width:50px"></th>
+                </tr>
+              </thead>
+              <tbody id="wit-tbody"></tbody>
+            </table>
+          </div>
+          <button type="button" class="btn btn-secondary btn-xs mt8" onclick="addWitnessRow()">${ICONS.plus} إضافة شاهد</button>
+        </div>
       </div>`;
     instr.innerHTML = `
       <strong style="font-size:13px;display:block;margin-bottom:10px">المستندات المطلوبة لطلب إصابة العمل:</strong>
@@ -236,25 +251,18 @@ function onRelapseChange() {
   document.getElementById('orig-req-group').style.display = v !== 'لا' ? '' : 'none';
 }
 
-let attCount = 0;
-function addAttachment() {
-  attCount++;
-  const container = document.getElementById('att-rows');
-  const div = document.createElement('div');
-  div.className = 'fgrp';
-  div.id = `att-row-${attCount}`;
-  div.innerHTML = `
-    <label class="flbl">مرفق ${attCount}</label>
-    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center">
-      <select class="fc">
-        <option>تقرير طبي</option><option>تقرير شرطة</option><option>كشف حضور وانصراف</option>
-        <option>صور</option><option>تسجيل صوتي</option><option>فيديو</option><option>مستند آخر</option>
-      </select>
-      <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4">
-      <button class="ibtn d" onclick="document.getElementById('att-row-${attCount}').remove()" title="حذف">${ICONS.trash}</button>
-    </div>`;
-  container.appendChild(div);
+function addWitnessRow() {
+  const tbody = document.getElementById('wit-tbody');
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td><input type="text" class="fc" placeholder="الاسم الكامل"></td>
+    <td><input type="text" class="fc" placeholder="زميل عمل، قريب، إلخ..."></td>
+    <td><input type="tel" class="fc" placeholder="9xxxxxxx"></td>
+    <td style="text-align:center"><button type="button" class="ibtn d" onclick="this.closest('tr').remove()" title="حذف">${ICONS.trash}</button></td>
+  `;
+  tbody.appendChild(row);
 }
+
 
 function saveDraft() {
   showToast('تم حفظ الطلب كمسودة', 'i');

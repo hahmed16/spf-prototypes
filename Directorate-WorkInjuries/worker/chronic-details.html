@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <div class="card" style="border-right:4px solid var(--primary)">
       <div class="pb-c">
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">
           <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">المسار</div><span class="badge ${req.path==='مسار مباشر'?'b-direct':'b-commpath'}">${req.path}</span></div>
           <div><div class="flbl" style="margin-bottom:4px">الحالة الحالية</div>${statusBadge(req.status)}</div>

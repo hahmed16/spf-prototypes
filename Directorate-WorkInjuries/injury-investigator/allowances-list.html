@@ -105,11 +105,13 @@ function render() {
                 <td>
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='allowances-details.html?id=${r.id}'" title="عرض التفاصيل">${ICONS.eye}</button>
-                    ${!r.checkedOutBy
-                      ? `<button class="ibtn" onclick="doCheckout('${r.id}')" title="Check-out — حجز الطلب للمعالجة">${ICONS.lock}</button>`
-                      : r.checkedOutBy === me
-                        ? `<button class="ibtn" onclick="doCheckin('${r.id}')" title="Check-in — إلغاء الحجز">${ICONS.unlock}</button>`
-                        : ''}
+                    ${(r.status.includes('بانتظار تعيين') || r.status.includes('قيد التحقيق'))
+                      ? !r.checkedOutBy
+                        ? `<button class="ibtn" onclick="doCheckout('${r.id}')" title="Check-out — حجز الطلب للمعالجة">${ICONS.lock}</button>`
+                        : r.checkedOutBy === me
+                          ? `<button class="ibtn" onclick="doCheckin('${r.id}')" title="Check-in — إلغاء الحجز">${ICONS.unlock}</button>`
+                          : ''
+                      : ''}
                     <button class="ibtn" onclick="openAddNoteModal('${r.id}')" title="إضافة ملاحظة">${ICONS.note}</button>
                   </div>
                 </td>

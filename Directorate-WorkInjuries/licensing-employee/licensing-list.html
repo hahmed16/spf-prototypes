@@ -79,7 +79,13 @@ function render() {
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='licensing-details.html?id=${r.id}'">${ICONS.eye}</button>
                     <button class="ibtn" onclick="window.location.href='institution-file.html?id=${r.id}'" title="ملف المؤسسة">${ICONS.file}</button>
-                    ${!r.checkedOutBy?`<button class="ibtn" onclick="doCheckout('${r.id}')">${ICONS.lock}</button>`:r.checkedOutBy===me?`<button class="ibtn" onclick="doCheckin('${r.id}')">${ICONS.unlock}</button>`:''}
+                    ${r.status.includes('بانتظار مراجعة موظف')
+                      ? !r.checkedOutBy
+                        ? `<button class="ibtn" onclick="doCheckout('${r.id}')" title="Check-out">${ICONS.lock}</button>`
+                        : r.checkedOutBy===me
+                          ? `<button class="ibtn" onclick="doCheckin('${r.id}')" title="Check-in">${ICONS.unlock}</button>`
+                          : ''
+                      : ''}
                   </div>
                 </td>
               </tr>`).join('')}

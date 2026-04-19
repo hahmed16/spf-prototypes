@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div><h1>تفاصيل التظلم</h1>
         <p>رقم التظلم: <strong style="font-family:monospace;color:var(--primary)">${appeal.id}</strong></p></div>
       <div class="pg-acts">
-        ${appeal.status===statusPending&&!appeal.checkedOutBy?`<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out</button>`:isCheckedOutByMe?`<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in</button>`:''}
+        ${(appeal.status===statusPending || appeal.status.includes('استيفاء')) && !appeal.checkedOutBy?`<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out</button>`:isCheckedOutByMe?`<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in</button>`:''}
         <button class="btn btn-secondary" onclick="window.location.href='appeals-list.html'">${ICONS.arrow_left} رجوع</button>
       </div>
     </div>

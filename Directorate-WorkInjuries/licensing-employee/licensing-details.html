@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div><h1>تفاصيل طلب ${req.requestType==='جديد'?'الترخيص':'التجديد'}</h1>
         <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p></div>
       <div class="pg-acts">
-        ${!req.checkedOutBy&&req.status===statusPending?`<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out</button>`:isCheckedOutByMe?`<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in</button>`:''}
+        ${!req.checkedOutBy && (req.status === statusPending || req.status.includes('استيفاء البيانات')) ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out</button>` : isCheckedOutByMe ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in</button>` : ''}
         <button class="btn btn-secondary" onclick="window.location.href='licensing-list.html'">${ICONS.arrow_left} رجوع</button>
       </div>
     </div>

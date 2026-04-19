@@ -44,19 +44,18 @@ document.addEventListener('DOMContentLoaded', () => {
               ${d.hasRequest
                 ? `<span class="badge b-submitted" style="font-size:10px">تم تقديم طلب</span>`
                 : `<span class="badge b-returned" style="font-size:10px">بانتظار إجراءك</span>`}
-              <span class="badge ${d.expectedPath==='مسار مباشر'?'b-direct':'b-commpath'}" style="font-size:10px">${d.expectedPath}</span>
             </div>
-            <div style="font-size:12px;color:var(--text2);display:flex;flex-wrap:wrap;gap:16px">
-              <span>${ICONS.building} ${d.hospital}</span>
-              <span>${ICONS.user} ${d.doctor}</span>
-              <span>${ICONS.calendar} تاريخ الثبوت: ${d.provenDate}</span>
+            <div class="m-row">
+              <span class="m-item">${ICONS.building} ${d.hospital}</span>
+              <span class="m-item">${ICONS.user} ${d.doctor}</span>
+              <span class="m-item">${ICONS.calendar} تاريخ الثبوت: ${d.provenDate}</span>
             </div>
           </div>
           <div style="display:flex;gap:6px;flex-shrink:0">
             ${d.hasRequest
               ? `<a href="chronic-details.html?id=${d.requestId}" class="btn btn-secondary btn-sm">${ICONS.eye} عرض الطلب</a>`
               : `<button class="btn btn-primary btn-sm" onclick="window.location.href='chronic-new.html?ref=${d.refId}'">${ICONS.plus} تقديم طلب</button>
-                 <button class="btn btn-ghost btn-sm" onclick="confirmDecline('${d.refId}')">رفض الاستفادة</button>`}
+                 <button class="btn btn-danger btn-sm" onclick="confirmDecline('${d.refId}')">عدم الرغبة فى الاستفادة من المنفعة</button>`}
           </div>
         </div>`).join('')}
       </div>

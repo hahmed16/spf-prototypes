@@ -1,80 +1,104 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة البيانات — رئيس قسم اللجان الطبية</title>
-<link rel="stylesheet" href="../shared/style.css"></head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة البيانات — رئيس قسم اللجان الطبية</title>
+  <link rel="stylesheet" href="../shared/style.css">
+</head>
 <body>
-<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
-<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
-<script>
-initLayout({ role: 'committees-head', activePage: 'dashboard' });
-setBreadcrumb([{ label: 'لوحة البيانات' }]);
-document.addEventListener('DOMContentLoaded', () => {
-  const stats = WI_DATA.dashboardStats['committees-head'];
-  getContent().innerHTML = `
-    <div class="pg-head"><div>
-      <h1>لوحة البيانات</h1>
-      <p>رئيس قسم اللجان الطبية — ${WI_DATA.users.committees_head.name}</p>
-    </div></div>
-    <div class="stats-grid">
-      ${stats.map(s=>`<div class="scard ${s.type}">
-        <div class="sc-lbl">${s.label}</div><div class="sc-val">${s.value}</div>
-      </div>`).join('')}
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div class="card">
-        <div class="ph"><h3><div class="pico bl">${ICONS.inbox}</div>طلبات العرض الواردة</h3>
-          <a href="referrals-list.html" style="font-size:12px;color:var(--primary)">عرض الكل</a>
-        </div>
-        <div class="pb">
-          <div class="alert alert-w">${ICONS.warn}<span>4 طلبات واردة تنتظر مراجعتك</span></div>
-          <div style="font-size:12.5px;color:var(--text2);line-height:2">
-            <div>• 2 طلبات بدلات انقطاع — تحديد مؤسسة صحية</div>
-            <div>• 2 طلبات أمراض مستديمة — مسار اللجان</div>
+  <script src="../shared/config.js"></script>
+  <script src="../shared/data.js"></script>
+  <script src="../shared/layout.js"></script>
+  <script src="../shared/components.js"></script>
+  <script>
+    initLayout({ role: 'committees-head', activePage: 'dashboard' });
+    setBreadcrumb([{ label: 'لوحة البيانات' }]);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const stats = WI_DATA.dashboardStats['committees-head'];
+      const pendingAppeals = WI_DATA.appeals.filter(a => 
+        ['تم تقديم طلب التظلم — بانتظار مراجعة موظف قسم اللجان الطبية', 'بانتظار مراجعة رئيس قسم اللجان الطبية'].includes(a.status)
+      );
+
+      getContent().innerHTML = `
+        <div class="pg-head">
+          <div>
+            <h1>لوحة البيانات</h1>
+            <p>رئيس قسم اللجان الطبية — ${WI_DATA.users.committees_head.name}</p>
           </div>
         </div>
-      </div>
-      <div class="card">
-        <div class="ph"><h3><div class="pico pu">${ICONS.list}</div>قائمة التظلمات</h3>
-          <a href="appeals-list.html" style="font-size:12px;color:var(--primary)">عرض الكل</a>
+        
+        <div class="stats-grid">
+          ${stats.map(s => `
+          <div class="scard ${s.type}" onclick="window.location.href='appeals-list.html'">
+            <div class="sc-lbl">${s.label}</div>
+            <div class="sc-val">${s.value}</div>
+          </div>`).join('')}
         </div>
-        <div class="pb">
-          <table class="dtbl">
-            <thead><tr><th>رقم التظلم</th><th>الحالة</th><th>التاريخ</th><th></th></tr></thead>
-            <tbody>
-              ${WI_DATA.appeals.map(a=>`
-              <tr>
-                <td style="font-family:monospace;font-size:11.5px;color:var(--primary)">${a.id}</td>
-                <td>${statusBadge(a.status)}</td>
-                <td style="font-size:11.5px">${a.submitDate}</td>
-                <td><button class="ibtn" onclick="window.location.href='appeals-details.html?id=${a.id}'">${ICONS.eye}</button></td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div class="ph">
+              <h3><div class="pico bl">${ICONS.inbox}</div>طلبات العرض الواردة</h3>
+              <a href="referrals-list.html" style="font-size:12px;color:var(--primary)">عرض الكل</a>
+            </div>
+            <div class="pb">
+              <div class="alert alert-w">${ICONS.warn}<span>لديك 4 حالات جديدة بانتظار التوجيه للجان الطبية.</span></div>
+              <div style="font-size:12.5px;color:var(--text2);line-height:2;padding:0 10px">
+                <div>• طلبات تحديد العجز — 3</div>
+                <div>• طلبات بدلات استمرارية — 1</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="ph">
+              <h3><div class="pico pu">${ICONS.list}</div>مراجعة التظلمات (Appeals)</h3>
+              <a href="appeals-list.html" style="font-size:12px;color:var(--primary)">عرض الكل</a>
+            </div>
+            <div class="pb-0">
+              <table class="dtbl">
+                <thead><tr><th>رقم الطلب</th><th>الحالة</th><th></th></tr></thead>
+                <tbody>
+                  ${pendingAppeals.slice(0, 3).map(a => `
+                  <tr>
+                    <td style="font-family:monospace;font-size:11.5px;color:var(--primary)">${a.id}</td>
+                    <td>${statusBadge(a.status)}</td>
+                    <td>
+                      <button class="btn btn-primary btn-xs" onclick="window.location.href='appeals-details.html?id=${a.id}'">مراجعة</button>
+                    </td>
+                  </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="ph"><h3><div class="pico tl">${ICONS.calendar}</div>الجلسات المجدولة</h3>
-        <a href="sessions-list.html" style="font-size:12px;color:var(--primary)">عرض الكل</a>
-      </div>
-      <div class="pb-0">
-        <table class="dtbl">
-          <thead><tr><th>رقم الجلسة</th><th>المؤسسة</th><th>التاريخ</th><th>الحالات</th><th>حالة النصاب</th><th></th></tr></thead>
-          <tbody>
-            ${WI_DATA.sessions.map(s=>`
-            <tr>
-              <td style="font-family:monospace;font-weight:700;color:var(--primary)">${s.id}</td>
-              <td>${s.institution}</td>
-              <td>${s.date} — ${s.time}</td>
-              <td>${s.casesCount} حالة</td>
-              <td><span class="badge ${s.quorum?'b-approved':'b-returned'}">${s.quorum?'مكتمل':'غير مكتمل'}</span></td>
-              <td><button class="ibtn" onclick="window.location.href='sessions-list.html'">${ICONS.eye}</button></td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>`;
-});
-</script></body></html>
+
+        <div class="card">
+          <div class="ph">
+            <h3><div class="pico tl">${ICONS.calendar}</div>الجلسات واللجان القادمة</h3>
+            <a href="sessions-list.html" style="font-size:12px;color:var(--primary)">عرض الكل</a>
+          </div>
+          <div class="pb-0">
+            <table class="dtbl">
+              <thead><tr><th>رقم الجلسة</th><th>المؤسسة</th><th>التاريخ</th><th>الحالات</th><th>النصاب</th><th></th></tr></thead>
+              <tbody>
+                ${WI_DATA.sessions.map(s => `
+                <tr>
+                  <td style="font-family:monospace;font-weight:700;color:var(--primary)">${s.id}</td>
+                  <td>${s.institution}</td>
+                  <td style="font-size:12px">${s.date} — ${s.time}</td>
+                  <td>${s.casesCount} حالة</td>
+                  <td><span class="badge ${s.quorum ? 'b-approved' : 'b-returned'}">${s.quorum ? 'مكتمل' : 'غير مكتمل'}</span></td>
+                  <td><button class="ibtn" onclick="window.location.href='sessions-list.html'">${ICONS.eye}</button></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+    });
+  </script>
+</body>
+</html>
 

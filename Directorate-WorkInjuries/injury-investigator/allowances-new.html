@@ -88,37 +88,58 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fg fg-3">
             <div class="fgrp">
               <label class="flbl">نوع الطلب <span class="req">*</span></label>
-              <select class="fc"><option>إصابة عمل</option></select>
+              <select class="fc" id="req-type" onchange="onTypeChange()">
+                <option value="">— اختر نوع الطلب —</option>
+                <option value="إصابة عمل">إصابة عمل</option>
+                <option value="مرض مهني">مرض مهني</option>
+              </select>
             </div>
-            <div class="fgrp">
+            <div class="fgrp" id="subtype-group" style="display:none">
               <label class="flbl">نوع الحالة <span class="req">*</span></label>
-              <select class="fc"><option>حادث طريق</option><option>إصابة في موقع العمل</option><option>إجهاد وإرهاق</option></select>
+              <select class="fc" id="req-subtype"></select>
             </div>
             <div class="fgrp">
-              <label class="flbl">تاريخ الواقعة <span class="req">*</span></label>
-              <input type="date" class="fc">
+              <label class="flbl">تاريخ الواقعة أو الاشتباه بالمرض <span class="req">*</span></label>
+              <input type="date" class="fc" id="incident-date">
             </div>
-            <div class="fgrp span-full">
-              <label class="flbl">وصف الواقعة <span class="req">*</span></label>
-              <textarea class="fc" rows="4" placeholder="صف الواقعة بالتفصيل..."></textarea>
+            <div class="fgrp">
+              <label class="flbl">هل الطلب انتكاسة أو مضاعفة؟ <span class="req">*</span></label>
+              <select class="fc" id="relapse" onchange="onRelapseChange()">
+                <option value="لا">لا</option>
+                <option value="انتكاسة">انتكاسة</option>
+                <option value="مضاعفة">مضاعفة</option>
+              </select>
             </div>
-            <div class="fgrp"><label class="flbl">مكان الواقعة</label><input type="text" class="fc"></div>
-            <div class="fgrp"><label class="flbl">الجزء المصاب</label>
-              <select class="fc"><option>الرأس</option><option>الطرف العلوي الأيمن</option><option>الطرف العلوي الأيسر</option><option>الطرف السفلي الأيمن</option><option>الطرف السفلي الأيسر</option><option>الجذع</option><option>متعدد</option></select>
+            <div class="fgrp" id="orig-req-group" style="display:none">
+              <label class="flbl">رقم الطلب الأصلي <span class="req">*</span></label>
+              <input type="text" class="fc" id="orig-req" placeholder="WI-YYYY-XXXXXX">
             </div>
           </div>
         </div>
       </div>
+
+      <!-- بيانات الإصابة أو المرض -->
+      <div class="card" id="injury-card" style="display:none">
+        <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>بيانات التفاصيل</h3></div>
+        <div class="pb" id="injury-fields"></div>
+      </div>
+
       <div class="card">
         <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات</h3></div>
         <div class="pb">
-          <div class="fg fg-2">
-            <div class="fgrp"><label class="flbl">نوع المرفق</label><select class="fc"><option>تقرير طبي</option><option>حكم محكمة</option><option>مراسلات رسمية</option><option>صور</option><option>مستند آخر</option></select></div>
-            <div class="fgrp"><label class="flbl">الملف</label><input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4"></div>
-          </div>
-          <button class="btn btn-secondary btn-sm mt8">${ICONS.plus} إضافة مرفق آخر</button>
+          ${renderModernUploadComponent({ idPrefix: 'allowance-att' })}
+          <div class="fhint mt8">الأنواع المقبولة: PDF, Word, صور, تسجيل صوتي, فيديو — الحجم الأقصى 20MB</div>
         </div>
       </div>
+
+      <!-- الإرشادات -->
+      <div class="card card-ro">
+        <div class="ph"><h3><div class="pico gy">${ICONS.info}</div>الإرشادات والمستندات المطلوبة</h3></div>
+        <div class="pb" id="instructions">
+          <div class="alert alert-i">${ICONS.info}<span>اختر نوع الطلب لعرض المستندات المطلوبة.</span></div>
+        </div>
+      </div>
+
       <div style="display:flex;gap:10px;padding:16px 0">
         <button class="btn btn-primary btn-lg" onclick="submitSpecialRequest()">${ICONS.check} إرسال الطلب</button>
         <button class="btn btn-secondary btn-lg" onclick="showToast('تم الحفظ كمسودة','i')">حفظ كمسودة</button>
@@ -148,14 +169,109 @@ function queryWorker() {
         <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${emp.jobTitle}</div></div>
       </div>`;
     document.getElementById('rest-form').style.display = '';
+    document.getElementById('rest-form').scrollIntoView({ behavior: 'smooth' });
   }, 1200);
+}
+
+function onTypeChange() {
+  const requestType = document.getElementById('req-type').value;
+  const subtypeGroup = document.getElementById('subtype-group');
+  const subtypeEl = document.getElementById('req-subtype');
+  const injuryCard = document.getElementById('injury-card');
+  const injuryFields = document.getElementById('injury-fields');
+  const instr = document.getElementById('instructions');
+
+  if (!requestType) {
+    subtypeGroup.style.display = 'none';
+    injuryCard.style.display = 'none';
+    return;
+  }
+
+  subtypeGroup.style.display = '';
+  injuryCard.style.display = '';
+
+  if (requestType === 'إصابة عمل') {
+    subtypeEl.innerHTML = `<option>حادث طريق</option><option>إصابة في موقع العمل</option><option>إجهاد وإرهاق</option>`;
+    injuryFields.innerHTML = `
+      <div class="fg fg-2">
+        <div class="fgrp span-full"><label class="flbl">وصف الواقعة <span class="req">*</span></label><textarea class="fc" rows="4" placeholder="صف الواقعة بالتفصيل..."></textarea></div>
+        <div class="fgrp"><label class="flbl">مكان الواقعة <span class="req">*</span></label><input type="text" class="fc" placeholder="الموقع الدقيق للحادثة"></div>
+        <div class="fgrp"><label class="flbl">الجزء المصاب من الجسم <span class="req">*</span></label>
+          <select class="fc"><option>الرأس</option><option>الطرف العلوي الأيسر</option><option>الطرف العلوي الأيمن</option><option>الطرف السفلي الأيسر</option><option>الطرف السفلي الأيمن</option><option>الجذع / الضلوع</option><option>متعدد</option><option>أخرى</option></select>
+        </div>
+        <div class="fgrp"><label class="flbl">هل كانت هناك شهود؟</label>
+          <select class="fc" id="wit-sel" onchange="document.getElementById('wit-table-container').style.display=this.value==='نعم'?'':'none'; if(this.value==='نعم' && document.getElementById('wit-tbody').children.length===0) addWitnessRow();"><option value="لا">لا</option><option value="نعم">نعم</option></select>
+        </div>
+        <div class="fgrp span-full" id="wit-table-container" style="display:none">
+          <label class="flbl">بيانات الشهود</label>
+          <div class="tbl-wrap">
+            <table class="dtbl">
+              <thead>
+                <tr>
+                  <th>الاسم الكامل <span class="req">*</span></th>
+                  <th>الصفة / المنصب</th>
+                  <th>رقم الهاتف</th>
+                  <th style="width:50px"></th>
+                </tr>
+              </thead>
+              <tbody id="wit-tbody"></tbody>
+            </table>
+          </div>
+          <button type="button" class="btn btn-secondary btn-xs mt8" onclick="addWitnessRow()">${ICONS.plus} إضافة شاهد</button>
+        </div>
+      </div>`;
+    instr.innerHTML = `
+      <strong style="font-size:13px;display:block;margin-bottom:10px">المستندات المطلوبة (إصابة عمل):</strong>
+      <ul style="font-size:12.5px;color:var(--text2);padding-right:18px;line-height:2">
+        <li>تقرير السلامة المهنية</li>
+        <li>كشف الحضور والانصراف</li>
+        <li>صور من موقع الحادثة</li>
+      </ul>`;
+  } else {
+    subtypeEl.innerHTML = `<option>ربو مهني</option><option>تسمم بالرصاص</option><option>التهاب الجلد التماسي</option><option>فقدان السمع المهني</option><option>داء الغبار الرئوي</option><option>مرض مهني آخر</option>`;
+    injuryFields.innerHTML = `
+      <div class="fg fg-2">
+        <div class="fgrp span-full"><label class="flbl">العوامل المسببة للمرض في بيئة العمل</label><textarea class="fc" rows="3" placeholder="المواد الكيميائية، الغبار، الضوضاء، إلخ..."></textarea></div>
+        <div class="fgrp"><label class="flbl">مدة التعرض لهذه العوامل</label><input type="text" class="fc" placeholder="مثال: سنتان"></div>
+        <div class="fgrp"><label class="flbl">تاريخ الاشتباه بالحالة</label><input type="date" class="fc"></div>
+        <div class="fgrp span-full"><label class="flbl">إجراءات السلامة المتوفرة</label><textarea class="fc" rows="3" placeholder="أدوات الوقاية، التهوية، التدريب..."></textarea></div>
+      </div>`;
+    instr.innerHTML = `
+      <strong style="font-size:13px;display:block;margin-bottom:10px">المستندات المطلوبة (مرض مهني):</strong>
+      <ul style="font-size:12.5px;color:var(--text2);padding-right:18px;line-height:2">
+        <li>كشف الفحوصات الدورية</li>
+        <li>نتائج قياسات بيئة العمل</li>
+        <li>قائمة بالمواد المستخدمة</li>
+      </ul>`;
+  }
+}
+
+function onRelapseChange() {
+  const v = document.getElementById('relapse').value;
+  document.getElementById('orig-req-group').style.display = v !== 'لا' ? '' : 'none';
+}
+
+function addWitnessRow() {
+  const tbody = document.getElementById('wit-tbody');
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td><input type="text" class="fc" placeholder="الاسم الكامل"></td>
+    <td><input type="text" class="fc" placeholder="المنصب"></td>
+    <td><input type="tel" class="fc" placeholder="9xxxxxxx"></td>
+    <td style="text-align:center"><button type="button" class="ibtn d" onclick="this.closest('tr').remove()" title="حذف">${ICONS.trash}</button></td>
+  `;
+  tbody.appendChild(row);
 }
 
 function submitSpecialRequest() {
   const reason = document.getElementById('entry-reason').value;
-  if (!reason) { showToast('يرجى اختيار سبب التقديم', 'w'); return; }
+  if (!reason) { showToast('يرجى اختيار سبب التقديم من قبل الموظف', 'w'); return; }
   if (!foundWorker) { showToast('يرجى الاستعلام عن بيانات المؤمن عليه أولاً', 'w'); return; }
-  showToast('جارٍ تقديم الطلب...', 'i');
+  
+  const type = document.getElementById('req-type').value;
+  if (!type) { showToast('يرجى اختيار نوع الطلب وتعبئة البيانات', 'w'); return; }
+
+  showToast('جارٍ تقديم الطلب الاستثنائي...', 'i');
   setTimeout(() => {
     showToast('تم تقديم الطلب بنجاح — WI-2025-001355', 's', 5000);
     setTimeout(() => window.location.href = 'allowances-list.html', 2000);

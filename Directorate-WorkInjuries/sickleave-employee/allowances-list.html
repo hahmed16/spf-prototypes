@@ -73,7 +73,13 @@ function render() {
                 <td>
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='allowances-details.html?id=${r.id}'">${ICONS.eye}</button>
-                    ${!r.checkedOutBy?`<button class="ibtn" onclick="doCheckout('${r.id}')" title="Check-out">${ICONS.lock}</button>`:r.checkedOutBy===me?`<button class="ibtn" onclick="doCheckin('${r.id}')" title="Check-in">${ICONS.unlock}</button>`:''}
+                    ${(r.status.includes('فني الإجازات المرضية') || r.status.includes('قيد المراجعة'))
+                      ? !r.checkedOutBy
+                        ? `<button class="ibtn" onclick="doCheckout('${r.id}')" title="Check-out">${ICONS.lock}</button>`
+                        : r.checkedOutBy===me
+                          ? `<button class="ibtn" onclick="doCheckin('${r.id}')" title="Check-in">${ICONS.unlock}</button>`
+                          : ''
+                      : ''}
                     <button class="ibtn" onclick="openAddNoteModal('${r.id}')">${ICONS.note}</button>
                   </div>
                 </td>

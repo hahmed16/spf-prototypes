@@ -155,20 +155,14 @@ function buildSidebar(roleConfig, activePage) {
     <div class="sb-nav">`;
 
   for (const item of roleConfig.sidebar) {
-    if (item.section) {
-      html += `<div class="nav-sec">${item.section}</div>`;
-    } else {
-      const isActive = item.page === activePage;
-      const badgeCount = getBadgeCount(item.badge, roleConfig);
-      const badgeHtml = badgeCount ? `<span class="nb ${badgeCount > 5 ? 'd' : ''}">${badgeCount}</span>` : '';
-      const icon = ICONS[item.icon] || ICONS.list;
-      html += `
-        <div class="nav-i ${isActive ? 'act' : ''}" onclick="navigateTo('${item.page}')">
-          ${icon}
-          <span>${item.label}</span>
-          ${badgeHtml}
-        </div>`;
-    }
+    if (item.section) continue;
+    const isActive = item.page === activePage;
+    const icon = ICONS[item.icon] || ICONS.list;
+    html += `
+      <div class="nav-i ${isActive ? 'act' : ''}" onclick="navigateTo('${item.page}')">
+        ${icon}
+        <span>${item.label}</span>
+      </div>`;
   }
 
   html += `</div>
@@ -180,23 +174,6 @@ function buildSidebar(roleConfig, activePage) {
     </div>
   </div>`;
   return html;
-}
-
-function getBadgeCount(key, roleConfig) {
-  if (!key) return 0;
-  const counts = {
-    'allowances': 7,
-    'disability': 6,
-    'chronic': 5,
-    'chronic-incoming': 3,
-    'reassessment': 4,
-    'appeals': 3,
-    'referrals': 4,
-    'sessions': 2,
-    'licensing': 5,
-    'signing': 2,
-  };
-  return counts[key] || 0;
 }
 
 /* ── تحديث الـ Breadcrumb ── */
@@ -385,6 +362,7 @@ function formatDate(d) {
   return new Date(d).toLocaleDateString('ar-OM', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+/* ── Format Time ── */
 function formatDateTime(d) {
   if (!d) return '—';
   const parts = d.split(' ');

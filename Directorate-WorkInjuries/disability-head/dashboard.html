@@ -1,62 +1,96 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة البيانات — رئيس قسم الإعاقة والأمراض المستديمة</title>
-<link rel="stylesheet" href="../shared/style.css"></head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة البيانات — رئيس قسم الإعاقة والأمراض المستديمة</title>
+  <link rel="stylesheet" href="../shared/style.css">
+</head>
 <body>
-<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
-<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
-<script>
-initLayout({ role: 'disability-head', activePage: 'dashboard' });
-setBreadcrumb([{ label: 'لوحة البيانات' }]);
-document.addEventListener('DOMContentLoaded', () => {
-  const stats = WI_DATA.dashboardStats['disability-head'];
-  getContent().innerHTML = `
-    <div class="pg-head"><div><h1>لوحة البيانات</h1>
-      <p>رئيس قسم الإعاقة والأمراض المستديمة — ${WI_DATA.users.disability_head.name}</p></div>
-    </div>
-    <div class="stats-grid">
-      ${stats.map(s=>`<div class="scard ${s.type}" onclick="window.location.href='disability-list.html'">
-        <div class="sc-lbl">${s.label}</div><div class="sc-val">${s.value}</div></div>`).join('')}
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div class="card">
-        <div class="ph"><h3><div class="pico pu">${ICONS.shield}</div>طلبات منفعة الإعاقة الجديدة</h3>
-          <a href="disability-list.html" style="font-size:12px;color:var(--primary)">عرض الكل</a></div>
-        <div class="pb-0">
-          <table class="dtbl">
-            <thead><tr><th>رقم الطلب</th><th>المستفيد</th><th>الحالة</th><th></th></tr></thead>
-            <tbody>
-              ${WI_DATA.disability.map(r=>`
-              <tr>
-                <td style="font-family:monospace;font-size:11.5px;color:var(--primary)">${r.id}</td>
-                <td>${r.applicant.name}</td>
-                <td>${statusBadge(r.status)}</td>
-                <td><button class="ibtn" onclick="window.location.href='disability-details.html?id=${r.id}'">${ICONS.eye}</button></td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
+  <script src="../shared/config.js"></script>
+  <script src="../shared/data.js"></script>
+  <script src="../shared/layout.js"></script>
+  <script src="../shared/components.js"></script>
+  <script>
+    initLayout({ role: 'disability-head', activePage: 'dashboard' });
+    setBreadcrumb([{ label: 'لوحة البيانات' }]);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const stats = WI_DATA.dashboardStats['disability-head'];
+      const pending = WI_DATA.disability.filter(r => 
+        ['تم تقديم طلب منفعة الأشخاص ذوي الإعاقة — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة', 'بانتظار اعتماد رئيس القسم'].includes(r.status)
+      );
+
+      getContent().innerHTML = `
+        <div class="pg-head">
+          <div>
+            <h1>لوحة البيانات</h1>
+            <p>رئيس قسم الإعاقة والأمراض المستديمة — ${WI_DATA.users.disability_head.name}</p>
+          </div>
         </div>
-      </div>
-      <div class="card">
-        <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>تشخيصات أمراض مستديمة واردة</h3>
-          <a href="chronic-incoming.html" style="font-size:12px;color:var(--primary)">عرض الكل</a></div>
-        <div class="pb-0">
-          <table class="dtbl">
-            <thead><tr><th>المستفيد</th><th>التشخيص</th><th>المسار</th><th>طلب؟</th></tr></thead>
-            <tbody>
-              ${WI_DATA.chronicIncoming.map(d=>`
-              <tr>
-                <td>${d.applicantName}</td>
-                <td style="font-size:11.5px">${d.diagnosis}</td>
-                <td><span class="badge ${d.expectedPath==='مسار مباشر'?'b-direct':'b-commpath'} " style="font-size:10px">${d.expectedPath}</span></td>
-                <td>${d.hasRequest?`<span class="badge b-approved" style="font-size:10px">نعم</span>`:`<span class="badge b-returned" style="font-size:10px">لا</span>`}</td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
+        
+        <div class="stats-grid">
+          ${stats.map(s => `
+          <div class="scard ${s.type}" onclick="window.location.href='disability-list.html'">
+            <div class="sc-lbl">${s.label}</div>
+            <div class="sc-val">${s.value}</div>
+          </div>`).join('')}
         </div>
-      </div>
-    </div>`;
-});
-</script></body></html>
+
+        ${pending.length ? `
+        <div class="alert alert-w">
+          ${ICONS.warn}
+          <div><strong>لديك ${pending.length} حالات بانتظار الاعتماد النهائي.</strong> <a href="disability-list.html" style="color:var(--primary);margin-right:10px">عرض الكل ${ICONS.arrow_left}</a></div>
+        </div>` : ''}
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div class="ph">
+              <h3><div class="pico pu">${ICONS.shield}</div>طلبات المنفعة بانتظار الاعتماد</h3>
+              <a href="disability-list.html" style="font-size:12px;color:var(--primary)">عرض الكل</a>
+            </div>
+            <div class="pb-0">
+              <table class="dtbl">
+                <thead><tr><th>رقم الطلب</th><th>المستفيد</th><th></th></tr></thead>
+                <tbody>
+                  ${pending.slice(0, 5).map(r => `
+                  <tr>
+                    <td style="font-family:monospace;font-size:11.5px;color:var(--primary)">${r.id}</td>
+                    <td>${r.applicant.name}</td>
+                    <td>
+                      <button class="btn btn-primary btn-xs" onclick="window.location.href='disability-details.html?id=${r.id}'">مراجعة واعتماد</button>
+                    </td>
+                  </tr>`).join('')}
+                  ${!pending.length ? `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">لا توجد طلبات بانتظار الاعتماد حالياً</td></tr>` : ''}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="ph">
+              <h3><div class="pico rd">${ICONS.medical}</div>الأمراض المستديمة (جديد للمراجعة)</h3>
+              <a href="chronic-incoming.html" style="font-size:12px;color:var(--primary)">عرض الكل</a>
+            </div>
+            <div class="pb-0">
+              <table class="dtbl">
+                <thead><tr><th>المستفيد</th><th>التشخيص</th><th></th></tr></thead>
+                <tbody>
+                  ${WI_DATA.chronicIncoming.slice(0, 5).map(d => `
+                  <tr>
+                    <td>${d.applicantName}</td>
+                    <td style="font-size:11.5px">${d.diagnosis}</td>
+                    <td>
+                      <button class="ibtn" onclick="window.location.href='chronic-incoming.html'">${ICONS.eye}</button>
+                    </td>
+                  </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>`;
+    });
+  </script>
+</body>
+</html>
 

@@ -1,36 +1,38 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>قائمة الطلبات — موظف قسم التحقيق في الأمراض المهنية</title>
-<link rel="stylesheet" href="../shared/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>قائمة الطلبات — موظف قسم التحقيق في الأمراض المهنية</title>
+  <link rel="stylesheet" href="../shared/style.css">
 </head>
+
 <body>
-<script src="../shared/config.js"></script>
-<script src="../shared/data.js"></script>
-<script src="../shared/layout.js"></script>
-<script src="../shared/components.js"></script>
-<script>
-initLayout({ role: 'od-investigator', activePage: 'allowances-list' });
-setBreadcrumb([{ label: 'بدلات الانقطاع عن العمل' }, { label: 'قائمة الطلبات' }]);
+  <script src="../shared/config.js"></script>
+  <script src="../shared/data.js"></script>
+  <script src="../shared/layout.js"></script>
+  <script src="../shared/components.js"></script>
+  <script>
+    initLayout({ role: 'od-investigator', activePage: 'allowances-list' });
+    setBreadcrumb([{ label: 'بدلات الانقطاع عن العمل' }, { label: 'قائمة الطلبات' }]);
 
-const me = WI_DATA.users.od_investigator.name;
-// موظف الأمراض المهنية يرى طلبات الأمراض المهنية + قيد التحقيق
-const reqs = WI_DATA.allowances.filter(r => r.type === 'إصابة عمل' || r.assignedTo === me || r.checkedOutBy === me);
-let activeTab = 'all';
+    const me = WI_DATA.users.od_investigator.name;
+    // موظف الأمراض المهنية يرى طلبات الأمراض المهنية + قيد التحقيق
+    const reqs = WI_DATA.allowances.filter(r => r.type === 'مرض مهني' || r.assignedTo === me || r.checkedOutBy === me);
+    let activeTab = 'all';
 
-document.addEventListener('DOMContentLoaded', render);
+    document.addEventListener('DOMContentLoaded', render);
 
-function render() {
-  const filtered = activeTab === 'all' ? reqs : reqs.filter(r => {
-    if (activeTab === 'new') return r.status === 'تم تقديم الطلب — بانتظار تعيين المحقق المختص';
-    if (activeTab === 'investigating') return r.status === 'قيد التحقيق — الأمراض المهنية';
-    if (activeTab === 'mine') return r.checkedOutBy === me;
-    return true;
-  });
+    function render() {
+      const filtered = activeTab === 'all' ? reqs : reqs.filter(r => {
+        if (activeTab === 'new') return r.status === 'تم تقديم الطلب — بانتظار تعيين المحقق المختص';
+        if (activeTab === 'investigating') return r.status === 'قيد التحقيق — الأمراض المهنية';
+        if (activeTab === 'mine') return r.checkedOutBy === me;
+        return true;
+      });
 
-  getContent().innerHTML = `
+      getContent().innerHTML = `
     <div class="pg-head">
       <div><h1>قائمة طلبات صرف بدلات الانقطاع</h1>
         <p>الأمراض المهنية — ${reqs.length} طلب</p>
@@ -67,11 +69,11 @@ function render() {
     <div class="card">
       <div class="ttabs">
         ${[
-          {key:'all',label:'الكل',count:reqs.length},
-          {key:'new',label:'جديدة — بانتظار الحجز',count:reqs.filter(r=>r.status==='تم تقديم الطلب — بانتظار تعيين المحقق المختص').length},
-          {key:'investigating',label:'قيد التحقيق',count:reqs.filter(r=>r.status==='قيد التحقيق — الأمراض المهنية').length},
-          {key:'mine',label:'محجوزة بواسطتي',count:reqs.filter(r=>r.checkedOutBy===me).length},
-        ].map(t=>`<div class="ttab ${activeTab===t.key?'act':''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+          { key: 'all', label: 'الكل', count: reqs.length },
+          { key: 'new', label: 'جديدة — بانتظار الحجز', count: reqs.filter(r => r.status === 'تم تقديم الطلب — بانتظار تعيين المحقق المختص').length },
+          { key: 'investigating', label: 'قيد التحقيق', count: reqs.filter(r => r.status === 'قيد التحقيق — الأمراض المهنية').length },
+          { key: 'mine', label: 'محجوزة بواسطتي', count: reqs.filter(r => r.checkedOutBy === me).length },
+        ].map(t => `<div class="ttab ${activeTab === t.key ? 'act' : ''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
       </div>
       <div class="pb-0">
         <div class="tbl-wrap">
@@ -88,28 +90,30 @@ function render() {
               </tr>
             </thead>
             <tbody>
-              ${filtered.map(r=>`
-              <tr style="${r.checkedOutBy===me?'background:#f0fdf4':''}">
+              ${filtered.map(r => `
+              <tr style="${r.checkedOutBy === me ? 'background:#f0fdf4' : ''}">
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
                 <td>${r.insured.name}</td>
-                <td style="font-size:11.5px">${r.employer.name.substring(0,25)}...</td>
+                <td style="font-size:11.5px">${r.employer.name.substring(0, 25)}...</td>
                 <td>${statusBadge(r.status)}</td>
                 <td style="font-size:12px">${r.submitDate}</td>
                 <td>
                   ${!r.checkedOutBy
-                    ? `<span class="badge b-avail">متاح</span>`
-                    : r.checkedOutBy === me
-                      ? `<span class="badge b-checkout">محجوز بواسطتي</span>`
-                      : `<span class="badge b-checkout" title="${r.checkedOutBy}">محجوز</span>`}
+            ? `<span class="badge b-avail">متاح</span>`
+            : r.checkedOutBy === me
+              ? `<span class="badge b-checkout">محجوز بواسطتي</span>`
+              : `<span class="badge b-checkout" title="${r.checkedOutBy}">محجوز</span>`}
                 </td>
                 <td>
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='allowances-details.html?id=${r.id}'" title="عرض التفاصيل">${ICONS.eye}</button>
-                    ${!r.checkedOutBy
-                      ? `<button class="ibtn" onclick="doCheckout('${r.id}')" title="Check-out — حجز الطلب للمعالجة">${ICONS.lock}</button>`
-                      : r.checkedOutBy === me
-                        ? `<button class="ibtn" onclick="doCheckin('${r.id}')" title="Check-in — إلغاء الحجز">${ICONS.unlock}</button>`
-                        : ''}
+                    ${(r.status.includes('بانتظار تعيين') || r.status.includes('قيد التحقيق'))
+            ? !r.checkedOutBy
+              ? `<button class="ibtn" onclick="doCheckout('${r.id}')" title="Check-out — حجز الطلب للمعالجة">${ICONS.lock}</button>`
+              : r.checkedOutBy === me
+                ? `<button class="ibtn" onclick="doCheckin('${r.id}')" title="Check-in — إلغاء الحجز">${ICONS.unlock}</button>`
+                : ''
+            : ''}
                     <button class="ibtn" onclick="openAddNoteModal('${r.id}')" title="إضافة ملاحظة">${ICONS.note}</button>
                   </div>
                 </td>
@@ -119,24 +123,24 @@ function render() {
         </div>
       </div>
     </div>`;
-}
+    }
 
-function setTab(t) { activeTab = t; render(); }
+    function setTab(t) { activeTab = t; render(); }
 
-function doCheckout(id) {
-  const req = reqs.find(r=>r.id===id);
-  if (req) { req.checkedOutBy = me; }
-  showToast(`تم حجز الطلب ${id} — Check-out`, 's');
-  render();
-}
+    function doCheckout(id) {
+      const req = reqs.find(r => r.id === id);
+      if (req) { req.checkedOutBy = me; }
+      showToast(`تم حجز الطلب ${id} — Check-out`, 's');
+      render();
+    }
 
-function doCheckin(id) {
-  const req = reqs.find(r=>r.id===id);
-  if (req) { req.checkedOutBy = null; }
-  showToast(`تم تحرير الطلب ${id} — Check-in`, 'i');
-  render();
-}
-</script>
+    function doCheckin(id) {
+      const req = reqs.find(r => r.id === id);
+      if (req) { req.checkedOutBy = null; }
+      showToast(`تم تحرير الطلب ${id} — Check-in`, 'i');
+      render();
+    }
+  </script>
 </body>
-</html>
 
+</html>

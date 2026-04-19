@@ -13,7 +13,7 @@
 <script src="../shared/components.js"></script>
 <script>
 initLayout({ role: 'worker', activePage: 'appeals-list' });
-setBreadcrumb([{ label: 'التظلمات' }, { label: 'قائمة تظلماتي' }]);
+setBreadcrumb([{ label: 'التظلمات' }, { label: 'قائمة التظلمات' }]);
 
 const u = WI_DATA.users.worker;
 const myAppeals = WI_DATA.appeals.filter(a => a.applicant.civil === u.civil);
@@ -21,7 +21,7 @@ const myAppeals = WI_DATA.appeals.filter(a => a.applicant.civil === u.civil);
 document.addEventListener('DOMContentLoaded', () => {
   getContent().innerHTML = `
     <div class="pg-head">
-      <div><h1>قائمة تظلماتي</h1><p>${myAppeals.length} تظلم مقدم</p></div>
+      <div><h1>قائمة التظلمات</h1><p>${myAppeals.length} تظلم مقدم</p></div>
       <div class="pg-acts">
         <button class="btn btn-primary" onclick="window.location.href='appeals-new.html'">${ICONS.plus} تقديم تظلم جديد</button>
       </div>

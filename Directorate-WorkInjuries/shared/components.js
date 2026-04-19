@@ -855,12 +855,7 @@ function renderAttachmentsPanel(attachments = [], canAdd = true) {
       ${attHtml}
       ${canAdd ? `
       <div style="margin-top:10px">
-        <div class="fu-area" onclick="document.getElementById('hidden-file-input').click()">
-          ${ICONS.upload}
-          <p>اسحب الملف هنا أو انقر للاختيار</p>
-          <small>يقبل: PDF, Word, صور, MP3, WAV, MP4 — الحجم الأقصى 20 ميغابايت</small>
-        </div>
-        <input type="file" id="hidden-file-input" style="display:none" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4" onchange="handleFileUpload(this)">
+        ${renderModernUploadComponent({ idPrefix: 'gen-att', subTitle: 'PDF, Word, صور, MP3, WAV, MP4 — الحجم الأقصى 20 ميغابايت' })}
       </div>` : ''}
     </div>
   </div>`;
@@ -924,15 +919,8 @@ function renderDecisionPanel({ actions = [], title = 'اتخاذ قرار', note
         <textarea class="fc" id="decision-notes" placeholder="أكتب ملاحظاتك هنا..." rows="3">${note}</textarea>
       </div>
       <div class="fgrp">
-        <label class="flbl">إرفاق ملف <span style="font-weight:400;color:var(--text3)">(اختياري)</span></label>
-        <div class="decision-upload-area" onclick="document.getElementById('decision-file')?.click()">
-          <input type="file" id="decision-file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4" style="display:none" onchange="renderDecisionFiles(this)">
-          <div class="decision-upload-icon">${ICONS.upload}</div>
-          <p>اسحب الملفات هنا أو انقر للاختيار</p>
-          <small>يمكن رفع عدة ملفات دفعة واحدة (PDF, Word, صور, صوت, فيديو)</small>
-        </div>
-        <div id="decision-files-list" class="decision-files-list"></div>
-        <div style="margin-top:6px;font-size:.74rem;color:var(--text3)">الحد الأقصى لكل ملف: 20 ميغابايت</div>
+        <label class="flbl">إرفاق ملفات داعمة للقرار <span style="font-weight:400;color:var(--text3)">(اختياري)</span></label>
+        ${renderModernUploadComponent({ idPrefix: 'decision-att', subTitle: 'يمكن رفع عدة ملفات دفعة واحدة' })}
       </div>
       <div class="dp-acts">${actionsHtml}</div>
     </div>
@@ -1007,8 +995,8 @@ function renderTimeline(events = []) {
             <span>${e.role}</span>
           </div>
           ${e.toStatus ? `<div class="tl-states">
-            ${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus.substring(0,30)}${e.fromStatus.length > 30 ? '...' : ''}</span><span>${ICONS.arrow_right}</span>` : ''}
-            <span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus.substring(0,35)}${e.toStatus.length > 35 ? '...' : ''}</span>
+            ${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus.substring(0,300)}${e.fromStatus.length > 300 ? '...' : ''}</span><span>${ICONS.arrow_right}</span>` : ''}
+            <span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus.substring(0,300)}${e.toStatus.length > 300 ? '...' : ''}</span>
           </div>` : ''}
           ${e.note ? `<div class="tl-note">${e.note}</div>` : ''}
         </div>
@@ -1182,3 +1170,63 @@ function openOriginalRequest(id) {
 
 /* متغير مساعد للطلب الحالي */
 let currentRequestId = null;
+/* ════════════════════════════════════════════════════════════════
+   Modern Multi-File Upload Components
+   ════════════════════════════════════════════════════════════════ */
+
+/**
+ * Renders the modern dropzone HTML.
+ */
+function renderModernUploadComponent({ idPrefix = 'up', title = 'إرفاق المستندات', subTitle = 'يمكنك اختيار عدة ملفات معاً (PDF, Word, صور...)' }) {
+  const containerId = `${idPrefix}-container`;
+  const inputId = `${idPrefix}-input`;
+  const listId = `${idPrefix}-list`;
+
+  return `
+    <div class="dz-container" id="${containerId}">
+      <div class="dz-box" onclick="document.getElementById('${inputId}').click()">
+        <div class="dz-box-icon">${ICONS.upload}</div>
+        <div class="dz-box-text">اسحب الملفات هنا أو انقر للاختيار</div>
+        <div class="dz-box-sub">${subTitle}</div>
+        <input type="file" id="${inputId}" class="fc" multiple style="display:none" onchange="handleModernFileUpload(this, '${listId}')">
+      </div>
+      <div class="dz-list" id="${listId}"></div>
+    </div>
+  `;
+}
+
+/**
+ * Handles multiple file selection and populates the list.
+ */
+function handleModernFileUpload(input, listId) {
+  const listEl = document.getElementById(listId);
+  if (!listEl) return;
+
+  const files = Array.from(input.files);
+  if (files.length === 0) return;
+
+  // Simulate upload and add to list
+  files.forEach(file => {
+    const fileId = 'f-' + Math.random().toString(36).substr(2, 9);
+    const item = document.createElement('div');
+    item.className = 'dz-item';
+    item.id = fileId;
+    
+    const ext = file.name.split('.').pop().toLowerCase();
+    const isImg = ['jpg', 'jpeg', 'png', 'gif'].includes(ext);
+    
+    item.innerHTML = `
+      <div class="dz-item-icon">${isImg ? ICONS.eye : ICONS.file}</div>
+      <div class="dz-item-info">
+        <div class="dz-item-name" title="${file.name}">${file.name}</div>
+        <div class="dz-item-size">${formatFileSize(file.size)}</div>
+      </div>
+      <button type="button" class="ibtn d" onclick="this.closest('.dz-item').remove()" title="حذف">${ICONS.trash}</button>
+    `;
+    listEl.appendChild(item);
+  });
+
+  showToast(`تمت إضافة ${files.length} ملف(ات)`, 's');
+  // Clear input to allow same files again if needed
+  input.value = '';
+}
