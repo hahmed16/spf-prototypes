@@ -20,8 +20,13 @@ const WI_DATA = {
     committees_head: { name: 'محمد بن راشد الهنائي', civil: '9055550000', phone: '96895550000', employeeId: 'SPF-0089' },
     licensing_employee: { name: 'هدى بنت ناصر الوهيبية', civil: '9066661111', phone: '96896661111', employeeId: 'SPF-0534' },
     licensing_head: { name: 'طالب بن سعيد الحنبلي', civil: '9066662222', phone: '96896662222', employeeId: 'SPF-0067' },
+    licensed_institution: { name: 'مستشفى النور التخصصي', civil: '7000000001', phone: '96824567890', email: 'info@alnoor-hospital.om', licenseNo: 'LIC-ORG-2020-014' },
+    supervisory_committee: { name: 'د. سيف بن حمد المسكري', civil: '9066665555', phone: '96896665555', committeeId: 'SUP-COM-01' },
+    appeals_committee: { name: 'د. خالد بن سالم الهاشمي', civil: '9066666666', phone: '96896666666', committeeId: 'APP-COM-01' },
     hospital_delegate: { name: 'منى بنت عبدالله الرحبية', civil: '9066663333', phone: '96896663333', email: 'mona@hospital.om' },
     institution_rapporteur: { name: 'أنس بن خلفان الجابري', civil: '9066664444', phone: '96896664444', employeeId: 'SPF-0589' },
+    appeals_rapporteur: { name: 'ليلى بنت حمود الفارسية', civil: '9066667777', phone: '96896667777', employeeId: 'SPF-0611' },
+    supervisory_rapporteur: { name: 'مازن بن سعيد اللواتي', civil: '9066668888', phone: '96896668888', employeeId: 'SPF-0624' },
   },
 
   /* ── طلبات بدلات الانقطاع عن العمل ── */
@@ -54,7 +59,7 @@ const WI_DATA = {
       committeeDecision: null,
       disbursement: null,
       timeline: [
-        { action: 'تم تقديم الطلب', actor: 'سالم الحارثي', role: 'العامل', time: '2025-01-10 10:15', fromStatus: '', toStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', note: '', type: 'default' },
+        { action: 'تم تقديم الطلب', actor: 'سالم بن ناصر الحارثي', role: 'العامل', time: '2025-01-10 10:15', fromStatus: '', toStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', note: '', type: 'default' },
         { action: 'تم توجيه الطلب لقسم التحقيق في إصابات العمل', actor: 'النظام', role: 'آلي', time: '2025-01-10 10:16', fromStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', toStatus: 'قيد التحقيق — إصابات العمل', note: 'تم توجيهه تلقائياً بناءً على نوع الطلب', type: 'default' },
         { action: 'تم حجز الطلب', actor: 'عائشة بنت محمد الرواحي', role: 'موظف قسم التحقيق في إصابات العمل', time: '2025-01-12 09:45', fromStatus: 'قيد التحقيق — إصابات العمل', toStatus: 'قيد التحقيق — إصابات العمل', note: '', type: 'default' },
       ],
@@ -77,7 +82,9 @@ const WI_DATA = {
         { id: 'att4', type: 'تقرير طبي أولي', name: 'تقرير_مشفى_صحار.pdf', uploadDate: '2025-01-05', uploadedBy: 'حمد العزري', role: 'العامل', size: '0.9 MB', icon: 'pdf' },
         { id: 'att5', type: 'تقرير السلامة والصحة المهنية', name: 'تقرير_حادثة_صحار.pdf', uploadDate: '2025-01-06', uploadedBy: 'خالد البلوشي', role: 'الشخص المفوض من جهة العمل', size: '1.5 MB', icon: 'pdf' },
       ],
-      notes: [],
+      notes: [
+        { id: 'n1198-1', author: 'عائشة بنت محمد الرواحي', role: 'موظف قسم التحقيق في إصابات العمل', text: 'تم استكمال معاينة الموقع وإرفاق الصور المطلوبة. الحالة واضحة ومطابقة لشروط إصابة العمل.', time: '2025-01-14 14:00' }
+      ],
       investigation: {
         summary: 'بعد مراجعة المستندات المقدمة والاطلاع على تقرير السلامة والصحة المهنية وإفادة المشرف المباشر، تبيّن أن الحادثة وقعت أثناء ساعات العمل الرسمية وفي موقع العمل المعتمد. وأن العامل كان يؤدي مهامه الوظيفية المعتادة. لا يوجد ما يشير إلى إهمال أو مخالفة للتعليمات.',
         findings: 'الحادثة مستوفية لشروط إصابة العمل وفقاً للمادة (4) من اللائحة. لا توجد مؤشرات على تعمّد الإصابة أو تناول مواد مؤثرة على الوعي.',
@@ -95,13 +102,13 @@ const WI_DATA = {
       committeeDecision: null,
       disbursement: null,
       timeline: [
-        { action: 'تم تقديم الطلب', actor: 'حمد العزري', role: 'العامل', time: '2025-01-05 08:30', fromStatus: '', toStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', note: '', type: 'default' },
+        { action: 'تم تقديم الطلب', actor: 'حمد بن سلطان العزري', role: 'العامل', time: '2025-01-05 08:30', fromStatus: '', toStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', note: '', type: 'default' },
         { action: 'توجيه لقسم التحقيق في إصابات العمل', actor: 'النظام', role: 'آلي', time: '2025-01-05 08:31', fromStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', toStatus: 'قيد التحقيق — إصابات العمل', note: '', type: 'default' },
         { action: 'إضافة زيارة ميدانية', actor: 'عائشة بنت محمد الرواحي', role: 'موظف قسم التحقيق في إصابات العمل', time: '2025-01-08 11:30', fromStatus: 'قيد التحقيق — إصابات العمل', toStatus: 'قيد التحقيق — إصابات العمل', note: 'تمت الزيارة الميدانية لمعاينة الموقع', type: 'default' },
         { action: 'رفع تقرير التحقيق لرئيس القسم', actor: 'عائشة بنت محمد الرواحي', role: 'موظف قسم التحقيق في إصابات العمل', time: '2025-01-14 14:20', fromStatus: 'قيد التحقيق — إصابات العمل', toStatus: 'بانتظار اعتماد رئيس قسم التحقيق في إصابات العمل', note: 'التوصية: موافقة على إصابة العمل', type: 'success' },
       ],
       assignedTo: 'عائشة بنت محمد الرواحي',
-      checkedOutBy: null,
+      checkedOutBy: 'عائشة بنت محمد الرواحي',
     },
     {
       id: 'WI-2025-001156',
@@ -135,66 +142,107 @@ const WI_DATA = {
       committeeDecision: null,
       disbursement: null,
       timeline: [
+        { action: 'تم تقديم الطلب', actor: 'أمينة بنت علي الخروصية', role: 'العامل', time: '2024-12-20 14:00', fromStatus: '', toStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', note: '', type: 'default' },
+        { action: 'توجيه لقسم التحقيق في الأمراض المهنية', actor: 'النظام', role: 'آلي', time: '2024-12-20 14:01', fromStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', toStatus: 'قيد التحقيق — الأمراض المهنية', note: '', type: 'default' },
+        { action: 'رفع تقرير التحقيق لرئيس القسم', actor: 'فاطمة بنت حمد الحجرية', role: 'موظف قسم التحقيق في الأمراض المهنية', time: '2024-12-30 16:45', fromStatus: 'قيد التحقيق — الأمراض المهنية', toStatus: 'بانتظار اعتماد رئيس قسم التحقيق في الأمراض المهنية', note: 'التوصية: موافقة', type: 'success' },
+        { action: 'اعتماد وتوجيه لقسم الإجازات المرضية', actor: 'أحمد بن سليم المعمري', role: 'رئيس قسم التحقيق في الأمراض المهنية', time: '2025-01-05 09:00', fromStatus: 'بانتظار اعتماد رئيس قسم التحقيق في الأمراض المهنية', toStatus: 'قيد المراجعة من موظف قسم الإجازات المرضية', note: 'اعتمدت التقرير وأحلته لقسم الإجازات المرضية', type: 'success' },
+      ],
+      //   assignedTo: 'مريم بنت سيف الكيومية',
+      //   checkedOutBy: 'مريم بنت سيف الكيومية',
+      // },
+      assignedTo: 'فاطمة بنت حمد الحجرية',
+      checkedOutBy: 'فاطمة بنت حمد الحجرية',
+    },
+    {
+      id: 'WI-2025-001568',
+      type: 'مرض مهني',
+      subtype: 'التهاب المفاصل الروماتويدي (المهني)',
+      status: 'قيد التحقيق — الأمراض المهنية',
+      submitDate: '2025-01-18',
+      lastUpdate: '2025-01-20 10:00',
+      applicant: { name: 'عائشة بنت سالم الكيومية', civil: '9087654322', role: 'المؤمن عليه', phone: '96898765433', email: 'aisha.k@mail.com' },
+      insured: { name: 'عائشة بنت سالم الكيومية', civil: '9087654322', insurance: 'IN-20150044332', dob: '1988-11-20', gender: 'أنثى', nationality: 'عُمانية', insuranceStatus: 'نشط', regDate: '2015-05-01', subType: 'إلزامي' },
+      employer: { name: 'الشركة الحديثة للصناعات الغذائية', cr: '9988776', establishment: 'EST-0055442', jobTitle: 'محضرة أغذية', joinDate: '2015-05-01', location: 'الموالح' },
+      injury: { description: 'بدأت الأعراض بآلام شديدة في المفاصل نتيجة العمل في بيئة باردة جداً ومهام متكررة.', firstSuspicion: '2024-12-10', chemicalAgents: 'عوامل فيزيائية (برودة شديدة، مهام متكررة)', exposureDuration: '7 سنوات' },
+      attachments: [],
+      notes: [],
+      investigation: { summary: 'بدأت فاطمة الحجرية بمعاينة الموقع وفحص سجلات الصحة المهنية.', findings: '' },
+      timeline: [
+        { action: 'تم تقديم الطلب', actor: 'عائشة الكيومية', role: 'العامل', time: '2025-01-18 09:00', fromStatus: '', toStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', note: '', type: 'default' },
+        { action: 'توجيه لقسم الأمراض المهنية', actor: 'النظام', role: 'آلي', time: '2025-01-18 09:01', fromStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', toStatus: 'قيد التحقيق — الأمراض المهنية', note: '', type: 'default' },
+      ],
+      assignedTo: 'فاطمة بنت حمد الحجرية',
+      checkedOutBy: 'فاطمة بنت حمد الحجرية',
+    },
+    {
+      id: 'WI-2025-001567',
+      type: 'مرض مهني',
+      subtype: 'الربو المهني',
+      status: 'بانتظار اعتماد رئيس قسم التحقيق في الأمراض المهنية',
+      assignedTo: 'أحمد بن سليم المعمري',
+      submitDate: '2024-12-10',
+      lastUpdate: '2025-01-10 14:00',
+      applicant: { name: 'عمر بن خالد البرواني', civil: '9554433221', role: 'العامل', phone: '96895551122', email: 'omar.b@mail.com' },
+      insured: { name: 'عمر بن خالد البرواني', civil: '9554433221', insurance: 'IN-2020112233', dob: '1985-03-12', gender: 'ذكر', nationality: 'عُماني', insuranceStatus: 'نشط', regDate: '2020-01-01', subType: 'إلزامي' },
+      employer: { name: 'مصنع الشرق للأصباغ والدهانات', cr: '1234567', establishment: 'EST-8877665', jobTitle: 'فني خلط أصباغ', joinDate: '2020-01-01', location: 'المسفاة' },
+      injury: { firstSuspicion: '2024-11-20', chemicalAgents: 'أبخرة كيميائية، مذيبات (Solvents)', exposureDuration: '4 سنوات', workEnvironment: 'بيئة مغلقة مع تهوية غير كافية أحياناً' },
+      investigation: { summary: 'تمت مراجعة التقارير الطبية والزيارة الميدانية للمصنع.', findings: 'وجود تعرض مستمر لأبخرة المذيبات الكيميائية.', employeeRecommendation: 'موافقة', employeeNotes: 'نوصي باعتماد الحالة كمرض مهني.' },
+      attachments: [
+        { id: 'att6', type: 'تقرير طبي متخصص', name: 'تقرير_الربو_المهني.pdf', uploadDate: '2024-12-20', uploadedBy: 'أمينة الخروصية', role: 'العامل', size: '2.1 MB', icon: 'pdf' },
+        { id: 'att7', type: 'قياسات البيئة المهنية', name: 'قياسات_غبار_المصنع.pdf', uploadDate: '2024-12-22', uploadedBy: 'فاطمة بنت حمد الحجرية', role: 'موظف قسم التحقيق في الأمراض المهنية', size: '3.4 MB', icon: 'pdf' },
+      ],
+      notes: [],
+      timeline: [
         { action: 'تم تقديم الطلب', actor: 'أمينة الخروصية', role: 'العامل', time: '2024-12-20 14:00', fromStatus: '', toStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', note: '', type: 'default' },
         { action: 'توجيه لقسم التحقيق في الأمراض المهنية', actor: 'النظام', role: 'آلي', time: '2024-12-20 14:01', fromStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', toStatus: 'قيد التحقيق — الأمراض المهنية', note: '', type: 'default' },
         { action: 'رفع تقرير التحقيق لرئيس القسم', actor: 'فاطمة بنت حمد الحجرية', role: 'موظف قسم التحقيق في الأمراض المهنية', time: '2024-12-30 16:45', fromStatus: 'قيد التحقيق — الأمراض المهنية', toStatus: 'بانتظار اعتماد رئيس قسم التحقيق في الأمراض المهنية', note: 'التوصية: موافقة', type: 'success' },
         { action: 'اعتماد وتوجيه لقسم الإجازات المرضية', actor: 'أحمد بن سليم المعمري', role: 'رئيس قسم التحقيق في الأمراض المهنية', time: '2025-01-05 09:00', fromStatus: 'بانتظار اعتماد رئيس قسم التحقيق في الأمراض المهنية', toStatus: 'قيد المراجعة من موظف قسم الإجازات المرضية', note: 'اعتمدت التقرير وأحلته لقسم الإجازات المرضية', type: 'success' },
       ],
-      assignedTo: 'مريم بنت سيف الكيومية',
-      checkedOutBy: 'مريم بنت سيف الكيومية',
     },
     {
-      id: 'WI-2025-001456',
-      type: 'مرض مهني',
-      subtype: 'فقدان السمع الحسي التقلصي',
-      isRelapse: 'لا',
-      status: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص',
-      submitDate: '2025-01-15',
-      lastUpdate: '2025-01-15 10:00',
-      applicant: { name: 'صالح بن سعيد المسروري', civil: '9078654321', role: 'العامل / المؤمن عليه / المواطن', phone: '96892345678', email: 'salih.m@mail.com' },
-      insured: { name: 'صالح بن سعيد المسروري', civil: '9078654321', insurance: 'IN-20180099887', dob: '1975-05-20', gender: 'ذكر', nationality: 'عُماني', insuranceStatus: 'نشط', regDate: '2018-05-01', subType: 'إلزامي' },
-      employer: { name: 'شركة عُمان للمعدات الصناعية', cr: '9876543', establishment: 'EST-0099887', jobTitle: 'فني تشغيل آلات حفر', joinDate: '2018-05-01', location: 'صحار — المنطقة الصناعية' },
-      injury: { description: 'التعرض لضوضاء عالية تتجاوز المستويات الآمنة لفترات طويلة في المصنع دون توفر حماية كافية للأذن، مما أدى لضعف تدريجي في السمع.', firstSuspicion: '2024-12-01', workEnvironment: 'ضوضاء عالية جداً ناتجة عن آلات الحفر والكبس' },
-      attachments: [],
-      notes: [],
-      investigation: null,
-      fieldVisits: [],
-      sickLeavePeriods: [],
-      timeline: [
-        { action: 'تم تقديم الطلب', actor: 'صالح المسروري', role: 'العامل', time: '2025-01-15 10:00', fromStatus: '', toStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', note: '', type: 'default' },
+      id: 'WI-2025-001005',
+      type: 'إصابة عمل',
+      subtype: 'إصابة في موقع العمل',
+      status: 'تم الموافقة على العرض على المؤسسات الصحية المرخصة — بانتظار إحالة المقرر',
+      submitDate: '2025-01-20',
+      lastUpdate: '2025-02-05 11:30',
+      applicant: { name: 'أحمد بن علي الحارثي', civil: '9905544332', role: 'العامل / المؤمن عليه / المواطن', phone: '96894455667', email: 'ahmed.h@omantel.om' },
+      insured: { name: 'أحمد بن علي الحارثي', civil: '9905544332', insurance: 'IN-20150033221', dob: '1990-05-12', gender: 'ذكر', nationality: 'عُماني', insuranceStatus: 'نشط', regDate: '2015-08-01', subType: 'إلزامي' },
+      employer: { name: 'الشركة العمانية للاتصالات (عُمانتل)', cr: '1122334', establishment: 'EST-0011223', jobTitle: 'فني شبكات', joinDate: '2015-08-01', location: 'مسقط — مرتفعات المطار' },
+      injury: { description: 'سقوط من برج اتصالات أثناء الصيانة الدورية في محافظة البريمي.', location: 'محافظة البريمي — ولاية السنينة', bodyPart: 'الساق والظهر', witnesses: 'نعم', witnessNames: 'فهد بن سعيد البادي', incidentDate: '2025-01-19' },
+      attachments: [
+        { id: 'att1005-1', type: 'تقرير طبي أولي', name: 'تقرير_مستشفى_البريمي.pdf', uploadDate: '2025-01-20', uploadedBy: 'أحمد بن علي الحارثي', role: 'العامل', size: '0.9 MB', icon: 'pdf' }
       ],
-      assignedTo: null,
-      checkedOutBy: null,
-    },
-    {
-      id: 'WI-2025-001567',
-      type: 'مرض مهني',
-      subtype: 'التهاب الجلد التماسي المهني',
-      isRelapse: 'لا',
-      status: 'بانتظار اعتماد رئيس قسم التحقيق في الأمراض المهنية',
-      submitDate: '2025-01-08',
-      lastUpdate: '2025-01-18 14:30',
-      applicant: { name: 'فاطمة بنت سالم المعمرية', civil: '9087651234', role: 'العامل / المؤمن عليه / المواطن', phone: '96898761234', email: 'fatma.m@mail.com' },
-      insured: { name: 'فاطمة بنت سالم المعمرية', civil: '9087651234', insurance: 'IN-20200055443', dob: '1992-09-12', gender: 'أنثى', nationality: 'عُمانية', insuranceStatus: 'نشط', regDate: '2020-01-01', subType: 'إلزامي' },
-      employer: { name: 'مصانع المنظفات الوطنية ش.م.م', cr: '5647382', establishment: 'EST-0055443', jobTitle: 'كيميائية مختبر', joinDate: '2020-01-01', location: 'مسقط — الرسيل' },
-      injury: { description: 'ظهور طفح جلدي والتهابات حادة في اليدين والساعدين نتيجة التعامل المباشر مع عينات كيميائية مركزة في المختبر.', chemicalAgents: 'مواد حمضية مركزة، مذيبات عضوية', firstSuspicion: '2024-11-20', workEnvironment: 'مختبر فحص الجودة — التعامل مع مواد كيميائية متنوعة' },
-      attachments: [],
       notes: [],
       investigation: {
-        summary: 'تؤكد التقارير الطبية وجود التهاب جلد تماسي نتيجة التعرض للمواد الكيميائية في موقع العمل. الحالات مشابهة لزملاء آخرين في نفس القسم.',
-        findings: 'الارتباط المهني ثابت. شروط المادة (9) مستوفاة.',
+        summary: 'تم التحقق من المهمة الرسمية وتصاريح العمل على الأبراج.',
+        findings: 'إصابة عمل أثناء تأدية الواجب.',
         employeeRecommendation: 'موافقة',
-        employeeNotes: 'تمت مراجعة جميع المستندات وتوصيتنا بالموافقة.',
+        employeeNotes: 'توصية بالعرض على اللجنة الطبية التخصصية لتحديد نسبة العجز.'
       },
-      fieldVisits: [],
-      sickLeavePeriods: [],
       timeline: [
-        { action: 'تم تقديم الطلب', actor: 'فاطمة المعمرية', role: 'العامل', time: '2025-01-08 14:30', fromStatus: '', toStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', note: '', type: 'default' },
-        { action: 'توجيه لقسم الأمراض المهنية', actor: 'النظام', role: 'آلي', time: '2025-01-11 09:00', fromStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', toStatus: 'قيد التحقيق — الأمراض المهنية', note: '', type: 'default' },
-        { action: 'رفع التقرير للاعتماد', actor: 'فاطمة بنت حمد الحجرية', role: 'موظف قسم التحقيق في الأمراض المهنية', time: '2025-01-18 14:30', fromStatus: 'قيد التحقيق — الأمراض المهنية', toStatus: 'بانتظار اعتماد رئيس قسم التحقيق في الأمراض المهنية', note: '', type: 'success' },
+        { action: 'تم تقديم الطلب', actor: 'أحمد بن علي الحارثي', role: 'العامل', time: '2025-01-20 09:00', fromStatus: '', toStatus: 'تم تقديم الطلب', note: '', type: 'default' },
+        { action: 'اعتماد التحقيق', actor: 'يوسف بن علي الشيباني', role: 'رئيس قسم التحقيق في إصابات العمل', time: '2025-02-05 11:30', fromStatus: 'بانتظار الاعتماد', toStatus: 'تم الموافقة على العرض على المؤسسات الصحية المرخصة', note: '', type: 'success' }
       ],
-      assignedTo: 'فاطمة بنت حمد الحجرية',
-      checkedOutBy: null,
+      assignedTo: 'أنس بن خلفان الجابري',
+      checkedOutBy: 'أنس بن خلفان الجابري',
+    },
+    {
+      id: 'WI-2025-001090',
+      type: 'إصابة عمل',
+      subtype: 'إصابة في موقع العمل',
+      status: 'بانتظار اعتماد رئيس قسم اللجان الطبية',
+      submitDate: '2024-12-25',
+      lastUpdate: '2025-01-20 14:00',
+      applicant: { name: 'خالد بن عيسى المعمري', civil: '9022334455', role: 'المؤمن عليه', phone: '96892233445', email: 'khaled.m@mail.com' },
+      insured: { name: 'خالد بن عيسى المعمري', civil: '9022334455', insurance: 'IN-20120033442', dob: '1975-02-10', gender: 'ذكر', nationality: 'عُماني', insuranceStatus: 'نشط', regDate: '2012-01-01', subType: 'إلزامي' },
+      employer: { name: 'شركة عُمان للبتروكيماويات', cr: '5544332', establishment: 'EST-0022334', jobTitle: 'فني غرف تحكم', joinDate: '2012-01-01', location: 'صحار' },
+      injury: { description: 'حادث انفجار صمام أدى لإصابات بالغة في الوجه والعينين.', location: 'وحدة التكسير رقم 4', bodyPart: 'الوجه والعينين', incidentDate: '2024-12-24' },
+      investigation: { summary: 'تم الانتهاء من التحقيق والزيارة الميدانية. الحالة مؤكدة كإصابة عمل جسيمة.', findings: 'التوصية بنسبة عجز مقدرة بـ 40%.', employeeRecommendation: 'موافقة' },
+      status: 'بانتظار اعتماد رئيس قسم اللجان الطبية',
+      committeeDecision: { type: 'توصية بالعجز', content: 'العرض على اللجنة الطبية لتحديد العجز الدائم.', date: '2025-01-19' },
+      assignedTo: 'محمد بن راشد الهنائي',
+      checkedOutBy: 'محمد بن راشد الهنائي',
     },
     {
       id: 'WI-2025-001089',
@@ -241,8 +289,8 @@ const WI_DATA = {
         { action: 'تم صرف استحقاق الفترة الأولى', actor: 'النظام', role: 'آلي', time: '2024-12-05 00:00', fromStatus: 'معتمد', toStatus: 'معتمد', note: 'صرف 750 ريال عُماني', type: 'success' },
         { action: 'تم صرف استحقاق الفترة الثانية', actor: 'النظام', role: 'آلي', time: '2025-01-05 00:00', fromStatus: 'معتمد', toStatus: 'معتمد', note: 'صرف 500 ريال عُماني', type: 'success' },
       ],
-      assignedTo: null,
-      checkedOutBy: null,
+      assignedTo: 'نورة بنت سالم الزدجالية',
+      checkedOutBy: 'نورة بنت سالم الزدجالية',
     },
     {
       id: 'WI-2024-000987',
@@ -285,17 +333,33 @@ const WI_DATA = {
       applicant: { name: 'عمر بن خالد الهنائي', civil: '9088877766', role: 'العامل / المؤمن عليه / المواطن', phone: '96898887776', email: 'omar.h@mail.com' },
       insured: { name: 'عمر بن خالد الهنائي', civil: '9088877766', insurance: 'IN-20190011223', dob: '1988-06-15', gender: 'ذكر', nationality: 'عُماني', insuranceStatus: 'نشط', regDate: '2019-01-01', subType: 'إلزامي' },
       employer: { name: 'العمانية للمقاولات العامة', cr: '2233445', establishment: 'EST-0088776', jobTitle: 'عامل بناء', joinDate: '2019-01-01', location: 'بوشر' },
-      injury: { description: 'سقوط من السقالات أدى لكسر في الساعد الأيمن.', firstSuspicion: '2025-01-18', workEnvironment: 'موقع بناء — مشروع الخوير' },
-      attachments: [],
-      notes: [],
+      injury: {
+        description: 'سقوط من السقالات أثناء تنفيذ أعمال تركيب القوالب الخرسانية في الطابق الثاني، مما أدى إلى كسر في الساعد الأيمن وكدمات في الركبة.',
+        location: 'موقع بناء — مشروع الخوير التجاري، الطابق الثاني',
+        bodyPart: 'الساعد الأيمن والركبة اليمنى',
+        witnesses: 'نعم',
+        witnessNames: 'مازن بن راشد السناني — مشرف موقع، ووليد بن حمود البلوشي — عامل سقالات',
+        incidentDate: '2025-01-18',
+      },
+      attachments: [
+        { id: 'att1600-1', type: 'تقرير طبي أولي', name: 'تقرير_مستشفى_الخوير.pdf', uploadDate: '2025-01-19', uploadedBy: 'عمر بن خالد الهنائي', role: 'العامل', size: '0.8 MB', icon: 'pdf' },
+        { id: 'att1600-2', type: 'إفادة جهة العمل', name: 'افادة_مشرف_الموقع.pdf', uploadDate: '2025-01-19', uploadedBy: 'خالد بن سعيد البلوشي', role: 'الشخص المفوض من جهة العمل', size: '0.4 MB', icon: 'pdf' },
+      ],
+      notes: [
+        { id: 'n1600-1', author: 'عمر بن خالد الهنائي', role: 'العامل', text: 'تم رفع التقرير الطبي الأولي وإفادة المشرف المباشر، والحالة تحتاج مباشرة التحقيق.', time: '2025-01-19 09:10' },
+      ],
       investigation: null,
       fieldVisits: [],
       sickLeavePeriods: [],
+      referral: null,
+      session: null,
+      committeeDecision: null,
+      disbursement: null,
       timeline: [
-        { action: 'تم تقديم الطلب', actor: 'عمر الهنائي', role: 'العامل', time: '2025-01-19 09:00', fromStatus: '', toStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', note: '', type: 'default' },
+        { action: 'تم تقديم الطلب', actor: 'عمر بن خالد الهنائي', role: 'العامل', time: '2025-01-19 09:00', fromStatus: '', toStatus: 'تم تقديم الطلب — بانتظار تعيين المحقق المختص', note: '', type: 'default' },
       ],
-      assignedTo: null,
-      checkedOutBy: null,
+      assignedTo: 'عائشة بنت محمد الرواحي',
+      checkedOutBy: 'عائشة بنت محمد الرواحي',
     },
     {
       id: 'WI-2025-001601',
@@ -336,19 +400,31 @@ const WI_DATA = {
       status: 'بانتظار اعتماد رئيس قسم الإجازات المرضية',
       submitDate: '2025-01-05',
       lastUpdate: '2025-01-19 14:00',
-      applicant: { name: 'علي بن سعيد المحرمي', civil: '9011224455', role: 'المؤمن عليه', phone: '96891122445' },
-      insured: { name: 'علي بن سعيد المحرمي', nationality: 'عُماني', insurance: 'IN-20120055421', dob: '1982-03-15', gender: 'ذكر' },
-      employer: { name: 'شركة خدمات حقول النفط', location: 'الدقم', cr: '5566778' },
-      injury: { description: 'ضيق تنفس مزمن ناتج عن استنشاق أبخرة كيميائية في منطقة العمل لفترة طويلة.', chemicalAgents: 'كبريتيد الهيدروجين، أبخرة نفطية', exposureDuration: '8 سنوات' },
+      applicant: { name: 'علي بن سعيد المحرمي', civil: '9011224455', role: 'العامل / المؤمن عليه / المواطن', phone: '96891122445', email: 'ali.m@oilfields.om' },
+      insured: { name: 'علي بن سعيد المحرمي', civil: '9011224455', insurance: 'IN-20120055421', dob: '1982-03-15', gender: 'ذكر', nationality: 'عُماني', insuranceStatus: 'نشط', regDate: '2012-05-01', subType: 'إلزامي' },
+      employer: { name: 'شركة خدمات حقول النفط ش.م.م', cr: '5566778', establishment: 'EST-0066554', jobTitle: 'فني صيانة ميكانيكية', joinDate: '2012-05-01', location: 'الوسطى — الدقم' },
+      injury: {
+        description: 'ضيق تنفس مزمن ناتج عن استنشاق أبخرة كيميائية في منطقة العمل لفترة طويلة.',
+        chemicalAgents: 'كبريتيد الهيدروجين، أبخرة نفطية، مذيبات صناعية',
+        exposureDuration: '8 سنوات',
+        firstSuspicion: '2024-11-10',
+        workEnvironment: 'محطة ضخ النفط رقم 4 — بيئة مفتوحة معرضة للغازات المصاحبة',
+        witnesses: 'نعم',
+        witnessNames: 'سعيد بن ناصر العامري — مسؤول الموقع',
+        incidentDate: '2025-01-04'
+      },
       attachments: [
-        { id: 'attB1', type: 'تقرير طبي تخصصي', name: 'تقرير_الصدرية.pdf', uploadDate: '2025-01-06', uploadedBy: 'علي المحرمي', size: '1.4 MB', icon: 'pdf' },
-        { id: 'attB2', type: 'تقرير التحقيق الميداني', name: 'تحقيق_بيئة_العمل.pdf', uploadDate: '2025-01-15', uploadedBy: 'فاطمة الحجرية', size: '2.1 MB', icon: 'pdf' }
+        { id: 'attB1', type: 'تقرير طبي تخصصي', name: 'تقرير_الصدرية.pdf', uploadDate: '2025-01-06', uploadedBy: 'علي بن سعيد المحرمي', role: 'العامل', size: '1.4 MB', icon: 'pdf' },
+        { id: 'attB2', type: 'تقرير التحقيق الميداني', name: 'تحقيق_بيئة_العمل.pdf', uploadDate: '2025-01-15', uploadedBy: 'فاطمة بنت حمد الحجرية', role: 'موظف قسم التحقيق في الأمراض المهنية', size: '2.1 MB', icon: 'pdf' }
       ],
-      notes: [],
+      notes: [
+        { id: 'n1602-1', author: 'فاطمة بنت حمد الحجرية', role: 'موظف قسم التحقيق في الأمراض المهنية', text: 'تم إجراء القياسات اللازمة في الموقع وتبين وجود تجاوزات في نسب الغازات خلال ساعات الذروة.', time: '2025-01-15 10:00' }
+      ],
       investigation: {
         summary: 'التحقيق أثبت تعرض العامل لتركيزات من الغازات تتجاوز الحدود المسموح بها في موقع العمل بالدقم.',
         findings: 'المرض مدرج في قائمة الأمراض المهنية. الارتباط السببي ثابت تماماً.',
         employeeRecommendation: 'موافقة',
+        employeeNotes: 'يوصى بصرف بدلات انقطاع لفترة العلاج.',
         headDecision: 'اعتماد وتوجيه إلى قسم الإجازات المرضية'
       },
       fieldVisits: [
@@ -358,12 +434,29 @@ const WI_DATA = {
         { id: 'sl100', from: '2025-01-10', to: '2025-02-09', days: 30, status: 'بانتظار الاعتماد', addedBy: 'مريم بنت سيف الكيومية', addedDate: '2025-01-19', note: 'فترة إجازة مقترحة بناءً على توصية الطبيب' }
       ],
       timeline: [
-        { action: 'تم تقديم الطلب', actor: 'علي المحرمي', role: 'المؤمن عليه', time: '2025-01-05 09:00', fromStatus: '', toStatus: 'بانتظار التحقيق', note: '', type: 'default' },
+        { action: 'تم تقديم الطلب', actor: 'علي بن سعيد المحرمي', role: 'المؤمن عليه', time: '2025-01-05 09:00', fromStatus: '', toStatus: 'بانتظار التحقيق', note: '', type: 'default' },
         { action: 'اعتماد ورفع لقسم الإجازات', actor: 'أحمد بن سليم المعمري', role: 'رئيس قسم التحقيق في الأمراض المهنية', time: '2025-01-17 10:00', fromStatus: 'بانتظار اعتماد رئيس القسم', toStatus: 'قيد المراجعة في الإجازات المرضية', note: '', type: 'success' },
         { action: 'رفع فترة إجازة للاعتماد', actor: 'مريم بنت سيف الكيومية', role: 'موظف قسم الإجازات المرضية', time: '2025-01-19 14:00', fromStatus: 'قيد المراجعة', toStatus: 'بانتظار اعتماد رئيس قسم الإجازات المرضية', note: '', type: 'success' }
       ],
-      assignedTo: 'مريم بنت سيف الكيومية',
-      checkedOutBy: null,
+      assignedTo: 'حمد بن عيسى الغافري',
+      checkedOutBy: 'حمد بن عيسى الغافري',
+    },
+    {
+      id: 'WI-2025-001605',
+      type: 'مرض مهني',
+      subtype: 'التهاب الرئة (سيليكوزيس)',
+      status: 'بانتظار اعتماد رئيس قسم التحقيق في الأمراض المهنية',
+      submitDate: '2025-01-10',
+      lastUpdate: '2025-01-20 15:00',
+      applicant: { name: 'سعيد بن أحمد الوهيبي', civil: '9112233445', role: 'المؤمن عليه', phone: '96891122335', email: 'saeed.w@mail.com' },
+      insured: { name: 'سعيد بن أحمد الوهيبي', civil: '9112233445', insurance: 'IN-20050011223', dob: '1970-05-15', gender: 'ذكر', nationality: 'عُماني', insuranceStatus: 'نشط', regDate: '2005-01-01', subType: 'إلزامي' },
+      employer: { name: 'شركة عُمان للمحاجر والكسارات', cr: '2233441', establishment: 'EST-0011225', jobTitle: 'عامل تكسير أحجار', joinDate: '2005-01-01', location: 'عبري' },
+      injury: { description: 'التعرض لغبار السليكا لفترات طويلة تتجاوز 15 سنة في المحاجر.', firstSuspicion: '2024-11-01', chemicalAgents: 'غبار السليكا (Silica Dust)', exposureDuration: '19 سنة' },
+      investigation: { summary: 'تمت مراجعة الفحوصات الدورية في مستشفى عبري والاطلاع على سجلات مكان العمل.', findings: 'تجاوز مستويات الغبار المسموح بها وعدم كفاية أدوات السلامة (الكمامات).', employeeRecommendation: 'موافقة', employeeNotes: 'نوصي بالاعتماد لصرف البدلات والحجز الطبي.' },
+      timeline: [
+        { action: 'رفع التقرير للاعتماد', actor: 'فاطمة بنت حمد الحجرية', role: 'موظف قسم التحقيق', time: '2025-01-20 15:00', fromStatus: 'قيد التحقيق', toStatus: 'بانتظار اعتماد رئيس قسم التحقيق في الأمراض المهنية', note: '', type: 'success' }
+      ],
+      assignedTo: 'أحمد بن سليم المعمري',
     },
     {
       id: 'WI-2025-001301',
@@ -390,7 +483,7 @@ const WI_DATA = {
       disbursement: null,
       returnReason: 'المستندات المطلوبة: (1) تقرير طبي من طبيب متخصص في الأمراض المهنية، (2) كشف ساعات العمل الإضافية للأشهر الثلاثة الأخيرة، (3) شهادة من المشرف المباشر توضح طبيعة العمل وحجم المسؤوليات.',
       timeline: [
-        { action: 'تم تقديم الطلب', actor: 'راشد الجابري', role: 'العامل', time: '2025-01-18 16:00', fromStatus: '', toStatus: 'تم تقديم الطلب', note: '', type: 'default' },
+        { action: 'تم تقديم الطلب', actor: 'راشد بن محمد الجابري', role: 'العامل', time: '2025-01-18 16:00', fromStatus: '', toStatus: 'تم تقديم الطلب', note: '', type: 'default' },
         { action: 'إعادة الطلب لاستيفاء البيانات', actor: 'عائشة بنت محمد الرواحي', role: 'موظف قسم التحقيق في إصابات العمل', time: '2025-01-19 15:30', fromStatus: 'قيد التحقيق — إصابات العمل', toStatus: 'تم إعادة الطلب لاستيفاء البيانات', note: 'يرجى تقديم المستندات المحددة أعلاه', type: 'warning' },
       ],
       assignedTo: 'عائشة بنت محمد الرواحي',
@@ -418,7 +511,7 @@ const WI_DATA = {
       committeeDecision: null,
       disbursement: null,
       timeline: [
-        { action: 'تم تقديم الطلب', actor: 'سالم الحارثي', role: 'العامل', time: '2024-09-15 10:00', fromStatus: '', toStatus: 'تم تقديم الطلب', note: '', type: 'default' },
+        { action: 'تم تقديم الطلب', actor: 'سالم بن ناصر الحارثي', role: 'العامل', time: '2024-09-15 10:00', fromStatus: '', toStatus: 'تم تقديم الطلب', note: '', type: 'default' },
         { action: 'رفض الطلب', actor: 'يوسف بن علي الشيباني', role: 'رئيس قسم التحقيق في إصابات العمل', time: '2024-10-10 11:30', fromStatus: 'قيد التحقيق', toStatus: 'تم رفض الطلب', note: 'السبب: عدم استيفاء المستندات الطبية المطلوبة', type: 'danger' },
       ],
       assignedTo: null,
@@ -431,26 +524,35 @@ const WI_DATA = {
       status: 'قيد المراجعة من موظف قسم الإجازات المرضية',
       submitDate: '2025-01-12',
       lastUpdate: '2025-01-18 09:00',
-      applicant: { name: 'فيصل بن يحيى الراشدي', civil: '9011223344', role: 'العامل', phone: '96891122334' },
-      insured: { name: 'فيصل بن يحيى الراشدي', civil: '9011223344', insurance: 'IN-20140055667', dob: '1980-01-01', gender: 'ذكر', nationality: 'عُماني', insuranceStatus: 'نشط' },
-      employer: { name: 'الشركة العصرية للخدمات اللوجستية', CR: '4455667', location: 'المسفاة' },
-      injury: { description: 'سقوط طرد ثقيل على القدم مما أدى لكسر في المشط.', incidentDate: '2025-01-11' },
-      attachments: [
-        { id: 'attSL1', type: 'تقرير طبي', name: 'تقرير_المستشفى_السلطاني.pdf', uploadDate: '2025-01-12', uploadedBy: 'فيصل بن يحيى الراشدي', size: '1.2 MB', icon: 'pdf' }
-      ],
-      investigation: { 
-        summary: 'الحادث وقع أثناء العمل الرسمي. تم التحقق من الكشوفات الطبية وإفادة الشهود.', 
-        findings: 'إصابة عمل مؤكدة تستدعي بدلات انقطاع.', 
-        employeeRecommendation: 'موافقة', 
-        headDecision: 'اعتماد وتوجيه إلى قسم الإجازات المرضية' 
+      applicant: { name: 'فيصل بن يحيى الراشدي', civil: '9011223344', role: 'العامل / المؤمن عليه / المواطن', phone: '96891122334', email: 'faisal.r@logistics.om' },
+      insured: { name: 'فيصل بن يحيى الراشدي', civil: '9011223344', insurance: 'IN-20140055667', dob: '1980-01-01', gender: 'ذكر', nationality: 'عُماني', insuranceStatus: 'نشط', regDate: '2014-03-15', subType: 'إلزامي' },
+      employer: { name: 'الشركة العصرية للخدمات اللوجستية', cr: '4455667', establishment: 'EST-0055443', jobTitle: 'سائق رافعة شوكية', joinDate: '2014-03-15', location: 'مسقط — المسفاة' },
+      injury: {
+        description: 'سقوط طرد ثقيل على القدم مما أدى لكسر في المشط أثناء تفريغ الحاوية.',
+        location: 'مستودع الشركة — رصيف رقم 2',
+        bodyPart: 'القدم اليمنى',
+        witnesses: 'نعم',
+        witnessNames: 'سعيد الجابري',
+        incidentDate: '2025-01-11'
       },
+      attachments: [
+        { id: 'attSL1', type: 'تقرير طبي', name: 'تقرير_المستشفى_السلطاني.pdf', uploadDate: '2025-01-12', uploadedBy: 'فيصل بن يحيى الراشدي', role: 'العامل', size: '1.2 MB', icon: 'pdf' }
+      ],
+      notes: [],
+      investigation: {
+        summary: 'الحادث وقع أثناء العمل الرسمي. تم التحقق من الكشوفات الطبية وإفادة الشهود.',
+        findings: 'إصابة عمل مؤكدة تستدعي بدلات انقطاع.',
+        employeeRecommendation: 'موافقة',
+        headDecision: 'اعتماد وتوجيه إلى قسم الإجازات المرضية'
+      },
+      fieldVisits: [],
       sickLeavePeriods: [],
       timeline: [
-        { action: 'تم تقديم الطلب', actor: 'فيصل الراشدي', role: 'العامل', time: '2025-01-12 08:00', fromStatus: '', toStatus: 'بانتظار التحقيق', note: '', type: 'default' },
+        { action: 'تم تقديم الطلب', actor: 'فيصل بن يحيى الراشدي', role: 'العامل', time: '2025-01-12 08:00', fromStatus: '', toStatus: 'بانتظار التحقيق', note: '', type: 'default' },
         { action: 'اعتماد وتوجيه لقسم الإجازات المرضية', actor: 'يوسف بن علي الشيباني', role: 'رئيس قسم التحقيق في إصابات العمل', time: '2025-01-18 09:00', fromStatus: 'بانتظار اعتماد رئيس القسم', toStatus: 'قيد المراجعة من موظف قسم الإجازات المرضية', note: '', type: 'success' }
       ],
       assignedTo: 'مريم بنت سيف الكيومية',
-      checkedOutBy: null,
+      checkedOutBy: 'مريم بنت سيف الكيومية',
     },
   ],
 
@@ -471,10 +573,10 @@ const WI_DATA = {
       notes: [],
       disbursement: null,
       timeline: [
-        { action: 'تم تقديم الطلب', actor: 'خلود الرواسية', role: 'العامل', time: '2025-01-15 11:00', fromStatus: '', toStatus: 'تم تقديم طلب منفعة الأشخاص ذوي الإعاقة', note: '', type: 'default' },
+        { action: 'تم تقديم الطلب', actor: 'خلود بنت سعيد الرواسية', role: 'العامل', time: '2025-01-15 11:00', fromStatus: '', toStatus: 'تم تقديم طلب منفعة الأشخاص ذوي الإعاقة', note: '', type: 'default' },
       ],
-      assignedTo: null,
-      checkedOutBy: null,
+      assignedTo: 'نورة بنت سالم الزدجالية',
+      checkedOutBy: 'نورة بنت سالم الزدجالية',
     },
     {
       id: 'DIS-2024-000198',
@@ -490,11 +592,27 @@ const WI_DATA = {
       notes: [],
       disbursement: { approved: true, approvalDate: '2024-09-10', monthlyDay: 18, status: 'الصرف جارٍ', expiryDate: '2025-06-14', stopReason: null, lastCheck: '2025-01-18' },
       timeline: [
-        { action: 'تم تقديم الطلب', actor: 'عبدالله الهاشمي', role: 'العامل', time: '2024-08-20 09:00', fromStatus: '', toStatus: 'تم تقديم طلب منفعة الأشخاص ذوي الإعاقة', note: '', type: 'default' },
-        { action: 'اعتماد الطلب', actor: 'بدر العبري', role: 'رئيس قسم الإعاقة والأمراض المستديمة', time: '2024-09-10 10:00', fromStatus: 'بانتظار اعتماد رئيس القسم', toStatus: 'تم اعتماد الطلب — الصرف جارٍ', note: 'تم التحقق من صحة البطاقة وسريانها', type: 'success' },
+        { action: 'تم تقديم الطلب', actor: 'عبدالله بن حمود الهاشمي', role: 'العامل', time: '2024-08-20 09:00', fromStatus: '', toStatus: 'تم تقديم طلب منفعة الأشخاص ذوي الإعاقة', note: '', type: 'default' },
+        { action: 'اعتماد الطلب', actor: 'بدر بن خميس العبري', role: 'رئيس قسم الإعاقة والأمراض المستديمة', time: '2024-09-10 10:00', fromStatus: 'بانتظار اعتماد رئيس القسم', toStatus: 'تم اعتماد الطلب — الصرف جارٍ', note: 'تم التحقق من صحة البطاقة وسريانها', type: 'success' },
       ],
-      assignedTo: null,
-      checkedOutBy: null,
+      assignedTo: 'نورة بنت سالم الزدجالية',
+      checkedOutBy: 'نورة بنت سالم الزدجالية',
+    },
+    {
+      id: 'DIS-2025-000235',
+      status: 'بانتظار اعتماد رئيس قسم الإعاقة والأمراض المستديمة',
+      submitDate: '2025-01-05',
+      lastUpdate: '2025-01-18 10:30',
+      applicant: { name: 'منى بنت أحمد البلوشية', civil: '9012233446', phone: '96891223349', email: 'mona.b@mail.com' },
+      card: { number: 'DIS-CARD-0011223', status: 'سارية', activationDate: '2023-01-01', expiryDate: '2028-01-01', typeSD: 'إعاقة سمعية تامة', typeMOH: 'فقدان سمع كلي', provenDate: '2022-12-15' },
+      insurance: { status: 'نشط', regDate: '2015-05-01', subType: 'إلزامي', otherBenefits: 'لا يوجد' },
+      attachments: [],
+      notes: [],
+      timeline: [
+        { action: 'توصية بالموافقة والرفع للاعتماد', actor: 'نورة بنت سالم الزدجالية', role: 'موظف قسم الإعاقة', time: '2025-01-18 10:30', fromStatus: 'قيد المراجعة', toStatus: 'بانتظار اعتماد رئيس قسم الإعاقة والأمراض المستديمة', note: 'مستوفية للشروط', type: 'success' }
+      ],
+      assignedTo: 'بدر بن خميس العبري',
+      checkedOutBy: 'بدر بن خميس العبري',
     },
   ],
 
@@ -548,15 +666,79 @@ const WI_DATA = {
       session: null,
       finalDecision: null,
       timeline: [
-        { action: 'تم تقديم التظلم', actor: 'ليلى الحوسنية', role: 'العامل', time: '2025-01-10 14:30', fromStatus: '', toStatus: 'تم تقديم طلب التظلم', note: '', type: 'default' },
+        { action: 'تم تقديم التظلم', actor: 'ليلى بنت سيف الحوسنية', role: 'العامل', time: '2025-01-10 14:30', fromStatus: '', toStatus: 'تم تقديم طلب التظلم', note: '', type: 'default' },
       ],
-      assignedTo: null,
-      checkedOutBy: null,
+      assignedTo: 'سعاد بنت أحمد الريامية',
+      checkedOutBy: 'سعاد بنت أحمد الريامية',
+    },
+    {
+      id: 'APP-2025-000068',
+      originalRequestId: 'WI-2025-001090',
+      originalRequestType: 'بدلات انقطاع عن العمل',
+      status: 'بانتظار اعتماد رئيس قسم اللجان الطبية',
+      submitDate: '2025-01-15',
+      lastUpdate: '2025-01-20 12:00',
+      applicant: { name: 'خالد بن عيسى المعمري', civil: '9022334455', role: 'المؤمن عليه' },
+      decision: {
+        type: 'اعتراض على الإحالة',
+        date: '2025-01-14',
+        issuer: 'موظف قسم اللجان الطبية',
+        details: 'أوصى الموظف بإحالة الحالة إلى مؤسسة صحية مرخصة لتحديد نسبة العجز الدائم، مع اعتماد ملف الفحوصات العينية والتقارير التخصصية.',
+        knowledgeDate: '2025-01-15'
+      },
+      appealReason: 'القرار يحتاج مراجعة طبية أدق',
+      appealDetails: 'يرى مقدم التظلم أن التقرير المرفوع يحتاج إلى عرض الحالة على مؤسسة صحية ذات تخصص دقيق في إصابات الوجه والعيون قبل اعتماد مسار اللجنة، وأرفق تقريراً إضافياً من استشاري العيون.',
+      additionalNotes: 'الحالة مرتبطة بطلب أصلي جسيم وتحتاج قراراً سريعاً قبل تثبيت الجلسة.',
+      attachments: [
+        { id: 'aatt68-1', type: 'تقرير طبي تخصصي', name: 'تقرير_استشاري_العيون.pdf', uploadDate: '2025-01-15', uploadedBy: 'خالد بن عيسى المعمري', role: 'المؤمن عليه', size: '1.4 MB', icon: 'pdf' },
+        { id: 'aatt68-2', type: 'خطاب تظلم', name: 'خطاب_التظلم_الطبي.pdf', uploadDate: '2025-01-15', uploadedBy: 'خالد بن عيسى المعمري', role: 'المؤمن عليه', size: '0.3 MB', icon: 'pdf' },
+      ],
+      notes: [
+        { id: 'app68-n1', author: 'سعاد بنت أحمد الريامية', role: 'موظف قسم اللجان الطبية', text: 'تمت مراجعة مستندات التظلم ورفع التوصية إلى رئيس القسم لاعتماد المسار المناسب للحالة.', time: '2025-01-19 15:10' },
+      ],
+      session: null,
+      finalDecision: null,
+      timeline: [
+        { action: 'تم تقديم التظلم', actor: 'خالد بن عيسى المعمري', role: 'المؤمن عليه', time: '2025-01-15 09:30', fromStatus: '', toStatus: 'تم تقديم طلب التظلم — بانتظار مراجعة موظف قسم اللجان الطبية', note: '', type: 'default' },
+        { action: 'رفع التوصية إلى رئيس القسم', actor: 'سعاد بنت أحمد الريامية', role: 'موظف قسم اللجان الطبية', time: '2025-01-19 15:15', fromStatus: 'تم تقديم طلب التظلم — بانتظار مراجعة موظف قسم اللجان الطبية', toStatus: 'بانتظار اعتماد رئيس قسم اللجان الطبية', note: 'التوصية: اعتماد التظلم وإعادة تقييم المسار الطبي', type: 'success' },
+      ],
+      assignedTo: 'محمد بن راشد الهنائي',
+      checkedOutBy: 'محمد بن راشد الهنائي',
     },
   ],
 
   /* ── طلبات الترخيص ── */
   licensing: [
+    {
+      id: 'LIC-2025-001605',
+      requestType: 'جديد',
+      status: 'مسودة',
+      submitDate: '2025-01-21',
+      lastUpdate: '2025-01-21 09:15',
+      delegate: { name: 'ناصر بن راشد الحارثي', civil: '9077001122', role: 'المفوض عن المستشفى', phone: '96897700112', email: 'nasser.h@royalcare.om' },
+      institution: { name: 'مستشفى رويال كير التخصصي', cr: '7788991', crStatus: 'سارٍ', crExpiry: '2026-12-31', type: 'مستشفى خاص', address: 'مسقط — الغبرة', governorate: 'مسقط — ولاية بوشر', phone: '96824445566', email: 'info@royalcare.om', currentLicenseNo: null },
+      doctors: [
+        { name: 'د. سامي بن خميس العجمي', civil: '9019988771', specialty: 'جراحة عامة', role: 'رئيس', confirmStatus: 'بانتظار التأكيد', duplicateCheck: 'لا يوجد تعارض' },
+        { name: 'د. هناء بنت راشد الهنائية', civil: '9019988772', specialty: 'طب باطني', role: 'نائب رئيس', confirmStatus: 'تم التأكيد', duplicateCheck: 'لا يوجد تعارض' },
+        { name: 'د. مروان بن سالم الجهضمي', civil: '9019988773', specialty: 'جراحة عظام', role: 'عضو', confirmStatus: 'بانتظار التأكيد', duplicateCheck: 'لا يوجد تعارض' },
+      ],
+      verification: { totalDoctors: 3, confirmedDoctors: 1, minMet: false },
+      attachments: [
+        { id: 'lic165-att1', type: 'السجل التجاري', name: 'السجل_التجاري.pdf', uploadDate: '2025-01-21', uploadedBy: 'ناصر بن راشد الحارثي', role: 'المفوض عن المستشفى', size: '0.7 MB', icon: 'pdf' },
+        { id: 'lic165-att2', type: 'عقد الإيجار', name: 'عقد_الإيجار.pdf', uploadDate: '2025-01-21', uploadedBy: 'ناصر بن راشد الحارثي', role: 'المفوض عن المستشفى', size: '0.9 MB', icon: 'pdf' },
+      ],
+      notes: [
+        { id: 'lic165-note1', author: 'ناصر بن راشد الحارثي', role: 'المفوض عن المستشفى', text: 'تم حفظ الطلب كمسودة لحين استكمال تأكيد جميع الأطباء وإرفاق بقية المستندات.', time: '2025-01-21 09:15' },
+      ],
+      session: null,
+      committeeDecision: null,
+      activeLicense: null,
+      timeline: [
+        { action: 'إنشاء الطلب كمسودة', actor: 'ناصر بن راشد الحارثي', role: 'المفوض عن المستشفى', time: '2025-01-21 09:15', fromStatus: '', toStatus: 'مسودة', note: 'تم حفظ الطلب قبل الإرسال النهائي', type: 'default' },
+      ],
+      assignedTo: null,
+      checkedOutBy: null,
+    },
     {
       id: 'LIC-2025-000034',
       requestType: 'جديد',
@@ -581,10 +763,10 @@ const WI_DATA = {
       committeeDecision: null,
       activeLicense: null,
       timeline: [
-        { action: 'تم تقديم طلب الترخيص', actor: 'منى الرحبية', role: 'المفوض عن المستشفى', time: '2025-01-12 16:00', fromStatus: '', toStatus: 'تم تقديم طلب الترخيص', note: '', type: 'default' },
+        { action: 'تم تقديم طلب الترخيص', actor: 'منى بنت عبدالله الرحبية', role: 'المفوض عن المستشفى', time: '2025-01-12 16:00', fromStatus: '', toStatus: 'تم تقديم طلب الترخيص', note: '', type: 'default' },
       ],
-      assignedTo: null,
-      checkedOutBy: null,
+      assignedTo: 'هدى بنت ناصر الوهيبية',
+      checkedOutBy: 'هدى بنت ناصر الوهيبية',
     },
     {
       id: 'LIC-2025-001603',
@@ -601,15 +783,15 @@ const WI_DATA = {
       attachments: [],
       notes: [],
       timeline: [
-        { action: 'تقديم الطلب عبر البوابة', actor: 'فهد البدري', role: 'المفوض', time: '2025-01-19 10:00', fromStatus: '', toStatus: 'تم تقديم طلب الترخيص / التجديد — بانتظار مراجعة موظف قسم التراخيص والرقابة', note: '', type: 'default' }
+        { action: 'تقديم الطلب عبر البوابة', actor: 'فهد بن غانم البدري', role: 'المفوض', time: '2025-01-19 10:00', fromStatus: '', toStatus: 'تم تقديم طلب الترخيص / التجديد — بانتظار مراجعة موظف قسم التراخيص والرقابة', note: '', type: 'default' }
       ],
-      assignedTo: null,
-      checkedOutBy: null,
+      assignedTo: 'هدى بنت ناصر الوهيبية',
+      checkedOutBy: 'هدى بنت ناصر الوهيبية',
     },
     {
       id: 'LIC-2025-001604',
       requestType: 'جديد',
-      status: 'تم اتخاذ القرار من اللجنة الطبية الإشرافية',
+      status: 'بانتظار اعتماد رئيس قسم التراخيص والرقابة',
       submitDate: '2025-01-01',
       lastUpdate: '2025-01-15 11:00',
       delegate: { name: 'سالم بن علي الهنائي', civil: '9088776655', role: 'المفوض عن المستشفيات', phone: '96898877665', email: 'salim.h@muscat-heart.om' },
@@ -626,12 +808,12 @@ const WI_DATA = {
       notes: [],
       committeeDecision: { type: 'اعتماد الترخيص', content: 'تم مراجعة طلب مركز مسقط للقلب والتحقق من كفاءة الكادر الطبي. اللجنة توصي بالموافقة النهائية على إصدار الترخيص.', date: '2025-01-15' },
       timeline: [
-        { action: 'تقديم طلب الترخيص', actor: 'سالم الهنائي', role: 'المفوض', time: '2025-01-01 10:00', fromStatus: '', toStatus: 'بانتظار المراجعة', note: '', type: 'default' },
+        { action: 'تقديم طلب الترخيص', actor: 'سالم بن علي الهنائي', role: 'المفوض', time: '2025-01-01 10:00', fromStatus: '', toStatus: 'بانتظار المراجعة', note: '', type: 'default' },
         { action: 'اكتمال المراجعة الفنية', actor: 'هدى بنت ناصر الوهيبية', role: 'موظف قسم التراخيص', time: '2025-01-08 11:00', fromStatus: 'بانتظار المراجعة', toStatus: 'مجدولة في جلسة', note: 'المستندات مكتملة والأطباء مؤكدون', type: 'success' },
         { action: 'قرار اللجنة الطبية', actor: 'اللجنة الإشرافية', time: '2025-01-15 11:00', fromStatus: 'مجدولة في جلسة', toStatus: 'تم اتخاذ القرار من اللجنة الطبية الإشرافية', note: 'الموافقة على الترخيص', type: 'success' }
       ],
-      assignedTo: null,
-      checkedOutBy: null,
+      assignedTo: 'طالب بن سعيد الحنبلي',
+      checkedOutBy: 'طالب بن سعيد الحنبلي',
     },
     {
       id: 'LIC-2024-000198',
@@ -655,8 +837,8 @@ const WI_DATA = {
       committeeDecision: { type: 'اعتماد الترخيص', content: 'استوفت المؤسسة جميع الاشتراطات — 5 أطباء مؤكدون جميعهم بدون تعارض', date: '2024-08-10', signatories: [] },
       activeLicense: { number: 'LIC-INST-2024-0067', issueDate: '2024-08-15', expiryDate: '2027-08-14', months: 36 },
       timeline: [
-        { action: 'تقديم طلب التجديد', actor: 'طارق الزدجالي', role: 'المفوض عن المستشفى', time: '2024-06-01 09:00', fromStatus: '', toStatus: 'تم تقديم طلب الترخيص', note: '', type: 'default' },
-        { action: 'اعتماد وإصدار الترخيص', actor: 'طالب الحنبلي', role: 'رئيس قسم التراخيص والرقابة', time: '2024-08-15 09:00', fromStatus: 'تم اتخاذ القرار من اللجنة الطبية الإشرافية', toStatus: 'تم اعتماد الترخيص — الترخيص نشط', note: 'صدر الترخيص رقم LIC-INST-2024-0067', type: 'success' },
+        { action: 'تقديم طلب التجديد', actor: 'طارق بن ناصر الزدجالي', role: 'المفوض عن المستشفى', time: '2024-06-01 09:00', fromStatus: '', toStatus: 'تم تقديم طلب الترخيص', note: '', type: 'default' },
+        { action: 'اعتماد وإصدار الترخيص', actor: 'طالب بن سعيد الحنبلي', role: 'رئيس قسم التراخيص والرقابة', time: '2024-08-15 09:00', fromStatus: 'تم اتخاذ القرار من اللجنة الطبية الإشرافية', toStatus: 'تم اعتماد الترخيص — الترخيص نشط', note: 'صدر الترخيص رقم LIC-INST-2024-0067', type: 'success' },
       ],
       assignedTo: null,
       checkedOutBy: null,
@@ -684,7 +866,7 @@ const WI_DATA = {
       ],
       minutes: '',
       cases: [
-        { requestId: 'WI-2025-001156', name: 'أمينة الخروصية', type: 'بدلات انقطاع — مرض مهني', reason: 'تحديد فترة الإجازة المرضية المستحقة', decisionStatus: 'بانتظار القرار', decision: null },
+        { requestId: 'WI-2025-001156', name: 'أمينة بنت علي الخروصية', type: 'بدلات انقطاع — مرض مهني', reason: 'تحديد فترة الإجازة المرضية المستحقة', decisionStatus: 'بانتظار القرار', decision: null },
       ],
       signatures: [],
     }

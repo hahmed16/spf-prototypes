@@ -86,8 +86,13 @@ function getUserData(role) {
     'committees-head': WI_DATA.users.committees_head,
     'licensing-employee': WI_DATA.users.licensing_employee,
     'licensing-head': WI_DATA.users.licensing_head,
+    'licensed-institution': WI_DATA.users.licensed_institution,
+    'supervisory-committee': WI_DATA.users.supervisory_committee,
+    'appeals-committee': WI_DATA.users.appeals_committee,
     'hospital-delegate': WI_DATA.users.hospital_delegate,
     'institution-rapporteur': WI_DATA.users.institution_rapporteur,
+    'appeals-rapporteur': WI_DATA.users.appeals_rapporteur,
+    'supervisory-rapporteur': WI_DATA.users.supervisory_rapporteur,
   };
   return map[role] || { name: 'مستخدم النظام', civil: '' };
 }

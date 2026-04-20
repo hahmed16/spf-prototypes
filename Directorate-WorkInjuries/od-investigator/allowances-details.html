@@ -22,7 +22,7 @@ setBreadcrumb([{label:'بدلات الانقطاع',page:'allowances-list'},{lab
 
 document.addEventListener('DOMContentLoaded', () => {
   // الإجراءات المتاحة — فقط إذا كان الطلب قيد التحقيق في الأمراض المهنية + محجوز من هذا الموظف
-  const canAct = req.status === 'قيد التحقيق — الأمراض المهنية' && isCheckedOutByMe;
+  const canAct = (req.status === 'قيد التحقيق — الأمراض المهنية' || req.status.includes('بانتظار تعيين')) && isCheckedOutByMe;
   const actions = canAct ? [
     'طلب استيفاء بيانات من مقدم الطلب',
     'تحويل إلى قسم إصابات العمل للاختصاص',
@@ -105,6 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function doCheckout() {
   req.checkedOutBy = WI_DATA.users.od_investigator.name;
+  if(req.status.includes('بانتظار تعيين')) {
+    req.status = 'قيد التحقيق — الأمراض المهنية';
+  }
   showToast(`تم حجز الطلب ${req.id} — Check-out`, 's');
   setTimeout(() => location.reload(), 800);
 }

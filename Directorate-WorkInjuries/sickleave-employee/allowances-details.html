@@ -21,7 +21,7 @@ const isCheckedOutByMe = req.checkedOutBy === me;
 setBreadcrumb([{label:'بدلات الانقطاع',page:'allowances-list'},{label:`تفاصيل ${req.id}`}]);
 
 document.addEventListener('DOMContentLoaded', () => {
-  const canAct = req.status === 'قيد المراجعة من موظف قسم الإجازات المرضية' && isCheckedOutByMe;
+  const canAct = (req.status === 'قيد المراجعة من موظف قسم الإجازات المرضية' || req.status.includes('فني الإجازات المرضية')) && isCheckedOutByMe;
   const actions = canAct ? [
     'توصية بالموافقة مع ترشيح مؤسسة صحية مرخصة',
     'توصية بالرفض',
@@ -104,6 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function doCheckout() {
   req.checkedOutBy = WI_DATA.users.sickleave_employee.name;
+  if(req.status.includes('فني الإجازات المرضية')) {
+    req.status = 'قيد المراجعة من موظف قسم الإجازات المرضية';
+  }
   showToast(`تم حجز الطلب ${req.id}`, 's');
   setTimeout(() => location.reload(), 800);
 }

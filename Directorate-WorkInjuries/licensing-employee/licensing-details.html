@@ -80,7 +80,14 @@ document.addEventListener('DOMContentLoaded', () => {
     ${renderTimeline(req.timeline)}`;
 });
 
-function doCheckout(){ req.checkedOutBy=WI_DATA.users.licensing_employee.name; showToast('تم الحجز','s'); setTimeout(()=>location.reload(),800); }
+function doCheckout(){ 
+  req.checkedOutBy=WI_DATA.users.licensing_employee.name; 
+  if(req.status.includes('بانتظار مراجعة موظف')) {
+    req.status = 'قيد المراجعة — قسم التراخيص والرقابة';
+  }
+  showToast('تم الحجز','s'); 
+  setTimeout(()=>location.reload(),800); 
+}
 function doCheckin(){ req.checkedOutBy=null; showToast('تم التحرير','i'); setTimeout(()=>window.location.href='licensing-list.html',800); }
 function licensingDecision(type){
   const msgs={رفع:'تم توجيه الطلب لرئيس القسم',استيفاء:'تم إعادة الطلب لاستيفاء البيانات',رفض:'تم رفض الطلب'};

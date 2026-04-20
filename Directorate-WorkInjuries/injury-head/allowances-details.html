@@ -37,11 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    ${canAct ? `
-    <div class="alert alert-i">
-      ${ICONS.info}
-      <span>هذا الطلب بانتظار قرارك. راجع تقرير التحقيق المرفوع من الموظف واتخذ القرار المناسب.</span>
-    </div>` : ''}
+
 
     ${renderRequestSummary(req)}
     ${renderApplicantPanel(req.applicant)}

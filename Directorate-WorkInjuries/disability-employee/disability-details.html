@@ -17,8 +17,7 @@ setBreadcrumb([{label:'منفعة الإعاقة',page:'disability-list'},{label
 
 document.addEventListener('DOMContentLoaded', () => {
   const statusPending = 'تم تقديم طلب منفعة الأشخاص ذوي الإعاقة — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة';
-  const canAct = req.status === statusPending && isCheckedOutByMe;
-  const canActReturn = req.status === 'تم إعادة الطلب لاستيفاء البيانات' && isCheckedOutByMe;
+  const canAct = (req.status === statusPending || req.status === 'قيد المراجعة — قسم الإعاقة' || req.status === 'تم إعادة الطلب لاستيفاء البيانات') && isCheckedOutByMe;
 
   getContent().innerHTML = `
     <div class="pg-head">
@@ -71,25 +70,30 @@ document.addEventListener('DOMContentLoaded', () => {
     ${renderAttachmentsPanel(req.attachments, true)}
     ${renderOperationalNotes(req.notes, true)}
 
-    ${canAct||canActReturn?`
+    ${canAct?`
     <div class="dp">
       <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>اتخاذ القرار</h3></div>
       <div class="dp-body">
         <div class="fgrp"><label class="flbl">الملاحظات</label><textarea class="fc" rows="3" placeholder="أكتب ملاحظاتك وتوصيتك..."></textarea></div>
         <div class="fgrp"><label class="flbl">إرفاق ملف (اختياري)</label><input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4"></div>
         <div class="dp-acts">
-          ${canAct?`
           <button class="btn btn-primary" onclick="decision('رفع')">${ICONS.arrow_left} توجيه إلى رئيس القسم</button>
           <button class="btn btn-warning" onclick="decision('استيفاء')">طلب استيفاء بيانات</button>
-          <button class="btn btn-danger" onclick="decision('رفض')">${ICONS.x} رفض</button>`:''}
-          ${canActReturn?`<button class="btn btn-primary" onclick="decision('إعادة')">استيفاء وإعادة الإرسال</button>`:''}
+          <button class="btn btn-danger" onclick="decision('رفض')">${ICONS.x} رفض</button>
         </div>
       </div>
     </div>`:''}
     ${renderTimeline(req.timeline)}`;
 });
 
-function doCheckout(){ req.checkedOutBy=WI_DATA.users.disability_employee.name; showToast('تم الحجز','s'); setTimeout(()=>location.reload(),800); }
+function doCheckout(){ 
+  req.checkedOutBy=WI_DATA.users.disability_employee.name; 
+  if(req.status.includes('بانتظار مراجعة موظف قسم الإعاقة')) {
+    req.status = 'قيد المراجعة — قسم الإعاقة';
+  }
+  showToast('تم الحجز','s'); 
+  setTimeout(()=>location.reload(),800); 
+}
 function doCheckin(){ req.checkedOutBy=null; showToast('تم التحرير','i'); setTimeout(()=>window.location.href='disability-list.html',800); }
 function decision(type){
   const msgs={رفع:'تم توجيه الطلب لرئيس القسم',استيفاء:'تم إعادة الطلب لمقدمه لاستيفاء البيانات',رفض:'تم رفض الطلب',إعادة:'تم إرسال الطلب بعد الاستيفاء'};

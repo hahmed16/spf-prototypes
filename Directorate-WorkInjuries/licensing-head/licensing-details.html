@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    ${canActHead?`<div class="alert alert-i">${ICONS.info}<span>هذا الطلب بانتظار قرارك — إحالة للجنة الطبية الإشرافية أو إعادة للموظف أو رفض.</span></div>`:''}
+
     ${canActExecute?`<div class="alert alert-s">${ICONS.check}<span>صدر قرار اللجنة الطبية الإشرافية — بانتظار تنفيذك لإصدار الترخيص.</span></div>`:''}
 
     <div class="card" style="border-right:4px solid var(--primary)">

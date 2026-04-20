@@ -217,8 +217,13 @@ function renderInjuryDataPanel(injury, requestType) {
         </div>
         <div class="fgrp span-full">
           <label class="flbl">وصف بيئة العمل</label>
-          <div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${injury.workEnvironment || '—'}</div>
+          <div class="fro">${injury.workEnvironment || '—'}</div>
         </div>
+        ${injury.description ? `
+        <div class="fgrp span-full">
+          <label class="flbl">الوصف التفصيلي للحالة</label>
+          <div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${injury.description}</div>
+        </div>` : ''}
         `}
       </div>
     </div>
@@ -291,32 +296,50 @@ function renderInvestigationReport(inv, canEdit = false) {
    PANEL: الزيارات الميدانية — لا تغيّر الحالة
    ════════════════════════════════════════════════════════════════ */
 function renderFieldVisitsPanel(visits = [], canAdd = false) {
-  const visitsHtml = visits.length === 0
+  const visitsLines = visits.length === 0
     ? `<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد زيارات ميدانية مسجلة</div>`
     : visits.map((v, i) => `
-      <div class="visit-item">
-        <div class="visit-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-          <span class="visit-date-badge">${formatDate(v.date)} — ${v.time}</span>
-          <span class="visit-title">زيارة ${i + 1}: ${v.reason?.substring(0, 50) || ''}...</span>
-          <span style="font-size:11px;color:var(--text3)">${v.staff || ''}</span>
+      <div style="border-right:3px solid var(--accent); background:var(--g50); padding:14px; border-radius:10px; margin-bottom:12px; position:relative">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px">
+          <div>
+            <div style="font-size:11px; color:var(--text3); font-weight:600; text-transform:uppercase">${formatDate(v.date)} — ${v.time}</div>
+            <div style="font-size:14px; font-weight:700; color:var(--primary); margin-top:2px">${v.reason}</div>
+          </div>
+          <span style="font-size:10px; display:flex; align-items:center; gap:4px; color:var(--success); font-weight:700">
+            <span style="width:6px; height:6px; background:var(--success); border-radius:50%"></span> تم التنفيذ
+          </span>
         </div>
-        <div class="visit-body" style="display:none">
-          <div class="fg fg-2" style="gap:10px">
-            <div class="fgrp"><label class="flbl">سبب الزيارة</label><div class="fro">${v.reason || '—'}</div></div>
-            <div class="fgrp"><label class="flbl">الموظفون القائمون</label><div class="fro">${v.staff || '—'}</div></div>
-            <div class="fgrp"><label class="flbl">ملخص الزيارة</label><div class="fro">${v.summary || '—'}</div></div>
-            <div class="fgrp"><label class="flbl">النتائج</label><div class="fro">${v.results || '—'}</div></div>
+        <div style="display:flex; flex-direction:column; gap:10px">
+          <div class="fgrp">
+            <label class="flbl" style="margin-bottom:2px">الموظفون القائمون</label>
+            <div style="font-size:12.5px; color:var(--text2)">${v.staff || '—'}</div>
+          </div>
+          <div class="fgrp">
+            <label class="flbl" style="margin-bottom:2px">ملخص الزيارة والنتائج</label>
+            <div style="font-size:13px; color:var(--text1); line-height:1.6">${v.summary || '—'}</div>
           </div>
         </div>
+        ${v.attachments && v.attachments.length ? `
+          <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:8px">
+            ${v.attachments.map(a => `
+              <div class="att-chip" style="display:flex; align-items:center; gap:6px; background:#fff; border:1px solid var(--border); padding:4px 10px; border-radius:100px; font-size:11px">
+                <span style="display:flex; align-items:center; width:14px">${ICONS.file}</span> <span style="font-weight:600">${a}</span>
+                <button class="ibtn" onclick="event.stopPropagation();showToast('جارٍ تحميل الملف...','i')" style="padding:0; margin-right:4px">${ICONS.download}</button>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
       </div>`).join('');
 
   return `
   <div class="card card-cum">
     <div class="ph">
-      <h3><div class="pico or">${ICONS.map}</div>الزيارات الميدانية <span style="font-size:11px;font-weight:400;color:var(--text3)">(لا تؤثر على حالة الطلب)</span></h3>
+      <h3><div class="pico or">${ICONS.map}</div>الزيارات الميدانية والمعاينات</h3>
       ${canAdd ? `<button class="btn btn-secondary btn-xs" onclick="openAddVisitModal()">${ICONS.plus} إضافة زيارة</button>` : ''}
     </div>
-    <div class="pb-0">${visitsHtml}</div>
+    <div class="pb">
+      ${visitsLines}
+    </div>
   </div>`;
 }
 
@@ -1010,6 +1033,99 @@ function renderTimeline(events = []) {
 }
 
 /* ════════════════════════════════════════════════════════════════
+   Unified Search & Filtering Logic
+   ════════════════════════════════════════════════════════════════ */
+
+/**
+ * Renders a unified prototype filter bar.
+ */
+function renderUnifiedFilterBar({ onSearch, onToggleAll, isAllVisible = false }) {
+  return `
+    <div class="filters unified-filter-panel" style="margin-bottom:20px; display:flex; flex-direction:column; gap:12px; padding:16px; background:var(--g50); border:1px solid var(--border); border-radius:14px">
+      <div class="unified-filter-row" style="display:grid; grid-template-columns:1.15fr 1fr 1fr 0.9fr 0.9fr 1.2fr auto; gap:12px; align-items:end">
+        <div class="fgrp" style="margin:0">
+          <label class="flbl">رقم الطلب</label>
+          <input
+            type="text"
+            class="fc"
+            id="global-search-input"
+            placeholder="WI-2025-001234"
+            oninput="handleGlobalSearch(this.value, ${onSearch})">
+        </div>
+        <div class="fgrp" style="margin:0">
+          <label class="flbl">الرقم المدني</label>
+          <input type="text" class="fc" placeholder="9012345678">
+        </div>
+        <div class="fgrp" style="margin:0">
+          <label class="flbl">رقم السجل التجاري</label>
+          <input type="text" class="fc" placeholder="1234567">
+        </div>
+        <div class="fgrp" style="margin:0">
+          <label class="flbl">من تاريخ</label>
+          <input type="date" class="fc">
+        </div>
+        <div class="fgrp" style="margin:0">
+          <label class="flbl">إلى تاريخ</label>
+          <input type="date" class="fc">
+        </div>
+        <div class="fgrp" style="margin:0">
+          <label class="flbl">الحالة</label>
+          <select class="fc">
+            <option>جميع الحالات</option>
+          </select>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; justify-content:flex-end; padding-bottom:6px">
+          <label class="switch-container" style="display:flex; align-items:center; gap:10px; cursor:pointer; white-space:nowrap" onclick="${onToggleAll}()">
+            <span style="font-size:12.5px; font-weight:700; color:var(--text2)">عرض كافة الطلبات</span>
+            <div class="switch ${isAllVisible ? 'active' : ''}" style="width:42px; height:22px; background:${isAllVisible ? 'var(--primary)' : '#cbd5e1'}; border-radius:20px; position:relative; transition:.3s">
+              <div style="width:16px; height:16px; background:#fff; border-radius:50%; position:absolute; top:3px; ${isAllVisible ? 'right:23px' : 'right:3px'}; transition:.3s; box-shadow:0 1px 3px rgba(0,0,0,0.1)"></div>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+let globalSearchTimer = null;
+function handleGlobalSearch(val, callback) {
+  clearTimeout(globalSearchTimer);
+  globalSearchTimer = setTimeout(() => {
+    if (callback) callback(val);
+  }, 400);
+}
+
+/**
+ * Generic logic to filter data across all stages and search.
+ */
+function getFilteredData({ role, data, query = '', showAll = false }) {
+  const stages = WI_CONFIG.roleStages[role] || [];
+  const q = query.toLowerCase().trim();
+
+  return data.filter(r => {
+    // 1. Search Logic (Check multiple fields)
+    const matchesSearch = !q || (
+      r.id.toLowerCase().includes(q) ||
+      (r.insured && r.insured.name?.toLowerCase().includes(q)) ||
+      (r.insured && r.insured.civil?.includes(q)) ||
+      (r.applicant && r.applicant.name?.toLowerCase().includes(q)) ||
+      (r.employer && r.employer.name?.toLowerCase().includes(q))
+    );
+
+    // 2. Stage Logic
+    const isInStage = stages.includes(r.status);
+
+    // Filter Decisions:
+    // - If searching: show if matches (Global Search)
+    // - If showAll: show all matches
+    // - Default: only role's stage
+    if (q) return matchesSearch;
+    if (showAll) return matchesSearch;
+    return isInStage && matchesSearch;
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════
    دوال مساعدة مشتركة
    ════════════════════════════════════════════════════════════════ */
 
@@ -1025,12 +1141,64 @@ function runMedicalQuery(civilId) {
         <table class="dtbl">
           <thead><tr><th>رقم التقرير</th><th>الجهة الصحية</th><th>التاريخ</th><th>نوع التقرير</th><th>التشخيص</th><th>أيام الإجازة</th><th></th></tr></thead>
           <tbody>
-            <tr><td style="font-family:monospace">RPT-2024-089123</td><td>مستشفى السلطاني</td><td>2024-12-10</td><td>إجازة مرضية</td><td>الربو الحاد</td><td>14 يوم</td><td><button class="ibtn" onclick="showToast('عرض تقرير التفاصيل','i')">${ICONS.eye}</button></td></tr>
-            <tr><td style="font-family:monospace">RPT-2024-076540</td><td>مستشفى خولة</td><td>2024-10-05</td><td>فحص دوري</td><td>وظائف الرئة</td><td>—</td><td><button class="ibtn" onclick="showToast('عرض تقرير التفاصيل','i')">${ICONS.eye}</button></td></tr>
+            <tr><td style="font-family:monospace">RPT-2024-089123</td><td>مستشفى السلطاني</td><td>2024-12-10</td><td>إجازة مرضية</td><td>الربو الحاد</td><td>14 يوم</td><td><button class="ibtn" onclick="openMedicalReportDetails('RPT-2024-089123')">${ICONS.eye}</button></td></tr>
+            <tr><td style="font-family:monospace">RPT-2024-076540</td><td>مستشفى خولة</td><td>2024-10-05</td><td>فحص دوري</td><td>وظائف الرئة</td><td>—</td><td><button class="ibtn" onclick="openMedicalReportDetails('RPT-2024-076540')">${ICONS.eye}</button></td></tr>
           </tbody>
         </table>
       </div>`;
   }, 1200);
+}
+
+function openMedicalReportDetails(reportId) {
+  openModal({
+    title: `تفاصيل التقرير الطبي — ${reportId}`,
+    size: 'md-lg',
+    body: `
+      <div class="card" style="border:none;box-shadow:none">
+        <div style="background:var(--g50);padding:16px;border-radius:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:12px;color:var(--text3)">الجهة المصدرة</div>
+            <div style="font-size:16px;font-weight:700;color:var(--primary)">مستشفى السلطاني — مسقط</div>
+          </div>
+          <div style="text-align:left">
+            <div style="font-size:12px;color:var(--text3)">تاريخ الإصدار</div>
+            <div style="font-size:14px;font-weight:600">10 ديسمبر 2024</div>
+          </div>
+        </div>
+        
+        <div class="fg fg-3" style="margin-bottom:20px">
+          <div class="fgrp"><label class="flbl">رقم التقرير</label><div class="fro">${reportId}</div></div>
+          <div class="fgrp"><label class="flbl">اسم المريض</label><div class="fro">${WI_DATA.users.worker.name}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro">${WI_DATA.users.worker.civil}</div></div>
+        </div>
+
+        <div class="divider"></div>
+        
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">التشخيص الطبي (ICD-10)</label><div class="fro">J45.909 - Asthma, unspecified</div></div>
+          <div class="fgrp"><label class="flbl">الفترة الممنوحة</label><div class="fro">14 يوم (من 2024-12-10 إلى 2024-12-23)</div></div>
+        </div>
+
+        <div class="fgrp" style="margin-top:16px">
+          <label class="flbl">خلاصة الحالة الطبية والتوصيات</label>
+          <div class="fro" style="line-height:1.8;height:auto;padding:12px">
+            تمت معاينة المريض في وحدة الطوارئ حيث كان يعاني من نوبة ربو حادة وضيق في التنفس. تم إعطاء العلاج اللازم (بخاخات وموسعات شعب هوائية). الحالة تستدعي الراحة التامة وتجنب مسببات الحساسية أو الغبار في بيئة العمل لمدة أسبوعين. سيتم مراجعة الحالة في العيادة الخارجية بعد أسبوع.
+          </div>
+        </div>
+
+        <div style="margin-top:20px;padding:12px;border:1px dashed var(--border);border-radius:8px;display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--s100);color:var(--s700);display:flex;align-items:center;justify-content:center">${ICONS.check}</div>
+          <div>
+            <div style="font-size:13px;font-weight:700">التوقيع الإلكتروني معتمد</div>
+            <div style="font-size:11px;color:var(--text3)">د. أحمد بن عبدالله الحوسني — استشاري أول أمراض صدرية</div>
+          </div>
+        </div>
+      </div>`,
+    footer: `
+      <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ طباعة التقرير...','i')">${ICONS.plus} طباعة التقرير</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">إغلاق</button>
+    `
+  });
 }
 
 /* تنفيذ إجراء مع تأكيد */
@@ -1109,24 +1277,86 @@ function handleFileUpload(input) {
   observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
 
+/* ════════════════════════════════════════════════════════════════
+   Field Visit Staff Table Helpers
+   ════════════════════════════════════════════════════════════════ */
+let visitStaffState = [];
+
+function renderVisitStaffTable() {
+  const container = document.getElementById('visit-staff-table-container');
+  if (!container) return;
+  
+  const internalUsers = Object.values(WI_DATA.users).filter(u => u.employeeId);
+  
+  let html = `
+    <table class="dtbl" style="margin-bottom:8px;font-size:12.5px">
+      <thead><tr><th>الموظف</th><th style="width:40px"></th></tr></thead>
+      <tbody>
+        ${visitStaffState.length === 0 
+          ? '<tr><td colspan="2" style="text-align:center;color:var(--text3);padding:10px">لم يتم إضافة موظفين بعد</td></tr>' 
+          : visitStaffState.map((name, i) => `
+          <tr>
+            <td>${name}</td>
+            <td><button class="ibtn d" onclick="removeVisitStaff(${i})">${ICONS.trash}</button></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    <div style="display:flex;gap:8px">
+      <select class="fc" id="add-staff-select" style="flex:1">
+        <option value="">-- اختر موظفاً لإضافته --</option>
+        ${internalUsers.map(u => `<option value="${u.name}">${u.name} (${u.employeeId})</option>`).join('')}
+      </select>
+      <button class="btn btn-secondary btn-sm" style="white-space:nowrap" onclick="addVisitStaff()">${ICONS.plus} إضافة</button>
+    </div>
+  `;
+  container.innerHTML = html;
+}
+
+function addVisitStaff() {
+  const sel = document.getElementById('add-staff-select');
+  if (!sel || !sel.value) return;
+  if (visitStaffState.includes(sel.value)) {
+    showToast('الموظف مضاف مسبقاً', 'w');
+    return;
+  }
+  visitStaffState.push(sel.value);
+  renderVisitStaffTable();
+}
+
+function removeVisitStaff(index) {
+  visitStaffState.splice(index, 1);
+  renderVisitStaffTable();
+}
+
 /* فتح نافذة إضافة زيارة ميدانية */
 function openAddVisitModal() {
+  visitStaffState = []; // Reset
   openModal({
-    title: 'إضافة زيارة ميدانية',
+    title: 'إضافة زيارة ميدانية جديدة',
     size: 'md-lg',
     body: `
-      <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info}<span>الزيارة الميدانية لا تغيّر حالة الطلب — إجراء فرعي فقط.</span></div>
       <div class="fg fg-2" style="gap:14px">
-        <div class="fgrp"><label class="flbl">تاريخ الزيارة <span class="req">*</span></label><input type="date" class="fc"></div>
-        <div class="fgrp"><label class="flbl">وقت الزيارة</label><input type="time" class="fc"></div>
-        <div class="fgrp span-full"><label class="flbl">سبب الزيارة <span class="req">*</span></label><textarea class="fc" rows="2"></textarea></div>
-        <div class="fgrp span-full"><label class="flbl">الموظفون القائمون</label><input type="text" class="fc" placeholder="أسماء الموظفين المشاركين"></div>
-        <div class="fgrp span-full"><label class="flbl">ملخص الزيارة</label><textarea class="fc" rows="3"></textarea></div>
-        <div class="fgrp span-full"><label class="flbl">النتائج</label><textarea class="fc" rows="3"></textarea></div>
-        <div class="fgrp span-full"><label class="flbl">مرفقات</label><input type="file" class="fc" accept=".pdf,.jpg,.png,.mp4" multiple></div>
+        <div class="fgrp"><label class="flbl">تاريخ الزيارة <span class="req">*</span></label><input type="date" class="fc" value="${new Date().toISOString().split('T')[0]}"></div>
+        <div class="fgrp"><label class="flbl">وقت الزيارة</label><input type="time" class="fc" value="09:00"></div>
+        <div class="fgrp span-full"><label class="flbl">سبب الزيارة / الغرض <span class="req">*</span></label><textarea class="fc" rows="2" placeholder="مثال: معاينة موقع الحادث، التحقق من الشهود..."></textarea></div>
+        
+        <div class="fgrp span-full">
+          <label class="flbl">الموظفون القائمون بالزيارة <span class="req">*</span></label>
+          <div id="visit-staff-table-container"></div>
+        </div>
+
+        <div class="fgrp span-full"><label class="flbl">ملخص الزيارة والنتائج</label><textarea class="fc" rows="4" placeholder="اكتب ملخصاً لما تم خلال الزيارة..."></textarea></div>
+        
+        <div class="fgrp span-full">
+          <label class="flbl">مرفقات الزيارة (صور، تقارير، وثائق)</label>
+          ${renderModernUploadComponent({ idPrefix: 'visit-att', subTitle: 'يمكن رفع عدة صور أو مستندات PDF' })}
+        </div>
       </div>`,
-    footer: `<button class="btn btn-primary" onclick="closeModal();showToast('تم حفظ الزيارة الميدانية','s')">حفظ الزيارة</button><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+    footer: `<button class="btn btn-primary" onclick="closeModal();showToast('تم حفظ الزيارة الميدانية وتحديث السجل','s')">حفظ الزيارة</button><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
   });
+  
+  // Wait for modal to render then initialize staff table
+  setTimeout(renderVisitStaffTable, 0);
 }
 
 /* فتح نافذة إضافة مرفق */
@@ -1230,3 +1460,383 @@ function handleModernFileUpload(input, listId) {
   // Clear input to allow same files again if needed
   input.value = '';
 }
+
+/* ════════════════════════════════════════════════════════════════
+   Dashboard Enhancements: Full-width tables + current work grid + charts
+   ════════════════════════════════════════════════════════════════ */
+function bucketEntries(entries, getter) {
+  const map = new Map();
+  entries.forEach((entry) => {
+    const key = getter(entry) || 'أخرى';
+    map.set(key, (map.get(key) || 0) + 1);
+  });
+  return [...map.entries()]
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value);
+}
+
+function pickChartPalette(count) {
+  const palette = ['#0a5c36', '#12a865', '#c7a94e', '#0f6f8f', '#c0392b', '#7c3aed', '#0f766e', '#b45309'];
+  return Array.from({ length: count }, (_, i) => palette[i % palette.length]);
+}
+
+function normalizeDateKey(value) {
+  if (!value) return null;
+  const raw = String(value).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0, 7);
+  return null;
+}
+
+function buildMonthBuckets(entries, dateGetter) {
+  const monthMap = new Map();
+  entries.forEach((entry) => {
+    const monthKey = normalizeDateKey(dateGetter(entry));
+    if (!monthKey) return;
+    monthMap.set(monthKey, (monthMap.get(monthKey) || 0) + 1);
+  });
+  return [...monthMap.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .slice(-6)
+    .map(([label, value]) => ({ label, value }));
+}
+
+function findRequestById(id) {
+  return WI_DATA.allowances.find(r => r.id === id)
+    || WI_DATA.disability.find(r => r.id === id)
+    || WI_DATA.appeals.find(r => r.id === id)
+    || WI_DATA.licensing.find(r => r.id === id)
+    || null;
+}
+
+function getDashboardEntityName(item) {
+  return item.insured?.name
+    || item.applicant?.name
+    || item.institution?.name
+    || item.delegate?.name
+    || item.name
+    || item.id
+    || '—';
+}
+
+function getDashboardDate(item) {
+  return item.submitDate || item.date || item.lastUpdate || null;
+}
+
+function getDashboardCategory(item) {
+  return item.type
+    || item.requestType
+    || item.originalRequestType
+    || item.institution
+    || item.subtype
+    || 'أخرى';
+}
+
+function getRoleDataset(role) {
+  const users = WI_DATA.users;
+  const workerCivil = users.worker?.civil;
+  const employerCivil = users.employer_delegate?.civil;
+
+  const licensingStatusesForCommittees = [
+    'تم إحالة الطلب إلى اللجنة الطبية الإشرافية — بانتظار جدولة جلسة',
+    'تم جدولة جلسة اللجنة الطبية الإشرافية',
+    'تم اتخاذ القرار من اللجنة الطبية الإشرافية — بانتظار تنفيذ القرار',
+    'تم اعتماد الترخيص — الترخيص نشط',
+    'مسودة',
+    'تم تقديم طلب الترخيص / التجديد — بانتظار مراجعة موظف قسم التراخيص والرقابة',
+    'بانتظار اعتماد رئيس قسم التراخيص والرقابة'
+  ];
+
+  switch (role) {
+    case 'worker':
+      return {
+        scopeLabel: 'طلباتك الحالية',
+        entries: [
+          ...WI_DATA.allowances.filter(r => r.applicant?.civil === workerCivil || r.insured?.civil === workerCivil),
+          ...WI_DATA.disability.filter(r => r.applicant?.civil === workerCivil),
+          ...WI_DATA.appeals.filter(r => r.applicant?.civil === workerCivil)
+        ]
+      };
+    case 'employer-delegate':
+      return {
+        scopeLabel: 'طلبات جهة العمل',
+        entries: [
+          ...WI_DATA.allowances.filter(r => r.employer?.cr === users.employer_delegate?.cr),
+          ...WI_DATA.appeals.filter(a => a.applicant?.civil === employerCivil)
+        ]
+      };
+    case 'injury-investigator':
+      return {
+        scopeLabel: 'ملف إصابات العمل',
+        entries: WI_DATA.allowances.filter(r => r.type === 'إصابة عمل')
+      };
+    case 'injury-head':
+      return {
+        scopeLabel: 'طلبات إصابات العمل',
+        entries: WI_DATA.allowances.filter(r => r.type === 'إصابة عمل')
+      };
+    case 'od-investigator':
+      return {
+        scopeLabel: 'ملف الأمراض المهنية',
+        entries: WI_DATA.allowances.filter(r => r.type === 'مرض مهني')
+      };
+    case 'od-head':
+      return {
+        scopeLabel: 'طلبات الأمراض المهنية',
+        entries: WI_DATA.allowances.filter(r => r.type === 'مرض مهني')
+      };
+    case 'sickleave-employee':
+    case 'sickleave-head':
+      return {
+        scopeLabel: 'طلبات الإجازات المرضية',
+        entries: WI_DATA.allowances.filter(r =>
+          r.status.includes('الإجازات المرضية') || (r.sickLeavePeriods && r.sickLeavePeriods.length)
+        )
+      };
+    case 'disability-employee':
+    case 'disability-head':
+      return {
+        scopeLabel: 'طلبات منفعة الإعاقة',
+        entries: WI_DATA.disability
+      };
+    case 'committees-employee':
+    case 'committees-head':
+      return {
+        scopeLabel: 'ملفات اللجان الطبية',
+        entries: [
+          ...WI_DATA.allowances.filter(r => r.status.includes('اللجان الطبية') || r.status.includes('المؤسسات الصحية المرخصة')),
+          ...WI_DATA.appeals
+        ]
+      };
+    case 'licensing-employee':
+    case 'licensing-head':
+    case 'hospital-delegate':
+    case 'supervisory-committee':
+    case 'supervisory-rapporteur':
+      return {
+        scopeLabel: 'طلبات التراخيص',
+        entries: WI_DATA.licensing.filter(r => licensingStatusesForCommittees.includes(r.status) || r.status)
+      };
+    case 'licensed-institution':
+    case 'institution-rapporteur':
+      return {
+        scopeLabel: 'الجلسات الطبية',
+        entries: WI_DATA.sessions
+      };
+    case 'appeals-committee':
+    case 'appeals-rapporteur':
+      return {
+        scopeLabel: 'ملفات التظلمات',
+        entries: WI_DATA.appeals
+      };
+    default:
+      return { scopeLabel: 'الملفات الحالية', entries: [] };
+  }
+}
+
+function renderDashboardDonutChart(items, title, centerLabel) {
+  if (!items.length) return '';
+  const total = items.reduce((sum, item) => sum + item.value, 0);
+  const radius = 44;
+  const circumference = 2 * Math.PI * radius;
+  let offset = 0;
+  const colors = pickChartPalette(items.length);
+
+  const segments = items.map((item, index) => {
+    const arc = (item.value / total) * circumference;
+    const segment = `<circle cx="70" cy="70" r="${radius}" fill="none" stroke="${colors[index]}" stroke-width="14" stroke-linecap="round" stroke-dasharray="${arc} ${circumference}" stroke-dashoffset="${-offset}" transform="rotate(-90 70 70)"></circle>`;
+    offset += arc;
+    return segment;
+  }).join('');
+
+  return `
+    <div class="chart-card">
+      <div class="chart-head">
+        <h3>${title}</h3>
+        <span>${total} عنصر</span>
+      </div>
+      <div class="chart-donut-wrap">
+        <svg class="chart-donut" viewBox="0 0 140 140" aria-hidden="true">
+          <circle cx="70" cy="70" r="${radius}" fill="none" stroke="#e5efe9" stroke-width="14"></circle>
+          ${segments}
+        </svg>
+        <div class="chart-donut-center">
+          <strong>${total}</strong>
+          <span>${centerLabel}</span>
+        </div>
+      </div>
+      <div class="chart-legend">
+        ${items.map((item, index) => `
+          <div class="chart-legend-item">
+            <span class="chart-swatch" style="background:${colors[index]}"></span>
+            <span class="chart-legend-label">${item.label}</span>
+            <strong>${item.value}</strong>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+}
+
+function renderDashboardBars(items, title, mode = 'value') {
+  if (!items.length) return '';
+  const max = Math.max(...items.map(item => item.value), 1);
+  return `
+    <div class="chart-card">
+      <div class="chart-head">
+        <h3>${title}</h3>
+        <span>${items.length} فئة</span>
+      </div>
+      <div class="chart-bars ${mode === 'months' ? 'months' : ''}">
+        ${items.map((item, index) => `
+          <div class="chart-bar-row">
+            <div class="chart-bar-meta">
+              <span>${item.label}</span>
+              <strong>${item.value}</strong>
+            </div>
+            <div class="chart-bar-track">
+              <div class="chart-bar-fill" style="width:${(item.value / max) * 100}%;background:${pickChartPalette(items.length)[index]}"></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+}
+
+function renderDashboardInsights(role) {
+  const { scopeLabel, entries } = getRoleDataset(role);
+  if (!entries.length) return '';
+
+  const statusBuckets = bucketEntries(entries, item => item.status).slice(0, 5);
+  const categoryBuckets = bucketEntries(entries, item => getDashboardCategory(item)).slice(0, 5);
+  const monthBuckets = buildMonthBuckets(entries, item => getDashboardDate(item));
+
+  if (!statusBuckets.length && !categoryBuckets.length && !monthBuckets.length) return '';
+
+  return `
+    <div class="dashboard-insights">
+      ${renderDashboardDonutChart(statusBuckets, `توزيع الحالات — ${scopeLabel}`, 'حالة')}
+      ${renderDashboardBars(categoryBuckets, `التوزيع حسب النوع — ${scopeLabel}`)}
+      ${renderDashboardBars(monthBuckets, `الحركة الزمنية لآخر 6 أشهر`, 'months')}
+    </div>`;
+}
+
+function buildCurrentWorkTable(rows) {
+  return `
+    <div class="card dashboard-card-wide dashboard-current-work">
+      <div class="ph">
+        <h3><div class="pico bl">${ICONS.lock}</div>الطلبات الجاري العمل عليها حاليا</h3>
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>صاحب الطلب / الجهة</th>
+                <th>الحالة الحالية</th>
+                <th>آخر تحديث</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(row => `
+                <tr>
+                  <td style="font-family:monospace;font-weight:700;color:var(--primary)">${row.id}</td>
+                  <td>${row.name}</td>
+                  <td>${row.statusHtml}</td>
+                  <td style="font-size:12px;color:var(--text3)">${row.lastUpdate || '—'}</td>
+                  <td><a class="btn btn-primary btn-xs" href="${row.href}">فتح التفاصيل</a></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function replaceCheckedOutSummary(content) {
+  const alerts = [...content.querySelectorAll('.alert')].filter(alert =>
+    alert.textContent.includes('الطلبات التي حجزتها حالياً') || alert.textContent.includes('الطلبات الجاري العمل عليها حاليا')
+  );
+
+  alerts.forEach((alert) => {
+    const anchors = [...alert.querySelectorAll('a[href]')];
+    if (!anchors.length) {
+      alert.innerHTML = alert.innerHTML.replace('الطلبات التي حجزتها حالياً', 'الطلبات الجاري العمل عليها حاليا');
+      return;
+    }
+
+    const rows = anchors.map((anchor) => {
+      const id = anchor.textContent.trim();
+      const req = findRequestById(id);
+      return {
+        id,
+        href: anchor.getAttribute('href'),
+        name: req ? getDashboardEntityName(req) : '—',
+        statusHtml: req ? statusBadge(req.status || '—') : '—',
+        lastUpdate: req ? (req.lastUpdate || req.submitDate || '—') : '—'
+      };
+    });
+
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = buildCurrentWorkTable(rows);
+    alert.replaceWith(wrapper.firstElementChild);
+  });
+}
+
+function normalizeDashboardTableWidths(content) {
+  [...content.children].forEach((child) => {
+    if (child.tagName === 'DIV' && (child.getAttribute('style') || '').includes('display:grid')) {
+      child.classList.add('dashboard-auto-grid');
+      child.querySelectorAll('.card').forEach((card) => {
+        if (card.querySelector('.dtbl')) card.classList.add('dashboard-card-wide');
+      });
+    }
+  });
+}
+
+let dashboardEnhanceQueued = false;
+
+function enhanceDashboardContent() {
+  if (typeof CURRENT_PAGE === 'undefined' || CURRENT_PAGE !== 'dashboard') return;
+  const content = getContent();
+  if (!content || !content.children.length) return;
+
+  replaceCheckedOutSummary(content);
+  normalizeDashboardTableWidths(content);
+
+  const statsGrid = content.querySelector('.stats-grid');
+  if (statsGrid && !content.querySelector('.dashboard-insights')) {
+    const insightsWrapper = document.createElement('div');
+    insightsWrapper.innerHTML = renderDashboardInsights(CURRENT_ROLE);
+    if (insightsWrapper.firstElementChild) {
+      statsGrid.insertAdjacentElement('afterend', insightsWrapper.firstElementChild);
+    }
+  }
+}
+
+function queueDashboardEnhancement() {
+  if (dashboardEnhanceQueued) return;
+  dashboardEnhanceQueued = true;
+  setTimeout(() => {
+    dashboardEnhanceQueued = false;
+    enhanceDashboardContent();
+  }, 0);
+}
+
+(function setupDashboardObserver() {
+  const run = () => queueDashboardEnhancement();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+
+  const observer = new MutationObserver(() => {
+    if (typeof CURRENT_PAGE !== 'undefined' && CURRENT_PAGE === 'dashboard') {
+      run();
+    }
+  });
+
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+})();

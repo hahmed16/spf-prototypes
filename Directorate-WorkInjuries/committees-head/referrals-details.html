@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>تفاصيل طلب العرض — رئيس قسم اللجان الطبية</title>
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p></div>
       <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.arrow_left} رجوع</button></div>
     </div>
-    ${canAct?`<div class="alert alert-i">${ICONS.info}<span>هذا الطلب بانتظار قرارك لتوجيهه إلى المقرر أو الرفض.</span></div>`:''}
+
 
     ${renderRequestSummary(req)}
     ${renderApplicantPanel(req.applicant)}

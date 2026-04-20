@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <button class="btn btn-secondary" onclick="window.location.href='allowances-list.html'">${ICONS.arrow_left} رجوع</button>
       </div>
     </div>
-    ${canAct?`<div class="alert alert-i">${ICONS.info}<span>هذا الطلب بانتظار قرارك — راجع توصية الموظف وفترات الإجازة.</span></div>`:''}
+
     ${renderRequestSummary(req)}
     ${renderApplicantPanel(req.applicant)}
     ${renderInsuredPersonPanel(req.insured)}

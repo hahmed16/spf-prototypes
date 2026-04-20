@@ -18,8 +18,6 @@ const referralReqs = WI_DATA.allowances.filter(r =>
   r.status === 'تم جدولة جلسة للعرض على المؤسسة الصحية المرخصة' ||
   r.status === 'تم اتخاذ القرار من المؤسسة الصحية المرخصة — بانتظار التنفيذ'
 );
-// Add sample referrals from all allowances for demo
-const allReferrals = WI_DATA.allowances;
 const me = WI_DATA.users.committees_head.name;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -53,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </tr>
             </thead>
             <tbody>
-              ${allReferrals.map(r=>`
+              ${referralReqs.map(r=>`
               <tr style="${r.checkedOutBy===me?'background:#f0fdf4':''}">
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
                 <td>${r.insured.name}</td>

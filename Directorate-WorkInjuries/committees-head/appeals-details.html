@@ -16,7 +16,7 @@ const isCheckedOutByMe = appeal.checkedOutBy === me;
 setBreadcrumb([{label:'التظلمات',page:'appeals-list'},{label:`تفاصيل ${appeal.id}`}]);
 
 document.addEventListener('DOMContentLoaded', () => {
-  const statusPending = 'تم تقديم طلب التظلم — بانتظار مراجعة رئيس قسم اللجان الطبية';
+  const statusPending = 'بانتظار اعتماد رئيس قسم اللجان الطبية';
   const canAct = appeal.status === statusPending && isCheckedOutByMe;
 
   getContent().innerHTML = `

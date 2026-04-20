@@ -13,12 +13,12 @@ const req = WI_DATA.allowances.find(r=>r.id===params.get('id')) || WI_DATA.allow
 currentRequestId = req.id;
 const me = WI_DATA.users.committees_employee.name;
 const isCheckedOutByMe = req.checkedOutBy === me;
+const statusPending = 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية';
 setBreadcrumb([{label:'طلبات العرض',page:'referrals-list'},{label:`تفاصيل ${req.id}`}]);
 
 document.addEventListener('DOMContentLoaded', () => {
   // موظف قسم اللجان الطبية يتخذ إجراءً عند: بانتظار مراجعة موظف قسم اللجان الطبية
-  const status10 = 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية';
-  const canAct = isCheckedOutByMe;
+  const canAct = (req.status === statusPending || req.status === 'قيد المراجعة — قسم اللجان الطبية') && isCheckedOutByMe;
   const actions = [
     'إعادة للاستيفاء',
     'توصية برفض الإحالة مع تحديد السبب',
@@ -80,7 +80,14 @@ document.addEventListener('DOMContentLoaded', () => {
     ${renderTimeline(req.timeline)}`;
 });
 
-function doCheckout(){ req.checkedOutBy=WI_DATA.users.committees_employee.name; showToast('تم الحجز','s'); setTimeout(()=>location.reload(),800); }
+function doCheckout(){ 
+  req.checkedOutBy=WI_DATA.users.committees_employee.name; 
+  if(req.status === statusPending) {
+    req.status = 'قيد المراجعة — قسم اللجان الطبية';
+  }
+  showToast('تم الحجز','s'); 
+  setTimeout(()=>location.reload(),800); 
+}
 function doCheckin(){ req.checkedOutBy=null; showToast('تم التحرير','i'); setTimeout(()=>window.location.href='referrals-list.html',800); }
 function committeesDecision(type){
   if(type==='توجيه'){
