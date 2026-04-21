@@ -36,9 +36,23 @@ function renderRequestSummary(request) {
           <div class="flbl" style="margin-bottom:4px">آخر تحديث</div>
           <div style="font-size:12px;color:var(--text2)">${request.lastUpdate || '—'}</div>
         </div>
+        ${request.notificationDate ? `
+        <div>
+          <div class="flbl" style="margin-bottom:4px">تاريخ العلم بالقرار</div>
+          <div style="font-size:12.5px;font-weight:600;color:var(--danger)">${formatDate(request.notificationDate)}</div>
+        </div>` : ''}
       </div>
     </div>
   </div>`;
+}
+
+function normalizeDisplay(value, fallback = '—') {
+  if (value === null || value === undefined) return fallback;
+  const text = String(value).trim();
+  if (!text) return fallback;
+  const lower = text.toLowerCase();
+  if (lower === 'undefined' || lower === 'null') return fallback;
+  return text;
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -64,11 +78,11 @@ function renderApplicantPanel(applicant, showReturnReason = null) {
         </div>
         <div class="fgrp">
           <label class="flbl">رقم الهاتف</label>
-          <div class="fro">${applicant.phone || '—'}</div>
+          <div class="fro">${normalizeDisplay(applicant.phone, 'غير متوفر')}</div>
         </div>
         <div class="fgrp">
           <label class="flbl">البريد الإلكتروني</label>
-          <div class="fro">${applicant.email || '—'}</div>
+          <div class="fro">${normalizeDisplay(applicant.email, 'غير متوفر')}</div>
         </div>
         ${applicant.employeeId ? `<div class="fgrp"><label class="flbl">الرقم الوظيفي</label><div class="fro">${applicant.employeeId}</div></div>` : ''}
       </div>
@@ -102,10 +116,6 @@ function renderInsuredPersonPanel(insured) {
           <div class="fro" style="font-family:monospace">${insured.civil || '—'}</div>
         </div>
         <div class="fgrp">
-          <label class="flbl">الرقم التأميني</label>
-          <div class="fro" style="font-family:monospace">${insured.insurance || '—'}</div>
-        </div>
-        <div class="fgrp">
           <label class="flbl">تاريخ الميلاد</label>
           <div class="fro">${formatDate(insured.dob)}</div>
         </div>
@@ -126,10 +136,6 @@ function renderInsuredPersonPanel(insured) {
         <div class="fgrp">
           <label class="flbl">تاريخ التسجيل في التأمين</label>
           <div class="fro">${formatDate(insured.regDate)}</div>
-        </div>
-        <div class="fgrp">
-          <label class="flbl">نوع الاشتراك</label>
-          <div class="fro">${insured.subType || '—'}</div>
         </div>
       </div>
     </div>
@@ -154,10 +160,6 @@ function renderEmployerPanel(employer) {
           <div class="fro" style="font-family:monospace">${employer.cr || '—'}</div>
         </div>
         <div class="fgrp">
-          <label class="flbl">رقم المنشأة</label>
-          <div class="fro" style="font-family:monospace">${employer.establishment || '—'}</div>
-        </div>
-        <div class="fgrp">
           <label class="flbl">المسمى الوظيفي</label>
           <div class="fro">${employer.jobTitle || '—'}</div>
         </div>
@@ -179,6 +181,9 @@ function renderEmployerPanel(employer) {
    ════════════════════════════════════════════════════════════════ */
 function renderInjuryDataPanel(injury, requestType) {
   const isWork = requestType === 'إصابة عمل';
+  const caseType = isWork
+    ? (injury.caseType || 'إصابة عمل')
+    : (injury.caseType || injury.diagnosis || 'مرض مهني');
   return `
   <div class="card card-ro">
     <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>بيانات ${isWork ? 'الإصابة' : 'المرض المهني'}</h3></div>
@@ -186,7 +191,7 @@ function renderInjuryDataPanel(injury, requestType) {
       <div class="fg fg-3">
         <div class="fgrp">
           <label class="flbl">نوع الحالة</label>
-          <div class="fro">${injury.bodyPart || injury.diagnosis || '—'}</div>
+          <div class="fro">${normalizeDisplay(caseType)}</div>
         </div>
         <div class="fgrp">
           <label class="flbl">تاريخ الواقعة / الاشتباه</label>
@@ -217,13 +222,17 @@ function renderInjuryDataPanel(injury, requestType) {
         </div>
         <div class="fgrp span-full">
           <label class="flbl">وصف بيئة العمل</label>
-          <div class="fro">${injury.workEnvironment || '—'}</div>
+          <div class="fro">${normalizeDisplay(injury.workEnvironment)}</div>
         </div>
-        ${injury.description ? `
+        ${injury.caseDescription ? `
+        <div class="fgrp span-full">
+          <label class="flbl">وصف الحالة (سرد مقدم الطلب)</label>
+          <div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${injury.caseDescription}</div>
+        </div>` : ''}
         <div class="fgrp span-full">
           <label class="flbl">الوصف التفصيلي للحالة</label>
-          <div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${injury.description}</div>
-        </div>` : ''}
+          <div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${normalizeDisplay(injury.description)}</div>
+        </div>
         `}
       </div>
     </div>
@@ -254,6 +263,12 @@ function renderInvestigationReport(inv, canEdit = false) {
           ${canEdit
             ? `<textarea class="fc" id="inv-findings" rows="3">${inv.findings || ''}</textarea>`
             : `<div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${inv.findings || '—'}</div>`}
+        </div>
+        <div class="fgrp span-full">
+          <label class="flbl">محضر التحقيق / الإفادات</label>
+          ${canEdit
+            ? `<textarea class="fc" id="inv-record" rows="4">${inv.record || ''}</textarea>`
+            : `<div class="fro" style="min-height:70px;align-items:flex-start;padding-top:10px">${inv.record || '—'}</div>`}
         </div>
         <div class="fg fg-3">
           <div class="fgrp">
@@ -302,8 +317,8 @@ function renderFieldVisitsPanel(visits = [], canAdd = false) {
       <div style="border-right:3px solid var(--accent); background:var(--g50); padding:14px; border-radius:10px; margin-bottom:12px; position:relative">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px">
           <div>
-            <div style="font-size:11px; color:var(--text3); font-weight:600; text-transform:uppercase">${formatDate(v.date)} — ${v.time}</div>
-            <div style="font-size:14px; font-weight:700; color:var(--primary); margin-top:2px">${v.reason}</div>
+            <div style="font-size:11px; color:var(--text3); font-weight:600; text-transform:uppercase">${formatDate(v.date)}${v.time ? ` — ${v.time}` : ''}</div>
+            <div style="font-size:14px; font-weight:700; color:var(--primary); margin-top:2px">${normalizeDisplay(v.reason)}</div>
           </div>
           <span style="font-size:10px; display:flex; align-items:center; gap:4px; color:var(--success); font-weight:700">
             <span style="width:6px; height:6px; background:var(--success); border-radius:50%"></span> تم التنفيذ
@@ -312,11 +327,11 @@ function renderFieldVisitsPanel(visits = [], canAdd = false) {
         <div style="display:flex; flex-direction:column; gap:10px">
           <div class="fgrp">
             <label class="flbl" style="margin-bottom:2px">الموظفون القائمون</label>
-            <div style="font-size:12.5px; color:var(--text2)">${v.staff || '—'}</div>
+            <div style="font-size:12.5px; color:var(--text2)">${normalizeDisplay(v.staff)}</div>
           </div>
           <div class="fgrp">
             <label class="flbl" style="margin-bottom:2px">ملخص الزيارة والنتائج</label>
-            <div style="font-size:13px; color:var(--text1); line-height:1.6">${v.summary || '—'}</div>
+            <div style="font-size:13px; color:var(--text1); line-height:1.6">${normalizeDisplay(v.summary)}</div>
           </div>
         </div>
         ${v.attachments && v.attachments.length ? `
@@ -482,11 +497,11 @@ function renderSessionPanel(session) {
         </div>
         <div class="fgrp">
           <label class="flbl">تاريخ ووقت الجلسة</label>
-          <div class="fro">${session.date ? `${formatDate(session.date)} — ${session.time}` : '—'}</div>
+          <div class="fro">${session.date ? `${formatDate(session.date)}${session.time ? ` — ${session.time}` : ''}` : '—'}</div>
         </div>
         <div class="fgrp">
-          <label class="flbl">حالة النصاب</label>
-          <div class="fro"><span class="badge ${session.quorum ? 'b-approved' : 'b-returned'}">${session.quorum ? 'النصاب مكتمل' : 'النصاب غير مكتمل'}</span></div>
+          <label class="flbl">الحد الادني للحضور</label>
+          <div class="fro"><span class="badge ${session.quorum ? 'b-approved' : 'b-returned'}">${session.quorum ? 'الحد الادني مكتمل' : 'الحد الادني غير مكتمل'}</span></div>
         </div>
       </div>
       ${session.members?.length ? `
@@ -640,20 +655,52 @@ function renderChronicMedicalPanel(medical) {
     <div class="pb">
       <div class="fg fg-3">
         <div class="fgrp">
+          <label class="flbl">رقم الطلب الفريد (وزارة الصحة)</label>
+          <div class="fro" style="font-family:monospace">${normalizeDisplay(medical.uniqueRequestId || medical.refId || medical.mohRef)}</div>
+        </div>
+        <div class="fgrp">
           <label class="flbl">المؤسسة الصحية المعالجة</label>
-          <div class="fro">${medical.hospital || '—'}</div>
+          <div class="fro">${normalizeDisplay(medical.hospital)}</div>
         </div>
         <div class="fgrp">
           <label class="flbl">الطبيب المعالج</label>
-          <div class="fro">${medical.doctor || '—'}</div>
+          <div class="fro">${normalizeDisplay(medical.doctor)}</div>
         </div>
         <div class="fgrp">
-          <label class="flbl">التشخيص</label>
-          <div class="fro" style="font-weight:700">${medical.diagnosis || '—'}</div>
+          <label class="flbl">التشخيص الطبي التفصيلي</label>
+          <div class="fro" style="font-weight:700">${normalizeDisplay(medical.detailedDiagnosis || medical.diagnosis)}</div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">تاريخ ووقت زيارة المؤسسة الصحية</label>
+          <div class="fro">${normalizeDisplay(medical.visitDateTime)}</div>
         </div>
         <div class="fgrp">
           <label class="flbl">تاريخ ثبوت المرض</label>
           <div class="fro">${formatDate(medical.provenDate)}</div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">تاريخ شدة المرض</label>
+          <div class="fro">${formatDate(medical.severityDate)}</div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">المرض المستديم</label>
+          <div class="fro">${normalizeDisplay(medical.chronicDisease || medical.diagnosis)}</div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">الجهاز المتأثر</label>
+          <div class="fro">${normalizeDisplay(medical.affectedSystem)}</div>
+        </div>
+        <div class="fgrp span-full">
+          <label class="flbl">Medical Severity Index and Treatment Burden</label>
+          <div class="fro">${normalizeDisplay(medical.severityIndex)}</div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">الرقم المرجعي للطلب الأول (إعادة التقييم)</label>
+          <div class="fro" style="font-family:monospace">${normalizeDisplay(medical.firstRequestRef)}</div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">الحالة العامة (إعادة التقييم)</label>
+          <div class="fro">${normalizeDisplay(medical.overallCondition)}</div>
         </div>
         <div class="fgrp">
           <label class="flbl">المسار المتوقع <span style="font-size:9.5px;font-weight:400;color:var(--text3)">(معلومة فقط)</span></label>
@@ -693,10 +740,9 @@ function renderReassessmentPanel(reassessment) {
   <div class="card card-cum">
     <div class="ph"><h3><div class="pico or">${ICONS.refresh}</div>بيانات إعادة التقييم الدوري</h3><span class="stg-lbl">إعادة التقييم</span></div>
     <div class="pb">
-      <div class="fg fg-3">
+      <div class="fg fg-2">
         <div class="fgrp"><label class="flbl">تاريخ آخر تقييم</label><div class="fro">${formatDate(reassessment.lastDate)}</div></div>
         <div class="fgrp"><label class="flbl">تاريخ إعادة التقييم القادم</label><div class="fro">${formatDate(reassessment.nextDate)}</div></div>
-        <div class="fgrp"><label class="flbl">حالة الالتزام</label><div class="fro"><span class="badge b-phead">${reassessment.compliance || '—'}</span></div></div>
         <div class="fgrp span-full"><label class="flbl">نتائج إعادة التقييم (من وزارة الصحة)</label><div class="fro">${reassessment.results || 'لم تصل النتائج بعد'}</div></div>
       </div>
     </div>
@@ -1094,6 +1140,9 @@ function handleGlobalSearch(val, callback) {
     if (callback) callback(val);
   }, 400);
 }
+
+function noopUnifiedSearch() {}
+function noopUnifiedToggleAll() {}
 
 /**
  * Generic logic to filter data across all stages and search.
@@ -1824,8 +1873,32 @@ function queueDashboardEnhancement() {
   }, 0);
 }
 
+function enhanceListContent() {
+  if (typeof CURRENT_PAGE === 'undefined') return;
+  const page = String(CURRENT_PAGE || '');
+  if (!page.includes('list')) return;
+  const content = getContent();
+  if (!content) return;
+  if (content.querySelector('.unified-filter-panel')) return;
+
+  const existingFilters = content.querySelector('.filters');
+  if (!existingFilters) return;
+  const panelWrapper = document.createElement('div');
+  panelWrapper.innerHTML = renderUnifiedFilterBar({
+    onSearch: 'noopUnifiedSearch',
+    onToggleAll: 'noopUnifiedToggleAll',
+    isAllVisible: true
+  });
+  const unified = panelWrapper.firstElementChild;
+  if (!unified) return;
+  existingFilters.replaceWith(unified);
+}
+
 (function setupDashboardObserver() {
-  const run = () => queueDashboardEnhancement();
+  const run = () => {
+    queueDashboardEnhancement();
+    enhanceListContent();
+  };
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', run);
   } else {

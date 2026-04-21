@@ -24,17 +24,20 @@ setBreadcrumb([
 
 const u = WI_DATA.users.hospital_delegate;
 let doctors = [
-  { id: 'd1', name: 'د. خالد بن سالم الهاشمي',  civil: '9011122233', specialty: 'جراحة العظام',         role: 'رئيس',       confirmStatus: 'بانتظار التأكيد', duplicateResult: null },
-  { id: 'd2', name: 'د. ريم بنت أحمد المعولية',  civil: '9022233344', specialty: 'الطب الباطني',        role: 'نائب رئيس', confirmStatus: 'بانتظار التأكيد', duplicateResult: null },
-  { id: 'd3', name: 'د. حسن بن علي السيابي',     civil: '9033344455', specialty: 'طب الأمراض المهنية', role: 'عضو',        confirmStatus: 'بانتظار التأكيد', duplicateResult: null },
-  { id: 'd4', name: 'د. سمية بنت سيف الشهرية',  civil: '9044455566', specialty: 'إعادة التأهيل',       role: 'عضو',        confirmStatus: 'بانتظار التأكيد', duplicateResult: null },
+  { id: 'd1', name: 'د. خالد بن سالم الهاشمي',   civil: '9011122233', specialty: 'جراحة العظام',         role: 'رئيس',       confirmStatus: 'بانتظار التأكيد' },
+  { id: 'd2', name: 'د. ريم بنت أحمد المعولية',   civil: '9022233344', specialty: 'الطب الباطني',        role: 'نائب رئيس', confirmStatus: 'بانتظار التأكيد' },
+  { id: 'd3', name: 'د. حسن بن علي السيابي',      civil: '9033344455', specialty: 'طب الأمراض المهنية',  role: 'عضو',        confirmStatus: 'بانتظار التأكيد' },
+  { id: 'd5', name: 'د. راشد بن ناصر العزري',     civil: '9055566677', specialty: 'جراحة الأعصاب',       role: 'عضو',        confirmStatus: 'بانتظار التأكيد' },
+  { id: 'd6', name: 'د. خلود بنت سيف الهنائية',   civil: '9066677788', specialty: 'طب الطوارئ',          role: 'عضو',        confirmStatus: 'بانتظار التأكيد' },
+  { id: 'd7', name: 'د. مازن بن خالد المعولي',    civil: '9077788899', specialty: 'طب الأسرة',            role: 'عضو',        confirmStatus: 'بانتظار التأكيد' },
 ];
+
+let crVerified = false;
 
 document.addEventListener('DOMContentLoaded', renderPage);
 
 function renderPage() {
   const confirmedCount = doctors.filter(d => d.confirmStatus === 'تم التأكيد').length;
-  const duplicatesFound = doctors.filter(d => d.duplicateResult === 'يوجد تعارض').length;
 
   getContent().innerHTML = `
     <div class="pg-head">
@@ -59,15 +62,11 @@ function renderPage() {
       </div>
     </div>
 
-    <!-- ② بيانات المؤسسة -->
+    <!-- ② بيانات المؤسسة الصحية -->
     <div class="card">
       <div class="ph"><h3><div class="pico tl">${ICONS.building}</div>② بيانات المؤسسة الصحية</h3></div>
       <div class="pb">
         <div class="fg fg-3">
-          <div class="fgrp">
-            <label class="flbl">اسم المؤسسة الصحية <span class="req">*</span></label>
-            <input type="text" class="fc" value="مستشفى الأمل التخصصي">
-          </div>
           <div class="fgrp">
             <label class="flbl">رقم السجل التجاري <span class="req">*</span></label>
             <div class="inp-btn">
@@ -77,8 +76,12 @@ function renderPage() {
             <div class="fhint" id="cr-status"></div>
           </div>
           <div class="fgrp">
+            <label class="flbl">اسم المؤسسة الصحية <span class="req">*</span></label>
+            <input type="text" class="fc" id="inst-name" value="مستشفى الأمل التخصصي">
+          </div>
+          <div class="fgrp">
             <label class="flbl">نوع المؤسسة <span class="req">*</span></label>
-            <select class="fc">
+            <select class="fc" id="inst-type">
               <option>مستشفى خاص</option>
               <option>عيادة متخصصة</option>
               <option>مركز طبي</option>
@@ -87,7 +90,7 @@ function renderPage() {
           </div>
           <div class="fgrp">
             <label class="flbl">المحافظة / الولاية <span class="req">*</span></label>
-            <select class="fc">
+            <select class="fc" id="inst-region">
               <option>مسقط — ولاية السيب</option>
               <option>مسقط — ولاية بوشر</option>
               <option>مسقط — ولاية مطرح</option>
@@ -98,15 +101,15 @@ function renderPage() {
           </div>
           <div class="fgrp">
             <label class="flbl">رقم الهاتف <span class="req">*</span></label>
-            <input type="tel" class="fc" value="96824567890">
+            <input type="tel" class="fc" id="inst-phone" value="96824567890">
           </div>
           <div class="fgrp">
             <label class="flbl">البريد الإلكتروني للمؤسسة</label>
-            <input type="email" class="fc" value="info@amal-hospital.om">
+            <input type="email" class="fc" id="inst-email" value="info@amal-hospital.om">
           </div>
           <div class="fgrp span-full">
             <label class="flbl">العنوان التفصيلي <span class="req">*</span></label>
-            <input type="text" class="fc" value="طريق السيب — مسقط">
+            <input type="text" class="fc" id="inst-address" value="طريق السيب — مسقط">
           </div>
         </div>
         ${requestType === 'تجديد' ? `
@@ -135,13 +138,8 @@ function renderPage() {
       <div class="pb">
         <div class="alert alert-i" style="margin-bottom:14px">
           ${ICONS.info}
-          <span>الحد الأدنى المطلوب <strong>4 أطباء</strong> — يجب أن يُؤكد جميعهم المشاركة. سيتم التحقق تلقائياً من عدم الازدواجية مع مؤسسات أخرى.</span>
+          <span>الحد الأدنى المطلوب <strong>7 أطباء</strong> — يجب أن يؤكد جميعهم المشاركة قبل الإرسال.</span>
         </div>
-        ${duplicatesFound > 0 ? `
-        <div class="alert alert-d" style="margin-bottom:14px">
-          ${ICONS.warn}
-          <span><strong>تحذير:</strong> ${duplicatesFound} طبيب/أطباء مرشحون لديهم تعارض مع مؤسسات أخرى — يرجى استبدالهم.</span>
-        </div>` : ''}
         <div class="tbl-wrap">
           <table class="dtbl">
             <thead>
@@ -151,13 +149,12 @@ function renderPage() {
                 <th>التخصص</th>
                 <th>المنصب في اللجنة</th>
                 <th>حالة التأكيد</th>
-                <th>فحص الازدواجية</th>
                 <th>إجراءات</th>
               </tr>
             </thead>
             <tbody>
               ${doctors.map(d => `
-              <tr style="${d.duplicateResult==='يوجد تعارض'?'background:var(--danger-l)':''}">
+              <tr>
                 <td style="font-weight:600">${d.name}</td>
                 <td style="font-family:monospace;font-size:11.5px">${d.civil}</td>
                 <td>${d.specialty}</td>
@@ -175,15 +172,6 @@ function renderPage() {
                   </span>
                 </td>
                 <td>
-                  ${d.duplicateResult === null ? `
-                  <button class="btn btn-secondary btn-xs" onclick="checkDuplicate('${d.id}')">
-                    ${ICONS.search} فحص
-                  </button>` : `
-                  <span class="badge ${d.duplicateResult==='لا يوجد تعارض'?'b-approved':'b-rejected'}">
-                    ${d.duplicateResult}
-                  </span>`}
-                </td>
-                <td>
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="sendConfirmRequest('${d.id}')" title="إرسال طلب التأكيد">${ICONS.bell}</button>
                     <button class="ibtn d" onclick="removeDoctor('${d.id}')" title="حذف">${ICONS.trash}</button>
@@ -194,9 +182,6 @@ function renderPage() {
           </table>
         </div>
         <div class="facts mt12">
-          <button class="btn btn-secondary btn-sm" onclick="checkAllDuplicates()">
-            ${ICONS.search} فحص الازدواجية لجميع الأطباء
-          </button>
           <button class="btn btn-secondary btn-sm" onclick="sendAllConfirmRequests()">
             ${ICONS.bell} إرسال طلب التأكيد للجميع
           </button>
@@ -204,30 +189,26 @@ function renderPage() {
       </div>
     </div>
 
-    <!-- ④ المرفقات -->
+    <!-- ④ المرفقات المطلوبة -->
     <div class="card">
       <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>④ المرفقات المطلوبة</h3></div>
       <div class="pb">
         <div class="fg fg-2">
           ${[
-            'السجل التجاري للمؤسسة',
-            'شهادة اعتماد وزارة الصحة',
-            'هيكل اللجنة الطبية',
-            'مؤهلات الأطباء المرشحين',
-          ].map((type, i) => `
+            { label: 'السجل التجاري للمؤسسة', id: 'att-cr' },
+            { label: 'شهادة اعتماد وزارة الصحة', id: 'att-moh' },
+            { label: 'هيكل اللجنة الطبية', id: 'att-struct' },
+            { label: 'مؤهلات الأطباء المرشحين', id: 'att-quals' },
+          ].map(item => `
           <div class="fgrp">
-            <label class="flbl">${type} <span class="req">*</span></label>
-            <div style="display:flex;gap:6px;align-items:center">
-              <input type="file" class="fc" id="att-${i}" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-              <span style="font-size:11px;color:var(--text3);white-space:nowrap">PDF, Word, صور</span>
-            </div>
+            <label class="flbl">${item.label} <span class="req">*</span></label>
+            ${renderModernUploadComponent({ idPrefix: item.id, title: item.label, subTitle: 'PDF, Word, صور — الحجم الأقصى 20 ميغابايت' })}
           </div>`).join('')}
-          <div class="fgrp span-full">
-            <label class="flbl">مستندات إضافية (اختياري)</label>
-            <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4" multiple>
-          </div>
         </div>
-        <div class="fhint mt8">الحجم الأقصى لكل ملف 20 ميغابايت — الأنواع المقبولة: PDF, Word, صور, تسجيل صوتي, فيديو</div>
+        <div class="fgrp mt12">
+          <label class="flbl">مستندات إضافية (اختياري)</label>
+          ${renderModernUploadComponent({ idPrefix: 'att-extra', title: 'مستندات إضافية', subTitle: 'PDF, Word, صور, تسجيل صوتي, فيديو — الحجم الأقصى 20 ميغابايت' })}
+        </div>
       </div>
     </div>
 
@@ -237,7 +218,7 @@ function renderPage() {
       <div class="pb">
         <div class="fgrp">
           <label class="flbl">ملاحظاتك (اختياري)</label>
-          <textarea class="fc" rows="3" placeholder="أي معلومات إضافية تودّ إضافتها للطلب..."></textarea>
+          <textarea class="fc" rows="3" placeholder="أي معلومات إضافية تود إضافتها للطلب..."></textarea>
         </div>
       </div>
     </div>
@@ -258,33 +239,40 @@ function verifyCR() {
   const status = document.getElementById('cr-status');
   status.innerHTML = `<span style="color:var(--text3)">${ICONS.clock} جارٍ التحقق...</span>`;
   setTimeout(() => {
-    status.innerHTML = `<span style="color:var(--accent)">✓ السجل التجاري سارٍ — ينتهي 2026-12-31</span>`;
+    status.innerHTML = `<span style="color:var(--accent)">✔ السجل التجاري ساري — ينتهي 2026-12-31</span>`;
+    crVerified = true;
+
+    // HD-05: populate institution fields from CR data and make them readonly
+    const fields = [
+      { id: 'inst-name',    value: 'مستشفى الأمل التخصصي',   isSelect: false },
+      { id: 'inst-phone',   value: '96824567890',              isSelect: false },
+      { id: 'inst-email',   value: 'info@amal-hospital.om',   isSelect: false },
+      { id: 'inst-address', value: 'طريق السيب — مسقط',       isSelect: false },
+    ];
+    fields.forEach(f => {
+      const el = document.getElementById(f.id);
+      if (!el) return;
+      el.value = f.value;
+      el.setAttribute('readonly', '');
+      el.style.background = 'var(--g50)';
+      el.style.cursor = 'not-allowed';
+    });
+
+    // For select fields: disable them
+    ['inst-type', 'inst-region'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.disabled = true;
+      el.style.background = 'var(--g50)';
+    });
+
+    showToast('تم التحقق من السجل التجاري — بيانات المؤسسة مُحدَّثة من وزارة التجارة', 's');
   }, 1000);
 }
 
 function updateDoctorRole(id, role) {
   const d = doctors.find(x => x.id === id);
   if (d) d.role = role;
-}
-
-function checkDuplicate(id) {
-  const d = doctors.find(x => x.id === id);
-  if (!d) return;
-  showToast(`جارٍ فحص الازدواجية للدكتور ${d.name}...`, 'i');
-  setTimeout(() => {
-    d.duplicateResult = 'لا يوجد تعارض';
-    showToast(`لا يوجد تعارض — الدكتور ${d.name}`, 's');
-    renderPage();
-  }, 1200);
-}
-
-function checkAllDuplicates() {
-  showToast('جارٍ فحص الازدواجية لجميع الأطباء...', 'i');
-  setTimeout(() => {
-    doctors.forEach(d => { d.duplicateResult = 'لا يوجد تعارض'; });
-    showToast('تم فحص جميع الأطباء — لا يوجد تعارض', 's');
-    renderPage();
-  }, 1500);
 }
 
 function sendConfirmRequest(id) {
@@ -329,7 +317,7 @@ function openAddDoctorModal() {
         <div class="fgrp">
           <label class="flbl">الرقم المدني للطبيب <span class="req">*</span></label>
           <div class="inp-btn">
-            <input type="text" class="fc" id="new-doc-civil" placeholder="10 أرقام" maxlength="10">
+            <input type="text" class="fc" id="new-doc-civil" placeholder="6-10 أرقام" minlength="6" maxlength="10">
             <button class="btn btn-primary btn-sm" onclick="lookupDoctor()">استعلام</button>
           </div>
         </div>
@@ -357,7 +345,7 @@ function openAddDoctorModal() {
 
 function lookupDoctor() {
   const civil = document.getElementById('new-doc-civil').value.trim();
-  if (!civil) { showToast('يرجى إدخال الرقم المدني','w'); return; }
+  if (!civil) { showToast('يرجى إدخال الرقم المدني', 'w'); return; }
   const el = document.getElementById('doc-lookup-result');
   el.innerHTML = `<div class="loading">${ICONS.clock} جارٍ الاستعلام...</div>`;
   setTimeout(() => {
@@ -371,10 +359,10 @@ function addDoctor() {
   const civil = document.getElementById('new-doc-civil')?.value.trim();
   const spec = document.getElementById('new-doc-spec')?.value.trim();
   const role = document.getElementById('new-doc-role')?.value;
-  if (!name || !civil || !spec) { showToast('يرجى استيفاء جميع الحقول الإلزامية','w'); return; }
-  doctors.push({ id: 'd'+Date.now(), name, civil, specialty: spec, role, confirmStatus: 'بانتظار التأكيد', duplicateResult: null });
+  if (!name || !civil || !spec) { showToast('يرجى استيفاء جميع الحقول الإلزامية', 'w'); return; }
+  doctors.push({ id: 'd'+Date.now(), name, civil, specialty: spec, role, confirmStatus: 'بانتظار التأكيد' });
   closeModal();
-  showToast(`تم إضافة الطبيب ${name}`,'s');
+  showToast(`تم إضافة الطبيب ${name}`, 's');
   renderPage();
 }
 
@@ -385,14 +373,8 @@ function saveDraft() {
 
 function submitLicenseRequest() {
   const confirmedCount = doctors.filter(d => d.confirmStatus === 'تم التأكيد').length;
-  const duplicatesFound = doctors.filter(d => d.duplicateResult === 'يوجد تعارض').length;
-
-  if (confirmedCount < 3) {
-    showToast(`يجب تأكيد ${3 - confirmedCount} طبيب/أطباء إضافيين على الأقل قبل الإرسال`, 'w');
-    return;
-  }
-  if (duplicatesFound > 0) {
-    showToast('يوجد أطباء لديهم تعارض — يرجى استبدالهم قبل الإرسال', 'd');
+  if (confirmedCount < 7) {
+    showToast(`يجب تأكيد ${7 - confirmedCount} طبيب/أطباء إضافيين على الأقل قبل الإرسال`, 'w');
     return;
   }
   showToast('جارٍ تقديم الطلب...', 'i');

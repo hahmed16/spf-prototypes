@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل إعادة التقييم — رئيس قسم الإعاقة</title>
+<link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script><script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'disability-head', activePage: 'chronic-reassessment' });
+const params = new URLSearchParams(window.location.search);
+const id = params.get('id') || 'CHR-2024-000089';
+setBreadcrumb([{ label: 'منفعة الأمراض المستديمة', page: 'chronic-reassessment' }, { label: `تفاصيل ${id}` }]);
+
+const incoming = WI_DATA.chronicIncoming.find(x => x.requestId === 'CHR-2025-000156') || WI_DATA.chronicIncoming[1];
+const req = {
+  id,
+  status: 'بانتظار اعتماد رئيس قسم الإعاقة والأمراض المستديمة',
+  applicant: { name: incoming.applicantName || '—', civil: incoming.civil || '—', role: 'المواطن', phone: '96890000000', email: 'noreply@spf-proto.om' },
+  insured: { name: incoming.applicantName || '—', civil: incoming.civil || '—', dob: '1981-02-10', gender: 'ذكر', nationality: 'عُماني', insuranceStatus: 'نشط', regDate: '2018-01-01' },
+  medical: { ...incoming },
+  reassessment: { lastDate: '2024-07-01', nextDate: '2025-01-01', results: 'استمرار الحالة المرضية مع حاجة لمتابعة علاجية دورية.' },
+  timeline: [
+    { action: 'تم رفع ملف إعادة التقييم', actor: 'موظف القسم', role: 'موظف قسم الإعاقة', time: '2025-01-03 10:30', fromStatus: '', toStatus: 'بانتظار اعتماد رئيس قسم الإعاقة والأمراض المستديمة', note: '', type: 'success' }
+  ]
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>تفاصيل إعادة تقييم الأمراض المستديمة</h1><p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p></div>
+      <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='chronic-reassessment.html'">${ICONS.arrow_left} رجوع</button></div>
+    </div>
+    ${renderApplicantPanel(req.applicant)}
+    ${renderInsuredPersonPanel(req.insured)}
+    ${renderChronicMedicalPanel(req.medical)}
+    ${renderReassessmentPanel(req.reassessment)}
+    <div class="dp">
+      <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>قرار رئيس القسم</h3></div>
+      <div class="dp-body">
+        <div class="fgrp"><label class="flbl">ملاحظات رئيس القسم</label><textarea class="fc" rows="3"></textarea></div>
+        <div class="dp-acts">
+          <button class="btn btn-accent" onclick="takeHeadDecision('approve')">${ICONS.check} اعتماد</button>
+          <button class="btn btn-warning" onclick="takeHeadDecision('return')">إعادة لموظف القسم</button>
+          <button class="btn btn-danger" onclick="takeHeadDecision('reject')">رفض</button>
+        </div>
+      </div>
+    </div>
+    ${renderTimeline(req.timeline)}
+  `;
+});
+
+function takeHeadDecision(mode) {
+  const msg = { approve: 'تم اعتماد الطلب', return: 'تمت إعادة الطلب لموظف القسم', reject: 'تم رفض الطلب' }[mode];
+  showToast(msg, mode === 'reject' ? 'd' : 's');
+  setTimeout(() => window.location.href = 'chronic-reassessment.html', 1200);
+}
+</script></body></html>

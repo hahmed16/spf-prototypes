@@ -80,7 +80,6 @@ function render() {
                 <th>التاريخ والوقت</th>
                 <th>الحالات</th>
                 <th>القرارات</th>
-                <th>النصاب</th>
                 <th>الحالة</th>
                 <th>التوقيعات</th>
                 <th></th>
@@ -97,7 +96,6 @@ function render() {
                   <td>${s.date} — ${s.time}</td>
                   <td>${s.casesCount}</td>
                   <td><span style="font-weight:700;color:${s.completedDecisions===s.casesCount?'var(--accent)':'var(--text2)'}">${s.completedDecisions} / ${s.casesCount}</span></td>
-                  <td><span class="badge ${s.quorum?'b-approved':'b-returned'}">${s.quorum?'مكتمل':'غير مكتمل'}</span></td>
                   <td><span class="badge ${s.status==='مجدولة'?'b-session':'b-approved'}">${s.status}</span></td>
                   <td>${totalMembers>0?`${signedCount}/${totalMembers}`:'—'}</td>
                   <td>

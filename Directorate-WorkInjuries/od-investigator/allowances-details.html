@@ -76,20 +76,13 @@ document.addEventListener('DOMContentLoaded', () => {
             <label class="flbl">نتائج التحقق من البيانات</label>
             <textarea class="fc" id="inv-findings" rows="4" placeholder="ما هي نتائجك؟">${req.investigation?.findings||''}</textarea>
           </div>
-          <div class="fg fg-2">
-            <div class="fgrp">
-              <label class="flbl">مدى انطباق شروط إصابة العمل</label>
-              <select class="fc" id="inv-eligibility">
-                <option value="">— اختر —</option>
-                <option ${req.investigation?.employeeRecommendation==='موافقة'?'selected':''}>مستوفية</option>
-                <option>غير مستوفية</option>
-                <option>تحتاج مراجعة إضافية</option>
-              </select>
-            </div>
-            <div class="fgrp">
-              <label class="flbl">ملاحظات إضافية</label>
-              <textarea class="fc" rows="3">${req.investigation?.employeeNotes||''}</textarea>
-            </div>
+          <div class="fgrp span-full">
+            <label class="flbl">محضر التحقيق / الإفادات</label>
+            <textarea class="fc" id="inv-record" rows="4" placeholder="إفادات الشهود ومحاضر التحقيق...">${req.investigation?.record||''}</textarea>
+          </div>
+          <div class="fgrp span-full">
+            <label class="flbl">ملاحظات إضافية (توصية الموظف)</label>
+            <textarea class="fc" rows="3">${req.investigation?.employeeNotes||''}</textarea>
           </div>
           <button class="btn btn-secondary btn-sm" style="width:auto;justify-self:start;align-self:flex-start" onclick="showToast('تم حفظ تقرير التحقيق','s')">${ICONS.check} حفظ التقرير</button>
         </div>

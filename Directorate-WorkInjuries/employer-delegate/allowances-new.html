@@ -59,13 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <div id="emp-results">
           <div class="tbl-wrap">
             <table class="dtbl">
-              <thead><tr><th>الاسم</th><th>الرقم المدني</th><th>الرقم التأميني</th><th>المسمى الوظيفي</th><th></th></tr></thead>
+              <thead><tr><th>الاسم</th><th>الرقم المدني</th><th>المسمى الوظيفي</th><th></th></tr></thead>
               <tbody>
                 ${employees.map(e=>`
                 <tr>
                   <td>${e.name}</td>
                   <td style="font-family:monospace">${e.civil}</td>
-                  <td style="font-family:monospace">${e.insurance}</td>
                   <td>${e.title}</td>
                   <td><button class="btn btn-primary btn-xs" onclick="selectEmployee('${e.civil}')">اختيار</button></td>
                 </tr>`).join('')}
@@ -167,7 +166,6 @@ function selectEmployee(civil) {
     <div class="fg fg-3">
       <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${e.name}</div></div>
       <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${e.civil}</div></div>
-      <div class="fgrp"><label class="flbl">الرقم التأميني</label><div class="fro" style="font-family:monospace">${e.insurance}</div></div>
       <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${e.title}</div></div>
       <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">نشط</span></div></div>
     </div>`;

@@ -70,7 +70,7 @@ function renderPage() {
             </div>
           </div>
           <div><div class="flbl" style="margin-bottom:4px">حالة الجلسة</div><span class="badge b-session">${session.status}</span></div>
-          <div><div class="flbl" style="margin-bottom:4px">النصاب</div>
+          <div><div class="flbl" style="margin-bottom:4px">الحد الادني للحضور</div>
             <span class="badge ${quorum?'b-approved':'b-returned'}">${quorum?'مكتمل':'غير مكتمل'} (${confirmedCount}/${session.members.length})</span>
           </div>
         </div>
@@ -187,7 +187,7 @@ function renderPage() {
           <span>بعد اكتمال التوقيعات، تُرسَل القرارات إلى <strong>رئيس قسم التراخيص والرقابة</strong> لتنفيذها وإصدار التراخيص.</span>
         </div>
         <div class="fg fg-4" style="margin-bottom:16px">
-          ${[{label:'النصاب',done:quorum},{label:'القرارات',done:allDecisionsDone},{label:'التوقيعات',done:allSigned},{label:'المحضر',done:!!minutesText}]
+          ${[{label:'الحد الادني للحضور',done:quorum},{label:'القرارات',done:allDecisionsDone},{label:'التوقيعات',done:allSigned},{label:'المحضر',done:!!minutesText}]
             .map(c=>`<div style="padding:10px;border:1px solid var(--border);border-radius:var(--r);text-align:center">
               <div style="font-size:20px;font-weight:800;color:${c.done?'var(--accent)':'var(--danger)'}">${c.done?'✓':'✗'}</div>
               <div style="font-size:11.5px;margin-top:4px">${c.label}</div>
@@ -198,7 +198,7 @@ function renderPage() {
           onclick="sendToLicensingHead()">
           ${ICONS.check} إرسال القرارات إلى رئيس قسم التراخيص والرقابة
         </button>
-        ${!(quorum&&allDecisionsDone&&allSigned)?`<p style="font-size:12px;color:var(--text3);margin-top:8px">يجب اكتمال: النصاب + القرارات + التوقيعات</p>`:''}
+        ${!(quorum&&allDecisionsDone&&allSigned)?`<p style="font-size:12px;color:var(--text3);margin-top:8px">يجب اكتمال: الحد الادني للحضور + القرارات + التوقيعات</p>`:''}
       </div>
     </div>`;
 }

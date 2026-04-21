@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="pb-0">
           <table class="dtbl">
-            <thead><tr><th>رقم الجلسة</th><th>التاريخ</th><th>الحالات</th><th>النصاب</th><th></th></tr></thead>
+            <thead><tr><th>رقم الجلسة</th><th>التاريخ</th><th>الحالات</th><th>الحد الادني للحضور</th><th></th></tr></thead>
             <tbody>
               ${sessions.map(s=>`
               <tr>
@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div style="padding:10px 12px;border:1px solid var(--border);background:var(--g50);border-radius:var(--rsm)">
               <p style="font-size:12.5px;font-weight:600">2 جلسات تحتاج جدولة</p>
               <p style="font-size:11px;color:var(--text3)">طلبات وردت من رئيس قسم اللجان الطبية</p>
+              <button class="btn btn-primary btn-xs" style="margin-top:8px" onclick="window.location.href='incoming-requests.html'">إدارة الطلبات الواردة</button>
             </div>
             <div style="padding:10px 12px;border:1px solid var(--border);background:var(--g50);border-radius:var(--rsm)">
               <p style="font-size:12.5px;font-weight:600">التوقيعات مكتملة — جلسة SES-2025-0098</p>

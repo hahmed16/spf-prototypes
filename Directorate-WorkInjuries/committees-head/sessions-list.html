@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم الجلسة</th><th>المؤسسة</th><th>التاريخ والوقت</th><th>الحالات</th><th>القرارات المكتملة</th><th>حالة النصاب</th><th>حالة الجلسة</th><th></th></tr></thead>
+            <thead><tr><th>رقم الجلسة</th><th>المؤسسة</th><th>التاريخ والوقت</th><th>الحالات</th><th>القرارات المكتملة</th><th>حالة الحد الادني للحضور</th><th>حالة الجلسة</th><th></th></tr></thead>
             <tbody>
               ${sessions.map(s=>`
               <tr>
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${s.completedDecisions} / ${s.casesCount}</td>
                 <td><span class="badge ${s.quorum ? 'b-approved' : 'b-returned'}">${s.quorum ? 'مكتمل' : 'غير مكتمل'}</span></td>
                 <td>${statusBadge(s.status === 'مجدولة' ? 'تم جدولة جلسة للعرض على المؤسسة الصحية المرخصة' : 'معتمد')}</td>
-                <td><button class="ibtn" title="قراءة فقط">${ICONS.eye}</button></td>
+                <td><button class="ibtn" onclick="showSessionDetails('${s.id}')" title="عرض تفاصيل الجلسة">${ICONS.eye}</button></td>
               </tr>`).join('')}
             </tbody>
           </table>
@@ -48,5 +48,24 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>`;
 });
+
+function showSessionDetails(id){
+  const s = WI_DATA.sessions.find(x => x.id === id);
+  if(!s) return;
+  openModal({
+    title: `تفاصيل الجلسة ${id}`,
+    size: 'md-lg',
+    body: `
+      <div class="fg fg-2">
+        <div class="fgrp"><label class="flbl">المؤسسة</label><div class="fro">${s.institution}</div></div>
+        <div class="fgrp"><label class="flbl">التاريخ والوقت</label><div class="fro">${s.date} — ${s.time}</div></div>
+        <div class="fgrp"><label class="flbl">عدد الحالات</label><div class="fro">${s.casesCount}</div></div>
+        <div class="fgrp"><label class="flbl">القرارات المكتملة</label><div class="fro">${s.completedDecisions} / ${s.casesCount}</div></div>
+        <div class="fgrp span-full"><label class="flbl">الحالات المدرجة</label><div class="fro">${(s.cases || []).map(c => c.requestId).join('، ') || '—'}</div></div>
+      </div>`,
+    footer: `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`
+  });
+}
 </script></body></html>
+
 

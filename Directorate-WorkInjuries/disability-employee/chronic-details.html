@@ -23,7 +23,22 @@ const req = {
   applicant: { name: refData?.applicantName||'سعيد بن علي الحبسي', civil: refData?.civil||'9001234567', role:'العامل / المؤمن عليه / المواطن', phone:'96891234567', email:'' },
   insured: { name: refData?.applicantName||'سعيد بن علي الحبسي', civil: refData?.civil||'9001234567', insurance:'IN-20180090123', dob:'1975-03-10', gender:'ذكر', nationality:'عُماني', insuranceStatus:'نشط', regDate:'2018-01-01', subType:'إلزامي' },
   insurance: { status:'نشط', subType:'إلزامي', otherBenefits:'لا يوجد' },
-  medical: { hospital: refData?.hospital||'مستشفى ابن سينا — نزوى', doctor: refData?.doctor||'د. فاطمة الخروصية', diagnosis: refData?.diagnosis||'الفشل الكلوي المزمن', provenDate: refData?.provenDate||'2024-11-20', expectedPath: refData?.expectedPath||'مسار اللجان الطبية' },
+  medical: {
+    uniqueRequestId: refData?.uniqueRequestId,
+    hospital: refData?.hospital||'مستشفى ابن سينا — نزوى',
+    doctor: refData?.doctor||'د. فاطمة الخروصية',
+    diagnosis: refData?.diagnosis||'الفشل الكلوي المزمن',
+    detailedDiagnosis: refData?.detailedDiagnosis,
+    visitDateTime: refData?.visitDateTime,
+    provenDate: refData?.provenDate||'2024-11-20',
+    severityDate: refData?.severityDate,
+    chronicDisease: refData?.chronicDisease,
+    affectedSystem: refData?.affectedSystem,
+    severityIndex: refData?.severityIndex,
+    firstRequestRef: refData?.firstRequestRef,
+    overallCondition: refData?.overallCondition,
+    expectedPath: refData?.expectedPath||'مسار اللجان الطبية',
+  },
   attachments:[], notes:[],
   timeline:[
     {action:'تم استلام التشخيص من وزارة الصحة',actor:'وزارة الصحة',role:'آلي',time:'2024-11-22 08:00',fromStatus:'',toStatus:'تم استلام التشخيص من المؤسسة الصحية المعالجة',note:'',type:'default'},
@@ -64,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb">
         <div class="fg fg-3">
           <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">${req.insurance.status}</span></div></div>
-          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${req.insurance.subType}</div></div>
           <div class="fgrp"><label class="flbl">منافع أخرى</label><div class="fro">${req.insurance.otherBenefits}</div></div>
         </div>
       </div>

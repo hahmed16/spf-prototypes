@@ -21,6 +21,17 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="pg-head"><div><h1>الحالات المحالة للمؤسسات الصحية المرخصة</h1>
       <p>متابعة مسار الإحالة حتى صدور القرار</p></div>
     </div>
+    <div class="filters">
+      <div class="fgrid">
+        <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc" placeholder="WI-YYYY-XXXXXX"></div>
+        <div class="fgrp"><label class="flbl">الرقم المدني</label><input type="text" class="fc"></div>
+        <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><input type="text" class="fc"></div>
+        <div class="fgrp"><label class="flbl">من تاريخ</label><input type="date" class="fc"></div>
+        <div class="fgrp"><label class="flbl">إلى تاريخ</label><input type="date" class="fc"></div>
+        <div class="fgrp"><label class="flbl">الحالة</label><select class="fc"><option>جميع الحالات</option></select></div>
+      </div>
+      <div class="facts"><button class="btn btn-primary btn-sm">${ICONS.search} بحث</button><button class="btn btn-secondary btn-sm">مسح</button></div>
+    </div>
     <div class="card">
       <div class="ttabs">
         <div class="ttab act">جميع الحالات <span class="tc">${all.length}</span></div>

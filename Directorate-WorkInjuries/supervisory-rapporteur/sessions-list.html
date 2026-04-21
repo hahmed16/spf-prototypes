@@ -52,7 +52,7 @@ function render() {
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم الجلسة</th><th>التاريخ والوقت</th><th>الطلبات</th><th>القرارات</th><th>النصاب</th><th>التوقيعات</th><th>الحالة</th><th></th></tr></thead>
+            <thead><tr><th>رقم الجلسة</th><th>التاريخ والوقت</th><th>الطلبات</th><th>القرارات</th><th>الحد الادني للحضور</th><th>التوقيعات</th><th>الحالة</th><th></th></tr></thead>
             <tbody>
               ${filtered.map(s=>`
               <tr style="${s.status==='مجدولة'?'background:var(--primary-l)':''}">

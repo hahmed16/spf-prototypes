@@ -51,8 +51,8 @@ function renderPage() {
           <div><div class="flbl" style="margin-bottom:4px">المؤسسة</div><div style="font-weight:600">${session.institution}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">التاريخ والوقت</div><div>${session.date} — ${session.time}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">حالة الجلسة</div><span class="badge b-session">${session.status}</span></div>
-          <div><div class="flbl" style="margin-bottom:4px">حالة النصاب</div>
-            <span class="badge ${quorum?'b-approved':'b-returned'}">${quorum?'النصاب مكتمل':'النصاب غير مكتمل'}</span>
+          <div><div class="flbl" style="margin-bottom:4px">الحد الادني للحضور</div>
+            <span class="badge ${quorum?'b-approved':'b-returned'}">${quorum?'الحد الادني مكتمل':'الحد الادني غير مكتمل'}</span>
           </div>
         </div>
       </div>

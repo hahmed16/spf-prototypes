@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -n \"\\\\\\\\bالرئيس\\\\\\\\b\\\\|رئيس القسم\" \"c:/SPF/BA Engagement/Prototypes/Directorate-WorkInjuries/shared/data.js\")",
+      "PowerShell($file = \"c:\\\\SPF\\\\BA Engagement\\\\Prototypes\\\\Directorate-WorkInjuries\\\\hospital-delegate\\\\licensing-new.html\"; $content = Get-Content $file -Raw -Encoding UTF8; $lines = $content -split \"`n\"; for \\($i = 26; $i -lt 35; $i++\\) { Write-Host \\(\"Line \" + \\($i+1\\) + \": \" + $lines[$i].Substring\\(0, [Math]::Min\\(120, $lines[$i].Length\\)\\)\\) })"
+    ]
+  }
+}

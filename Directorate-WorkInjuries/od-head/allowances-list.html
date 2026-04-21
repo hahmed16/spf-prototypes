@@ -1,13 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>قائمة الطلبات — رئيس قسم التحقيق في الأمراض المهنية</title>
   <link rel="stylesheet" href="../shared/style.css">
 </head>
-
 <body>
   <script src="../shared/config.js"></script>
   <script src="../shared/data.js"></script>
@@ -16,49 +14,37 @@
   <script>
     initLayout({ role: 'od-head', activePage: 'allowances-list' });
     setBreadcrumb([{ label: 'بدلات الانقطاع عن العمل' }, { label: 'قائمة الطلبات' }]);
-    const reqs = WI_DATA.allowances.filter(r => r.type === 'مرض مهني');
-    let activeTab = 'all';
+    let searchQuery = '';
+    let showAllStages = false;
     document.addEventListener('DOMContentLoaded', render);
     function render() {
-      const filtered = activeTab === 'all' ? reqs : reqs.filter(r => {
-        if (activeTab === 'pending') return r.status === 'بانتظار اعتماد رئيس قسم التحقيق في الأمراض المهنية';
-        if (activeTab === 'investigating') return r.status === 'قيد التحقيق — الأمراض المهنية';
-        return true;
+      const filtered = getFilteredData({
+        role: 'od-head',
+        data: WI_DATA.allowances.filter(r => r.type === 'مرض مهني'),
+        query: searchQuery,
+        showAll: showAllStages
       });
       getContent().innerHTML = `
     <div class="pg-head">
-      <div><h1>قائمة طلبات صرف بدلات الانقطاع</h1><p>الأمراض المهنية — ${reqs.length} طلب</p></div>
+      <div><h1>قائمة طلبات صرف بدلات الانقطاع</h1><p>الأمراض المهنية — ${WI_DATA.allowances.filter(r=>r.type==='مرض مهني').length} طلب إجمالي في النظام</p></div>
       <div class="pg-acts"><button class="btn btn-secondary btn-sm" onclick="window.location.href='../shared/medical-query.html'">${ICONS.medical} استعلام طبي</button></div>
     </div>
-    <div class="filters">
-      <div class="fgrid">
-        <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc" placeholder="WI-YYYY-XXXXXX"></div>
-        <div class="fgrp"><label class="flbl">اسم المؤمن عليه</label><input type="text" class="fc"></div>
-        <div class="fgrp"><label class="flbl">الحالة</label><select class="fc"><option>جميع الحالات</option><option>بانتظار اعتماد رئيس قسم التحقيق في الأمراض المهنية</option><option>قيد التحقيق — الأمراض المهنية</option></select></div>
-        <div class="fgrp"><label class="flbl">الموظف المسؤول</label><select class="fc"><option>الكل</option><option>${WI_DATA.users.od_investigator.name}</option></select></div>
-      </div>
-      <div class="facts">
-        <button class="btn btn-primary btn-sm">${ICONS.search} بحث</button>
-        <button class="btn btn-secondary btn-sm">مسح</button>
-      </div>
-    </div>
+    ${renderUnifiedFilterBar({ onSearch: 'updateSearch', onToggleAll: 'toggleAll', isAllVisible: showAllStages })}
     <div class="card">
-      <div class="ttabs">
-        ${[{ key: 'all', label: 'الكل', count: reqs.length }, { key: 'pending', label: 'بانتظار قراري', count: reqs.filter(r => r.status === 'بانتظار اعتماد رئيس قسم التحقيق في الأمراض المهنية').length }, { key: 'investigating', label: 'قيد التحقيق', count: reqs.filter(r => r.status === 'قيد التحقيق — الأمراض المهنية').length }].map(t => `<div class="ttab ${activeTab === t.key ? 'act' : ''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
-      </div>
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم الطلب</th><th>المؤمن عليه</th><th>جهة العمل</th><th>الحالة</th><th>توصية الموظف</th><th>الموظف المسؤول</th><th>التاريخ</th><th></th></tr></thead>
+            <thead><tr><th>رقم الطلب</th><th>المؤمن عليه</th><th>جهة العمل</th><th>الحالة</th><th>الموظف المسؤول</th><th>التاريخ</th><th></th></tr></thead>
             <tbody>
-              ${filtered.map(r => `
-              <tr style="${r.status === 'بانتظار اعتماد رئيس قسم التحقيق في الأمراض المهنية' ? 'background:var(--primary-l)' : ''}">
+              ${filtered.length === 0
+                ? `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text3)">لا توجد نتائج تطابق البحث أو المرحلة الحالية</td></tr>`
+                : filtered.map(r => `
+              <tr style="${r.status==='بانتظار اعتماد رئيس قسم التحقيق في الأمراض المهنية'?'background:var(--primary-l)':''}">
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
-                <td>${r.insured.name}</td>
-                <td style="font-size:11.5px">${r.employer.name.substring(0, 22)}...</td>
+                <td>${r.insured?.name || r.applicant?.name}</td>
+                <td style="font-size:11.5px">${(r.employer?.name||'—').substring(0,22)}...</td>
                 <td>${statusBadge(r.status)}</td>
-                <td>${r.investigation ? `<span class="badge ${r.investigation.employeeRecommendation === 'موافقة' ? 'b-approved' : 'b-rejected'}">${r.investigation.employeeRecommendation}</span>` : '—'}</td>
-                <td style="font-size:11.5px">${r.assignedTo || '—'}</td>
+                <td style="font-size:11.5px">${r.assignedTo||'—'}</td>
                 <td style="font-size:12px">${r.submitDate}</td>
                 <td>
                   <button class="ibtn" onclick="window.location.href='allowances-details.html?id=${r.id}'">${ICONS.eye}</button>
@@ -70,9 +56,13 @@
         </div>
       </div>
     </div>`;
+      if (searchQuery) {
+        const inp = document.getElementById('global-search-input');
+        if (inp) { inp.value = searchQuery; inp.focus(); inp.setSelectionRange(searchQuery.length, searchQuery.length); }
+      }
     }
-    function setTab(t) { activeTab = t; render(); }
+    function updateSearch(val) { searchQuery = val; render(); }
+    function toggleAll() { showAllStages = !showAllStages; render(); }
   </script>
 </body>
-
 </html>

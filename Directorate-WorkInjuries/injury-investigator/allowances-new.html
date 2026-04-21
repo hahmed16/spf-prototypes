@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="fg fg-2" style="margin-bottom:14px">
           <div class="fgrp">
             <label class="flbl">الرقم المدني للعامل <span class="req">*</span></label>
-            <input type="text" class="fc" id="worker-civil" placeholder="10 أرقام" maxlength="10">
+            <input type="text" class="fc" id="worker-civil" placeholder="6-10 أرقام" minlength="6" maxlength="10">
           </div>
           <div class="fgrp">
             <label class="flbl">رقم السجل التجاري لجهة العمل <span class="req">*</span></label>
@@ -163,7 +163,6 @@ function queryWorker() {
       <div class="alert alert-s" style="margin-bottom:14px">${ICONS.check}<span>تم العثور على بيانات المؤمن عليه وجهة العمل</span></div>
       <div class="fg fg-3" style="margin-bottom:0">
         <div class="fgrp"><label class="flbl">اسم العامل</label><div class="fro">${foundWorker.name}</div></div>
-        <div class="fgrp"><label class="flbl">الرقم التأميني</label><div class="fro" style="font-family:monospace">${foundWorker.insurance}</div></div>
         <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">${foundWorker.insuranceStatus}</span></div></div>
         <div class="fgrp"><label class="flbl">جهة العمل</label><div class="fro">${emp.name}</div></div>
         <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${emp.jobTitle}</div></div>

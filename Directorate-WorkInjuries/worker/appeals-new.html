@@ -77,8 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <textarea class="fc" id="appeal-details" rows="5" placeholder="اشرح سبب تظلمك بالتفصيل — الوقائع والأسباب القانونية والمستندات الداعمة..."></textarea>
           </div>
           <div class="fgrp">
-            <label class="flbl">تاريخ العلم بالقرار <span class="req">*</span></label>
-            <input type="date" class="fc" id="knowledge-date">
+            <label class="flbl">تاريخ العلم بالقرار</label>
+            <div class="fro" id="knowledge-date-display"></div>
+            <input type="hidden" id="knowledge-date">
           </div>
           <div class="fgrp">
             <label class="flbl">ملاحظات إضافية</label>
@@ -153,6 +154,8 @@ function selectDecision() {
   document.getElementById('appeal-attachments-card').style.display = '';
   document.getElementById('appeal-submit-btns').style.display = 'flex';
   document.getElementById('appeal-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('knowledge-date-display').textContent = selectedDecision.knowledgeDate;
+  document.getElementById('knowledge-date').value = selectedDecision.knowledgeDate;
   showToast('تم اختيار القرار — يرجى استكمال بيانات التظلم', 'i');
 }
 
