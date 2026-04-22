@@ -91,8 +91,15 @@ function renderDashboard(role) {
     ],
   };
 
+  const _firstPage = {
+    'employer': 'complaints-list', 'insured': 'complaints-list',
+    'monitoring-employee': 'complaints-list', 'monitoring-head': 'complaints-list',
+    'field-inspector': 'visits-periodic-list', 'field-head': 'visits-periodic-list',
+    'inspection-director': 'complaints-list', 'ops-analyst': 'risk-analysis'
+  };
+  const _navTarget = _firstPage[role] || 'dashboard';
   const cards = (kpis[role] || kpis['monitoring-employee']).map(k =>
-    `<div class="scard ${k.color}" onclick="navigateTo('complaints-list')">
+    `<div class="scard ${k.color}" onclick="navigateTo('${_navTarget}')">
       <div class="sc-lbl">${k.lbl}</div>
       <div class="sc-val">${k.val}</div>
       <div class="sc-sub">${k.sub}</div>
@@ -137,12 +144,13 @@ function renderDashboard(role) {
 
 function _recentItems(role) {
   if (role === 'field-inspector' || role === 'field-head') {
+    const _vpg = id => id.includes('MFJ') ? 'visit-surprise-details' : id.includes('MJD') ? 'visit-scheduled-details' : 'visit-periodic-details';
     const rows = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise].slice(0, 4).map(v =>
-      `<tr><td><a href="#" onclick="navigateTo('visits-periodic-list')" class="txp fw7">${v.id}</a></td>
+      `<tr><td><a href="#" onclick="navigateTo('${_vpg(v.id)}','id=${v.id}')" class="txp fw7">${v.id}</a></td>
        <td>${v.employerName}</td><td>${statusBadge(v.status)}</td><td>${v.scheduledDate}</td>
-       <td><div class="df ac g8"><button class="btn btn-primary btn-xs" onclick="navigateTo('visits-periodic-list')">عرض</button></div></td></tr>`).join('');
+       <td><button class="btn btn-primary btn-xs" onclick="navigateTo('${_vpg(v.id)}','id=${v.id}')">عرض</button></td></tr>`).join('');
     return `<div class="card dashboard-current-work"><div class="ph"><h3>${ICONS.clipboard} آخر الزيارات</h3></div>
-      <div class="pb-0">${_tblWrap(['رقم الزيارة','المنشأة','الحالة','التاريخ','إجراء'], rows).replace('card mb0','').replace('<div class="tbl-wrap">','<div class="tbl-wrap">').replace('</div></div>','</div>')}</div></div>`;
+      <div class="tbl-wrap"><table class="dtbl"><thead><tr><th>رقم الزيارة</th><th>المنشأة</th><th>الحالة</th><th>التاريخ</th><th>إجراء</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
   }
   if (role === 'ops-analyst') {
     const rows = INSP_DATA.employers.map(e =>
@@ -154,11 +162,11 @@ function _recentItems(role) {
       <div class="tbl-wrap"><table class="dtbl"><thead><tr><th>المنشأة</th><th>القطاع</th><th>المخاطر</th><th>الامتثال</th><th>آخر زيارة</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
   }
   const rows = INSP_DATA.complaints.slice(0, 4).map(c =>
-    `<tr><td><a href="#" onclick="navigateTo('complaints-list')" class="txp fw7">${c.id}</a></td>
+    `<tr><td><a href="#" onclick="navigateTo('complaint-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
      <td>${c.type}</td><td>${statusBadge(c.status)}</td>
      <td><span class="badge ${_priClass(c.priority)}">${c.priority}</span></td>
      <td>${c.dueDate}</td>
-     <td><button class="btn btn-primary btn-xs" onclick="navigateTo('complaints-list')">عرض</button></td></tr>`).join('');
+     <td><button class="btn btn-primary btn-xs" onclick="navigateTo('complaint-details','id=${c.id}')">عرض</button></td></tr>`).join('');
   return `<div class="card dashboard-current-work"><div class="ph"><h3>${ICONS.inbox} آخر البلاغات</h3></div>
     <div class="tbl-wrap"><table class="dtbl"><thead><tr><th>الرقم</th><th>النوع</th><th>الحالة</th><th>الأولوية</th><th>الموعد</th><th>إجراء</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
@@ -445,7 +453,7 @@ function renderVisitsList(role, type) {
   ]);
 
   const data = INSP_DATA.visits[type] || [];
-  const detailPage = { periodic: 'visit-periodic-details', surprise: 'visit-surprise-details', scheduled: 'visit-scheduled-details' }[type];
+  const detailPage = { periodic: 'visit-periodic-details', surprise: 'visit-surprise-details', scheduled: 'visit-scheduled-details' }[type] || 'visit-periodic-details';
 
   const rows = data.map(v =>
     `<tr>
@@ -567,46 +575,358 @@ function renderVisitNew(role) {
 
 /* ── تحليل بيانات العامل ── */
 function renderWorkerAnalysis(role) {
-  const w = INSP_DATA.workers[0];
-  const rows = INSP_DATA.workers.map(wk =>
-    `<tr>
-      <td class="fw7">${wk.name}</td><td>${wk.civil}</td><td>${wk.employer}</td>
-      <td>${wk.position}</td><td>${wk.salary} ر.ع</td>
-      <td>${wk.riskIndicators.length > 0 ? `<span class="badge b-high">${wk.riskIndicators.length} مؤشر</span>` : '<span class="badge b-low">سليم</span>'}</td>
-      <td><button class="btn btn-primary btn-xs">${ICONS.eye}ملف العامل</button></td>
-    </tr>`).join('');
+  const wid = getParam('worker') || INSP_DATA.workers[0].id;
+  const w = INSP_DATA.workers.find(x => x.id === wid) || INSP_DATA.workers[0];
 
-  return `<div class="pg-head"><div><h1>تحليل بيانات العمال</h1><p>مراجعة بيانات العمال ومؤشرات المخاطر</p></div>
-    <div class="pg-acts"><button class="btn btn-secondary btn-sm">${ICONS.download}تصدير التقرير</button></div></div>
-    ${_filterBar([{label:'بحث بالاسم أو الهوية',ph:'أدخل اسم العامل...'},{label:'المنشأة',type:'select',opts:INSP_DATA.employers.map(e=>e.name)},{label:'مستوى الخطر',type:'select',opts:['مرتفع','متوسط','منخفض']}])}
-    ${_tblWrap(['الاسم','رقم الهوية','جهة العمل','المسمى الوظيفي','الراتب','مؤشر الخطر','إجراء'], rows)}
-    <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.warn}</span>مؤشرات خطر العامل المحدد: ${w.name}</h3></div>
-    <div class="pb">${w.riskIndicators.map(r => `<div class="alert alert-w">${ICONS.warn} ${r}</div>`).join('')}
-      <div class="fg fg-3 mt12">
-        <div class="fgrp"><label class="flbl">رقم الهوية</label><div class="fro">${w.civil}</div></div>
-        <div class="fgrp"><label class="flbl">جهة العمل</label><div class="fro">${w.employer}</div></div>
-        <div class="fgrp"><label class="flbl">التأمين منذ</label><div class="fro">${w.insuredFrom}</div></div>
+  const wComplaints = INSP_DATA.complaints.filter(c => c.workerId === w.id);
+  const wAppeals   = INSP_DATA.appeals.filter(a => a.submittedByName === w.name || (INSP_DATA.complaints.filter(c=>c.workerId===w.id).map(c=>c.id).includes(a.relatedId)));
+  const empVisits  = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled].filter(v => v.employerId === w.employerId);
+  const _vpg = id => id.includes('MFJ') ? 'visit-surprise-details' : id.includes('MJD') ? 'visit-scheduled-details' : 'visit-periodic-details';
+
+  const riskScore = w.riskLevel === 'مرتفع' ? 82 : w.riskLevel === 'متوسط' ? 48 : 15;
+  const riskColor = w.riskLevel === 'مرتفع' ? 'var(--danger)' : w.riskLevel === 'متوسط' ? 'var(--warning)' : 'var(--success)';
+
+  const _insBadge = s => {
+    if (s === 'مدفوع') return 'b-approved';
+    if (s === 'غير مدفوع') return 'b-rejected';
+    if (s === 'مدفوع متأخر') return 'b-returned';
+    return 'b-draft';
+  };
+  const _srvBadge = s => s === 'نشط' ? 'b-approved' : 'b-rejected';
+
+  const workerSelector = `<div class="card" style="margin-bottom:16px"><div class="pb" style="padding:14px 18px">
+    <div class="df ac g8" style="flex-wrap:wrap">
+      <span style="font-size:12.5px;font-weight:700;color:var(--text2)">اختر العامل:</span>
+      ${INSP_DATA.workers.map(wk => `<button class="btn ${wk.id===w.id?'btn-primary':'btn-secondary'} btn-sm" onclick="navigateTo('worker-analysis','worker=${wk.id}')">${wk.name}</button>`).join('')}
+      <div style="margin-right:auto"><button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير التقرير...','i')">${ICONS.download}تصدير ملف العامل</button></div>
+    </div></div></div>`;
+
+  const profileCard = `
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.user}</span>الملف الشخصي</h3>
+      <span class="badge ${_riskClass(w.riskLevel)}">${w.riskLevel} المخاطر</span></div>
+    <div class="pb">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--primary);color:#fff;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${w.name.substring(0,2)}</div>
+        <div><div style="font-size:16px;font-weight:700;color:var(--text)">${w.name}</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">${w.position} — ${w.employer}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">رقم الهوية: ${w.civil}</div></div>
+      </div>
+      <div class="fg fg-3">
+        <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${w.nationality}</div></div>
+        <div class="fgrp"><label class="flbl">الجنس</label><div class="fro">${w.gender}</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${w.dob}</div></div>
+        <div class="fgrp"><label class="flbl">الهاتف</label><div class="fro">${w.phone}</div></div>
+        <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${w.email}</div></div>
+        <div class="fgrp"><label class="flbl">القسم</label><div class="fro">${w.department}</div></div>
+        <div class="fgrp"><label class="flbl">نوع العقد</label><div class="fro">${w.contractType}</div></div>
+        <div class="fgrp"><label class="flbl">الراتب الأساسي</label><div class="fro fw7 txp">${w.salary} ر.ع / شهر</div></div>
+        <div class="fgrp"><label class="flbl">مؤمَّن منذ</label><div class="fro">${w.insuredFrom}</div></div>
+        <div class="fgrp"><label class="flbl">حماية الأجور</label><div class="fro"><span class="badge ${w.wageProtection==='منتظم'?'b-approved':'b-returned'}">${w.wageProtection}</span></div></div>
+        <div class="fgrp"><label class="flbl">التأمين الصحي</label><div class="fro" style="font-size:11.5px">${w.healthInsurance}</div></div>
       </div>
     </div></div>`;
+
+  const riskCard = `
+    <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.warn}</span>تقييم المخاطر</h3></div>
+    <div class="pb">
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:36px;font-weight:800;color:${riskColor}">${riskScore}</div>
+        <div style="font-size:11px;color:var(--text3)">درجة المخاطر من 100</div>
+        <div style="height:10px;background:var(--g100);border-radius:999px;margin:10px 0;overflow:hidden">
+          <div style="height:100%;width:${riskScore}%;background:${riskColor};border-radius:999px"></div></div>
+        <span class="badge ${_riskClass(w.riskLevel)}" style="font-size:12px">${w.riskLevel === 'مرتفع' ? 'خطر مرتفع — يتطلب متابعة عاجلة' : w.riskLevel === 'متوسط' ? 'خطر متوسط — يتطلب مراقبة' : 'خطر منخفض — وضع سليم'}</span>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px">مؤشرات الخطر (${w.riskIndicators.length})</div>
+        ${w.riskIndicators.map(r => `
+          <div style="display:flex;align-items:flex-start;gap:8px;padding:9px 12px;border-radius:var(--rsm);background:${r.severity==='مرتفع'?'var(--danger-l)':r.severity==='متوسط'?'#fff7ed':'var(--success-l)'};border:1px solid ${r.severity==='مرتفع'?'#fca5a5':r.severity==='متوسط'?'#fed7aa':'#86efac'};margin-bottom:8px">
+            <span style="font-size:9px;padding:2px 7px;border-radius:999px;font-weight:700;background:${r.severity==='مرتفع'?'var(--danger)':r.severity==='متوسط'?'var(--warning)':'var(--success)'};color:#fff;white-space:nowrap;margin-top:1px">${r.severity}</span>
+            <span style="font-size:12px;color:var(--text2);line-height:1.6">${r.text}</span>
+          </div>`).join('')}
+      </div>
+    </div></div>`;
+
+  const insHistory = `
+    <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.clock}</span>سجل اشتراكات التأمين الاجتماعي (آخر 6 أشهر)</h3></div>
+    <div class="tbl-wrap"><table class="dtbl">
+      <thead><tr><th>الشهر</th><th>المبلغ المستحق</th><th>الحالة</th><th>تاريخ السداد</th></tr></thead>
+      <tbody>${w.insuranceHistory.map(h => `
+        <tr>
+          <td class="fw7">${h.month}</td>
+          <td>${h.amount}</td>
+          <td><span class="badge ${_insBadge(h.status)}">${h.status}</span></td>
+          <td>${h.paidDate || '<span class="badge b-rejected">لم يُسدَّد</span>'}</td>
+        </tr>`).join('')}
+      </tbody></table></div></div>`;
+
+  const empHistory = `
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.building}</span>سجل التوظيف والتأمين</h3></div>
+    <div class="tbl-wrap"><table class="dtbl">
+      <thead><tr><th>جهة العمل</th><th>المسمى الوظيفي</th><th>من</th><th>إلى</th><th>سبب الانتهاء</th><th>الحالة</th></tr></thead>
+      <tbody>${w.employmentHistory.map(h => `
+        <tr>
+          <td class="fw7">${h.employer}</td>
+          <td>${h.position}</td>
+          <td>${h.from}</td>
+          <td>${h.to}</td>
+          <td>${h.reason || '<span class="tx3">—</span>'}</td>
+          <td><span class="badge ${_srvBadge(h.status)}">${h.status}</span></td>
+        </tr>`).join('')}
+      </tbody></table></div></div>`;
+
+  const complaintsSection = wComplaints.length ? `
+    <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.inbox}</span>البلاغات المرتبطة بالعامل (${wComplaints.length})</h3></div>
+    <div class="tbl-wrap"><table class="dtbl">
+      <thead><tr><th>رقم البلاغ</th><th>النوع</th><th>المنشأة</th><th>الحالة</th><th>الأولوية</th><th>تاريخ التقديم</th><th>إجراء</th></tr></thead>
+      <tbody>${wComplaints.map(c => `
+        <tr>
+          <td><a href="#" onclick="navigateTo('complaint-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
+          <td>${c.type}<br><span class="fs11 tx3">${c.subtype}</span></td>
+          <td>${c.employerName}</td>
+          <td>${statusBadge(c.status)}</td>
+          <td><span class="badge ${_priClass(c.priority)}">${c.priority}</span></td>
+          <td>${c.submitDate}</td>
+          <td><button class="btn btn-primary btn-xs" onclick="navigateTo('complaint-details','id=${c.id}')">${ICONS.eye}عرض</button></td>
+        </tr>`).join('')}
+      </tbody></table></div></div>` :
+    `<div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.inbox}</span>البلاغات المرتبطة بالعامل</h3></div>
+    <div class="pb"><div class="empty-st" style="padding:24px 0">${ICONS.check}<h4>لا توجد بلاغات مرتبطة بهذا العامل</h4></div></div></div>`;
+
+  const visitsSection = empVisits.length ? `
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clipboard}</span>الزيارات التفتيشية للمنشأة (${empVisits.length})</h3>
+      <span style="font-size:11px;color:var(--text3)">جميع الزيارات لمنشأة ${w.employer}</span></div>
+    <div class="tbl-wrap"><table class="dtbl">
+      <thead><tr><th>رقم الزيارة</th><th>النوع</th><th>المفتش</th><th>الحالة</th><th>التاريخ المجدول</th><th>المخالفات</th><th>إجراء</th></tr></thead>
+      <tbody>${empVisits.map(v => `
+        <tr>
+          <td><a href="#" onclick="navigateTo('${_vpg(v.id)}','id=${v.id}')" class="txp fw7">${v.id}</a></td>
+          <td>${v.id.includes('MFJ')?'مفاجئة':v.id.includes('MJD')?'مجدولة':'دورية'}</td>
+          <td>${v.inspectorName}</td>
+          <td>${statusBadge(v.status)}</td>
+          <td>${v.scheduledDate}</td>
+          <td>${v.findings ? `<span class="badge b-returned">${v.findings.violations.length} مخالفة</span>` : '<span class="badge b-approved">لا مخالفات</span>'}</td>
+          <td><button class="btn btn-primary btn-xs" onclick="navigateTo('${_vpg(v.id)}','id=${v.id}')">${ICONS.eye}عرض</button></td>
+        </tr>`).join('')}
+      </tbody></table></div></div>` : '';
+
+  const appealsSection = wAppeals.length ? `
+    <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.file}</span>التظلمات المرتبطة (${wAppeals.length})</h3></div>
+    <div class="tbl-wrap"><table class="dtbl">
+      <thead><tr><th>رقم التظلم</th><th>النوع</th><th>البند المرتبط</th><th>الحالة</th><th>تاريخ التقديم</th><th>إجراء</th></tr></thead>
+      <tbody>${wAppeals.map(a => `
+        <tr>
+          <td><a href="#" onclick="navigateTo('appeal-details','id=${a.id}')" class="txp fw7">${a.id}</a></td>
+          <td>${a.type}</td><td class="fw7">${a.relatedId}</td>
+          <td>${statusBadge(a.status)}</td><td>${a.submitDate}</td>
+          <td><button class="btn btn-primary btn-xs" onclick="navigateTo('appeal-details','id=${a.id}')">${ICONS.eye}عرض</button></td>
+        </tr>`).join('')}
+      </tbody></table></div></div>` : '';
+
+  return `<div class="pg-head"><div><h1>تحليل بيانات العمال</h1><p>ملف شامل للعامل مع كامل السجلات والمؤشرات المرتبطة</p></div>
+    <div class="pg-acts"><button class="btn btn-secondary btn-sm">${ICONS.download}تصدير</button></div></div>
+    ${workerSelector}
+    <div class="dashboard-auto-grid">
+      <div>${profileCard}</div>
+      <div>${riskCard}</div>
+    </div>
+    ${insHistory}
+    ${empHistory}
+    ${complaintsSection}
+    ${visitsSection}
+    ${appealsSection}`;
 }
 
 /* ── تحليل بيانات صاحب العمل ── */
 function renderEmployerAnalysis(role) {
-  const rows = INSP_DATA.employers.map(e =>
-    `<tr>
-      <td class="fw7">${e.name}</td><td>${e.sector}</td>
-      <td>${e.employees}</td>
-      <td><span class="badge ${_riskClass(e.riskLevel)}">${e.riskLevel}</span></td>
-      <td><div style="display:flex;align-items:center;gap:8px"><div class="progress-bar-wrap" style="flex:1;margin:0"><div class="progress-bar-fill" style="width:${e.complianceScore}%;background:${_compColor(e.complianceScore)}"></div></div><span class="fs11">${e.complianceScore}%</span></div></td>
-      <td>${e.lastVisit}</td>
-      <td><span class="badge ${e.contributions.status==='منتظم'?'b-approved':'b-returned'}">${e.contributions.status}</span></td>
-      <td><button class="btn btn-primary btn-xs">${ICONS.eye}عرض الملف</button></td>
-    </tr>`).join('');
+  const eid = getParam('employer') || INSP_DATA.employers[0].id;
+  const e = INSP_DATA.employers.find(x => x.id === eid) || INSP_DATA.employers[0];
 
-  return `<div class="pg-head"><div><h1>تحليل بيانات أصحاب العمل</h1><p>مراجعة بيانات المنشآت ومستويات الامتثال</p></div>
+  const eComplaints = INSP_DATA.complaints.filter(c => c.employerId === e.id);
+  const eAppeals   = INSP_DATA.appeals.filter(a => a.employerId === e.id);
+  const eBanCases  = INSP_DATA.banCases.filter(b => b.employerId === e.id);
+  const eWorkers   = INSP_DATA.workers.filter(w => w.employerId === e.id);
+  const eVisits    = [...INSP_DATA.visits.periodic.filter(v=>v.employerId===e.id),
+                      ...INSP_DATA.visits.surprise.filter(v=>v.employerId===e.id),
+                      ...INSP_DATA.visits.scheduled.filter(v=>v.employerId===e.id)];
+  const _vpg = id => id.includes('MFJ') ? 'visit-surprise-details' : id.includes('MJD') ? 'visit-scheduled-details' : 'visit-periodic-details';
+  const _csBadge = s => s==='منتظم'?'b-approved':s==='متأخر'?'b-rejected':'b-returned';
+  const _vBadge  = s => s==='مرتفع'?'b-rejected':s==='متوسط'?'b-returned':'b-approved';
+
+  const employerSelector = `<div class="card" style="margin-bottom:16px"><div class="pb" style="padding:14px 18px">
+    <div class="df ac g8" style="flex-wrap:wrap">
+      <span style="font-size:12.5px;font-weight:700;color:var(--text2)">اختر المنشأة:</span>
+      ${INSP_DATA.employers.map(em => `<button class="btn ${em.id===e.id?'btn-primary':'btn-secondary'} btn-sm" onclick="navigateTo('employer-analysis','employer=${em.id}')">${em.name.split(' ').slice(0,3).join(' ')}</button>`).join('')}
+      <div style="margin-right:auto"><button class="btn btn-secondary btn-sm">${ICONS.download}تصدير ملف المنشأة</button></div>
+    </div></div></div>`;
+
+  const kpis = `<div class="stats-grid">
+    <div class="scard p"><div class="sc-lbl">إجمالي البلاغات</div><div class="sc-val">${eComplaints.length}</div><div class="sc-sub">${eComplaints.filter(c=>!c.status.includes('إغلاق')&&!c.status.includes('قرار')).length} مفتوح</div></div>
+    <div class="scard i"><div class="sc-lbl">إجمالي الزيارات</div><div class="sc-val">${eVisits.length}</div><div class="sc-sub">${eVisits.filter(v=>v.findings).length} كشفت مخالفات</div></div>
+    <div class="scard ${e.contributions.arrears>0?'d':'s'}"><div class="sc-lbl">المتأخرات التأمينية</div><div class="sc-val">${e.contributions.arrears>0?e.contributions.arrears.toLocaleString()+' ر.ع':'لا يوجد'}</div><div class="sc-sub">${e.contributions.status}</div></div>
+    <div class="scard ${eBanCases.filter(b=>b.status.includes('سارٍ')).length?'d':'s'}"><div class="sc-lbl">حالات الحظر</div><div class="sc-val">${eBanCases.length}</div><div class="sc-sub">${eBanCases.filter(b=>b.status.includes('سارٍ')).length} نشط</div></div>
+  </div>`;
+
+  const profileCard = `
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.building}</span>ملف المنشأة</h3>
+      <span class="badge ${_riskClass(e.riskLevel)}">${e.riskLevel} المخاطر</span></div>
+    <div class="pb"><div class="fg fg-3">
+      <div class="fgrp"><label class="flbl">اسم المنشأة</label><div class="fro fw7">${e.name}</div></div>
+      <div class="fgrp"><label class="flbl">السجل التجاري</label><div class="fro">${e.crn}</div></div>
+      <div class="fgrp"><label class="flbl">القطاع</label><div class="fro">${e.sector}</div></div>
+      <div class="fgrp"><label class="flbl">الموقع</label><div class="fro">${e.location}</div></div>
+      <div class="fgrp"><label class="flbl">تاريخ التسجيل</label><div class="fro">${e.registrationDate}</div></div>
+      <div class="fgrp"><label class="flbl">عدد العمال</label><div class="fro fw7">${e.employees} عامل</div></div>
+      <div class="fgrp"><label class="flbl">حالة المنشأة</label><div class="fro"><span class="badge b-approved">${e.status}</span></div></div>
+      <div class="fgrp"><label class="flbl">آخر زيارة تفتيشية</label><div class="fro">${e.lastVisit}</div></div>
+      <div class="fgrp"><label class="flbl">حالة الاشتراكات</label><div class="fro"><span class="badge ${_csBadge(e.contributions.status)}">${e.contributions.status}</span></div></div>
+    </div></div></div>`;
+
+  const complianceCard = `
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.check}</span>مستوى الامتثال والمخاطر</h3></div>
+    <div class="pb">
+      <div style="text-align:center;margin-bottom:18px">
+        <div style="font-size:42px;font-weight:800;color:${_compColor(e.complianceScore)}">${e.complianceScore}%</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px">درجة الامتثال الإجمالية</div>
+        <div style="height:14px;background:var(--g100);border-radius:999px;overflow:hidden;margin-bottom:12px">
+          <div style="height:100%;width:${e.complianceScore}%;background:${_compColor(e.complianceScore)};border-radius:999px"></div></div>
+        <span class="badge ${e.complianceScore>=85?'b-approved':e.complianceScore>=70?'b-returned':'b-rejected'}">${e.complianceScore>=85?'امتثال عالٍ':e.complianceScore>=70?'امتثال متوسط':'امتثال ضعيف — يستوجب تدخلاً'}</span>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px">
+        ${[
+          { lbl:'البلاغات المفتوحة', val: eComplaints.filter(c=>!c.status.includes('إغلاق')&&!c.status.includes('قرار')).length, icon: '🔴', threshold: 2 },
+          { lbl:'مخالفات مكتشفة', val: e.violations.length, icon: '⚠️', threshold: 3 },
+          { lbl:'زيارات بمخالفات', val: eVisits.filter(v=>v.findings).length, icon: '📋', threshold: 2 },
+          { lbl:'متأخرات الاشتراكات (ر.ع)', val: e.contributions.arrears, icon: '💰', threshold: 1000 },
+        ].map(m=>`
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+            <span style="font-size:12px;color:var(--text2)">${m.lbl}</span>
+            <span style="font-size:13px;font-weight:700;color:${m.val>m.threshold?'var(--danger)':'var(--success)'}">${m.val}</span>
+          </div>`).join('')}
+      </div>
+    </div></div>`;
+
+  const workersCard = eWorkers.length ? `
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.user}</span>العمال المسجلون في المنشأة (${eWorkers.length})</h3></div>
+    <div class="tbl-wrap"><table class="dtbl">
+      <thead><tr><th>الاسم</th><th>رقم الهوية</th><th>المسمى الوظيفي</th><th>الراتب</th><th>حماية الأجور</th><th>التأمين الصحي</th><th>مؤشرات الخطر</th><th>إجراء</th></tr></thead>
+      <tbody>${eWorkers.map(wk=>`
+        <tr>
+          <td class="fw7">${wk.name}</td>
+          <td>${wk.civil}</td>
+          <td>${wk.position}</td>
+          <td>${wk.salary} ر.ع</td>
+          <td><span class="badge ${wk.wageProtection==='منتظم'?'b-approved':'b-returned'}">${wk.wageProtection}</span></td>
+          <td style="font-size:11px">${wk.healthInsurance.split('—')[0].trim()}</td>
+          <td>${wk.riskIndicators.length?`<span class="badge b-returned">${wk.riskIndicators.length} مؤشر</span>`:'<span class="badge b-approved">سليم</span>'}</td>
+          <td><button class="btn btn-primary btn-xs" onclick="navigateTo('worker-analysis','worker=${wk.id}')">${ICONS.eye}الملف</button></td>
+        </tr>`).join('')}
+      </tbody></table></div></div>` : '';
+
+  const violationsCard = e.violations.length ? `
+    <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.warn}</span>سجل المخالفات المكتشفة (${e.violations.length})</h3></div>
+    <div class="tbl-wrap"><table class="dtbl">
+      <thead><tr><th>التاريخ</th><th>نوع المخالفة</th><th>الخطورة</th><th>الزيارة المرجعية</th><th>الحالة</th></tr></thead>
+      <tbody>${e.violations.map(v=>`
+        <tr>
+          <td>${v.date}</td>
+          <td>${v.type}</td>
+          <td><span class="badge ${_vBadge(v.severity)}">${v.severity}</span></td>
+          <td><a href="#" onclick="navigateTo('${_vpg(v.visit)}','id=${v.visit}')" class="txp fw7">${v.visit}</a></td>
+          <td><span class="badge ${v.status==='منجز'?'b-approved':v.status==='معلق'?'b-rejected':'b-returned'}">${v.status}</span></td>
+        </tr>`).join('')}
+      </tbody></table></div></div>` : '';
+
+  const contribCard = `
+    <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.clock}</span>سجل الاشتراكات التأمينية (آخر 6 أشهر)</h3>
+      ${e.contributions.arrears>0?`<span class="badge b-rejected">متأخرات: ${e.contributions.arrears.toLocaleString()} ر.ع</span>`:''}
+    </div>
+    <div class="tbl-wrap"><table class="dtbl">
+      <thead><tr><th>الشهر</th><th>عدد العمال</th><th>المبلغ</th><th>الحالة</th><th>تاريخ السداد</th></tr></thead>
+      <tbody>${e.contributionHistory.map(h=>`
+        <tr>
+          <td class="fw7">${h.month}</td>
+          <td>${h.workers}</td>
+          <td>${h.amount}</td>
+          <td><span class="badge ${h.status==='منتظم'?'b-approved':h.status==='غير مدفوع'?'b-rejected':'b-returned'}">${h.status}</span></td>
+          <td>${h.paidDate||'<span class="badge b-rejected">لم يُسدَّد</span>'}</td>
+        </tr>`).join('')}
+      </tbody></table></div></div>`;
+
+  const complaintsCard = eComplaints.length ? `
+    <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.inbox}</span>البلاغات المرتبطة بالمنشأة (${eComplaints.length})</h3></div>
+    <div class="tbl-wrap"><table class="dtbl">
+      <thead><tr><th>رقم البلاغ</th><th>النوع</th><th>العامل المعني</th><th>الحالة</th><th>الأولوية</th><th>القناة</th><th>تاريخ التقديم</th><th>إجراء</th></tr></thead>
+      <tbody>${eComplaints.map(c=>`
+        <tr>
+          <td><a href="#" onclick="navigateTo('complaint-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
+          <td>${c.type}<br><span class="fs11 tx3">${c.subtype}</span></td>
+          <td>${c.workerName||'<span class="tx3">غير محدد</span>'}</td>
+          <td>${statusBadge(c.status)}</td>
+          <td><span class="badge ${_priClass(c.priority)}">${c.priority}</span></td>
+          <td style="font-size:11px">${c.channel}</td>
+          <td>${c.submitDate}</td>
+          <td><button class="btn btn-primary btn-xs" onclick="navigateTo('complaint-details','id=${c.id}')">${ICONS.eye}عرض</button></td>
+        </tr>`).join('')}
+      </tbody></table></div></div>` : '';
+
+  const visitsCard = eVisits.length ? `
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clipboard}</span>الزيارات التفتيشية (${eVisits.length})</h3></div>
+    <div class="tbl-wrap"><table class="dtbl">
+      <thead><tr><th>رقم الزيارة</th><th>النوع</th><th>المفتش</th><th>الحالة</th><th>التاريخ</th><th>المخالفات</th><th>المحضر</th><th>إجراء</th></tr></thead>
+      <tbody>${eVisits.map(v=>`
+        <tr>
+          <td><a href="#" onclick="navigateTo('${_vpg(v.id)}','id=${v.id}')" class="txp fw7">${v.id}</a></td>
+          <td>${v.id.includes('MFJ')?'مفاجئة':v.id.includes('MJD')?'مجدولة':'دورية'}</td>
+          <td>${v.inspectorName}</td>
+          <td>${statusBadge(v.status)}</td>
+          <td>${v.actualDate||v.scheduledDate}</td>
+          <td>${v.findings?`<span class="badge b-returned">${v.findings.violations.length}</span>`:'<span class="badge b-approved">0</span>'}</td>
+          <td>${v.report?.approved?'<span class="badge b-approved">معتمد</span>':'<span class="badge b-draft">—</span>'}</td>
+          <td><button class="btn btn-primary btn-xs" onclick="navigateTo('${_vpg(v.id)}','id=${v.id}')">${ICONS.eye}عرض</button></td>
+        </tr>`).join('')}
+      </tbody></table></div></div>` : '';
+
+  const appealsCard = eAppeals.length ? `
+    <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.file}</span>التظلمات المقدمة من المنشأة (${eAppeals.length})</h3></div>
+    <div class="tbl-wrap"><table class="dtbl">
+      <thead><tr><th>رقم التظلم</th><th>النوع</th><th>البند المرتبط</th><th>الحالة</th><th>تاريخ التقديم</th><th>إجراء</th></tr></thead>
+      <tbody>${eAppeals.map(a=>`
+        <tr>
+          <td><a href="#" onclick="navigateTo('appeal-details','id=${a.id}')" class="txp fw7">${a.id}</a></td>
+          <td>${a.type}</td><td class="fw7">${a.relatedId}</td>
+          <td>${statusBadge(a.status)}</td><td>${a.submitDate}</td>
+          <td><button class="btn btn-primary btn-xs" onclick="navigateTo('appeal-details','id=${a.id}')">${ICONS.eye}عرض</button></td>
+        </tr>`).join('')}
+      </tbody></table></div></div>` : '';
+
+  const banCard = eBanCases.length ? `
+    <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.lock}</span>حالات الحظر (${eBanCases.length})</h3></div>
+    <div class="tbl-wrap"><table class="dtbl">
+      <thead><tr><th>رقم الحظر</th><th>النوع</th><th>تاريخ الإصدار</th><th>الحالة</th><th>تاريخ الرفع</th><th>إجراء</th></tr></thead>
+      <tbody>${eBanCases.map(b=>`
+        <tr>
+          <td><a href="#" onclick="navigateTo('ban-case-details','id=${b.id}')" class="txp fw7">${b.id}</a></td>
+          <td>${b.type}</td><td>${b.issuedDate}</td>
+          <td>${statusBadge(b.status)}</td><td>${b.liftedDate||'<span class="tx3">—</span>'}</td>
+          <td><button class="btn btn-primary btn-xs" onclick="navigateTo('ban-case-details','id=${b.id}')">${ICONS.eye}عرض</button></td>
+        </tr>`).join('')}
+      </tbody></table></div></div>` : '';
+
+  return `<div class="pg-head"><div><h1>تحليل بيانات أصحاب العمل</h1><p>ملف شامل للمنشأة مع كامل السجلات والمؤشرات المرتبطة</p></div>
     <div class="pg-acts"><button class="btn btn-secondary btn-sm">${ICONS.download}تصدير</button></div></div>
-    ${_filterBar([{label:'بحث بالاسم أو السجل التجاري',ph:'أدخل اسم المنشأة...'},{label:'القطاع',type:'select',opts:['تقنية المعلومات','التصنيع','البناء']},{label:'مستوى الخطر',type:'select',opts:['مرتفع','متوسط','منخفض']},{label:'حالة الاشتراكات',type:'select',opts:['منتظم','متأخر','متأخر جزئياً']}])}
-    ${_tblWrap(['المنشأة','القطاع','عدد العمال','الخطر','الامتثال','آخر زيارة','الاشتراكات','إجراء'], rows)}`;
+    ${employerSelector}
+    ${kpis}
+    <div class="dashboard-auto-grid">
+      <div>${profileCard}</div>
+      <div>${complianceCard}</div>
+    </div>
+    ${workersCard}
+    ${violationsCard}
+    ${contribCard}
+    ${complaintsCard}
+    ${visitsCard}
+    ${appealsCard}
+    ${banCard}`;
 }
 
 /* ── إعادة التخصيص (monitoring-head) ── */
@@ -680,7 +1000,7 @@ function renderRecordsReview(role) {
         <td>${v.id.includes('DWR')?'دورية':v.id.includes('MFJ')?'مفاجئة':'مجدولة'}</td>
         <td>${v.actualDate || v.scheduledDate}</td>
         <td><div class="df ac g8">
-          <button class="btn btn-primary btn-xs" onclick="navigateTo('visit-periodic-details','id=${v.id}')">${ICONS.eye}مراجعة</button>
+          <button class="btn btn-primary btn-xs" onclick="navigateTo('${v.id.includes('MFJ')?'visit-surprise-details':v.id.includes('MJD')?'visit-scheduled-details':'visit-periodic-details'}','id=${v.id}')">${ICONS.eye}مراجعة</button>
           <button class="btn btn-accent btn-xs" onclick="showToast('تم اعتماد المحضر','s')">اعتماد</button>
           <button class="btn btn-warning btn-xs" onclick="showToast('تم إعادة للمفتش','w')">إعادة</button>
         </div></td></tr>`).join(''))}`;
@@ -746,7 +1066,8 @@ function renderInspectionPlanDetails(role) {
   const id = getParam('id') || 'KHT-2025-Q1';
   const p = INSP_DATA.inspectionPlans.find(x => x.id === id) || INSP_DATA.inspectionPlans[0];
 
-  return `<div class="pg-head"><div><h1>${p.id}</h1><p>${p.name}</p></div>
+  const pct = p.targetCount ? Math.round(p.completedCount / p.targetCount * 100) : 0;
+  return `<div class="pg-head"><div><h1>${p.id}</h1><p>${p.title}</p></div>
     <div class="pg-acts">${statusBadge(p.status)}<button class="btn btn-secondary btn-sm" onclick="navigateTo('inspection-plans-list')">${ICONS.arrow_right}رجوع</button>
       ${p.status !== 'مكتملة' ? `<button class="btn btn-accent" onclick="showToast('تم اعتماد الخطة','s')">${ICONS.check}اعتماد</button>` : ''}</div></div>
   <div class="dashboard-auto-grid">
@@ -754,6 +1075,7 @@ function renderInspectionPlanDetails(role) {
       <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>تفاصيل الخطة</h3></div>
       <div class="pb"><div class="fg fg-2">
         <div class="fgrp"><label class="flbl">رقم الخطة</label><div class="fro fw7">${p.id}</div></div>
+        <div class="fgrp"><label class="flbl">اسم الخطة</label><div class="fro">${p.title}</div></div>
         <div class="fgrp"><label class="flbl">الفترة</label><div class="fro">${p.period}</div></div>
         <div class="fgrp"><label class="flbl">إجمالي المنشآت المستهدفة</label><div class="fro">${p.targetCount}</div></div>
         <div class="fgrp"><label class="flbl">الزيارات المنجزة</label><div class="fro txp fw7">${p.completedCount}</div></div>
@@ -764,8 +1086,8 @@ function renderInspectionPlanDetails(role) {
     <div>
       <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.chart}</span>التقدم</h3></div>
       <div class="pb">
-        <div class="progress-bar-wrap" style="height:14px;margin-bottom:8px"><div class="progress-bar-fill" style="width:${p.completionRate}%"></div></div>
-        <p class="fs11 tx3 mt8">${p.completionRate}% من الزيارات مكتملة</p>
+        <div class="progress-bar-wrap" style="height:14px;margin-bottom:8px"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+        <p class="fs11 tx3 mt8">${pct}% من الزيارات مكتملة</p>
       </div></div>
     </div>
   </div>`;
@@ -822,61 +1144,269 @@ function renderBanCaseDetails(role) {
 
 /* ── تحليل المخاطر (ops-analyst) ── */
 function renderRiskAnalysis(role) {
-  return `<div class="pg-head"><div><h1>تحليل المخاطر</h1><p>تقييم مستويات المخاطر للمنشآت واستخراج التوصيات</p></div>
-    <div class="pg-acts"><button class="btn btn-primary btn-sm">${ICONS.download}تصدير تقرير المخاطر</button></div></div>
-  <div class="dashboard-insights">
+  const _score = e => {
+    let s = 0;
+    const c = INSP_DATA.complaints.filter(x=>x.employerId===e.id&&!x.status.includes('إغلاق')&&!x.status.includes('قرار')).length;
+    const v = e.violations ? e.violations.length : 0;
+    const b = INSP_DATA.banCases.filter(x=>x.employerId===e.id&&x.status.includes('سارٍ')).length;
+    s += c * 10 + v * 8 + (100 - e.complianceScore) * 0.8;
+    if (e.contributions.arrears > 5000) s += 20;
+    else if (e.contributions.arrears > 0) s += 10;
+    if (b > 0) s += 25;
+    return Math.min(100, Math.round(s));
+  };
+  const scored = INSP_DATA.employers.map(e=>({...e, riskScore:_score(e)})).sort((a,b)=>b.riskScore-a.riskScore);
+  const allViolations = INSP_DATA.employers.flatMap(e=>e.violations||[]);
+  const allComplaints = INSP_DATA.complaints;
+  const _vBadge = s => s==='مرتفع'?'b-rejected':s==='متوسط'?'b-returned':'b-approved';
+
+  const summaryKpis = `<div class="stats-grid">
+    <div class="scard d"><div class="sc-lbl">منشآت عالية الخطر</div><div class="sc-val">${scored.filter(e=>e.riskLevel==='مرتفع').length}</div><div class="sc-sub">تستوجب أولوية</div></div>
+    <div class="scard w"><div class="sc-lbl">إجمالي المخالفات المرصودة</div><div class="sc-val">${allViolations.length}</div><div class="sc-sub">${allViolations.filter(v=>v.status==='معلق').length} معلق</div></div>
+    <div class="scard p"><div class="sc-lbl">بلاغات مفتوحة</div><div class="sc-val">${allComplaints.filter(c=>!c.status.includes('إغلاق')&&!c.status.includes('قرار')).length}</div><div class="sc-sub">من ${allComplaints.length} إجمالاً</div></div>
+    <div class="scard i"><div class="sc-lbl">عمال في بيئة خطرة</div><div class="sc-val">${INSP_DATA.workers.filter(w=>w.riskLevel==='مرتفع').length}</div><div class="sc-sub">من ${INSP_DATA.workers.length} عامل</div></div>
+  </div>`;
+
+  const charts = `<div class="dashboard-insights">
     <div class="chart-card">
-      <div class="chart-head"><h3>توزيع المخاطر</h3></div>
+      <div class="chart-head"><h3>درجة المخاطر المحسوبة</h3><span>100 = أعلى خطر</span></div>
       <div class="chart-bars">
-        ${[['مرتفع',1,33],['متوسط',1,33],['منخفض',1,33]].map(([l,v,p])=>
-          `<div class="chart-bar-row"><div class="chart-bar-meta"><span>${l}</span><strong>${v} منشأة</strong></div>
-          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${p}%;background:${l==='مرتفع'?'var(--danger)':l==='متوسط'?'var(--warning)':'var(--success)'}"></div></div></div>`).join('')}
+        ${scored.map(e=>`<div class="chart-bar-row">
+          <div class="chart-bar-meta"><span>${e.name.split(' ').slice(0,3).join(' ')}</span><strong>${e.riskScore}</strong></div>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${e.riskScore}%;background:${_compColor(100-e.riskScore)}"></div></div>
+        </div>`).join('')}
       </div>
     </div>
     <div class="chart-card">
-      <div class="chart-head"><h3>مؤشرات الخطر الرئيسية</h3></div>
+      <div class="chart-head"><h3>توزيع أنواع المخالفات</h3><span>جميع المنشآت</span></div>
       <div class="chart-bars">
-        ${[['مخالفات سلامة',3,75],['تأخر اشتراكات',2,50],['غياب تسجيل',1,25],['فصل تعسفي',1,25]].map(([l,v,p])=>
-          `<div class="chart-bar-row"><div class="chart-bar-meta"><span>${l}</span><strong>${v}</strong></div>
-          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${p}%;background:var(--danger)"></div></div></div>`).join('')}
+        ${[
+          ['مخالفات السلامة المهنية', allViolations.filter(v=>v.type.includes('سلامة')).length],
+          ['تأخر الاشتراكات',         allViolations.filter(v=>v.type.includes('اشتراك')).length],
+          ['عمالة غير نظامية',        allViolations.filter(v=>v.type.includes('عمالة')).length],
+          ['مخالفات الرواتب',         allViolations.filter(v=>v.type.includes('رواتب')||v.type.includes('رواتب')).length],
+          ['مخالفات عقود/ساعات عمل', allViolations.filter(v=>v.type.includes('ساعات')||v.type.includes('تسجيل')).length],
+        ].map(([l,v])=>{const mx=allViolations.length||1;return`<div class="chart-bar-row">
+          <div class="chart-bar-meta"><span>${l}</span><strong>${v}</strong></div>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(v/mx*100)}%;background:var(--danger)"></div></div>
+        </div>`}).join('')}
       </div>
     </div>
     <div class="chart-card">
-      <div class="chart-head"><h3>درجات الامتثال</h3></div>
+      <div class="chart-head"><h3>درجات الامتثال</h3><span>المنشآت المسجلة</span></div>
       <div class="chart-bars">
-        ${INSP_DATA.employers.map(e=>`<div class="chart-bar-row"><div class="chart-bar-meta"><span>${e.name.split(' ').slice(0,3).join(' ')}</span><strong>${e.complianceScore}%</strong></div>
-          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${e.complianceScore}%;background:${_compColor(e.complianceScore)}"></div></div></div>`).join('')}
+        ${INSP_DATA.employers.map(e=>`<div class="chart-bar-row">
+          <div class="chart-bar-meta"><span>${e.name.split(' ').slice(0,3).join(' ')}</span><strong>${e.complianceScore}%</strong></div>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${e.complianceScore}%;background:${_compColor(e.complianceScore)}"></div></div>
+        </div>`).join('')}
       </div>
     </div>
-  </div>
-  <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.warn}</span>تقييم المخاطر التفصيلي</h3></div>
-  <div class="tbl-wrap"><table class="dtbl"><thead><tr><th>المنشأة</th><th>القطاع</th><th>درجة المخاطر</th><th>الامتثال</th><th>عوامل الخطر</th><th>التوصية</th></tr></thead>
-  <tbody>${INSP_DATA.employers.map(e=>`<tr>
-    <td class="fw7">${e.name}</td><td>${e.sector}</td>
-    <td><span class="badge ${_riskClass(e.riskLevel)}">${e.riskLevel}</span></td>
-    <td><span style="color:${_compColor(e.complianceScore)};font-weight:700">${e.complianceScore}%</span></td>
-    <td>${INSP_DATA.workers.filter(w=>w.employerId===e.id).flatMap(w=>w.riskIndicators).slice(0,2).join('، ') || 'لا توجد مؤشرات بارزة'}</td>
-    <td>${e.riskLevel==='مرتفع'?'زيارة عاجلة':'زيارة دورية'}</td>
-  </tr>`).join('')}</tbody></table></div></div>`;
+  </div>`;
+
+  const detailTable = `<div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.shield}</span>مصفوفة المخاطر التفصيلية</h3>
+    <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير مصفوفة المخاطر...','i')">${ICONS.download}تصدير</button></div>
+  <div class="tbl-wrap"><table class="dtbl">
+    <thead><tr>
+      <th>المنشأة</th><th>درجة الخطر</th><th>الامتثال</th><th>بلاغات مفتوحة</th><th>مخالفات معلقة</th><th>متأخرات (ر.ع)</th><th>حظر نشط</th><th>عمال في خطر</th><th>التوصية الأولوية</th><th>إجراء</th>
+    </tr></thead>
+    <tbody>${scored.map(e=>{
+      const openC = INSP_DATA.complaints.filter(c=>c.employerId===e.id&&!c.status.includes('إغلاق')&&!c.status.includes('قرار')).length;
+      const pendV = (e.violations||[]).filter(v=>v.status==='معلق').length;
+      const activeBan = INSP_DATA.banCases.filter(b=>b.employerId===e.id&&b.status.includes('سارٍ')).length;
+      const atRiskW = INSP_DATA.workers.filter(w=>w.employerId===e.id&&w.riskLevel==='مرتفع').length;
+      const rec = e.riskScore>=70?'زيارة مفاجئة عاجلة':e.riskScore>=40?'جدولة زيارة دورية':'متابعة دورية منتظمة';
+      const recCls = e.riskScore>=70?'b-rejected':e.riskScore>=40?'b-returned':'b-approved';
+      return `<tr>
+        <td><a href="#" onclick="navigateTo('employer-analysis','employer=${e.id}')" class="txp fw7">${e.name.split(' ').slice(0,3).join(' ')}</a></td>
+        <td><div style="display:flex;align-items:center;gap:6px">
+          <div style="height:8px;width:${e.riskScore}px;max-width:60px;background:${_compColor(100-e.riskScore)};border-radius:999px"></div>
+          <strong style="color:${_compColor(100-e.riskScore)}">${e.riskScore}</strong></div></td>
+        <td><span style="font-weight:700;color:${_compColor(e.complianceScore)}">${e.complianceScore}%</span></td>
+        <td><span class="badge ${openC>0?'b-returned':'b-approved'}">${openC}</span></td>
+        <td><span class="badge ${pendV>0?'b-rejected':'b-approved'}">${pendV}</span></td>
+        <td><span class="badge ${e.contributions.arrears>0?'b-rejected':'b-approved'}">${e.contributions.arrears>0?e.contributions.arrears.toLocaleString():'0'}</span></td>
+        <td><span class="badge ${activeBan?'b-rejected':'b-approved'}">${activeBan?'نعم':'لا'}</span></td>
+        <td><span class="badge ${atRiskW>0?'b-returned':'b-approved'}">${atRiskW}</span></td>
+        <td><span class="badge ${recCls}">${rec}</span></td>
+        <td><button class="btn btn-primary btn-xs" onclick="navigateTo('employer-analysis','employer=${e.id}')">${ICONS.eye}الملف</button></td>
+      </tr>`;}).join('')}
+    </tbody></table></div></div>`;
+
+  const workersRiskTable = `<div class="card"><div class="ph"><h3><span class="pico or">${ICONS.user}</span>العمال عالو المخاطر</h3></div>
+  <div class="tbl-wrap"><table class="dtbl">
+    <thead><tr><th>العامل</th><th>رقم الهوية</th><th>جهة العمل</th><th>حماية الأجور</th><th>التأمين الصحي</th><th>مؤشرات الخطر</th><th>إجراء</th></tr></thead>
+    <tbody>${INSP_DATA.workers.filter(w=>w.riskLevel!=='منخفض').map(wk=>`
+      <tr>
+        <td class="fw7">${wk.name}</td><td>${wk.civil}</td>
+        <td><a href="#" onclick="navigateTo('employer-analysis','employer=${wk.employerId}')" class="txp">${wk.employer.split(' ').slice(0,3).join(' ')}</a></td>
+        <td><span class="badge ${wk.wageProtection==='منتظم'?'b-approved':'b-returned'}">${wk.wageProtection}</span></td>
+        <td style="font-size:11px">${wk.healthInsurance.split('—')[0].trim()}</td>
+        <td>${wk.riskIndicators.map(r=>`<div style="font-size:11px;color:var(--text2)">• ${r.text.substring(0,60)}${r.text.length>60?'…':''}</div>`).join('')}</td>
+        <td><button class="btn btn-primary btn-xs" onclick="navigateTo('worker-analysis','worker=${wk.id}')">${ICONS.eye}الملف</button></td>
+      </tr>`).join('')}
+    </tbody></table></div></div>`;
+
+  return `<div class="pg-head"><div><h1>تحليل المخاطر</h1><p>تقييم متكامل لمستويات مخاطر المنشآت والعمال مع التوصيات الاستباقية</p></div>
+    <div class="pg-acts"><button class="btn btn-primary btn-sm" onclick="showToast('جارٍ تصدير تقرير المخاطر...','i')">${ICONS.download}تصدير تقرير المخاطر</button></div></div>
+    ${summaryKpis}
+    ${charts}
+    ${detailTable}
+    ${workersRiskTable}`;
 }
 
 /* ── كشف الأنماط (ops-analyst) ── */
 function renderPatternDetection(role) {
-  const patterns = [
-    { pattern: 'تأخر دوري في سداد الاشتراكات', count: 2, employers: 'مصنع الإنتاج الغذائي الخليجي، مؤسسة البناء والتشييد', risk: 'مرتفع', recommendation: 'توسيع نطاق التفتيش وإشعار الجهات الرقابية' },
-    { pattern: 'مخالفات متكررة في السلامة المهنية', count: 3, employers: 'مصنع الإنتاج الغذائي، مؤسسة البناء والتشييد', risk: 'مرتفع', recommendation: 'إدراج في قائمة الحظر المحتمل' },
-    { pattern: 'شكاوى من نفس القطاع', count: 2, employers: 'قطاع البناء والإنشاء', risk: 'متوسط', recommendation: 'تحليل قطاعي موسع' },
-  ];
-  return `<div class="pg-head"><div><h1>كشف الأنماط</h1><p>تحليل الأنماط المتكررة في المخالفات والبلاغات</p></div>
-    <div class="pg-acts"><button class="btn btn-secondary btn-sm">${ICONS.download}تصدير التحليل</button></div></div>
-  <div class="alert alert-w">${ICONS.warn} تم رصد ${patterns.length} أنماط مثيرة للقلق — يُوصى باتخاذ إجراءات استباقية.</div>
-  ${patterns.map(p=>`<div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.chart}</span>${p.pattern}</h3>
-    <span class="badge ${_riskClass(p.risk)}">${p.risk}</span></div>
-  <div class="pb"><div class="fg fg-2">
-    <div class="fgrp"><label class="flbl">عدد الحالات</label><div class="fro fw7">${p.count}</div></div>
-    <div class="fgrp"><label class="flbl">المنشآت المعنية</label><div class="fro">${p.employers}</div></div>
-    <div class="fgrp span-full"><label class="flbl">التوصية</label><div class="fro">${p.recommendation}</div></div>
-  </div></div></div>`).join('')}`;
+  const allV = INSP_DATA.employers.flatMap(e=>(e.violations||[]).map(v=>({...v, employer: e.name, employerId: e.id})));
+  const allC = INSP_DATA.complaints;
+  const allVisits = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled];
+  const _vpg = id => id.includes('MFJ') ? 'visit-surprise-details' : id.includes('MJD') ? 'visit-scheduled-details' : 'visit-periodic-details';
+  const _rb = r => r==='مرتفع'?'b-rejected':r==='متوسط'?'b-returned':'b-approved';
+
+  /* ── Pattern 1: متكرر — تأخر الاشتراكات ── */
+  const contribDelayEmps = INSP_DATA.employers.filter(e=>e.contributions.arrears>0);
+  const contribPattern = {
+    id: 'PT-001', risk:'مرتفع',
+    title: 'تأخر متكرر في سداد اشتراكات التأمين الاجتماعي',
+    desc: 'رُصد نمط ممنهج لتأخر سداد الاشتراكات في أكثر من منشأة. يرتبط هذا النمط بتدهور الالتزام التأميني للعمال وانقطاع التغطية.',
+    frequency: `${contribDelayEmps.length} منشآت من ${INSP_DATA.employers.length}`,
+    timespan: 'سبتمبر 2024 — ديسمبر 2024',
+    recommendation: 'إحالة فورية لوحدة التحصيل — تفعيل آلية الجزاءات التلقائية — جدولة زيارة متابعة.',
+    entities: contribDelayEmps.map(e=>({
+      type: 'employer', id: e.id, label: e.name,
+      detail: `متأخرات: ${e.contributions.arrears.toLocaleString()} ر.ع — آخر سداد: ${e.contributions.lastPaid}`,
+      badge: 'b-rejected'
+    })),
+    relatedComplaints: allC.filter(c=>(c.type||'').includes('اشتراك')).map(c=>c.id),
+    relatedVisits: allVisits.filter(v=>v.findings&&v.findings.violations.some(x=>x.includes('اشتراك'))).map(v=>v.id)
+  };
+
+  /* ── Pattern 2: متكرر — مخالفات السلامة ── */
+  const safetyViolEmps = INSP_DATA.employers.filter(e=>(e.violations||[]).some(v=>v.type.includes('سلامة')));
+  const safetyPattern = {
+    id: 'PT-002', risk:'مرتفع',
+    title: 'مخالفات متكررة في السلامة المهنية وبيئة العمل',
+    desc: 'رُصدت مخالفات سلامة جوهرية في أكثر من زيارة للمنشآت ذاتها، مما يدل على قصور هيكلي في منظومة السلامة وليس عارضاً طارئاً.',
+    frequency: `${safetyViolEmps.length} منشآت — ${allV.filter(v=>v.type.includes('سلامة')).length} حوادث`,
+    timespan: 'نوفمبر 2024 — يناير 2025',
+    recommendation: 'إصدار أمر تصحيحي ملزم بموعد نهائي — زيارة مفاجئة للتحقق — دراسة تصعيد لحظر التشغيل.',
+    entities: safetyViolEmps.map(e=>({
+      type: 'employer', id: e.id, label: e.name,
+      detail: `${(e.violations||[]).filter(v=>v.type.includes('سلامة')).length} مخالفة سلامة`,
+      badge: 'b-rejected'
+    })),
+    relatedComplaints: allC.filter(c=>c.type.includes('آمنة')||c.type.includes('سلامة')).map(c=>c.id),
+    relatedVisits: allVisits.filter(v=>v.findings&&v.findings.violations.some(x=>x.includes('سلامة')||x.includes('حماية'))).map(v=>v.id)
+  };
+
+  /* ── Pattern 3: قطاع البناء — تركّز المخالفات ── */
+  const buildingEmps = INSP_DATA.employers.filter(e=>e.sector.includes('بناء'));
+  const buildingComplaints = allC.filter(c=>buildingEmps.some(e=>e.id===c.employerId));
+  const buildingPattern = {
+    id: 'PT-003', risk:'مرتفع',
+    title: 'تركّز المخالفات في قطاع البناء والإنشاء',
+    desc: 'يستأثر قطاع البناء بنسبة غير متناسبة من البلاغات والمخالفات مقارنة بحجمه. ويرتبط ذلك بطبيعة عقود العمل الموسمية والاعتماد المفرط على العمالة الأجنبية.',
+    frequency: `${buildingComplaints.length} بلاغات — ${buildingEmps.flatMap(e=>e.violations||[]).length} مخالفة`,
+    timespan: 'يناير 2024 — يناير 2025',
+    recommendation: 'تكثيف الزيارات الدورية للقطاع — تعميم إرشادي لجميع منشآت البناء — تطوير قائمة تحقق مخصصة للقطاع.',
+    entities: buildingEmps.map(e=>({
+      type: 'employer', id: e.id, label: e.name,
+      detail: `${buildingComplaints.filter(c=>c.employerId===e.id).length} بلاغ — امتثال ${e.complianceScore}%`,
+      badge: e.riskLevel==='مرتفع'?'b-rejected':'b-returned'
+    })),
+    relatedComplaints: buildingComplaints.map(c=>c.id),
+    relatedVisits: allVisits.filter(v=>buildingEmps.some(e=>e.id===v.employerId)).map(v=>v.id)
+  };
+
+  /* ── Pattern 4: عمالة غير نظامية ── */
+  const illegalLaborViol = allV.filter(v=>v.type.includes('أجنبية')||v.type.includes('غير مسجل'));
+  const illegalPattern = {
+    id: 'PT-004', risk:'متوسط',
+    title: 'وجود عمالة غير مسجلة أو غير نظامية',
+    desc: 'كُشف عن حالات عمالة غير مسجلة في التأمين الاجتماعي أو غير نظامية في عدة مواقع. هذا النمط يحرم العمال من الحماية الاجتماعية ويُعرّض المنشأة لغرامات.',
+    frequency: `${illegalLaborViol.length} حوادث في ${new Set(illegalLaborViol.map(v=>v.employer)).size} منشآت`,
+    timespan: 'ديسمبر 2024 — يناير 2025',
+    recommendation: 'إشعار المنشآت بضرورة تسجيل جميع العمال فوراً — مشاركة البيانات مع وزارة القوى العاملة — تعزيز تغطية التفتيش.',
+    entities: [...new Set(illegalLaborViol.map(v=>v.employerId))].map(eid=>{
+      const emp = INSP_DATA.employers.find(e=>e.id===eid)||{};
+      return {type:'employer',id:eid,label:emp.name||eid,detail:`${illegalLaborViol.filter(v=>v.employerId===eid).length} حادثة`,badge:'b-returned'};
+    }),
+    relatedComplaints: [],
+    relatedVisits: illegalLaborViol.map(v=>v.visit).filter(Boolean)
+  };
+
+  /* ── Pattern 5: عمال بتغييرات متكررة لصاحب العمل ── */
+  const mobilWorkers = INSP_DATA.workers.filter(w=>w.employmentHistory&&w.employmentHistory.length>2);
+  const mobilityPattern = {
+    id: 'PT-005', risk:'متوسط',
+    title: 'تغيير متكرر لصاحب العمل — مؤشر ضعف الاستقرار الوظيفي',
+    desc: 'عمال سجّلوا أكثر من صاحب عمل خلال فترة قصيرة، وهو مؤشر على قصور في عقود العمل أو تعرضهم لظروف تدفعهم للتنقل.',
+    frequency: `${mobilWorkers.length} عمال من ${INSP_DATA.workers.length}`,
+    timespan: '2013 — 2025',
+    recommendation: 'مراجعة سجلات التأمين لهذه الفئة — تقييم وضع الاشتراكات — توعية بحقوق الثبات الوظيفي.',
+    entities: mobilWorkers.map(wk=>({
+      type:'worker',id:wk.id,label:wk.name,
+      detail:`${wk.employmentHistory.length} جهات عمل — آخرها ${wk.employer}`,badge:'b-returned'
+    })),
+    relatedComplaints: mobilWorkers.flatMap(wk=>allC.filter(c=>c.workerId===wk.id).map(c=>c.id)),
+    relatedVisits: []
+  };
+
+  const patterns = [contribPattern, safetyPattern, buildingPattern, illegalPattern, mobilityPattern];
+  const highCount = patterns.filter(p=>p.risk==='مرتفع').length;
+
+  const _patternCard = p => `
+    <div class="card" style="border-right:4px solid ${p.risk==='مرتفع'?'var(--danger)':p.risk==='متوسط'?'var(--warning)':'var(--success)'}">
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <span style="font-size:10px;font-weight:700;color:var(--text3);white-space:nowrap">${p.id}</span>
+          <h3 style="margin:0;flex:1">${p.title}</h3>
+        </div>
+        <span class="badge ${_rb(p.risk)}">${p.risk}</span>
+      </div>
+      <div class="pb">
+        <p style="font-size:13px;color:var(--text2);line-height:1.75;margin-bottom:14px">${p.desc}</p>
+        <div class="fg fg-3" style="margin-bottom:14px">
+          <div class="fgrp"><label class="flbl">التكرار</label><div class="fro fw7">${p.frequency}</div></div>
+          <div class="fgrp"><label class="flbl">الفترة الزمنية</label><div class="fro">${p.timespan}</div></div>
+          <div class="fgrp span-full"><label class="flbl">التوصية</label><div class="fro" style="color:var(--primary)">${p.recommendation}</div></div>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px">المنشآت/العمال المعنيون</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              ${p.entities.map(en=>`
+                <div style="display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--g50);border:1px solid var(--border);border-radius:var(--rsm);cursor:pointer"
+                  onclick="navigateTo('${en.type==='worker'?'worker-analysis':'employer-analysis'}','${en.type==='worker'?'worker':'employer'}=${en.id}')">
+                  <span style="font-size:12px;font-weight:700;color:var(--primary)">${en.label.split(' ').slice(0,3).join(' ')}</span>
+                  <span style="font-size:11px;color:var(--text3)">${en.detail}</span>
+                </div>`).join('')}
+            </div>
+          </div>
+        </div>
+        ${p.relatedComplaints.length || p.relatedVisits.length ? `
+        <div style="display:flex;gap:12px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:12px">
+          ${p.relatedComplaints.length ? `<div>
+            <span style="font-size:11px;font-weight:700;color:var(--text3)">البلاغات المرتبطة: </span>
+            ${p.relatedComplaints.map(id=>`<a href="#" onclick="navigateTo('complaint-details','id=${id}')" class="txp fw7" style="font-size:11px;margin-left:6px">${id}</a>`).join('')}
+          </div>` : ''}
+          ${p.relatedVisits.length ? `<div>
+            <span style="font-size:11px;font-weight:700;color:var(--text3)">الزيارات المرتبطة: </span>
+            ${p.relatedVisits.map(id=>`<a href="#" onclick="navigateTo('${_vpg(id)}','id=${id}')" class="txp fw7" style="font-size:11px;margin-left:6px">${id}</a>`).join('')}
+          </div>` : ''}
+        </div>` : ''}
+      </div>
+    </div>`;
+
+  return `<div class="pg-head"><div><h1>كشف الأنماط</h1><p>تحليل الأنماط المتكررة في المخالفات والبلاغات والعمال — مدعوم بالبيانات المتكاملة</p></div>
+    <div class="pg-acts"><button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير التحليل...','i')">${ICONS.download}تصدير التحليل</button></div></div>
+  <div class="alert alert-${highCount>0?'d':'w'}">${ICONS.warn} تم رصد <strong>${patterns.length} أنماط</strong> — منها <strong>${highCount} عالية الخطورة</strong> تستوجب إجراءً استباقياً فورياً.</div>
+  <div class="stats-grid">
+    <div class="scard d"><div class="sc-lbl">أنماط عالية الخطر</div><div class="sc-val">${highCount}</div></div>
+    <div class="scard w"><div class="sc-lbl">أنماط متوسطة الخطر</div><div class="sc-val">${patterns.filter(p=>p.risk==='متوسط').length}</div></div>
+    <div class="scard p"><div class="sc-lbl">منشآت تحت المراقبة</div><div class="sc-val">${new Set(patterns.flatMap(p=>p.entities.filter(e=>e.type==='employer').map(e=>e.id))).size}</div></div>
+    <div class="scard i"><div class="sc-lbl">عمال في دائرة المخاطر</div><div class="sc-val">${new Set(patterns.flatMap(p=>p.entities.filter(e=>e.type==='worker').map(e=>e.id))).size}</div></div>
+  </div>
+  ${patterns.map(_patternCard).join('')}`;
 }
 
 /* ── إعداد خطة التفتيش (ops-analyst) ── */

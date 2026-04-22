@@ -164,16 +164,17 @@ function setBreadcrumb(items) {
 }
 
 /* ── توجيه التنقل ── */
-function navigateTo(page) {
+function navigateTo(page, query) {
   const roleConfig = INSP_CONFIG.roles[CURRENT_ROLE];
   if (!roleConfig) return;
-  if (page.startsWith('../')) { window.location.href = page + '.html'; return; }
-  window.location.href = `../${roleConfig.folder}/${page}.html`;
+  const qs = query ? '?' + query : '';
+  if (page.startsWith('../')) { window.location.href = page + '.html' + qs; return; }
+  window.location.href = `../${roleConfig.folder}/${page}.html${qs}`;
 }
 
 function goHome() {
   const roleConfig = INSP_CONFIG.roles[CURRENT_ROLE];
-  if (!roleConfig) { window.location.href = '../shared/role-selection.html'; return; }
+  if (!roleConfig) { window.location.href = '../role-selection.html'; return; }
   if (roleConfig.folder === 'fund-staff') {
     window.location.href = `../fund-staff/complaints-list.html`;
   } else {
@@ -182,7 +183,7 @@ function goHome() {
 }
 
 function switchRole() {
-  window.location.href = '../shared/role-selection.html';
+  window.location.href = '../role-selection.html';
 }
 
 function bindHeaderEvents() {
@@ -284,7 +285,7 @@ function showUserMenu() {
       <div class="divider"></div>
       <div style="display:flex;flex-direction:column;gap:6px">
         <button class="btn btn-ghost" style="justify-content:flex-start;gap:10px" onclick="switchRole(); closeModal();">${ICONS.switch} تغيير الدور</button>
-        <button class="btn btn-ghost btn-sm" style="justify-content:flex-start;gap:10px;color:var(--danger)" onclick="window.location.href='../index.html'">${ICONS.logout} تسجيل الخروج</button>
+        <button class="btn btn-ghost btn-sm" style="justify-content:flex-start;gap:10px;color:var(--danger)" onclick="window.location.href='../index.html'">${ICONS.logout} تسجيل الخروج (محاكاة)</button>
       </div>`,
     footer: `<button class="btn btn-ghost btn-sm" onclick="closeModal()">إغلاق</button>`
   });

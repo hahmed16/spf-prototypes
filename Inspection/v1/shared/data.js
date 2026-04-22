@@ -29,7 +29,16 @@ const INSP_DATA = {
       riskLevel: 'منخفض',
       lastVisit: '2024-11-15',
       complianceScore: 92,
-      contributions: { status: 'منتظم', lastPaid: '2025-01-01', arrears: 0 }
+      contributions: { status: 'منتظم', lastPaid: '2025-01-01', arrears: 0 },
+      violations: [],
+      contributionHistory: [
+        { month: 'يوليو 2024',    status: 'منتظم', amount: '18,720 ر.ع', paidDate: '2024-07-01', workers: 156 },
+        { month: 'أغسطس 2024',   status: 'منتظم', amount: '18,720 ر.ع', paidDate: '2024-08-01', workers: 156 },
+        { month: 'سبتمبر 2024',  status: 'منتظم', amount: '19,440 ر.ع', paidDate: '2024-09-01', workers: 162 },
+        { month: 'أكتوبر 2024',  status: 'منتظم', amount: '19,440 ر.ع', paidDate: '2024-10-01', workers: 162 },
+        { month: 'نوفمبر 2024',  status: 'منتظم', amount: '19,440 ر.ع', paidDate: '2024-11-01', workers: 162 },
+        { month: 'ديسمبر 2024',  status: 'منتظم', amount: '19,440 ر.ع', paidDate: '2024-12-01', workers: 162 }
+      ]
     },
     {
       id: 'EMP-002',
@@ -43,7 +52,22 @@ const INSP_DATA = {
       riskLevel: 'متوسط',
       lastVisit: '2025-01-12',
       complianceScore: 74,
-      contributions: { status: 'متأخر', lastPaid: '2024-09-01', arrears: 8400 }
+      contributions: { status: 'متأخر', lastPaid: '2024-09-01', arrears: 8400 },
+      violations: [
+        { date: '2024-11-25', type: 'غياب معدات الحماية الشخصية (30% من المطلوب)', severity: 'مرتفع', visit: 'ZYR-MJD-2025-0001', status: 'معلق' },
+        { date: '2025-01-12', type: 'عدم تسجيل 12 عاملاً في التأمين الاجتماعي', severity: 'مرتفع', visit: 'ZYR-DWR-2025-0002', status: 'معلق' },
+        { date: '2025-01-12', type: 'تجاوز ساعات العمل في الوردية الليلية', severity: 'متوسط', visit: 'ZYR-DWR-2025-0002', status: 'معلق' },
+        { date: '2025-01-12', type: 'غياب سجل إجازات منتظم للعمالة الأجنبية', severity: 'منخفض', visit: 'ZYR-DWR-2025-0002', status: 'معلق' },
+        { date: '2024-09-01', type: 'عدم سداد اشتراكات التأمين لـ 3 أشهر (8,400 ر.ع)', severity: 'مرتفع', visit: 'ZYR-MFJ-2025-0001', status: 'معلق' }
+      ],
+      contributionHistory: [
+        { month: 'يوليو 2024',    status: 'منتظم',       amount: '2,880 ر.ع', paidDate: '2024-07-01', workers: 180 },
+        { month: 'أغسطس 2024',   status: 'منتظم',       amount: '2,880 ر.ع', paidDate: '2024-08-01', workers: 180 },
+        { month: 'سبتمبر 2024',  status: 'غير مدفوع',   amount: '2,880 ر.ع', paidDate: null,         workers: 180 },
+        { month: 'أكتوبر 2024',  status: 'غير مدفوع',   amount: '2,880 ر.ع', paidDate: null,         workers: 180 },
+        { month: 'نوفمبر 2024',  status: 'غير مدفوع',   amount: '2,880 ر.ع', paidDate: null,         workers: 180 },
+        { month: 'ديسمبر 2024',  status: 'غير مدفوع',   amount: '2,880 ر.ع', paidDate: null,         workers: 180 }
+      ]
     },
     {
       id: 'EMP-003',
@@ -57,7 +81,22 @@ const INSP_DATA = {
       riskLevel: 'مرتفع',
       lastVisit: '2025-01-08',
       complianceScore: 58,
-      contributions: { status: 'متأخر جزئياً', lastPaid: '2024-11-01', arrears: 2200 }
+      contributions: { status: 'متأخر جزئياً', lastPaid: '2024-11-01', arrears: 2200 },
+      violations: [
+        { date: '2024-11-20', type: 'مخالفات سلامة جسيمة في مواقع البناء النشطة', severity: 'مرتفع', visit: 'ZYR-MFJ-2024-0088', status: 'جارٍ معالجته' },
+        { date: '2024-11-20', type: 'تأخر في صرف رواتب 12 عاملاً (شهرين)', severity: 'مرتفع', visit: 'ZYR-MFJ-2024-0088', status: 'منجز' },
+        { date: '2024-12-10', type: 'غياب معدات السلامة لـ 45 عاملاً في موقع نزوى', severity: 'مرتفع', visit: 'ZYR-DWR-2024-0095', status: 'جارٍ معالجته' },
+        { date: '2024-12-10', type: 'عمالة أجنبية غير نظامية — 15 عاملاً', severity: 'مرتفع', visit: 'ZYR-DWR-2024-0095', status: 'جارٍ معالجته' },
+        { date: '2024-12-10', type: 'عدم صرف رواتب 8 عمال منذ شهرين', severity: 'مرتفع', visit: 'ZYR-DWR-2024-0095', status: 'منجز' }
+      ],
+      contributionHistory: [
+        { month: 'يوليو 2024',    status: 'منتظم',           amount: '5,760 ر.ع', paidDate: '2024-07-01',   workers: 320 },
+        { month: 'أغسطس 2024',   status: 'متأخر',           amount: '5,760 ر.ع', paidDate: '2024-09-15',   workers: 320 },
+        { month: 'سبتمبر 2024',  status: 'منتظم',           amount: '5,760 ر.ع', paidDate: '2024-09-28',   workers: 320 },
+        { month: 'أكتوبر 2024',  status: 'متأخر جزئياً',   amount: '5,760 ر.ع', paidDate: '2024-11-20',   workers: 320 },
+        { month: 'نوفمبر 2024',  status: 'متأخر جزئياً',   amount: '5,760 ر.ع', paidDate: '2025-01-05',   workers: 320 },
+        { month: 'ديسمبر 2024',  status: 'غير مدفوع',       amount: '5,760 ر.ع', paidDate: null,           workers: 320 }
+      ]
     }
   ],
 
@@ -67,36 +106,112 @@ const INSP_DATA = {
       name: 'أحمد محمد القحطاني',
       civil: '0912345001',
       nationality: 'عُماني',
+      gender: 'ذكر',
+      dob: '1990-05-15',
+      phone: '96891112233',
+      email: 'ahmed.q@ntc.com.om',
       employer: 'شركة التقنية الوطنية',
       employerId: 'EMP-001',
       position: 'مهندس برمجيات',
+      department: 'قسم تطوير البرمجيات',
+      contractType: 'عقد دائم',
       insuredFrom: '2015-04-01',
       salary: 1200,
-      riskIndicators: ['تغيير صاحب العمل مرتين خلال 6 أشهر']
+      riskLevel: 'متوسط',
+      wageProtection: 'منتظم',
+      healthInsurance: 'نشط — شركة ضمان للتأمين',
+      riskIndicators: [
+        { text: 'تغيير صاحب العمل مرتين خلال 6 أشهر (2014–2015)', severity: 'متوسط' }
+      ],
+      employmentHistory: [
+        { employer: 'شركة البرمجيات المتقدمة', position: 'مطور مبتدئ', from: '2013-06', to: '2015-03', reason: 'عرض عمل أفضل', status: 'منتهي' },
+        { employer: 'حلول التقنية الرقمية', position: 'مطور برمجيات', from: '2014-10', to: '2015-02', reason: 'عقد مؤقت', status: 'منتهي' },
+        { employer: 'شركة التقنية الوطنية', position: 'مهندس برمجيات', from: '2015-04', to: 'الآن', reason: null, status: 'نشط' }
+      ],
+      insuranceHistory: [
+        { month: 'يوليو 2024',    status: 'مدفوع',       amount: '120 ر.ع', paidDate: '2024-07-01' },
+        { month: 'أغسطس 2024',   status: 'مدفوع',       amount: '120 ر.ع', paidDate: '2024-08-01' },
+        { month: 'سبتمبر 2024',  status: 'مدفوع',       amount: '120 ر.ع', paidDate: '2024-09-01' },
+        { month: 'أكتوبر 2024',  status: 'مدفوع',       amount: '120 ر.ع', paidDate: '2024-10-01' },
+        { month: 'نوفمبر 2024',  status: 'مدفوع',       amount: '120 ر.ع', paidDate: '2024-11-01' },
+        { month: 'ديسمبر 2024',  status: 'مدفوع',       amount: '120 ر.ع', paidDate: '2024-12-01' }
+      ]
     },
     {
       id: 'WRK-002',
       name: 'فاطمة خالد العمري',
       civil: '0734567002',
       nationality: 'عُماني',
+      gender: 'أنثى',
+      dob: '1996-11-30',
+      phone: '96892223344',
+      email: 'fatima.o@gulf-food.com',
       employer: 'مصنع الإنتاج الغذائي الخليجي',
       employerId: 'EMP-002',
       position: 'عاملة خط إنتاج',
+      department: 'قسم التصنيع',
+      contractType: 'عقد سنوي متجدد',
       insuredFrom: '2018-09-15',
       salary: 400,
-      riskIndicators: ['تأخر في صرف الاشتراكات لثلاثة أشهر', 'بلاغ سابق مُغلق']
+      riskLevel: 'مرتفع',
+      wageProtection: 'متأخر — 3 أشهر',
+      healthInsurance: 'منتهي الصلاحية — يناير 2025',
+      riskIndicators: [
+        { text: 'تأخر في صرف الاشتراكات التأمينية لثلاثة أشهر متتالية (أكتوبر–ديسمبر 2024)', severity: 'مرتفع' },
+        { text: 'بلاغ سابق مُغلق بشأن ظروف العمل (INSP-BLG-2025-0003)', severity: 'متوسط' },
+        { text: 'انتهاء صلاحية التأمين الصحي دون تجديد', severity: 'متوسط' }
+      ],
+      employmentHistory: [
+        { employer: 'مصنع المنتجات الخفيفة للإنتاج', position: 'عاملة إنتاج', from: '2016-03', to: '2018-08', reason: 'انتهاء العقد', status: 'منتهي' },
+        { employer: 'مصنع الإنتاج الغذائي الخليجي', position: 'عاملة خط إنتاج', from: '2018-09', to: 'الآن', reason: null, status: 'نشط' }
+      ],
+      insuranceHistory: [
+        { month: 'يوليو 2024',    status: 'مدفوع',       amount: '40 ر.ع', paidDate: '2024-07-01' },
+        { month: 'أغسطس 2024',   status: 'مدفوع',       amount: '40 ر.ع', paidDate: '2024-08-01' },
+        { month: 'سبتمبر 2024',  status: 'غير مدفوع',   amount: '40 ر.ع', paidDate: null },
+        { month: 'أكتوبر 2024',  status: 'غير مدفوع',   amount: '40 ر.ع', paidDate: null },
+        { month: 'نوفمبر 2024',  status: 'غير مدفوع',   amount: '40 ر.ع', paidDate: null },
+        { month: 'ديسمبر 2024',  status: 'غير مدفوع',   amount: '40 ر.ع', paidDate: null }
+      ]
     },
     {
       id: 'WRK-003',
       name: 'سالم عبدالله الرشيدي',
       civil: '0467890003',
       nationality: 'عُماني',
+      gender: 'ذكر',
+      dob: '1985-03-22',
+      phone: '96893334455',
+      email: 'salem.r@gmail.com',
       employer: 'مؤسسة البناء والتشييد المتكاملة',
       employerId: 'EMP-003',
       position: 'عامل بناء متخصص',
+      department: 'فريق الإنشاءات الميدانية',
+      contractType: 'عقد مشروع',
       insuredFrom: '2020-02-20',
       salary: 450,
-      riskIndicators: ['بيئة عمل عالية المخاطر', 'بلاغان جاريان', 'زيارة ميدانية نشطة']
+      riskLevel: 'مرتفع',
+      wageProtection: 'متأخر — شهرين',
+      healthInsurance: 'معلق — بانتظار التجديد',
+      riskIndicators: [
+        { text: 'بيئة عمل عالية المخاطر — مواقع بناء نشطة بدون معدات حماية كافية', severity: 'مرتفع' },
+        { text: 'بلاغان جاريان في النظام مرتبطان به (INSP-BLG-2024-0097, INSP-BLG-2025-0006)', severity: 'مرتفع' },
+        { text: 'زيارة ميدانية نشطة لصاحب العمل (ZYR-MJD-2025-0002)', severity: 'متوسط' },
+        { text: 'تاريخ اشتراكات غير منتظم: 3 أشهر متأخرة خلال 2024', severity: 'متوسط' }
+      ],
+      employmentHistory: [
+        { employer: 'شركة المقاولات العامة العُمانية', position: 'عامل بناء', from: '2010-01', to: '2014-06', reason: 'إنهاء مشروع', status: 'منتهي' },
+        { employer: 'مقاولو الخليج للإنشاء والتشييد', position: 'عامل بناء متقدم', from: '2014-08', to: '2019-12', reason: 'تسريح جماعي بسبب تراجع المشاريع', status: 'منتهي' },
+        { employer: 'مؤسسة البناء والتشييد المتكاملة', position: 'عامل بناء متخصص', from: '2020-02', to: 'الآن', reason: null, status: 'نشط' }
+      ],
+      insuranceHistory: [
+        { month: 'يوليو 2024',    status: 'مدفوع',         amount: '45 ر.ع', paidDate: '2024-07-15' },
+        { month: 'أغسطس 2024',   status: 'مدفوع متأخر',   amount: '45 ر.ع', paidDate: '2024-09-10' },
+        { month: 'سبتمبر 2024',  status: 'مدفوع متأخر',   amount: '45 ر.ع', paidDate: '2024-11-05' },
+        { month: 'أكتوبر 2024',  status: 'غير مدفوع',     amount: '45 ر.ع', paidDate: null },
+        { month: 'نوفمبر 2024',  status: 'غير مدفوع',     amount: '45 ر.ع', paidDate: null },
+        { month: 'ديسمبر 2024',  status: 'غير مدفوع',     amount: '45 ر.ع', paidDate: null }
+      ]
     }
   ],
 

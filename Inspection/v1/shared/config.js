@@ -174,6 +174,8 @@ const INSP_CONFIG = {
         { label: 'قائمة الزيارات المجدولة', page: 'visits-scheduled-list', icon: 'list', badge: null },
         { label: 'تحليل المخاطر', page: 'risk-analysis', icon: 'shield', badge: null },
         { label: 'كشف الأنماط', page: 'pattern-detection', icon: 'search', badge: null },
+        { label: 'تحليل بيانات العمال', page: 'worker-analysis', icon: 'user', badge: null },
+        { label: 'تحليل بيانات أصحاب العمل', page: 'employer-analysis', icon: 'building', badge: null },
         { label: 'إعداد خطة التفتيش الدوري', page: 'inspection-plan-draft', icon: 'pen', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
