@@ -18,10 +18,16 @@ const session = WI_DATA.sessions.find(s=>s.id===params.get('id')) || WI_DATA.ses
 setBreadcrumb([{label:'إدارة الجلسات',page:'sessions-list'},{label:`جلسة ${session.id}`}]);
 
 const attendanceState = {};
+// Per-case signatures: { caseId: { memberName: status } }
 const signatureState = {};
 session.members.forEach(m=>{
   attendanceState[m.name] = m.attendance || 'مجدول';
-  signatureState[m.name] = 'بانتظار';
+});
+session.cases.forEach(c => {
+  signatureState[c.requestId] = {};
+  session.members.forEach(m => {
+    signatureState[c.requestId][m.name] = 'بانتظار';
+  });
 });
 
 const caseDecisions = {};
@@ -35,8 +41,13 @@ function renderPage() {
   const confirmedCount = Object.values(attendanceState).filter(v=>v==='حاضر').length;
   const quorum = confirmedCount >= Math.ceil(session.members.length/2);
   const allDecisionsDone = session.cases.every(c => caseDecisions[c.requestId] && caseDecisions[c.requestId]!=='بانتظار القرار');
-  const allSigned = Object.values(signatureState).every(v=>v==='تم التوقيع');
-  const signedCount = Object.values(signatureState).filter(v=>v==='تم التوقيع').length;
+  const allSigned = session.cases.every(c =>
+    Object.values(signatureState[c.requestId]||{}).every(v=>v==='تم التوقيع')
+  );
+  const totalSignatures = session.cases.length * session.members.length;
+  const signedCount = session.cases.reduce((sum,c) =>
+    sum + Object.values(signatureState[c.requestId]||{}).filter(v=>v==='تم التوقيع').length, 0
+  );
 
   getContent().innerHTML = `
     <div class="pg-head">
@@ -155,34 +166,65 @@ function renderPage() {
       </div>
     </div>
 
-    <!-- ④ إعادة إرسال طلبات التوقيع -->
+    <!-- ④ متابعة التوقيعات الإلكترونية (على مستوى كل حالة) -->
     <div class="card">
       <div class="ph">
         <h3><div class="pico gr">${ICONS.pen}</div>④ متابعة التوقيعات الإلكترونية</h3>
-        <span style="font-size:12px;color:var(--text3)">${signedCount} / ${session.members.length} وقّعوا</span>
+        <span style="font-size:12px;color:var(--text3)">${signedCount} / ${totalSignatures} توقيعات مكتملة</span>
       </div>
-      <div class="pb-0">
-        <table class="dtbl">
-          <thead><tr><th>العضو</th><th>المنصب</th><th>حالة التوقيع</th><th>إجراء المقرر</th></tr></thead>
-          <tbody>
-            ${session.members.map(m=>`
-            <tr>
-              <td style="font-weight:600">${m.name}</td>
-              <td>${m.role}</td>
-              <td><span class="badge ${signatureState[m.name]==='تم التوقيع'?'b-approved':'b-phead'}">${signatureState[m.name]}</span></td>
-              <td>
-                ${signatureState[m.name]==='بانتظار' ? `
-                <button class="btn btn-secondary btn-xs" onclick="resendSignRequest('${m.name}')">
-                  ${ICONS.bell} إعادة إرسال طلب التوقيع
-                </button>` : `<span class="badge b-approved">مكتمل</span>`}
-              </td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
+      ${!allDecisionsDone ? `
+      <div class="pb-c" style="padding-bottom:0">
+        <div class="alert alert-i" style="margin-bottom:0">${ICONS.info}<span>أدخل جميع قرارات الحالات أولاً ليتاح إرسال طلبات التوقيع للأعضاء.</span></div>
+      </div>` : !minutesText ? `
+      <div class="pb-c" style="padding-bottom:0">
+        <div class="alert alert-w" style="margin-bottom:0">${ICONS.warning}<span>احفظ محضر الجلسة (القسم ③) قبل إرسال طلبات التوقيع.</span></div>
+      </div>` : ''}
+      <div class="pb" style="display:flex;flex-direction:column;gap:12px">
+        ${session.cases.map(c => {
+          const caseSigs = signatureState[c.requestId] || {};
+          const caseSigned = Object.values(caseSigs).filter(v=>v==='تم التوقيع').length;
+          const caseTotal = session.members.length;
+          const caseAllSigned = caseSigned === caseTotal;
+          const decisionDone = caseDecisions[c.requestId] && caseDecisions[c.requestId]!=='بانتظار القرار';
+          const canSendSign = decisionDone && !!minutesText;
+          return `
+          <div style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--g50);border-bottom:1px solid var(--border)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-family:monospace;font-weight:700;color:var(--primary)">${c.requestId}</span>
+                <span style="font-size:12.5px;color:var(--text2)">${c.name}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                ${!decisionDone ? `<span class="badge b-phead">القرار لم يُدخَل بعد</span>` : ''}
+                <span class="badge ${caseAllSigned?'b-approved':'b-returned'}">${caseSigned}/${caseTotal} توقيع</span>
+              </div>
+            </div>
+            <table class="dtbl" style="margin:0;border:none">
+              <thead><tr><th>العضو</th><th>المنصب</th><th>حالة التوقيع</th><th>إجراء المقرر</th></tr></thead>
+              <tbody>
+                ${session.members.map(m => `
+                <tr>
+                  <td style="font-weight:600">${m.name}</td>
+                  <td>${m.role}</td>
+                  <td><span class="badge ${caseSigs[m.name]==='تم التوقيع'?'b-approved':'b-phead'}">${caseSigs[m.name]||'بانتظار'}</span></td>
+                  <td>
+                    ${caseSigs[m.name]!=='تم التوقيع' ? `
+                    <button class="btn btn-secondary btn-xs"
+                      ${!canSendSign?'disabled style="opacity:.5;cursor:not-allowed"':''}
+                      onclick="${canSendSign?`resendSignRequest('${m.name}','${c.requestId}')`:''}"
+                      title="${!decisionDone?'أدخل القرار أولاً':!minutesText?'احفظ المحضر أولاً':'إعادة إرسال طلب التوقيع'}">
+                      ${ICONS.bell} إعادة إرسال طلب التوقيع
+                    </button>` : `<span style="font-size:12px;color:var(--accent)">✓ مكتمل</span>`}
+                  </td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>`;
+        }).join('')}
       </div>
       ${allSigned?`
       <div class="pb-c">
-        <div class="alert alert-s" style="margin-bottom:0">${ICONS.check}<span>اكتملت جميع التوقيعات — يمكنك الآن إرسال القرارات.</span></div>
+        <div class="alert alert-s" style="margin-bottom:0">${ICONS.check}<span>اكتملت جميع التوقيعات على جميع الحالات — يمكنك الآن إرسال القرارات.</span></div>
       </div>`:''}
     </div>
 
@@ -237,8 +279,8 @@ function saveMinutes() {
   showToast('تم حفظ محضر الجلسة', 's');
 }
 
-function resendSignRequest(name) {
-  showToast(`تم إرسال طلب التوقيع إلى ${name}`, 'i');
+function resendSignRequest(name, caseId) {
+  showToast(`تم إرسال طلب التوقيع على حالة ${caseId} إلى ${name}`, 'i');
 }
 
 function reschedule() {

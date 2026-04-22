@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>التظلمات الواردة — مقرر لجنة التظلمات</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'appeals-rapporteur', activePage: 'incoming-requests' });
+setBreadcrumb([{ label: 'التظلمات الواردة' }]);
+
+const appeals = WI_DATA.appeals;
+
+let activeTab = 'all';
+document.addEventListener('DOMContentLoaded', render);
+
+function getTabAppeals(tab) {
+  if (tab === 'all') return appeals;
+  if (tab === 'pending-schedule') return appeals.filter(a => !a.session);
+  if (tab === 'scheduled') return appeals.filter(a => a.session);
+  return appeals;
+}
+
+function render() {
+  const list = getTabAppeals(activeTab);
+  const pendingCount = appeals.filter(a => !a.session).length;
+  const scheduledCount = appeals.filter(a => a.session).length;
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>التظلمات الواردة</h1>
+        <p>التظلمات التي تحتاج إدراجها في جلسة لجنة التظلمات</p></div>
+      <div class="pg-acts">
+        <button class="btn btn-primary" onclick="openNewSessionModal()">${ICONS.plus} إنشاء جلسة جديدة</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="fgrid">
+        <div class="fgrp"><label class="flbl">رقم التظلم</label><input type="text" class="fc" placeholder="APP-YYYY-XXXXXX"></div>
+        <div class="fgrp"><label class="flbl">اسم المتظلم</label><input type="text" class="fc" placeholder="اسم المتظلم"></div>
+        <div class="fgrp"><label class="flbl">رقم الطلب الأصلي</label><input type="text" class="fc" placeholder="WI-YYYY-XXXXXX"></div>
+        <div class="fgrp"><label class="flbl">سبب التظلم</label>
+          <select class="fc">
+            <option>الكل</option>
+            <option>القرار مخالف للأنظمة</option>
+            <option>القرار يحتاج مراجعة طبية أدق</option>
+            <option>بيانات غير مكتملة</option>
+          </select>
+        </div>
+      </div>
+      <div class="facts">
+        <button class="btn btn-primary btn-sm">${ICONS.search} بحث</button>
+        <button class="btn btn-secondary btn-sm">مسح</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ttabs">
+        ${[
+          { key: 'all', label: 'الكل', count: appeals.length },
+          { key: 'pending-schedule', label: 'بانتظار الجدولة', count: pendingCount },
+          { key: 'scheduled', label: 'مجدولة في جلسة', count: scheduledCount },
+        ].map(t => `<div class="ttab ${activeTab===t.key?'act':''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم التظلم</th>
+                <th>المتظلم</th>
+                <th>الطلب الأصلي</th>
+                <th>سبب التظلم</th>
+                <th>تاريخ التقديم</th>
+                <th>الحالة</th>
+                <th>حالة الجدولة</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list.map(a => `
+              <tr style="${!a.session?'background:var(--primary-l)':''}">
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${a.id}</td>
+                <td>${a.applicant.name}</td>
+                <td style="font-family:monospace;font-size:12px">${a.originalRequestId}</td>
+                <td style="font-size:12.5px">${a.appealReason}</td>
+                <td style="font-size:12px">${a.submitDate}</td>
+                <td>${statusBadge(a.status)}</td>
+                <td>
+                  ${a.session
+                    ? `<span class="badge b-session">مجدولة في جلسة</span>`
+                    : `<span class="badge b-phead">بانتظار الجدولة</span>`}
+                </td>
+                <td>
+                  <div style="display:flex;gap:4px">
+                    <button class="ibtn" onclick="showAppealDetails('${a.id}')" title="عرض التفاصيل">${ICONS.eye}</button>
+                    ${!a.session ? `
+                    <button class="btn btn-primary btn-xs" onclick="addToSession('${a.id}')">
+                      ${ICONS.plus} إضافة لجلسة
+                    </button>` : ''}
+                  </div>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function setTab(t) { activeTab = t; render(); }
+
+function showAppealDetails(id) {
+  const a = WI_DATA.appeals.find(x => x.id === id);
+  if (!a) return;
+  openModal({
+    title: `تفاصيل التظلم — ${a.id}`,
+    size: 'md-lg',
+    body: `
+      <div class="fg fg-2" style="gap:12px;margin-bottom:12px">
+        <div class="fgrp"><label class="flbl">رقم التظلم</label><div class="fro" style="font-family:monospace;font-weight:700;color:var(--primary)">${a.id}</div></div>
+        <div class="fgrp"><label class="flbl">الطلب الأصلي</label><div class="fro" style="font-family:monospace">${a.originalRequestId}</div></div>
+        <div class="fgrp"><label class="flbl">المتظلم</label><div class="fro">${a.applicant.name}</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ التقديم</label><div class="fro">${a.submitDate}</div></div>
+        <div class="fgrp"><label class="flbl">الحالة</label><div class="fro">${statusBadge(a.status)}</div></div>
+        <div class="fgrp"><label class="flbl">نوع القرار المتظلم منه</label><div class="fro">${a.decision?.type||'—'}</div></div>
+      </div>
+      <div class="fgrp"><label class="flbl">سبب التظلم</label><div class="fro">${a.appealReason}</div></div>
+      <div class="fgrp"><label class="flbl">تفاصيل التظلم</label>
+        <div class="fro" style="white-space:pre-wrap;font-size:12.5px">${a.appealDetails}</div>
+      </div>
+      ${a.attachments.length ? `
+      <div class="fgrp"><label class="flbl">المرفقات (${a.attachments.length})</label>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          ${a.attachments.map(att => `
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--g50);border-radius:var(--rsm)">
+            <span style="font-size:12px;color:var(--text2)">${att.name}</span>
+            <span class="badge" style="font-size:10px;margin-right:auto">${att.type}</span>
+          </div>`).join('')}
+        </div>
+      </div>` : ''}`,
+    footer: `
+      ${!a.session ? `<button class="btn btn-primary" onclick="closeModal();addToSession('${a.id}')">${ICONS.plus} إضافة لجلسة</button>` : ''}
+      <button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`
+  });
+}
+
+function addToSession(id) {
+  openModal({
+    title: 'إضافة التظلم إلى جلسة',
+    body: `
+      <div class="alert alert-i" style="margin-bottom:14px">
+        ${ICONS.info}<span>يمكنك إضافة هذا التظلم إلى جلسة قائمة أو إنشاء جلسة جديدة</span>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">اختر الجلسة <span class="req">*</span></label>
+        <select class="fc">
+          <option value="">— اختر جلسة —</option>
+          <option value="APP-SES-2025-0023">APP-SES-2025-0023 — 2025-02-05 — مجدولة</option>
+          <option value="new">إنشاء جلسة جديدة</option>
+        </select>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">ملاحظات للجلسة</label>
+        <textarea class="fc" rows="2" placeholder="ملاحظات إضافية..."></textarea>
+      </div>`,
+    footer: `
+      <button class="btn btn-primary" onclick="closeModal();confirmAddToSession('${id}')">${ICONS.check} تأكيد الإضافة</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+
+function confirmAddToSession(id) {
+  const a = WI_DATA.appeals.find(x => x.id === id);
+  if (a) a.session = 'APP-SES-2025-0023';
+  showToast(`تم إضافة التظلم ${id} إلى الجلسة APP-SES-2025-0023`, 's');
+  render();
+}
+
+function openNewSessionModal() {
+  openModal({
+    title: 'إنشاء جلسة جديدة — لجنة التظلمات',
+    size: 'md-lg',
+    body: `
+      <div class="fg" style="gap:14px">
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">تاريخ الجلسة <span class="req">*</span></label><input type="date" class="fc"></div>
+          <div class="fgrp"><label class="flbl">وقت الجلسة <span class="req">*</span></label><input type="time" class="fc" value="10:00"></div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">التظلمات المدرجة</label>
+          <div style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            ${WI_DATA.appeals.map(a => `
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border)">
+              <input type="checkbox" ${!a.session?'checked':''}>
+              <span style="font-size:12.5px">
+                <span style="font-family:monospace;color:var(--primary)">${a.id}</span> — ${a.applicant.name} — ${a.appealReason}
+                ${a.session ? '<span class="badge" style="font-size:10px;margin-right:4px">مجدولة مسبقاً</span>' : ''}
+              </span>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>`,
+    footer: `
+      <button class="btn btn-primary" onclick="closeModal();showToast('تم إنشاء الجلسة وإرسال الدعوات لأعضاء لجنة التظلمات','s')">${ICONS.check} إنشاء الجلسة</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+</script>
+</body>
+</html>

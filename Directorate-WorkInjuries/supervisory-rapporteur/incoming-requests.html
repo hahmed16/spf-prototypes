@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>طلبات الترخيص الواردة — مقرر اللجنة الطبية الإشرافية</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+initLayout({ role: 'supervisory-rapporteur', activePage: 'incoming-requests' });
+setBreadcrumb([{ label: 'طلبات الترخيص الواردة' }]);
+
+const licensing = WI_DATA.licensing.filter(r => r.status !== 'مسودة');
+
+let activeTab = 'all';
+document.addEventListener('DOMContentLoaded', render);
+
+function getTabList(tab) {
+  if (tab === 'all') return licensing;
+  if (tab === 'pending-schedule') return licensing.filter(r => !r.session);
+  if (tab === 'scheduled') return licensing.filter(r => r.session);
+  return licensing;
+}
+
+function getVerificationBadge(r) {
+  const met = r.verification?.minMet;
+  if (met === true) return `<span class="badge b-approved">مكتملة</span>`;
+  if (met === false) return `<span class="badge b-returned">غير مكتملة</span>`;
+  return `<span class="badge b-phead">—</span>`;
+}
+
+function render() {
+  const list = getTabList(activeTab);
+  const pendingCount = licensing.filter(r => !r.session).length;
+  const scheduledCount = licensing.filter(r => r.session).length;
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>طلبات الترخيص الواردة</h1>
+        <p>طلبات الترخيص الجاهزة للعرض على اللجنة الطبية الإشرافية</p></div>
+      <div class="pg-acts">
+        <button class="btn btn-primary" onclick="openNewSessionModal()">${ICONS.plus} إنشاء جلسة جديدة</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="fgrid">
+        <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc" placeholder="LIC-YYYY-XXXXXX"></div>
+        <div class="fgrp"><label class="flbl">اسم المؤسسة</label><input type="text" class="fc" placeholder="اسم المؤسسة الصحية"></div>
+        <div class="fgrp"><label class="flbl">نوع الطلب</label>
+          <select class="fc">
+            <option>الكل</option>
+            <option>جديد</option>
+            <option>تجديد</option>
+          </select>
+        </div>
+        <div class="fgrp"><label class="flbl">حالة التحقق</label>
+          <select class="fc">
+            <option>الكل</option>
+            <option>مكتملة</option>
+            <option>غير مكتملة</option>
+          </select>
+        </div>
+      </div>
+      <div class="facts">
+        <button class="btn btn-primary btn-sm">${ICONS.search} بحث</button>
+        <button class="btn btn-secondary btn-sm">مسح</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ttabs">
+        ${[
+          { key: 'all', label: 'الكل', count: licensing.length },
+          { key: 'pending-schedule', label: 'بانتظار الجدولة', count: pendingCount },
+          { key: 'scheduled', label: 'مجدولة في جلسة', count: scheduledCount },
+        ].map(t => `<div class="ttab ${activeTab===t.key?'act':''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>المؤسسة الصحية</th>
+                <th>النوع</th>
+                <th>الأطباء</th>
+                <th>التحقق من الشروط</th>
+                <th>الحالة</th>
+                <th>حالة الجدولة</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list.map(r => `
+              <tr style="${!r.session && r.verification?.minMet?'background:var(--primary-l)':''}">
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td>
+                  <div style="font-weight:600;font-size:13px">${r.institution.name}</div>
+                  <div style="font-size:11px;color:var(--text3)">${r.institution.type}</div>
+                </td>
+                <td><span class="badge ${r.requestType==='جديد'?'b-direct':'b-commpath'}">${r.requestType}</span></td>
+                <td style="text-align:center">
+                  <span style="font-weight:700">${r.verification?.confirmedDoctors||0}</span>
+                  <span style="color:var(--text3)"> / ${r.verification?.totalDoctors||r.doctors?.length||0}</span>
+                </td>
+                <td>${getVerificationBadge(r)}</td>
+                <td>${statusBadge(r.status)}</td>
+                <td>
+                  ${r.session
+                    ? `<span class="badge b-session">مجدولة في جلسة</span>`
+                    : `<span class="badge b-phead">بانتظار الجدولة</span>`}
+                </td>
+                <td>
+                  <div style="display:flex;gap:4px">
+                    <button class="ibtn" onclick="showLicDetails('${r.id}')" title="عرض التفاصيل">${ICONS.eye}</button>
+                    ${!r.session ? `
+                    <button class="btn btn-primary btn-xs" onclick="addToSession('${r.id}')"
+                      ${!r.verification?.minMet?'disabled style="opacity:.5;cursor:not-allowed" title=شروط التحقق غير مكتملة':''}
+                    >${ICONS.plus} إضافة لجلسة</button>` : ''}
+                  </div>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function setTab(t) { activeTab = t; render(); }
+
+function showLicDetails(id) {
+  const r = WI_DATA.licensing.find(x => x.id === id);
+  if (!r) return;
+  openModal({
+    title: `تفاصيل طلب الترخيص — ${r.id}`,
+    size: 'md-lg',
+    body: `
+      <div class="fg fg-2" style="gap:12px;margin-bottom:12px">
+        <div class="fgrp"><label class="flbl">رقم الطلب</label><div class="fro" style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</div></div>
+        <div class="fgrp"><label class="flbl">نوع الطلب</label><div class="fro"><span class="badge ${r.requestType==='جديد'?'b-direct':'b-commpath'}">${r.requestType}</span></div></div>
+        <div class="fgrp"><label class="flbl">المؤسسة</label><div class="fro" style="font-weight:600">${r.institution.name}</div></div>
+        <div class="fgrp"><label class="flbl">نوع المؤسسة</label><div class="fro">${r.institution.type}</div></div>
+        <div class="fgrp"><label class="flbl">المفوض</label><div class="fro">${r.delegate.name}</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ التقديم</label><div class="fro">${r.submitDate}</div></div>
+        <div class="fgrp"><label class="flbl">الحالة</label><div class="fro">${statusBadge(r.status)}</div></div>
+        <div class="fgrp"><label class="flbl">التحقق من الشروط</label><div class="fro">${r.verification?.minMet?'<span class="badge b-approved">مكتملة</span>':'<span class="badge b-returned">غير مكتملة</span>'}</div></div>
+      </div>
+      <div class="fgrp"><label class="flbl">الأطباء المؤكدون (${r.verification?.confirmedDoctors||0} / ${r.verification?.totalDoctors||r.doctors?.length||0})</label>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+          ${(r.doctors||[]).map(d => `
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--g50);border-radius:var(--rsm)">
+            <span class="badge ${d.confirmStatus==='تم التأكيد'?'b-approved':'b-phead'}" style="font-size:10px">${d.confirmStatus}</span>
+            <span style="font-size:12.5px;font-weight:600">${d.name}</span>
+            <span style="font-size:11px;color:var(--text3)">${d.specialty}</span>
+            <span class="badge" style="font-size:10px;margin-right:auto">${d.role}</span>
+          </div>`).join('')}
+        </div>
+      </div>`,
+    footer: `
+      ${!r.session && r.verification?.minMet ? `<button class="btn btn-primary" onclick="closeModal();addToSession('${r.id}')">${ICONS.plus} إضافة لجلسة</button>` : ''}
+      <button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`
+  });
+}
+
+function addToSession(id) {
+  openModal({
+    title: 'إضافة طلب الترخيص إلى جلسة',
+    body: `
+      <div class="alert alert-i" style="margin-bottom:14px">
+        ${ICONS.info}<span>يمكنك إضافة هذا الطلب إلى جلسة قائمة أو إنشاء جلسة جديدة</span>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">اختر الجلسة <span class="req">*</span></label>
+        <select class="fc">
+          <option value="">— اختر جلسة —</option>
+          <option value="LIC-SES-2025-0012">LIC-SES-2025-0012 — 2025-02-10 — مجدولة</option>
+          <option value="new">إنشاء جلسة جديدة</option>
+        </select>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">ملاحظات</label>
+        <textarea class="fc" rows="2" placeholder="ملاحظات إضافية..."></textarea>
+      </div>`,
+    footer: `
+      <button class="btn btn-primary" onclick="closeModal();confirmAddToSession('${id}')">${ICONS.check} تأكيد الإضافة</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+
+function confirmAddToSession(id) {
+  const r = WI_DATA.licensing.find(x => x.id === id);
+  if (r) r.session = 'LIC-SES-2025-0012';
+  showToast(`تم إضافة الطلب ${id} إلى الجلسة LIC-SES-2025-0012`, 's');
+  render();
+}
+
+function openNewSessionModal() {
+  const eligible = licensing.filter(r => r.verification?.minMet && !r.session);
+  openModal({
+    title: 'إنشاء جلسة جديدة — اللجنة الطبية الإشرافية',
+    size: 'md-lg',
+    body: `
+      <div class="fg" style="gap:14px">
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">تاريخ الجلسة <span class="req">*</span></label><input type="date" class="fc"></div>
+          <div class="fgrp"><label class="flbl">وقت الجلسة <span class="req">*</span></label><input type="time" class="fc" value="10:00"></div>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">طلبات الترخيص المدرجة</label>
+          ${eligible.length ? `
+          <div style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            ${eligible.map(r => `
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border)">
+              <input type="checkbox" checked>
+              <span style="font-size:12.5px">
+                <span style="font-family:monospace;color:var(--primary)">${r.id}</span> — ${r.institution.name}
+                <span class="badge ${r.requestType==='جديد'?'b-direct':'b-commpath'}" style="font-size:10px;margin-right:4px">${r.requestType}</span>
+              </span>
+            </div>`).join('')}
+          </div>` : `<div class="alert alert-w">${ICONS.warning}<span>لا توجد طلبات مستوفية لشروط الجدولة حالياً</span></div>`}
+        </div>
+        ${licensing.filter(r => r.verification?.minMet === false && !r.session).length ? `
+        <div class="alert alert-w" style="margin-top:0">
+          ${ICONS.warning}
+          <span>يوجد ${licensing.filter(r => r.verification?.minMet===false && !r.session).length} طلب لم تكتمل شروط التحقق منه — لا يمكن إدراجه في الجلسة حتى الاستيفاء.</span>
+        </div>` : ''}
+      </div>`,
+    footer: `
+      <button class="btn btn-primary" onclick="closeModal();showToast('تم إنشاء الجلسة وإرسال الدعوات لأعضاء اللجنة الإشرافية','s')">${ICONS.check} إنشاء الجلسة</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+</script>
+</body>
+</html>

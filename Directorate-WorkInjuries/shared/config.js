@@ -309,6 +309,7 @@ const WI_CONFIG = {
       canCheckout: false,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
+        { label: 'التظلمات الواردة', page: 'incoming-requests', icon: 'inbox', badge: 'incoming' },
         { label: 'قائمة جلسات التظلمات', page: 'sessions-list', icon: 'calendar', badge: 'sessions' },
         { label: 'التوقيعات المعلّقة (قرارات التظلمات)', page: 'signing', icon: 'pen', badge: 'signing' },
       ]
@@ -323,6 +324,7 @@ const WI_CONFIG = {
       canCheckout: false,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
+        { label: 'طلبات الترخيص الواردة', page: 'incoming-requests', icon: 'inbox', badge: 'incoming' },
         { label: 'قائمة جلسات اللجنة الإشرافية', page: 'sessions-list', icon: 'calendar', badge: 'sessions' },
         { label: 'التوقيعات المعلّقة (قرارات التراخيص)', page: 'signing', icon: 'pen', badge: 'signing' },
       ]
