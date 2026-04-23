@@ -122,6 +122,9 @@ const INSP_DATA = {
       department: 'قسم تطوير البرمجيات',
       contractType: 'عقد دائم',
       insuredFrom: '2015-04-01',
+      joinDate: '2015-04-01',
+      employmentStatus: 'على رأس العمل',
+      resignDate: null,
       salary: 1200,
       riskLevel: 'متوسط',
       wageProtection: 'منتظم',
@@ -158,6 +161,9 @@ const INSP_DATA = {
       department: 'قسم التصنيع',
       contractType: 'عقد سنوي متجدد',
       insuredFrom: '2018-09-15',
+      joinDate: '2018-09-15',
+      employmentStatus: 'على رأس العمل',
+      resignDate: null,
       salary: 400,
       riskLevel: 'مرتفع',
       wageProtection: 'متأخر — 3 أشهر',
@@ -195,6 +201,9 @@ const INSP_DATA = {
       department: 'فريق الإنشاءات الميدانية',
       contractType: 'عقد مشروع',
       insuredFrom: '2020-02-20',
+      joinDate: '2020-02-20',
+      employmentStatus: 'على رأس العمل',
+      resignDate: null,
       salary: 450,
       riskLevel: 'مرتفع',
       wageProtection: 'متأخر — شهرين',
@@ -222,12 +231,12 @@ const INSP_DATA = {
   ],
 
   complaints: [
-    /* ── بلاغ 1: شكوى عدم صحة الأجر ─ قيد المراجعة الميدانية ── */
+    /* ── بلاغ 1: شكوى عدم صحة الأجر ─ قيد المراجعة من قسم التفتيش ── */
     {
       id: '2025-01-000001',
-      type: 'تعديل الأجر',
+      type: 'شكوى عدم صحة الأجر',
       channel: 'منصة إلكترونية — مؤمن عليه',
-      status: 'قيد المراجعة الميدانية',
+      status: 'قيد المراجعة من قسم التفتيش',
       submittedBy: 'insured',
       submittedByName: 'فاطمة خالد العمري',
       submittedByCivil: '0734567002',
@@ -240,10 +249,14 @@ const INSP_DATA = {
       employerPhone: '96891234567',
       workerId: 'WRK-002',
       workerName: 'فاطمة خالد العمري',
+      workerCivil: '0734567002',
       description: 'الأجر المسجل في الصندوق 400 ر.ع في حين أن الأجر الفعلي المصروف في الحساب البنكي 480 ر.ع منذ يناير 2024. طلب تصحيح الأجر لتعكس السجلات الواقع الفعلي.',
       assignedTo: 'سيف خلفان الأمري',
+      assignedToCivil: '06456789',
       assignedToRole: 'monitoring-employee',
       assignedInspector: 'حاتم سالم الزدجالي',
+      assignedInspectorCivil: '04678901',
+      assignedInspectorRole: 'field-inspector',
       priority: 'مرتفع',
       dueDate: '2025-01-20',
       returnCount: 0,
@@ -264,8 +277,7 @@ const INSP_DATA = {
       },
       requiredDocuments: [
         { name: 'كشف الحساب البنكي خلال الفترة المراد تعديلها',   status: 'مرفق' },
-        { name: 'ما يفيد الأجر الصحيح (مراسلة صاحب العمل)',        status: 'مرفق' },
-        { name: 'خطاب صاحب العمل معتمد',                           status: 'مطلوب' }
+        { name: 'ما يفيد الأجر الصحيح (مراسلة صاحب العمل)',        status: 'مرفق' }
       ],
       verificationResults: [
         {
@@ -290,7 +302,7 @@ const INSP_DATA = {
           status: 'موافق',
           checks: [
             { rule: 'وجود عقد عمل مسجل',            result: 'موافق', value: 'عقد مسجل — رقم WM-2022-04567' },
-            { rule: 'عدم وجود دعوى عمالية جارية',    result: 'موافق', value: 'لا توجد دعاوى' }
+            { rule: 'عدم وجود شكوى عمالية جارية',    result: 'موافق', value: 'لا توجد شكاوى' }
           ]
         },
         {
@@ -319,12 +331,12 @@ const INSP_DATA = {
       ]
     },
 
-    /* ── بلاغ 2: شكوى عدم التسجيل ─ تم جدولة زيارة تفتيشية ── */
+    /* ── بلاغ 2: شكوى عدم التسجيل ─ بانتظار اعتماد رئيس قسم المتابعة والبلاغات ── */
     {
       id: '2025-01-000002',
-      type: 'تسجيل عقد',
+      type: 'شكوى عدم التسجيل',
       channel: 'إحالة داخلية',
-      status: 'تم جدولة زيارة تفتيشية',
+      status: 'بانتظار اعتماد رئيس قسم المتابعة والبلاغات',
       submittedBy: 'fund-staff',
       submittedByName: 'منى راشد البلوشي',
       submittedByCivil: '09123456',
@@ -339,11 +351,15 @@ const INSP_DATA = {
       workerName: null,
       description: 'تبيّن من خلال التقارير الداخلية أن المنشأة لم تسدد اشتراكات التأمين لمدة ثلاثة أشهر متتالية (أكتوبر–ديسمبر 2024) ويُشتبه في وجود عمال غير مسجلين.',
       assignedTo: 'سيف خلفان الأمري',
+      assignedToCivil: '06456789',
       assignedToRole: 'monitoring-employee',
       assignedInspector: 'حاتم سالم الزدجالي',
+      assignedInspectorCivil: '04678901',
+      assignedInspectorRole: 'field-inspector',
       priority: 'مرتفع',
       dueDate: '2025-01-10',
       returnCount: 1,
+      completionNote: 'تمت إعادة البلاغ لاستيفاء بيان تاريخ الالتحاق الصحيح وتوضيح عدد العمال غير المسجلين مع المستندات الداعمة.',
       registeredData: {
         joinDate: null,
         contractReceiveDate: null,
@@ -360,7 +376,6 @@ const INSP_DATA = {
       },
       requiredDocuments: [
         { name: 'ما يفيد تاريخ الالتحاق الصحيح (عقود عمل)',         status: 'مرفق' },
-        { name: 'خطاب صاحب العمل بتأكيد تاريخ الالتحاق',           status: 'مطلوب' },
         { name: 'كشف الحساب البنكي خلال فترة العمل',                status: 'مطلوب' }
       ],
       verificationResults: [
@@ -379,7 +394,7 @@ const INSP_DATA = {
           status: 'موافق',
           checks: [
             { rule: 'وجود عقد في نظام وزارة العمل',          result: 'موافق', value: 'عقد مسجل بتاريخ 2024-09-01' },
-            { rule: 'عدم وجود دعوى عمالية',                   result: 'موافق', value: 'لا توجد' },
+            { rule: 'عدم وجود شكوى عمالية',                   result: 'موافق', value: 'لا توجد' },
             { rule: 'مرور 30 يوماً على تاريخ الالتحاق',       result: 'موافق', value: 'مر 112 يوم' }
           ]
         },
@@ -413,12 +428,12 @@ const INSP_DATA = {
       notes: []
     },
 
-    /* ── بلاغ 3: تعديل الأجر ─ صدر قرار ── */
+    /* ── بلاغ 3: تعديل الأجر ─ بانتظار اعتماد رئيس قسم التفتيش ── */
     {
       id: '2025-01-000003',
-      type: 'تعديل الأجر',
+      type: 'شكوى عدم صحة الأجر',
       channel: 'منصة إلكترونية — مؤمن عليه',
-      status: 'تم إصدار قرار بشأن البلاغ',
+      status: 'بانتظار اعتماد رئيس قسم التفتيش',
       submittedBy: 'insured',
       submittedByName: 'أسماء محمد الحارثي',
       submittedByCivil: '07345678',
@@ -429,12 +444,16 @@ const INSP_DATA = {
       employerCRN: '9876543210',
       employerContact: 'محمد الغيلاني',
       employerPhone: '96891234567',
-      workerId: 'WRK-002',
-      workerName: 'فاطمة خالد العمري',
+      workerId: null,
+      workerName: 'أسماء محمد الحارثي',
+      workerCivil: '07345678',
       description: 'المؤمن عليها تشتكي من غياب معدات الحماية الشخصية في خط الإنتاج وعدم التزام المصنع باشتراطات السلامة المهنية عند التعامل مع المواد الكيميائية.',
       assignedTo: 'سيف خلفان الأمري',
+      assignedToCivil: '06456789',
       assignedToRole: 'monitoring-employee',
       assignedInspector: 'حاتم سالم الزدجالي',
+      assignedInspectorCivil: '04678901',
+      assignedInspectorRole: 'field-inspector',
       priority: 'مرتفع',
       dueDate: '2024-11-25',
       returnCount: 0,
@@ -455,8 +474,7 @@ const INSP_DATA = {
       },
       requiredDocuments: [
         { name: 'صور من موقع العمل',           status: 'مرفق' },
-        { name: 'تقرير السلامة المهنية',        status: 'مرفق' },
-        { name: 'خطاب صاحب العمل',             status: 'مرفق' }
+        { name: 'تقرير السلامة المهنية',        status: 'مرفق' }
       ],
       verificationResults: [
         {
@@ -499,12 +517,12 @@ const INSP_DATA = {
       }
     },
 
-    /* ── بلاغ 4: تعديل تاريخ الالتحاق ─ بانتظار تعيين ── */
+    /* ── بلاغ 4: تعديل تاريخ الالتحاق ─ تم إعادة الطلب لاستيفاء البيانات ── */
     {
       id: '2025-01-000004',
-      type: 'تعديل تاريخ الالتحاق',
+      type: 'شكوى عدم التسجيل',
       channel: 'منصة إلكترونية — جهة العمل',
-      status: 'بانتظار تعيين',
+      status: 'تم إعادة الطلب لاستيفاء البيانات',
       submittedBy: 'employer',
       submittedByName: 'طارق سعيد الكلباني',
       submittedByCivil: '08234567',
@@ -517,30 +535,52 @@ const INSP_DATA = {
       employerPhone: '96891023456',
       workerId: 'WRK-001',
       workerName: 'أحمد محمد القحطاني',
+      partyInsuredCivil: '07345678',
       description: 'يطلب صاحب العمل تعديل تاريخ التحاق الموظف المسجّل في النظام من 2023-03-15 إلى 2023-01-01 ليتوافق مع تاريخ بدء العقد الفعلي.',
-      assignedTo: null,
-      assignedToRole: null,
+      assignedTo: 'سيف خلفان الأمري',
+      assignedToCivil: '06456789',
+      assignedToRole: 'monitoring-employee',
       assignedInspector: null,
       priority: 'منخفض',
       dueDate: '2025-01-25',
-      returnCount: 0,
-      registeredData: null,
-      requestedData: null,
-      requiredDocuments: [],
+      returnCount: 1,
+      completionNote: 'يرجى إرفاق عقد العمل الأصلي الذي يؤكد تاريخ الالتحاق الفعلي (2023-01-01) وأي مراسلات تثبت بدء العقد قبل تاريخ التسجيل في النظام.',
+      registeredData: {
+        joinDate: '2023-03-15',
+        contractReceiveDate: '2023-03-20',
+        salary: 1200,
+        allowances: 0,
+        fullSalary: 1200,
+        resignDate: null,
+        resignReceiveDate: null
+      },
+      requestedData: {
+        changeType: 'تعديل تاريخ الالتحاق',
+        actualJoinDate: '2023-01-01',
+        notes: 'تاريخ الالتحاق الفعلي هو 2023-01-01 بموجب عقد العمل الأصلي'
+      },
+      requiredDocuments: [
+        { name: 'عقد العمل الأصلي موضحاً تاريخ البداية', status: 'مطلوب' },
+        { name: 'إشعار التعيين أو خطاب القبول', status: 'مطلوب' }
+      ],
       verificationResults: [],
       attachments: [],
       timeline: [
-        { date: '2025-01-10 10:30', step: 'تقديم البلاغ', action: 'تم تقديم البلاغ إلكترونياً', actor: 'طارق سعيد الكلباني', actorRole: 'employer' }
+        { date: '2025-01-10 10:30', step: 'تقديم البلاغ', action: 'تم تقديم البلاغ إلكترونياً', actor: 'طارق سعيد الكلباني', actorRole: 'employer' },
+        { date: '2025-01-11 09:00', step: 'تعيين المختص', action: 'تم تعيين الموظف المختص', actor: 'النظام', actorRole: 'system' },
+        { date: '2025-01-12 11:00', step: 'طلب استيفاء بيانات', action: 'أُعيد البلاغ لصاحب العمل لاستيفاء المستندات الداعمة', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' }
       ],
-      notes: []
+      notes: [
+        { text: 'تاريخ الالتحاق المسجّل لا يتطابق مع المدة المطالب بها — يُطلب تأكيد العقد الأصلي.', author: 'سيف خلفان الأمري', date: '2025-01-12', role: 'monitoring-employee' }
+      ]
     },
 
-    /* ── بلاغ 5: تعديل تاريخ انتهاء الخدمة ─ مُغلق (2024) ── */
+    /* ── بلاغ 5: تعديل تاريخ انتهاء الخدمة ─ انتظار اعتماد مدير الدائرة ── */
     {
       id: '2024-01-000097',
-      type: 'تعديل تاريخ انتهاء الخدمة',
+      type: 'أخرى',
       channel: 'منصة إلكترونية — مؤمن عليه',
-      status: 'تم إغلاق البلاغ',
+      status: 'انتظار اعتماد مدير الدائرة',
       submittedBy: 'insured',
       submittedByName: 'سالم عبدالله الرشيدي',
       submittedByCivil: '0467890003',
@@ -555,6 +595,7 @@ const INSP_DATA = {
       workerName: 'سالم عبدالله الرشيدي',
       description: 'يدّعي الموظف أنه فُصل من العمل دون سبب مشروع بعد خدمة تجاوزت 10 سنوات ويطالب بالتعويضات النظامية.',
       assignedTo: 'سيف خلفان الأمري',
+      assignedToCivil: '06456789',
       assignedToRole: 'monitoring-employee',
       assignedInspector: null,
       priority: 'مرتفع',
@@ -574,33 +615,34 @@ const INSP_DATA = {
       timeline: [
         { date: '2024-09-15 13:00', step: 'تقديم البلاغ',        action: 'تم تقديم البلاغ',                         actor: 'سالم عبدالله الرشيدي',  actorRole: 'insured' },
         { date: '2024-09-28 11:00', step: 'اعتماد رئيس الشكاوى', action: 'توجيه للمصالحة والتسوية',                  actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' },
-        { date: '2024-10-05 15:00', step: 'إغلاق',               action: 'تم إغلاق البلاغ بعد تسوية ودية',         actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
+        { date: '2024-10-05 15:00', step: 'انتظار اعتماد مدير الدائرة', action: 'رُفع البلاغ لاعتماد مدير الدائرة قبل الإغلاق النهائي', actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
       ],
       notes: [],
       investigationResults: { outcome: 'تسوية ودية', findings: 'تم التوصل إلى اتفاق ودي بين الطرفين.', corrective: null, fine: null, decisionDate: '2024-10-05' }
     },
 
-    /* ── بلاغ 6: تسجيل عقد ─ إحالة خارجية ── */
+    /* ── بلاغ 6: تسجيل عقد ─ قيد المراجعة ── */
     {
       id: '2025-01-000006',
-      type: 'تسجيل عقد',
+      type: 'شكوى عدم التسجيل',
       channel: 'إحالة رسمية خارجية',
-      status: 'بانتظار تعيين',
+      status: 'قيد المراجعة',
       submittedBy: 'external-ref',
       submittedByName: 'وزارة العمل',
       submittedByCivil: null,
       submittedByPhone: null,
       submitDate: '2025-01-12',
-      employerId: 'EMP-003',
-      employerName: 'مؤسسة البناء والتشييد المتكاملة',
-      employerCRN: '4567891230',
-      employerContact: 'عامر الهاشمي',
-      employerPhone: '96895566778',
+      employerId: 'EMP-001',
+      employerName: 'شركة التقنية الوطنية',
+      employerCRN: '1234567890',
+      employerContact: 'طارق سعيد الكلباني',
+      employerPhone: '96891023456',
       workerId: null,
       workerName: null,
       description: 'أحالت وزارة العمل ملف عمال المنشأة للتحقق من تسجيل عقودهم في النظام والتأكد من صحة بيانات التحاقهم.',
-      assignedTo: null,
-      assignedToRole: null,
+      assignedTo: 'سيف خلفان الأمري',
+      assignedToCivil: '06456789',
+      assignedToRole: 'monitoring-employee',
       assignedInspector: null,
       priority: 'عاجل',
       dueDate: '2025-01-18',
@@ -618,6 +660,254 @@ const INSP_DATA = {
         { date: '2025-01-12 10:30', step: 'تسجيل البلاغ',  action: 'تم تسجيل البلاغ في النظام',                actor: 'منى راشد البلوشي', actorRole: 'fund-staff' }
       ],
       notes: []
+    },
+
+    /* ── بلاغ 7: مسودة لدى مقدم الطلب (الصندوق) ── */
+    {
+      id: '2025-01-000007',
+      type: 'شكوى عدم التسجيل',
+      channel: 'إدخال داخلي',
+      status: 'مسودة',
+      submittedBy: 'fund-staff',
+      submittedByName: 'منى راشد البلوشي',
+      submittedByCivil: '09123456',
+      submittedByPhone: '96890012345',
+      submitDate: '2025-01-15',
+      employerId: 'EMP-001',
+      employerName: 'شركة التقنية الوطنية',
+      employerCRN: '1234567890',
+      employerContact: 'طارق سعيد الكلباني',
+      employerPhone: '96891023456',
+      workerId: 'WRK-001',
+      workerName: 'أحمد محمد القحطاني',
+      workerCivil: '0912345001',
+      description: 'مسودة بلاغ داخلي بانتظار استكمال بيانات العامل وصاحب العمل قبل الإرسال.',
+      assignedTo: null,
+      assignedToCivil: null,
+      assignedToRole: null,
+      assignedInspector: null,
+      assignedInspectorCivil: null,
+      assignedInspectorRole: null,
+      priority: 'متوسط',
+      dueDate: '2025-01-30',
+      returnCount: 0,
+      registeredData: null,
+      requestedData: null,
+      requiredDocuments: [],
+      verificationResults: [],
+      attachments: [],
+      timeline: [
+        { date: '2025-01-15 09:45', step: 'مسودة', action: 'تم حفظ البلاغ كمسودة من مقدم الطلب', actor: 'منى راشد البلوشي', actorRole: 'fund-staff' }
+      ],
+      notes: []
+    },
+
+    /* ── بلاغ 8: معاد للمؤمن عليه لاستيفاء البيانات ── */
+    {
+      id: '2025-01-000008',
+      type: 'شكوى عدم صحة الأجر',
+      channel: 'منصة إلكترونية — مؤمن عليه',
+      status: 'تم إعادة الطلب لاستيفاء البيانات',
+      submittedBy: 'insured',
+      submittedByName: 'أسماء محمد الحارثي',
+      submittedByCivil: '07345678',
+      submittedByPhone: '96892034567',
+      submitDate: '2025-01-16',
+      employerId: 'EMP-001',
+      employerName: 'شركة التقنية الوطنية',
+      employerCRN: '1234567890',
+      employerContact: 'طارق سعيد الكلباني',
+      employerPhone: '96891023456',
+      workerId: null,
+      workerName: 'أسماء محمد الحارثي',
+      workerCivil: '07345678',
+      description: 'تمت إعادة فتح البلاغ لاستيفاء بيانات إضافية تخص الأجر الفعلي وتاريخ النفاذ.',
+      assignedTo: 'سيف خلفان الأمري',
+      assignedToCivil: '06456789',
+      assignedToRole: 'monitoring-employee',
+      assignedInspector: null,
+      assignedInspectorCivil: null,
+      assignedInspectorRole: null,
+      priority: 'متوسط',
+      dueDate: '2025-01-28',
+      returnCount: 1,
+      completionNote: 'يرجى توضيح الأجر الفعلي المودع بالحساب البنكي وإرفاق ما يثبت تاريخ بدء تطبيقه.',
+      registeredData: null,
+      requestedData: null,
+      requiredDocuments: [
+        { name: 'كشف الحساب البنكي للفترة المطلوبة', status: 'مطلوب' }
+      ],
+      verificationResults: [],
+      attachments: [],
+      timeline: [
+        { date: '2025-01-16 10:00', step: 'تقديم البلاغ', action: 'تم تقديم البلاغ إلكترونياً', actor: 'أسماء محمد الحارثي', actorRole: 'insured' },
+        { date: '2025-01-17 12:30', step: 'إعادة فتح البلاغ', action: 'تمت إعادة فتح البلاغ لاستيفاء البيانات', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' }
+      ],
+      notes: []
+    },
+
+    /* ── بلاغ 9: بانتظار تعيين مختص — مقدم من صاحب العمل ── */
+    {
+      id: '2025-01-000009',
+      type: 'شكوى عدم صحة الأجر',
+      channel: 'منصة إلكترونية — جهة العمل',
+      status: 'بانتظار تعيين',
+      submittedBy: 'employer',
+      submittedByName: 'طارق سعيد الكلباني',
+      submittedByCivil: '08234567',
+      submittedByPhone: '96891023456',
+      submitDate: '2025-01-18',
+      employerId: 'EMP-001',
+      employerName: 'شركة التقنية الوطنية',
+      employerCRN: '1234567890',
+      employerContact: 'طارق سعيد الكلباني',
+      employerPhone: '96891023456',
+      workerId: 'WRK-001',
+      workerName: 'أحمد محمد القحطاني',
+      workerCivil: '0912345001',
+      description: 'يطلب صاحب العمل تعديل أجر الموظف المسجل في الصندوق من 1200 ر.ع إلى 1350 ر.ع ليعكس الزيادة السنوية المعتمدة بعد مراجعة الرواتب.',
+      assignedTo: null,
+      assignedToCivil: null,
+      assignedToRole: null,
+      assignedInspector: null,
+      assignedInspectorCivil: null,
+      assignedInspectorRole: null,
+      priority: 'متوسط',
+      dueDate: '2025-02-01',
+      returnCount: 0,
+      registeredData: {
+        joinDate: '2015-04-01',
+        contractReceiveDate: '2015-04-05',
+        salary: 1200,
+        allowances: 0,
+        fullSalary: 1200,
+        resignDate: null,
+        resignReceiveDate: null
+      },
+      requestedData: {
+        changeType: 'تعديل الأجر',
+        actualSalary: 1350,
+        effectiveFrom: '2025-01-01',
+        notes: 'الزيادة السنوية المعتمدة بموجب مراجعة رواتب ديسمبر 2024'
+      },
+      requiredDocuments: [
+        { name: 'قرار الزيادة السنوية المعتمد', status: 'مرفق' },
+        { name: 'كشف الراتب بعد الزيادة',       status: 'مرفق' }
+      ],
+      verificationResults: [],
+      attachments: [
+        { name: 'قرار الزيادة السنوية.pdf', size: '380 KB', date: '2025-01-18', type: 'pdf' },
+        { name: 'كشف راتب يناير 2025.pdf',  size: '210 KB', date: '2025-01-18', type: 'pdf' }
+      ],
+      timeline: [
+        { date: '2025-01-18 09:15', step: 'تقديم البلاغ',   action: 'تم تقديم البلاغ إلكترونياً',                      actor: 'طارق سعيد الكلباني', actorRole: 'employer' },
+        { date: '2025-01-18 09:16', step: 'بانتظار تعيين',  action: 'البلاغ في قائمة انتظار التعيين — لم يُعيَّن مختص بعد', actor: 'النظام',             actorRole: 'system' }
+      ],
+      notes: []
+    },
+
+    /* ── بلاغ 10: مسودة — لدى صاحب العمل ── */
+    {
+      id: '2025-01-000010',
+      type: 'شكوى عدم التسجيل',
+      channel: 'منصة إلكترونية — جهة العمل',
+      status: 'مسودة',
+      submittedBy: 'employer',
+      submittedByName: 'طارق سعيد الكلباني',
+      submittedByCivil: '08234567',
+      submittedByPhone: '96891023456',
+      submitDate: '2025-01-19',
+      employerId: 'EMP-001',
+      employerName: 'شركة التقنية الوطنية',
+      employerCRN: '1234567890',
+      employerContact: 'طارق سعيد الكلباني',
+      employerPhone: '96891023456',
+      workerId: null,
+      workerName: null,
+      workerCivil: null,
+      description: 'تسجيل موظف جديد التحق بالشركة منذ يناير 2025 ولم يُسجَّل بعد في منظومة التأمين الاجتماعي.',
+      assignedTo: null,
+      assignedToCivil: null,
+      assignedToRole: null,
+      assignedInspector: null,
+      assignedInspectorCivil: null,
+      assignedInspectorRole: null,
+      priority: 'منخفض',
+      dueDate: null,
+      returnCount: 0,
+      registeredData: null,
+      requestedData: null,
+      requiredDocuments: [],
+      verificationResults: [],
+      attachments: [],
+      timeline: [
+        { date: '2025-01-19 11:30', step: 'مسودة', action: 'تم حفظ البلاغ كمسودة من صاحب العمل', actor: 'طارق سعيد الكلباني', actorRole: 'employer' }
+      ],
+      notes: []
+    },
+
+    /* ── بلاغ 11: تم تقديم الطلب مرة أخرى — مؤمن عليه أعاد الإرسال بعد الإعادة ── */
+    {
+      id: '2025-01-000011',
+      type: 'شكوى عدم صحة الأجر',
+      channel: 'منصة إلكترونية — مؤمن عليه',
+      status: 'تم تقديم الطلب مرة أخرى',
+      submittedBy: 'insured',
+      submittedByName: 'أسماء محمد الحارثي',
+      submittedByCivil: '07345678',
+      submittedByPhone: '96892034567',
+      submitDate: '2025-01-17',
+      employerId: 'EMP-001',
+      employerName: 'شركة التقنية الوطنية',
+      employerCRN: '1234567890',
+      employerContact: 'طارق سعيد الكلباني',
+      employerPhone: '96891023456',
+      workerId: null,
+      workerName: 'أسماء محمد الحارثي',
+      workerCivil: '07345678',
+      description: 'تطلب المؤمن عليها تعديل أجرها المسجل من 380 ر.ع إلى 420 ر.ع وفق آخر مراجعة رواتب سنوية معتمدة يوليو 2024.',
+      assignedTo: 'سيف خلفان الأمري',
+      assignedToCivil: '06456789',
+      assignedToRole: 'monitoring-employee',
+      assignedInspector: null,
+      assignedInspectorCivil: null,
+      assignedInspectorRole: null,
+      priority: 'متوسط',
+      dueDate: '2025-02-03',
+      returnCount: 1,
+      completionNote: 'تم استيفاء البيانات وإرفاق الكشف البنكي ومراسلة صاحب العمل كما طُلب.',
+      registeredData: {
+        joinDate: '2020-06-01',
+        contractReceiveDate: '2020-06-05',
+        salary: 380,
+        allowances: 0,
+        fullSalary: 380,
+        resignDate: null,
+        resignReceiveDate: null
+      },
+      requestedData: {
+        changeType: 'تعديل الأجر',
+        actualSalary: 420,
+        effectiveFrom: '2024-07-01',
+        notes: 'تعديل الأجر بناءً على مراجعة الرواتب السنوية يوليو 2024'
+      },
+      requiredDocuments: [
+        { name: 'كشف الحساب البنكي للفترة المطلوبة', status: 'مرفق' },
+        { name: 'مراسلة صاحب العمل بالأجر الجديد',   status: 'مرفق' }
+      ],
+      verificationResults: [],
+      attachments: [
+        { name: 'كشف الحساب البنكي يوليو–ديسمبر 2024.pdf', size: '870 KB', date: '2025-01-20', type: 'pdf' },
+        { name: 'مراسلة صاحب العمل بزيادة الأجر.pdf',      size: '295 KB', date: '2025-01-20', type: 'pdf' }
+      ],
+      timeline: [
+        { date: '2025-01-17 10:00', step: 'تقديم البلاغ',    action: 'تم تقديم البلاغ إلكترونياً',                                  actor: 'أسماء محمد الحارثي',  actorRole: 'insured' },
+        { date: '2025-01-18 11:00', step: 'طلب استيفاء بيانات', action: 'أُعيد البلاغ لاستيفاء الكشف البنكي ومراسلة صاحب العمل',   actor: 'سيف خلفان الأمري',    actorRole: 'monitoring-employee' },
+        { date: '2025-01-20 14:30', step: 'إعادة إرسال',      action: 'أعادت المؤمن عليها إرسال الطلب مع المستندات المطلوبة',      actor: 'أسماء محمد الحارثي',  actorRole: 'insured' }
+      ],
+      notes: [
+        { text: 'طُلب الكشف البنكي ومراسلة صاحب العمل لإثبات الأجر الفعلي بعد المراجعة السنوية.', author: 'سيف خلفان الأمري', date: '2025-01-18', role: 'monitoring-employee' }
+      ]
     }
   ],
 

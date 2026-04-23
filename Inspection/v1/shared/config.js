@@ -186,7 +186,21 @@ const INSP_CONFIG = {
   /* ── ألوان حالات البلاغات ── */
   statusBadges: {
     'مسودة':                                                        'b-draft',
-    /* البلاغات — مسار جديد */
+    'تم تقديم البلاغ':                                              'b-submitted',
+    'تم اعادة فتح البلاغ':                                          'b-returned',
+    'تم إعادة الطلب لاستيفاء البيانات':                             'b-returned',
+    'تم تقديم الطلب مرة أخرى':                                      'b-submitted',
+    'قيد المراجعة':                                                 'b-invest',
+    'تم رفض البلاغ':                                                'b-rejected',
+    'بانتظار اعتماد رئيس قسم المتابعة والبلاغات':                    'b-phead',
+    'تم توجيه البلاغ للتفتيش':                                       'b-session',
+    'قيد المراجعة من قسم التفتيش':                                  'b-invest',
+    'بانتظار اجراء الزيارة التفتيشية':                              'b-session',
+    'بانتظار اعتماد رئيس قسم التفتيش':                              'b-phead',
+    'انتظار اعتماد مدير الدائرة':                                   'b-phead',
+    'تم اغلاق البلاغ':                                              'b-closed',
+    'تم حفظ البلاغ':                                                'b-draft',
+    /* قديم — للتوافق */
     'بانتظار تعيين':                                               'b-submitted',
     'قيد الدراسة والتحقق':                                         'b-invest',
     'قيد المراجعة الميدانية':                                      'b-invest',
@@ -196,7 +210,6 @@ const INSP_CONFIG = {
     'بانتظار موافقة المدير':                                       'b-phead',
     'صدر قرار':                                                    'b-decided',
     'مُغلق':                                                       'b-closed',
-    /* قديم — للتوافق */
     'تم تقديم البلاغ — بانتظار تعيين المختص':                      'b-submitted',
     'مرفوع من جهة رسمية — بانتظار تعيين المختص':                   'b-submitted',
     'قيد التحقق الميداني':                                         'b-invest',
@@ -236,32 +249,40 @@ const INSP_CONFIG = {
   /* ── أنماط أزرار الإجراءات ── */
   actionStyles: {
     'حفظ كمسودة':                           'btn-ghost btn-sm',
-    'إرسال البلاغ':                          'btn-primary btn-sm',
+    'حفظ وإرسال الطلب':                      'btn-primary btn-sm',
+    'إعادة إرسال':                           'btn-primary btn-sm',
+    'إعادة إرسال البلاغ':                    'btn-primary btn-sm',
+    'إعادة إرسال الطلب':                     'btn-primary btn-sm',
     /* fund-staff */
     'تعيين للمختص':                          'btn-primary btn-sm',
+    'إعادة تعيين الموظف المختص ببحث البلاغ':  'btn-secondary btn-sm',
     /* monitoring-employee */
-    'إرسال للمفتش':                          'btn-primary btn-sm',
-    'طلب مستندات':                           'btn-warning btn-sm',
-    'رفض للغلق':                             'btn-danger btn-sm',
-    'إعادة للتصحيح':                         'btn-warning btn-sm',
-    'بدء الدراسة':                           'btn-primary btn-sm',
-    'إعادة إرسال للمفتش':                   'btn-primary btn-sm',
+    'طلب استيفاء البيانات من كافة أطراف البلاغ':  'btn-warning btn-sm',
+    'طلب استيفاء البيانات من صاحب العمل فقط':      'btn-warning btn-sm',
+    'طلب استيفاء البيانات من المؤمن عليه فقط':      'btn-warning btn-sm',
+    'توصية برفض البلاغ':                           'btn-danger btn-sm',
+    'توصية بقبول البلاغ':                          'btn-primary btn-sm',
+    'توصية بحفظ البلاغ':                           'btn-ghost btn-sm',
     /* field-inspector */
-    'رفع رأي مبدئي':                         'btn-primary btn-sm',
-    'رفع رأي نهائي':                         'btn-accent btn-sm',
-    'إحالة للفرع':                           'btn-secondary btn-sm',
-    'إغلاق':                                 'btn-ghost btn-sm',
+    'إعادة البلاغ الى رئيس قسم المتابعة والبلاغات': 'btn-warning btn-sm',
+    'توجيه البلاغ الى رئيس القسم':               'btn-primary btn-sm',
     /* monitoring-head */
-    'اعتماد':                                'btn-accent btn-sm',
+    'إعادة البلاغ إلى الموظف':                 'btn-warning btn-sm',
+    'تأكيد رفض البلاغ':                        'btn-danger btn-sm',
+    'اغلاق البلاغ':                            'btn-ghost btn-sm',
+    'حفظ البلاغ':                              'btn-ghost btn-sm',
+    'توجيه لقسم التفتيش':                      'btn-primary btn-sm',
     /* field-head */
-    'اعتماد نهائي':                          'btn-accent btn-sm',
-    'رفض':                                   'btn-danger btn-sm',
-    'إعادة للمفتش':                          'btn-warning btn-sm',
+    'رفض اجراء التفتيش على البلاغ':            'btn-danger btn-sm',
     /* inspection-director */
-    'موافقة وتحويل للمفتش':                 'btn-accent btn-sm',
+    'إعادة البلاغ إلى موظف قسم المتابعة والبلاغات': 'btn-warning btn-sm',
+    'إعادة البلاغ إلى موظف قسم التفتيش':         'btn-warning btn-sm',
+    'إعادة البلاغ إلى رئيس قسم المتابعة والبلاغات': 'btn-warning btn-sm',
+    'إعادة البلاغ إلى رئيس قسم التفتيش':         'btn-warning btn-sm',
+    'إعادة فتح البلاغ':                         'btn-accent btn-sm',
     /* external */
-    'تقديم تظلم':                            'btn-warning btn-sm',
-    'استيفاء البيانات وإعادة الإرسال':      'btn-primary btn-sm',
+    'تقديم تظلم':                              'btn-warning btn-sm',
+    'استيفاء البيانات وإعادة الإرسال':        'btn-primary btn-sm',
     /* قديم — للتوافق */
     'تعيين المختص':                          'btn-primary btn-sm',
     'طلب استيفاء بيانات':                    'btn-warning btn-sm',
@@ -293,17 +314,19 @@ const INSP_CONFIG = {
   /* ── الحالات حسب الدور ── */
   roleStages: {
     'monitoring-employee': [
-      'قيد الدراسة والتحقق',
-      'تم تقديم البلاغ — بانتظار تعيين المختص',
-      'تم إعادة البلاغ لاستيفاء البيانات'
+      'قيد المراجعة',
+      'تم تقديم البلاغ',
+      'تم اعادة فتح البلاغ',
+      'تم إعادة الطلب لاستيفاء البيانات',
+      'تم تقديم الطلب مرة أخرى'
     ],
     'monitoring-head': [
-      'بانتظار اعتماد رئيس القسم',
-      'قيد الدراسة والتحقق'
+      'بانتظار اعتماد رئيس قسم المتابعة والبلاغات',
+      'قيد المراجعة'
     ],
-    'field-inspector': ['مجدولة', 'جارية'],
-    'field-head': ['بانتظار مراجعة المحضر'],
-    'inspection-director': ['يتطلب قرار المدير', 'بانتظار اعتماد رئيس القسم'],
+    'field-inspector': ['قيد المراجعة من قسم التفتيش', 'بانتظار اجراء الزيارة التفتيشية'],
+    'field-head': ['بانتظار اعتماد رئيس قسم التفتيش'],
+    'inspection-director': ['انتظار اعتماد مدير الدائرة', 'تم اغلاق البلاغ'],
   }
 
 };
