@@ -312,7 +312,16 @@ function formatDateTime(d) {
 
 /* ── Content Helpers ── */
 function getContent() { return document.getElementById('app-content'); }
-function renderContent(html) { const ct = getContent(); if (ct) ct.innerHTML = html; }
+function renderContent(html) {
+  const ct = getContent();
+  if (!ct) return;
+  ct.innerHTML = html;
+  ct.querySelectorAll('script').forEach(old => {
+    const s = document.createElement('script');
+    s.textContent = old.textContent;
+    old.parentNode.replaceChild(s, old);
+  });
+}
 
 /* ── URL Params ── */
 function getParam(key) {

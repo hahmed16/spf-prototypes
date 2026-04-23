@@ -430,6 +430,7 @@ function renderComplaintNew(role) {
         </div>
       </div>
     </div></div>`;
+  };
 
   return `<div class="pg-head"><div><h1>تقديم بلاغ جديد</h1><p>تعبئة نموذج البلاغ وإرساله</p></div>
     <div class="pg-acts"><button class="btn btn-secondary" onclick="goHome()">${ICONS.arrow_right}رجوع</button></div></div>
@@ -518,27 +519,28 @@ function renderComplaintNew(role) {
     const civil = document.getElementById('worker-civil-input') ? document.getElementById('worker-civil-input').value.trim() : '';
     const panel = document.getElementById('worker-data-panel');
     if (!panel) return;
-    const w = INSP_DATA.workers.find(x => x.civil === civil);
-    if (w) {
-      panel.style.display = 'block';
-      document.getElementById('w-name').textContent = w.name;
-      document.getElementById('w-civil').textContent = w.civil;
-      document.getElementById('w-position').textContent = w.position;
-      document.getElementById('w-salary').textContent = (w.salary || '—') + ' ر.ع / شهر';
-      document.getElementById('w-joindate').textContent = w.joinDate || w.insuredFrom || '—';
-      const statusBadgeTxt = w.employmentStatus === 'على رأس العمل' ? 'b-approved' : 'b-returned';
-      document.getElementById('w-status').innerHTML = '<span class="badge ' + statusBadgeTxt + '">' + (w.employmentStatus || '—') + '</span>';
-      document.getElementById('w-dept').textContent = w.department;
-      const resignGrp = document.getElementById('w-resign-grp');
-      if (w.resignDate) {
-        resignGrp.style.display = '';
-        document.getElementById('w-resigndate').textContent = w.resignDate;
-      } else {
-        resignGrp.style.display = 'none';
-      }
+    if (!civil || civil.length < 4) {
+      showToast('يرجى إدخال رقم مدني صحيح (4 أرقام على الأقل)', 'w');
+      return;
+    }
+    const w = INSP_DATA.workers.find(x => x.civil === civil)
+           || INSP_DATA.workers.find(x => x.civil.startsWith(civil) || civil.startsWith(x.civil.substring(0,6)))
+           || INSP_DATA.workers[0];
+    panel.style.display = 'block';
+    document.getElementById('w-name').textContent = w.name;
+    document.getElementById('w-civil').textContent = civil;
+    document.getElementById('w-position').textContent = w.position;
+    document.getElementById('w-salary').textContent = (w.salary || '—') + ' ر.ع / شهر';
+    document.getElementById('w-joindate').textContent = w.joinDate || w.insuredFrom || '—';
+    const statusBadgeTxt = w.employmentStatus === 'على رأس العمل' ? 'b-approved' : 'b-returned';
+    document.getElementById('w-status').innerHTML = '<span class="badge ' + statusBadgeTxt + '">' + (w.employmentStatus || '—') + '</span>';
+    document.getElementById('w-dept').textContent = w.department;
+    const resignGrp = document.getElementById('w-resign-grp');
+    if (w.resignDate) {
+      resignGrp.style.display = '';
+      document.getElementById('w-resigndate').textContent = w.resignDate;
     } else {
-      showToast('لم يتم العثور على عامل بهذا الرقم المدني في السجلات', 'w');
-      panel.style.display = 'none';
+      resignGrp.style.display = 'none';
     }
   }
   function _toggleEmployerLookup(val) {
@@ -880,16 +882,23 @@ function _renderCumulativeRolePanels(c) {
 }
 
 function _getComplaintActions(role, status) {
-  const isApplicant = role === 'fund-staff' || role === 'insured' || role === 'employer';
-  if (isApplicant) {
+  if (role === 'employer' || role === 'insured') {
     if (status === 'مسودة') return ['حفظ كمسودة', 'حفظ وإرسال الطلب'];
     if (status === 'تم إعادة الطلب لاستيفاء البيانات') return ['إعادة إرسال الطلب'];
     if (status === 'تم اعادة فتح البلاغ') return ['إعادة إرسال الطلب'];
     return [];
   }
 
+  if (role === 'fund-staff') {
+    if (status === 'مسودة') return ['حفظ كمسودة', 'حفظ وإرسال الطلب'];
+    if (status === 'تم إعادة الطلب لاستيفاء البيانات') return ['إعادة إرسال الطلب'];
+    if (status === 'تم اعادة فتح البلاغ') return ['إعادة إرسال الطلب'];
+    if (status === 'بانتظار تعيين') return ['تعيين مختص'];
+    return [];
+  }
+
   if (role === 'monitoring-employee') {
-    if (status !== 'قيد المراجعة' && status !== 'تم اعادة فتح البلاغ') return [];
+    if (status !== 'قيد المراجعة' && status !== 'تم اعادة فتح البلاغ' && status !== 'تم تقديم الطلب مرة أخرى') return [];
     return [
       'طلب استيفاء البيانات من كافة أطراف البلاغ',
       'طلب استيفاء البيانات من صاحب العمل فقط',
@@ -996,11 +1005,23 @@ function _buildComplaintActionPanel(role, c) {
     return `<button class="btn ${cls}" onclick="executeComplaintAction('${b}', '${c.id}', '${panelId}')">${b}</button>`;
   }).join('');
 
+  const isAssignment = btns.includes('تعيين مختص');
+  const specialistSelectHtml = isAssignment ? `
+        <div class="fgrp" style="margin-bottom:12px">
+          <label class="flbl">اختيار الموظف المختص <span class="req">*</span></label>
+          <select class="fc" data-specialist-select>
+            <option value="">— اختر الموظف المختص —</option>
+            <option value="سيف خلفان الأمري">سيف خلفان الأمري — قسم المتابعة والبلاغات</option>
+            <option value="منى راشد البلوشي">منى راشد البلوشي — الصندوق</option>
+          </select>
+        </div>` : '';
+
   if (isApplicantRole) {
     return `
     <div class="dp" id="${panelId}">
       <div class="ph"><h3><span class="pico bl">${ICONS.pen}</span>لوحة الإجراءات</h3></div>
       <div class="dp-body">
+        ${specialistSelectHtml}
         <div class="fgrp" style="margin-bottom:12px">
           <label class="flbl">ملاحظة</label>
           <textarea class="fc" rows="3" data-action-note data-required="false" placeholder="اكتب أي ملاحظات إضافية..." style="resize:vertical"></textarea>
@@ -1432,7 +1453,8 @@ function renderVisitsList(role, type) {
       <td><div class="df ac g8">
         <button class="btn btn-primary btn-xs" onclick="navigateTo('${detailPage}','id=${v.id}')">${ICONS.eye}عرض</button>
         ${role === 'field-inspector' && v.status === 'مجدولة' ? `<button class="btn btn-accent btn-xs" onclick="showToast('تم بدء الزيارة','s')">بدء</button>` : ''}
-        ${(role === 'field-head') && v.status === 'بانتظار مراجعة المحضر' ? `<button class="btn btn-warning btn-xs" onclick="navigateTo('${detailPage}','id=${v.id}')">مراجعة</button>` : ''}
+        ${role === 'field-head' && v.status === 'بانتظار مراجعة المحضر' ? `<button class="btn btn-warning btn-xs" onclick="navigateTo('${detailPage}','id=${v.id}')">مراجعة</button>` : ''}
+        ${role === 'field-head' && (v.status === 'مجدولة' || v.status === 'قيد التنفيذ') ? `<button class="btn btn-secondary btn-xs" onclick="navigateTo('inspector-redistribution','visit=${v.id}')">${ICONS.switch}إعادة توزيع</button>` : ''}
       </div></td>
     </tr>`).join('');
 
@@ -1582,8 +1604,39 @@ function renderVisitNew(role) {
 
 /* ── تحليل بيانات العامل ── */
 function renderWorkerAnalysis(role) {
-  const wid = getParam('worker') || INSP_DATA.workers[0].id;
-  const w = INSP_DATA.workers.find(x => x.id === wid) || INSP_DATA.workers[0];
+  const wid   = getParam('worker');
+  const civil = getParam('civil');
+  let w = null;
+  if (wid)   w = INSP_DATA.workers.find(x => x.id === wid);
+  if (!w && civil) w = INSP_DATA.workers.find(x => x.civil === civil)
+                    || INSP_DATA.workers.find(x => x.civil.startsWith(civil.substring(0,6)))
+                    || INSP_DATA.workers[0];
+
+  /* ── شاشة البحث (لا يوجد معامل) ── */
+  if (!w) {
+    return `<div class="pg-head"><div><h1>تحليل بيانات العمال</h1><p>أدخل الرقم المدني للعامل لعرض ملفه الشامل</p></div></div>
+    <div class="card">
+      <div class="ph"><h3><span class="pico bl">${ICONS.user}</span>البحث عن عامل</h3></div>
+      <div class="pb" style="max-width:480px">
+        <div class="fgrp" style="margin-bottom:16px">
+          <label class="flbl">الرقم المدني للعامل <span class="req">*</span></label>
+          <div style="display:flex;gap:8px">
+            <input class="fc" id="wa-civil" placeholder="مثال: 0912345001" style="flex:1">
+            <button class="btn btn-primary" onclick="_analyzeWorker()">${ICONS.chart}تحليل البيانات</button>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:6px">يمكن أيضاً الوصول لهذه الشاشة من تفاصيل البلاغ أو الزيارة لعرض بيانات العامل مباشرة.</div>
+        </div>
+      </div>
+    </div>
+    <script>
+    function _analyzeWorker() {
+      var v = document.getElementById('wa-civil') ? document.getElementById('wa-civil').value.trim() : '';
+      if (!v || v.length < 4) { showToast('يرجى إدخال رقم مدني صحيح (4 أرقام على الأقل)','w'); return; }
+      navigateTo('worker-analysis', 'civil=' + v);
+    }
+    document.addEventListener('keydown', function(e){ if(e.key==='Enter'){ var el=document.getElementById('wa-civil'); if(el===document.activeElement) _analyzeWorker(); } });
+    <\/script>`;
+  }
 
   const wComplaints = INSP_DATA.complaints.filter(c => c.workerId === w.id);
   const wAppeals   = INSP_DATA.appeals.filter(a => a.submittedByName === w.name || (INSP_DATA.complaints.filter(c=>c.workerId===w.id).map(c=>c.id).includes(a.relatedId)));
@@ -1601,11 +1654,16 @@ function renderWorkerAnalysis(role) {
   };
   const _srvBadge = s => s === 'نشط' ? 'b-approved' : 'b-rejected';
 
-  const workerSelector = `<div class="card" style="margin-bottom:16px"><div class="pb" style="padding:14px 18px">
-    <div class="df ac g8" style="flex-wrap:wrap">
-      <span style="font-size:12.5px;font-weight:700;color:var(--text2)">اختر العامل:</span>
-      ${INSP_DATA.workers.map(wk => `<button class="btn ${wk.id===w.id?'btn-primary':'btn-secondary'} btn-sm" onclick="navigateTo('worker-analysis','worker=${wk.id}')">${wk.name}</button>`).join('')}
-      <div style="margin-right:auto"><button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير التقرير...','i')">${ICONS.download}تصدير ملف العامل</button></div>
+  const workerSelector = `<div class="card" style="margin-bottom:16px;background:var(--g50)"><div class="pb" style="padding:11px 18px">
+    <div class="df ac g8">
+      <span class="pico bl" style="font-size:16px">${ICONS.user}</span>
+      <span style="font-size:13px;font-weight:700;color:var(--text)">${w.name}</span>
+      <span style="font-size:11.5px;color:var(--text3)">رقم الهوية: ${w.civil}</span>
+      <span class="badge ${_riskClass(w.riskLevel)}" style="font-size:11px">${w.riskLevel} المخاطر</span>
+      <div style="margin-right:auto;display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" onclick="navigateTo('worker-analysis')">${ICONS.arrow_right}بحث جديد</button>
+        <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير الملف...','i')">${ICONS.download}تصدير</button>
+      </div>
     </div></div></div>`;
 
   const profileCard = `
@@ -1618,7 +1676,7 @@ function renderWorkerAnalysis(role) {
           <div style="font-size:12px;color:var(--text3);margin-top:2px">${w.position} — ${w.employer}</div>
           <div style="font-size:11px;color:var(--text3);margin-top:2px">رقم الهوية: ${w.civil}</div></div>
       </div>
-      <div class="fg fg-3">
+      <div class="fg fg-2">
         <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${w.nationality}</div></div>
         <div class="fgrp"><label class="flbl">الجنس</label><div class="fro">${w.gender}</div></div>
         <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${w.dob}</div></div>
@@ -1780,10 +1838,8 @@ function renderWorkerAnalysis(role) {
   return `<div class="pg-head"><div><h1>تحليل بيانات العمال</h1><p>ملف شامل للعامل مع كامل السجلات والمؤشرات المرتبطة</p></div>
     <div class="pg-acts"><button class="btn btn-secondary btn-sm">${ICONS.download}تصدير</button></div></div>
     ${workerSelector}
-    <div class="dashboard-auto-grid">
-      <div>${profileCard}</div>
-      <div>${riskCard}</div>
-    </div>
+    ${profileCard}
+    ${riskCard}
     ${externalIntegration}
     ${salaryHistory}
     ${insHistory}
@@ -1795,8 +1851,39 @@ function renderWorkerAnalysis(role) {
 
 /* ── تحليل بيانات صاحب العمل ── */
 function renderEmployerAnalysis(role) {
-  const eid = getParam('employer') || INSP_DATA.employers[0].id;
-  const e = INSP_DATA.employers.find(x => x.id === eid) || INSP_DATA.employers[0];
+  const eid = getParam('employer');
+  const crn  = getParam('crn');
+  let e = null;
+  if (eid) e = INSP_DATA.employers.find(x => x.id === eid);
+  if (!e && crn) e = INSP_DATA.employers.find(x => x.crn === crn)
+                  || INSP_DATA.employers.find(x => x.crn.startsWith(crn.substring(0,6)))
+                  || INSP_DATA.employers[0];
+
+  /* ── شاشة البحث (لا يوجد معامل) ── */
+  if (!e) {
+    return `<div class="pg-head"><div><h1>تحليل بيانات أصحاب العمل</h1><p>أدخل رقم السجل التجاري لعرض الملف الشامل للمنشأة</p></div></div>
+    <div class="card">
+      <div class="ph"><h3><span class="pico or">${ICONS.building}</span>البحث عن منشأة</h3></div>
+      <div class="pb" style="max-width:480px">
+        <div class="fgrp" style="margin-bottom:16px">
+          <label class="flbl">رقم السجل التجاري <span class="req">*</span></label>
+          <div style="display:flex;gap:8px">
+            <input class="fc" id="ea-crn" placeholder="مثال: 1234567890" style="flex:1">
+            <button class="btn btn-primary" onclick="_analyzeEmployer()">${ICONS.chart}تحليل البيانات</button>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:6px">يمكن أيضاً الوصول لهذه الشاشة من تفاصيل البلاغ أو الزيارة لعرض بيانات المنشأة مباشرة.</div>
+        </div>
+      </div>
+    </div>
+    <script>
+    function _analyzeEmployer() {
+      var v = document.getElementById('ea-crn') ? document.getElementById('ea-crn').value.trim() : '';
+      if (!v || v.length < 4) { showToast('يرجى إدخال رقم سجل تجاري صحيح (4 أرقام على الأقل)','w'); return; }
+      navigateTo('employer-analysis', 'crn=' + v);
+    }
+    document.addEventListener('keydown', function(e){ if(e.key==='Enter'){ var el=document.getElementById('ea-crn'); if(el===document.activeElement) _analyzeEmployer(); } });
+    <\/script>`;
+  }
 
   const eComplaints = INSP_DATA.complaints.filter(c => c.employerId === e.id);
   const eAppeals   = INSP_DATA.appeals.filter(a => a.employerId === e.id);
@@ -1809,11 +1896,16 @@ function renderEmployerAnalysis(role) {
   const _csBadge = s => s==='منتظم'?'b-approved':s==='متأخر'?'b-rejected':'b-returned';
   const _vBadge  = s => s==='مرتفع'?'b-rejected':s==='متوسط'?'b-returned':'b-approved';
 
-  const employerSelector = `<div class="card" style="margin-bottom:16px"><div class="pb" style="padding:14px 18px">
-    <div class="df ac g8" style="flex-wrap:wrap">
-      <span style="font-size:12.5px;font-weight:700;color:var(--text2)">اختر المنشأة:</span>
-      ${INSP_DATA.employers.map(em => `<button class="btn ${em.id===e.id?'btn-primary':'btn-secondary'} btn-sm" onclick="navigateTo('employer-analysis','employer=${em.id}')">${em.name.split(' ').slice(0,3).join(' ')}</button>`).join('')}
-      <div style="margin-right:auto"><button class="btn btn-secondary btn-sm">${ICONS.download}تصدير ملف المنشأة</button></div>
+  const employerSelector = `<div class="card" style="margin-bottom:16px;background:var(--g50)"><div class="pb" style="padding:11px 18px">
+    <div class="df ac g8">
+      <span class="pico or" style="font-size:16px">${ICONS.building}</span>
+      <span style="font-size:13px;font-weight:700;color:var(--text)">${e.name}</span>
+      <span style="font-size:11.5px;color:var(--text3)">سجل تجاري: ${e.crn}</span>
+      <span class="badge ${_riskClass(e.riskLevel)}" style="font-size:11px">${e.riskLevel} المخاطر</span>
+      <div style="margin-right:auto;display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" onclick="navigateTo('employer-analysis')">${ICONS.arrow_right}بحث جديد</button>
+        <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير الملف...','i')">${ICONS.download}تصدير</button>
+      </div>
     </div></div></div>`;
 
   const kpis = `<div class="stats-grid">
@@ -1826,7 +1918,7 @@ function renderEmployerAnalysis(role) {
   const profileCard = `
     <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.building}</span>ملف المنشأة</h3>
       <span class="badge ${_riskClass(e.riskLevel)}">${e.riskLevel} المخاطر</span></div>
-    <div class="pb"><div class="fg fg-3">
+    <div class="pb"><div class="fg fg-2">
       <div class="fgrp"><label class="flbl">اسم المنشأة</label><div class="fro fw7">${e.name}</div></div>
       <div class="fgrp"><label class="flbl">السجل التجاري</label><div class="fro">${e.crn}</div></div>
       <div class="fgrp"><label class="flbl">القطاع</label><div class="fro">${e.sector}</div></div>
@@ -2035,10 +2127,8 @@ function renderEmployerAnalysis(role) {
     <div class="pg-acts"><button class="btn btn-secondary btn-sm">${ICONS.download}تصدير</button></div></div>
     ${employerSelector}
     ${kpis}
-    <div class="dashboard-auto-grid">
-      <div>${profileCard}</div>
-      <div>${complianceCard}</div>
-    </div>
+    ${profileCard}
+    ${complianceCard}
     ${empExternalInteg}
     ${empCharts}
     ${workersCard}
@@ -2052,15 +2142,104 @@ function renderEmployerAnalysis(role) {
 
 /* ── إعادة التخصيص (monitoring-head) ── */
 function renderReassignment(role) {
-  return `<div class="pg-head"><div><h1>إعادة تخصيص البلاغات</h1><p>توزيع البلاغات بين موظفي القسم وتعديل التخصيصات الحالية</p></div></div>
-    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.switch}</span>البلاغات المخصصة حالياً</h3></div>
-    <div class="tbl-wrap"><table class="dtbl"><thead><tr><th>رقم البلاغ</th><th>النوع</th><th>الحالة</th><th>المختص الحالي</th><th>عبء العمل</th><th>إعادة التخصيص</th></tr></thead>
-    <tbody>${INSP_DATA.complaints.filter(c=>c.assignedTo).map(c=>`
-      <tr><td class="fw7 txp">${c.id}</td><td>${c.type}</td><td>${statusBadge(c.status)}</td>
-      <td>${c.assignedTo}</td><td><span class="badge b-medium">4 بلاغات</span></td>
-      <td><div class="df ac g8"><select class="fc" style="width:180px"><option>سيف خلفان الأمري</option><option>موظف آخر</option></select>
-        <button class="btn btn-accent btn-xs" onclick="showToast('تم إعادة التخصيص','s')">تطبيق</button></div></td></tr>`).join('')}
-    </tbody></table></div></div>`;
+  const preId = getParam('complaint');
+
+  /* عبء العمل لكل موظف */
+  const staffList = [
+    { name: 'سيف خلفان الأمري',  civil: '06456789', dept: 'قسم المتابعة والبلاغات' },
+    { name: 'منى راشد البلوشي',   civil: '09123456', dept: 'الصندوق' },
+  ].map(s => ({
+    ...s,
+    active: INSP_DATA.complaints.filter(c => c.assignedTo === s.name && !c.status.includes('إغلاق') && !c.status.includes('قرار') && !c.status.includes('حفظ')).length
+  }));
+
+  const _staffOpts = (exclude) => staffList
+    .filter(s => s.name !== exclude)
+    .map(s => `<option value="${s.name}">${s.name} — عبء العمل الحالي: ${s.active} بلاغ</option>`)
+    .join('');
+
+  const searchPanel = `
+    <div class="card">
+      <div class="ph"><h3><span class="pico bl">${ICONS.switch}</span>البحث عن طلب لإعادة التخصيص</h3></div>
+      <div class="pb" style="max-width:520px">
+        <div class="fgrp" style="margin-bottom:16px">
+          <label class="flbl">رقم البلاغ أو التظلم <span class="req">*</span></label>
+          <div style="display:flex;gap:8px">
+            <input class="fc" id="ra-id" placeholder="مثال: 2025-01-000001" value="${preId||''}" style="flex:1">
+            <button class="btn btn-primary" onclick="_lookupForReassign()">${ICONS.eye}عرض التفاصيل</button>
+          </div>
+        </div>
+        <div id="ra-result"></div>
+      </div>
+    </div>`;
+
+  /* توزيع عبء العمل الحالي */
+  const workloadCard = `
+    <div class="card">
+      <div class="ph"><h3><span class="pico tl">${ICONS.user}</span>توزيع عبء العمل الحالي</h3></div>
+      <div class="pb">
+        ${staffList.map(s => `
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)">
+            <div style="width:38px;height:38px;border-radius:50%;background:var(--primary);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${s.name.substring(0,2)}</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:700;color:var(--text)">${s.name}</div>
+              <div style="font-size:11.5px;color:var(--text3)">${s.dept}</div>
+            </div>
+            <span class="badge ${s.active>4?'b-returned':s.active>2?'b-session':'b-approved'}" style="font-size:12px">${s.active} بلاغ نشط</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  const script = `<script>
+  function _lookupForReassign() {
+    var id = document.getElementById('ra-id') ? document.getElementById('ra-id').value.trim() : '';
+    var res = document.getElementById('ra-result');
+    if (!res) return;
+    if (!id) { showToast('يرجى إدخال رقم الطلب','w'); return; }
+    var c = (INSP_DATA.complaints||[]).find(function(x){return x.id===id;})
+         || (INSP_DATA.appeals||[]).find(function(x){return x.id===id;});
+    if (!c) {
+      res.innerHTML = '<div class="alert alert-w" style="margin-top:12px">${ICONS.warn} لم يتم العثور على طلب بهذا الرقم. تحقق من الرقم وأعد المحاولة.</div>';
+      return;
+    }
+    var currentAssignee = c.assignedTo || c.assignedToName || 'غير معين';
+    var staffOpts = ${JSON.stringify(staffList)}.filter(function(s){return s.name!==currentAssignee;}).map(function(s){
+      return '<option value="'+s.name+'">'+s.name+' — عبء العمل الحالي: '+s.active+' بلاغ</option>';
+    }).join('');
+    res.innerHTML = '<div style="margin-top:12px">'
+      + '<div class="card" style="margin-bottom:12px"><div class="ph"><h3><span class=\"pico bl\">&#x1F4CB;</span>تفاصيل الطلب</h3>'
+      + '<span class=\"badge b-session\" style=\"font-size:11px\">'+c.id+'</span></div>'
+      + '<div class=\"pb\"><div class=\"fg fg-2\">'
+      + '<div class=\"fgrp\"><label class=\"flbl\">النوع</label><div class=\"fro\">'+(c.type||'تظلم')+'</div></div>'
+      + '<div class=\"fgrp\"><label class=\"flbl\">الحالة</label><div class=\"fro\">'+statusBadge(c.status)+'</div></div>'
+      + '<div class=\"fgrp\"><label class=\"flbl\">المختص الحالي</label><div class=\"fro fw7\">'+currentAssignee+'</div></div>'
+      + '<div class=\"fgrp\"><label class=\"flbl\">المنشأة</label><div class=\"fro\">'+(c.employerName||'—')+'</div></div>'
+      + '<div class=\"fgrp\"><label class=\"flbl\">الأولوية</label><div class=\"fro\">'+(c.priority||'—')+'</div></div>'
+      + '<div class=\"fgrp\"><label class=\"flbl\">الموعد النهائي</label><div class=\"fro\">'+(c.dueDate||'—')+'</div></div>'
+      + '</div></div></div>'
+      + '<div class=\"card\"><div class=\"ph\"><h3><span class=\"pico tl\">&#x1F501;</span>اختيار الموظف الجديد</h3></div>'
+      + '<div class=\"pb\"><div class=\"fgrp\" style=\"margin-bottom:14px\">'
+      + '<label class=\"flbl\">الموظف الجديد المكلف <span class=\"req\">*</span></label>'
+      + '<select class=\"fc\" id=\"ra-new-staff\"><option value=\"\">— اختر الموظف —</option>'+staffOpts+'</select></div>'
+      + '<div class=\"fgrp\" style=\"margin-bottom:14px\">'
+      + '<label class=\"flbl\">ملاحظة (اختياري)</label>'
+      + '<textarea class=\"fc\" id=\"ra-note\" rows=\"2\" placeholder=\"سبب إعادة التخصيص...\"></textarea></div>'
+      + '<button class=\"btn btn-primary\" onclick=\"_confirmReassign(\\'' + id + '\\')\">تأكيد إعادة التخصيص</button>'
+      + '</div></div></div>';
+  }
+  function _confirmReassign(id) {
+    var sel = document.getElementById('ra-new-staff');
+    if (!sel || !sel.value) { showToast('يرجى اختيار موظف','w'); return; }
+    showToast('تمت إعادة تخصيص الطلب ' + id + ' إلى ' + sel.value, 's');
+    document.getElementById('ra-result').innerHTML = '<div class=\"alert alert-s\" style=\"margin-top:12px\">تمت إعادة التخصيص بنجاح.</div>';
+  }
+  ${preId ? 'document.addEventListener("DOMContentLoaded",function(){document.getElementById("ra-id").value="'+preId+'";_lookupForReassign();});' : ''}
+  <\/script>`;
+
+  return `<div class="pg-head"><div><h1>إعادة تخصيص الطلبات</h1><p>ابحث عن طلب وحدد الموظف الجديد المكلف به</p></div></div>
+  ${searchPanel}
+  ${workloadCard}
+  ${script}`;
 }
 
 /* ── متابعة الأعمال المتأخرة (monitoring-head) ── */
@@ -2078,7 +2257,7 @@ function renderOverdueTracking(role) {
           <td>${c.assignedTo || 'غير معين'}</td>
           <td><div class="df ac g8">
             <button class="btn btn-warning btn-xs" onclick="showToast('تم إرسال تنبيه','w')">${ICONS.bell}تنبيه</button>
-            <button class="btn btn-danger btn-xs" onclick="showToast('تم إعادة التخصيص','s')">إعادة تخصيص</button>
+            <button class="btn btn-danger btn-xs" onclick="navigateTo('reassignment','complaint=${c.id}')">إعادة تخصيص</button>
           </div></td></tr>`;}).join(''))}`;
 }
 
@@ -2149,19 +2328,113 @@ function renderCorrectiveActions(role) {
 
 /* ── إعادة توزيع المفتشين (field-head) ── */
 function renderInspectorRedistribution(role) {
-  return `<div class="pg-head"><div><h1>إعادة توزيع المفتشين</h1><p>إدارة تكليفات المفتشين الميدانيين وموازنة أعباء العمل</p></div></div>
-    <div class="stats-grid">
-      <div class="scard p"><div class="sc-lbl">مفتشون نشطون</div><div class="sc-val">1</div></div>
-      <div class="scard w"><div class="sc-lbl">زيارات مجدولة</div><div class="sc-val">3</div></div>
-      <div class="scard i"><div class="sc-lbl">متوسط زيارات / مفتش</div><div class="sc-val">3.0</div></div>
-    </div>
-    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.user}</span>توزيع المفتشين</h3></div>
-    <div class="tbl-wrap"><table class="dtbl"><thead><tr><th>المفتش</th><th>الزيارات المكلف بها</th><th>قيد التنفيذ</th><th>مجدولة</th><th>نسبة الإشغال</th><th>إجراء</th></tr></thead>
-    <tbody><tr>
-      <td class="fw7">حاتم سالم الزدجالي</td><td>7</td><td>1</td><td>1</td>
-      <td><div style="display:flex;align-items:center;gap:8px"><div class="progress-bar-wrap" style="flex:1;margin:0"><div class="progress-bar-fill" style="width:70%;background:var(--warning)"></div></div><span class="fs11">70%</span></div></td>
-      <td><button class="btn btn-secondary btn-xs" onclick="showToast('فتح نافذة إعادة التوزيع','i')">تعديل التكليف</button></td>
-    </tr></tbody></table></div></div>`;
+  const preId = getParam('visit');
+
+  const allVisits = [
+    ...INSP_DATA.visits.periodic,
+    ...INSP_DATA.visits.surprise,
+    ...INSP_DATA.visits.scheduled
+  ];
+  const activeStatuses = ['مجدولة', 'قيد التنفيذ', 'بانتظار اجراء الزيارة التفتيشية'];
+
+  /* عبء العمل لكل مفتش */
+  const inspectors = [
+    { name: 'حاتم سالم الزدجالي', civil: '04678901', dept: 'قسم التفتيش الميداني' },
+  ].map(ins => ({
+    ...ins,
+    active: allVisits.filter(v => v.inspectorName === ins.name && activeStatuses.some(s => v.status && v.status.includes(s.split(' ')[0]))).length,
+    total:  allVisits.filter(v => v.inspectorName === ins.name).length
+  }));
+
+  const workloadCard = `
+    <div class="card">
+      <div class="ph"><h3><span class="pico bl">${ICONS.user}</span>أعباء العمل الحالية للمفتشين</h3></div>
+      <div class="pb">
+        ${inspectors.map(ins => {
+          const pct = ins.total ? Math.round(ins.active / Math.max(ins.total, 1) * 100) : 0;
+          return `<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${ins.name.substring(0,2)}</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:700;color:var(--text)">${ins.name}</div>
+              <div style="font-size:11.5px;color:var(--text3)">${ins.dept}</div>
+              <div class="progress-bar-wrap" style="margin-top:6px;height:6px"><div class="progress-bar-fill" style="width:${pct}%;background:${pct>75?'var(--danger)':pct>50?'var(--warning)':'var(--success)'}"></div></div>
+            </div>
+            <div style="text-align:center;min-width:80px">
+              <div style="font-size:18px;font-weight:800;color:var(--primary)">${ins.active}</div>
+              <div style="font-size:10.5px;color:var(--text3)">زيارة نشطة</div>
+            </div>
+            <span class="badge ${ins.active>4?'b-returned':ins.active>2?'b-session':'b-approved'}" style="font-size:11px">${ins.total} إجمالاً</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+  const searchPanel = `
+    <div class="card">
+      <div class="ph"><h3><span class="pico tl">${ICONS.switch}</span>البحث عن زيارة لإعادة التوزيع</h3></div>
+      <div class="pb" style="max-width:520px">
+        <div class="fgrp" style="margin-bottom:16px">
+          <label class="flbl">رقم الزيارة <span class="req">*</span></label>
+          <div style="display:flex;gap:8px">
+            <input class="fc" id="ir-id" placeholder="مثال: 2025-03-000001" value="${preId||''}" style="flex:1">
+            <button class="btn btn-primary" onclick="_lookupVisitForRedist()">${ICONS.eye}عرض التفاصيل</button>
+          </div>
+        </div>
+        <div id="ir-result"></div>
+      </div>
+    </div>`;
+
+  const inspJson = JSON.stringify(inspectors);
+  const script = `<script>
+  function _lookupVisitForRedist() {
+    var id = document.getElementById('ir-id') ? document.getElementById('ir-id').value.trim() : '';
+    var res = document.getElementById('ir-result');
+    if (!res) return;
+    if (!id) { showToast('يرجى إدخال رقم الزيارة','w'); return; }
+    var allV = [].concat(INSP_DATA.visits.periodic||[], INSP_DATA.visits.surprise||[], INSP_DATA.visits.scheduled||[]);
+    var v = allV.find(function(x){return x.id===id;});
+    if (!v) {
+      res.innerHTML = '<div class="alert alert-w" style="margin-top:12px">${ICONS.warn} لم يتم العثور على زيارة بهذا الرقم.</div>';
+      return;
+    }
+    var typeLabel = v.id.includes('-03-')?'دورية':v.id.includes('-04-')?'مفاجئة':'مجدولة';
+    var insList = ${inspJson};
+    var insOpts = insList.filter(function(i){return i.name!==v.inspectorName;}).map(function(i){
+      return '<option value="'+i.name+'">'+i.name+' — نشط: '+i.active+' زيارة</option>';
+    }).join('');
+    if(!insOpts) insOpts='<option value="حاتم سالم الزدجالي (مفتش آخر)">حاتم سالم الزدجالي (إعادة تعيين) — نشط: '+insList[0].active+' زيارة</option>';
+    res.innerHTML = '<div style="margin-top:12px">'
+      + '<div class="card" style="margin-bottom:12px"><div class="ph"><h3><span class=\"pico bl\">&#x1F4CB;</span>تفاصيل الزيارة</h3>'
+      + '<span class=\"badge b-session\" style=\"font-size:11px\">'+v.id+'</span></div>'
+      + '<div class=\"pb\"><div class=\"fg fg-2\">'
+      + '<div class=\"fgrp\"><label class=\"flbl\">نوع الزيارة</label><div class=\"fro fw7\">'+typeLabel+'</div></div>'
+      + '<div class=\"fgrp\"><label class=\"flbl\">الحالة</label><div class=\"fro\">'+statusBadge(v.status)+'</div></div>'
+      + '<div class=\"fgrp\"><label class=\"flbl\">المنشأة</label><div class=\"fro fw7\">'+(v.employerName||'—')+'</div></div>'
+      + '<div class=\"fgrp\"><label class=\"flbl\">تاريخ الجدولة</label><div class=\"fro\">'+(v.scheduledDate||'—')+'</div></div>'
+      + '<div class=\"fgrp\"><label class=\"flbl\">المفتش الحالي</label><div class=\"fro fw7 txp\">'+(v.inspectorName||'غير معين')+'</div></div>'
+      + '</div></div></div>'
+      + '<div class=\"card\"><div class=\"ph\"><h3><span class=\"pico tl\">&#x1F501;</span>اختيار المفتش الجديد</h3></div>'
+      + '<div class=\"pb\">'
+      + '<div class=\"fgrp\" style=\"margin-bottom:14px\"><label class=\"flbl\">المفتش الجديد <span class=\"req\">*</span></label>'
+      + '<select class=\"fc\" id=\"ir-new-insp\"><option value=\"\">— اختر المفتش —</option>'+insOpts+'</select></div>'
+      + '<div class=\"fgrp\" style=\"margin-bottom:14px\"><label class=\"flbl\">سبب إعادة التوزيع (اختياري)</label>'
+      + '<textarea class=\"fc\" id=\"ir-note\" rows=\"2\" placeholder=\"مثل: تعارض مواعيد، مرض، تحميل متوازن...\"></textarea></div>'
+      + '<button class=\"btn btn-primary\" onclick=\"_confirmRedist(\\'' + id + '\\')\">تأكيد إعادة التوزيع</button>'
+      + '</div></div></div>';
+  }
+  function _confirmRedist(id) {
+    var sel = document.getElementById('ir-new-insp');
+    if (!sel || !sel.value) { showToast('يرجى اختيار مفتش','w'); return; }
+    showToast('تمت إعادة توزيع الزيارة ' + id + ' إلى ' + sel.value, 's');
+    document.getElementById('ir-result').innerHTML = '<div class=\"alert alert-s\" style=\"margin-top:12px\">تمت إعادة التوزيع بنجاح.</div>';
+  }
+  ${preId ? 'document.addEventListener("DOMContentLoaded",function(){_lookupVisitForRedist();});' : ''}
+  <\/script>`;
+
+  return `<div class="pg-head"><div><h1>إعادة توزيع المفتشين</h1><p>ابحث عن زيارة وحدد المفتش الجديد المكلف بها</p></div></div>
+  ${searchPanel}
+  ${workloadCard}
+  ${script}`;
 }
 
 /* ── خطط التفتيش (inspection-director) ── */
@@ -2191,27 +2464,21 @@ function renderInspectionPlanDetails(role) {
   return `<div class="pg-head"><div><h1>${p.id}</h1><p>${p.title}</p></div>
     <div class="pg-acts">${statusBadge(p.status)}<button class="btn btn-secondary btn-sm" onclick="navigateTo('inspection-plans-list')">${ICONS.arrow_right}رجوع</button>
       ${p.status !== 'مكتملة' ? `<button class="btn btn-accent" onclick="showToast('تم اعتماد الخطة','s')">${ICONS.check}اعتماد</button>` : ''}</div></div>
-  <div class="dashboard-auto-grid">
-    <div>
-      <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>تفاصيل الخطة</h3></div>
-      <div class="pb"><div class="fg fg-2">
-        <div class="fgrp"><label class="flbl">رقم الخطة</label><div class="fro fw7">${p.id}</div></div>
-        <div class="fgrp"><label class="flbl">اسم الخطة</label><div class="fro">${p.title}</div></div>
-        <div class="fgrp"><label class="flbl">الفترة</label><div class="fro">${p.period}</div></div>
-        <div class="fgrp"><label class="flbl">إجمالي المنشآت المستهدفة</label><div class="fro">${p.targetCount}</div></div>
-        <div class="fgrp"><label class="flbl">الزيارات المنجزة</label><div class="fro txp fw7">${p.completedCount}</div></div>
-        <div class="fgrp"><label class="flbl">المعتمد بواسطة</label><div class="fro">${p.approvedBy || 'بانتظار الاعتماد'}</div></div>
-        <div class="fgrp"><label class="flbl">تاريخ الاعتماد</label><div class="fro">${p.approvalDate || '—'}</div></div>
-      </div></div></div>
-    </div>
-    <div>
-      <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.chart}</span>التقدم</h3></div>
-      <div class="pb">
-        <div class="progress-bar-wrap" style="height:14px;margin-bottom:8px"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
-        <p class="fs11 tx3 mt8">${pct}% من الزيارات مكتملة</p>
-      </div></div>
-    </div>
-  </div>`;
+  <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>تفاصيل الخطة</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">رقم الخطة</label><div class="fro fw7">${p.id}</div></div>
+      <div class="fgrp"><label class="flbl">اسم الخطة</label><div class="fro">${p.title}</div></div>
+      <div class="fgrp"><label class="flbl">الفترة</label><div class="fro">${p.period}</div></div>
+      <div class="fgrp"><label class="flbl">إجمالي المنشآت المستهدفة</label><div class="fro">${p.targetCount}</div></div>
+      <div class="fgrp"><label class="flbl">الزيارات المنجزة</label><div class="fro txp fw7">${p.completedCount}</div></div>
+      <div class="fgrp"><label class="flbl">المعتمد بواسطة</label><div class="fro">${p.approvedBy || 'بانتظار الاعتماد'}</div></div>
+      <div class="fgrp"><label class="flbl">تاريخ الاعتماد</label><div class="fro">${p.approvalDate || '—'}</div></div>
+    </div></div></div>
+  <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.chart}</span>التقدم</h3></div>
+    <div class="pb">
+      <div class="progress-bar-wrap" style="height:14px;margin-bottom:8px"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+      <p class="fs11 tx3 mt8">${pct}% من الزيارات مكتملة</p>
+    </div></div>`;
 }
 
 /* ── حالات الحظر (inspection-director) ── */
@@ -2241,26 +2508,20 @@ function renderBanCaseDetails(role) {
     <div class="pg-acts">${statusBadge(b.status)}<button class="btn btn-secondary btn-sm" onclick="navigateTo('ban-cases-list')">${ICONS.arrow_right}رجوع</button>
       ${b.status.includes('سارٍ') ? `<button class="btn btn-accent btn-sm" onclick="showToast('تم رفع الحظر','s')">${ICONS.unlock}رفع الحظر</button>` : ''}
     </div></div>
-  <div class="dashboard-auto-grid">
-    <div>
-      <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.lock}</span>تفاصيل الحظر</h3></div>
-      <div class="pb"><div class="fg fg-2">
-        <div class="fgrp"><label class="flbl">رقم الحظر</label><div class="fro fw7">${b.id}</div></div>
-        <div class="fgrp"><label class="flbl">المنشأة</label><div class="fro txp fw7">${b.employerName}</div></div>
-        <div class="fgrp"><label class="flbl">تاريخ الإصدار</label><div class="fro">${b.issuedDate}</div></div>
-        <div class="fgrp"><label class="flbl">أصدره</label><div class="fro">${b.issuedBy}</div></div>
-        <div class="fgrp span-full"><label class="flbl">سبب الحظر</label><div class="fro" style="min-height:50px">${b.reason}</div></div>
-        ${b.liftedDate ? `<div class="fgrp"><label class="flbl">تاريخ رفع الحظر</label><div class="fro txp">${b.liftedDate}</div></div>` : ''}
-        ${b.liftedBy ? `<div class="fgrp"><label class="flbl">رُفع بواسطة</label><div class="fro">${b.liftedBy}</div></div>` : ''}
-      </div></div></div>
-      ${b.status.includes('سارٍ') ? _dpanel('رفع الحظر أو تعديله', ['رفع الحظر','تعديل شروط الحظر'],
-        `<div class="fgrp"><label class="flbl">سبب رفع الحظر أو تعديله</label><textarea class="fc" rows="3" placeholder="اكتب المبرر..."></textarea></div>`) : ''}
-    </div>
-    <div>
-      <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>سجل الأحداث</h3></div>
-      <div class="pb">${renderTimeline(b.timeline || [])}</div></div>
-    </div>
-  </div>`;
+  <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.lock}</span>تفاصيل الحظر</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">رقم الحظر</label><div class="fro fw7">${b.id}</div></div>
+      <div class="fgrp"><label class="flbl">المنشأة</label><div class="fro txp fw7">${b.employerName}</div></div>
+      <div class="fgrp"><label class="flbl">تاريخ الإصدار</label><div class="fro">${b.issuedDate}</div></div>
+      <div class="fgrp"><label class="flbl">أصدره</label><div class="fro">${b.issuedBy}</div></div>
+      <div class="fgrp span-full"><label class="flbl">سبب الحظر</label><div class="fro" style="min-height:50px">${b.reason}</div></div>
+      ${b.liftedDate ? `<div class="fgrp"><label class="flbl">تاريخ رفع الحظر</label><div class="fro txp">${b.liftedDate}</div></div>` : ''}
+      ${b.liftedBy ? `<div class="fgrp"><label class="flbl">رُفع بواسطة</label><div class="fro">${b.liftedBy}</div></div>` : ''}
+    </div></div></div>
+  ${b.status.includes('سارٍ') ? _dpanel('رفع الحظر أو تعديله', ['رفع الحظر','تعديل شروط الحظر'],
+    `<div class="fgrp"><label class="flbl">سبب رفع الحظر أو تعديله</label><textarea class="fc" rows="3" placeholder="اكتب المبرر..."></textarea></div>`) : ''}
+  <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>سجل الأحداث</h3></div>
+    <div class="pb">${renderTimeline(b.timeline || [])}</div></div>`;
 }
 
 /* ── تحليل المخاطر (ops-analyst) ── */
@@ -2486,7 +2747,7 @@ function renderPatternDetection(role) {
       </div>
       <div class="pb">
         <p style="font-size:13px;color:var(--text2);line-height:1.75;margin-bottom:14px">${p.desc}</p>
-        <div class="fg fg-3" style="margin-bottom:14px">
+        <div class="fg fg-2" style="margin-bottom:14px">
           <div class="fgrp"><label class="flbl">التكرار</label><div class="fro fw7">${p.frequency}</div></div>
           <div class="fgrp"><label class="flbl">الفترة الزمنية</label><div class="fro">${p.timespan}</div></div>
           <div class="fgrp span-full"><label class="flbl">التوصية</label><div class="fro" style="color:var(--primary)">${p.recommendation}</div></div>
@@ -2532,28 +2793,303 @@ function renderPatternDetection(role) {
 
 /* ── إعداد خطة التفتيش (ops-analyst) ── */
 function renderInspectionPlanDraft(role) {
-  return `<div class="pg-head"><div><h1>إعداد مقترح خطة التفتيش الدوري</h1><p>تحليل البيانات وتجهيز مقترح الخطة للاعتماد</p></div></div>
-  <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>معلومات الخطة المقترحة</h3></div>
-  <div class="pb"><div class="fg fg-2">
-    <div class="fgrp"><label class="flbl">الفترة الزمنية <span class="req">*</span></label>
-      <select class="fc"><option>الربع الثاني 2025 (أبريل–يونيو)</option><option>الربع الثالث 2025</option><option>النصف الثاني 2025</option></select></div>
-    <div class="fgrp"><label class="flbl">معيار اختيار المنشآت</label>
-      <select class="fc"><option>مستوى المخاطر</option><option>آخر زيارة</option><option>سجل المخالفات</option></select></div>
-    <div class="fgrp"><label class="flbl">عدد المنشآت المقترح</label><input type="number" class="fc" value="12"></div>
-    <div class="fgrp"><label class="flbl">عدد المفتشين المتاحين</label><input type="number" class="fc" value="1"></div>
-  </div></div></div>
-  <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.warn}</span>المنشآت ذات الأولوية (استناداً لتحليل المخاطر)</h3></div>
-  <div class="tbl-wrap"><table class="dtbl"><thead><tr><th>المنشأة</th><th>آخر زيارة</th><th>مستوى الخطر</th><th>الامتثال</th><th>أولوية الإدراج</th></tr></thead>
-  <tbody>${INSP_DATA.employers.map(e=>`<tr>
-    <td class="fw7">${e.name}</td><td>${e.lastVisit}</td>
-    <td><span class="badge ${_riskClass(e.riskLevel)}">${e.riskLevel}</span></td>
-    <td><span style="color:${_compColor(e.complianceScore)};font-weight:700">${e.complianceScore}%</span></td>
-    <td><span class="badge ${e.riskLevel==='مرتفع'?'b-high':e.riskLevel==='متوسط'?'b-medium':'b-low'}">${e.riskLevel==='مرتفع'?'أولى':'ثانوية'}</span></td>
-  </tr>`).join('')}</tbody></table></div></div>
-  <div class="df ac g8 mt16">
-    <button class="btn btn-primary" onclick="showToast('تم رفع المقترح للاعتماد','s')">${ICONS.check}رفع المقترح للاعتماد</button>
-    <button class="btn btn-ghost" onclick="showToast('تم الحفظ كمسودة','i')">حفظ كمسودة</button>
-  </div>`;
+  const pid    = getParam('id');
+  const isNew  = getParam('new') === 'true';
+
+  /* ══════════════════════════════════════════
+     قائمة الخطط السابقة (الصفحة الافتراضية)
+  ══════════════════════════════════════════ */
+  if (!pid && !isNew) {
+    const plans = INSP_DATA.inspectionPlans || [];
+    const rows = plans.map(p => {
+      const pct = p.targetCount ? Math.round(p.completedCount / p.targetCount * 100) : 0;
+      const stCls = p.status.includes('مكتملة') ? 'b-approved' : p.status.includes('معتمدة') ? 'b-session' : p.status.includes('مسودة') ? 'b-draft' : 'b-returned';
+      return `<tr>
+        <td><a href="#" onclick="navigateTo('inspection-plan-draft','id=${p.id}')" class="txp fw7">${p.id}</a></td>
+        <td class="fw7">${p.title}</td>
+        <td>${p.period}</td>
+        <td><span class="badge ${stCls}">${p.status}</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="progress-bar-wrap" style="flex:1;margin:0;height:8px"><div class="progress-bar-fill" style="width:${pct}%;background:${_compColor(pct)}"></div></div>
+            <span class="fs11 fw7">${pct}%</span>
+          </div>
+          <div style="font-size:10.5px;color:var(--text3);margin-top:2px">${p.completedCount} من ${p.targetCount} زيارة</div>
+        </td>
+        <td>${p.approvedBy || '<span class="tx3">—</span>'}</td>
+        <td>${p.approvalDate || '<span class="tx3">—</span>'}</td>
+        <td><button class="btn btn-primary btn-xs" onclick="navigateTo('inspection-plan-draft','id=${p.id}')">${ICONS.eye}عرض</button></td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="8">${_noData()}</td></tr>`;
+
+    return `<div class="pg-head"><div><h1>خطط التفتيش الدوري</h1><p>سجل خطط التفتيش الدورية وحالة تنفيذها</p></div>
+      <div class="pg-acts"><button class="btn btn-primary" onclick="navigateTo('inspection-plan-draft','new=true')">${ICONS.plus}إعداد خطة جديدة</button></div></div>
+      <div class="stats-grid">
+        <div class="scard s"><div class="sc-lbl">إجمالي الخطط</div><div class="sc-val">${plans.length}</div></div>
+        <div class="scard p"><div class="sc-lbl">قيد التنفيذ</div><div class="sc-val">${plans.filter(p=>p.status.includes('قيد')).length}</div></div>
+        <div class="scard i"><div class="sc-lbl">مكتملة</div><div class="sc-val">${plans.filter(p=>p.status.includes('مكتملة')).length}</div></div>
+        <div class="scard d"><div class="sc-lbl">مسودات</div><div class="sc-val">${plans.filter(p=>p.status.includes('مسودة')).length}</div></div>
+      </div>
+      ${_tblWrap(['رقم الخطة','المسمى','الفترة','الحالة','نسبة الإنجاز','المعتمد بواسطة','تاريخ الاعتماد','إجراء'], rows)}`;
+  }
+
+  /* ══════════════════════════════════════════
+     تفاصيل خطة موجودة
+  ══════════════════════════════════════════ */
+  if (pid) {
+    const p = (INSP_DATA.inspectionPlans || []).find(x => x.id === pid) || INSP_DATA.inspectionPlans[0];
+    const pct = p.targetCount ? Math.round(p.completedCount / p.targetCount * 100) : 0;
+    const stCls = p.status.includes('مكتملة') ? 'b-approved' : p.status.includes('معتمدة') ? 'b-session' : p.status.includes('مسودة') ? 'b-draft' : 'b-returned';
+
+    const stages = [
+      { lbl: 'إنشاء المقترح',     done: true,  by: p.createdBy,    date: p.createdDate },
+      { lbl: 'رفع للاعتماد',      done: !!p.approvedBy, by: p.createdBy, date: p.createdDate },
+      { lbl: 'اعتماد مدير الدائرة', done: !!p.approvedBy, by: p.approvedBy||'—', date: p.approvalDate||'—' },
+      { lbl: 'قيد التنفيذ',       done: p.completedCount > 0, by: 'حاتم سالم الزدجالي', date: '—' },
+      { lbl: 'مكتملة',            done: p.status.includes('مكتملة'), by: '—', date: '—' },
+    ];
+
+    const planVisits = [...(INSP_DATA.visits.periodic||[]), ...(INSP_DATA.visits.surprise||[]), ...(INSP_DATA.visits.scheduled||[])]
+      .filter(v => v.planId === p.id);
+
+    return `<div class="pg-head"><div><h1>${p.title}</h1><p>${p.period}</p></div>
+      <div class="pg-acts">${statusBadge(p.status)}
+        <button class="btn btn-secondary btn-sm" onclick="navigateTo('inspection-plan-draft')">${ICONS.arrow_right}قائمة الخطط</button>
+      </div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>بيانات الخطة</h3></div>
+      <div class="pb"><div class="fg fg-2">
+        <div class="fgrp"><label class="flbl">رقم الخطة</label><div class="fro fw7">${p.id}</div></div>
+        <div class="fgrp"><label class="flbl">الفترة</label><div class="fro">${p.period}</div></div>
+        <div class="fgrp"><label class="flbl">معيار الاختيار</label><div class="fro">${p.riskCriteria}</div></div>
+        <div class="fgrp"><label class="flbl">القطاعات المستهدفة</label><div class="fro">${(p.sectors||[]).join('، ')}</div></div>
+        <div class="fgrp"><label class="flbl">المفتشون المكلفون</label><div class="fro">${(p.inspectors||[]).join('، ')}</div></div>
+        <div class="fgrp"><label class="flbl">منشأت مستهدفة</label><div class="fro fw7">${p.targetCount}</div></div>
+      </div></div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.chart}</span>نسبة الإنجاز</h3></div>
+      <div class="pb">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+          <div style="font-size:36px;font-weight:800;color:${_compColor(pct)}">${pct}%</div>
+          <div>
+            <div class="progress-bar-wrap" style="width:260px;height:12px"><div class="progress-bar-fill" style="width:${pct}%;background:${_compColor(pct)}"></div></div>
+            <div style="font-size:11.5px;color:var(--text3);margin-top:4px">${p.completedCount} زيارة منجزة من أصل ${p.targetCount}</div>
+          </div>
+        </div>
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">قيد التنفيذ</label><div class="fro fw7 txp">${p.inProgressCount || 0}</div></div>
+          <div class="fgrp"><label class="flbl">متبقية</label><div class="fro fw7">${p.targetCount - p.completedCount - (p.inProgressCount||0)}</div></div>
+        </div>
+      </div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.clock}</span>مراحل اعتماد الخطة</h3></div>
+      <div class="pb">
+        ${stages.map((s,i) => `
+          <div style="display:flex;align-items:flex-start;gap:14px;padding:10px 0;${i<stages.length-1?'border-bottom:1px solid var(--border)':''}">
+            <div style="width:28px;height:28px;border-radius:50%;background:${s.done?'var(--success)':'var(--g200)'};color:${s.done?'#fff':'var(--text3)'};display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;font-weight:700">${s.done?'✓':(i+1)}</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:700;color:${s.done?'var(--text)':'var(--text3)'}">${s.lbl}</div>
+              ${s.done ? `<div style="font-size:11.5px;color:var(--text3)">${s.by} — ${s.date}</div>` : '<div style="font-size:11.5px;color:var(--text3)">بانتظار اتخاذ الإجراء</div>'}
+            </div>
+            <span class="badge ${s.done?'b-approved':'b-draft'}" style="font-size:10.5px">${s.done?'مكتمل':'معلق'}</span>
+          </div>`).join('')}
+      </div></div>
+
+    ${planVisits.length ? `
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.clipboard}</span>الزيارات المرتبطة بالخطة (${planVisits.length})</h3></div>
+      <div class="tbl-wrap"><table class="dtbl">
+        <thead><tr><th>رقم الزيارة</th><th>المنشأة</th><th>المفتش</th><th>الحالة</th><th>تاريخ الجدولة</th></tr></thead>
+        <tbody>${planVisits.map(v=>`<tr>
+          <td class="txp fw7">${v.id}</td><td>${v.employerName}</td><td>${v.inspectorName}</td>
+          <td>${statusBadge(v.status)}</td><td>${v.scheduledDate}</td>
+        </tr>`).join('')}</tbody>
+      </table></div></div>` : ''}`;
+  }
+
+  /* ══════════════════════════════════════════
+     نموذج إعداد خطة جديدة
+  ══════════════════════════════════════════ */
+  const recommended = (INSP_DATA.employers || []).map(e => ({
+    id: e.id, name: e.name, crn: e.crn, sector: e.sector,
+    riskLevel: e.riskLevel, complianceScore: e.complianceScore,
+    lastVisit: e.lastVisit, violations: (e.violations||[]).length,
+    priority: e.riskLevel === 'مرتفع' ? 'أولى' : e.riskLevel === 'متوسط' ? 'ثانوية' : 'عادية'
+  }));
+
+  const recRows = recommended.map(e => `
+    <tr id="rec-row-${e.id}">
+      <td><input type="checkbox" id="rec-chk-${e.id}" style="cursor:pointer"></td>
+      <td class="fw7">${e.name}</td>
+      <td style="font-size:11.5px">${e.crn}</td>
+      <td>${e.sector}</td>
+      <td>${e.lastVisit}</td>
+      <td><span class="badge ${_riskClass(e.riskLevel)}">${e.riskLevel}</span></td>
+      <td><span style="color:${_compColor(e.complianceScore)};font-weight:700">${e.complianceScore}%</span></td>
+      <td><span class="badge ${e.priority==='أولى'?'b-high':e.priority==='ثانوية'?'b-medium':'b-low'}">${e.priority}</span></td>
+      <td><button class="btn btn-accent btn-xs" onclick="_addEmpToPlan('${e.id}','${e.name}','${e.sector}','${e.riskLevel}','${e.complianceScore}%','${e.lastVisit}')">${ICONS.plus}إضافة</button></td>
+    </tr>`).join('');
+
+  const empJson = JSON.stringify(recommended);
+
+  const script = `<script>
+  var _planEmps = [];
+
+  function _addEmpToPlan(id, name, sector, risk, comp, lastVisit) {
+    if (_planEmps.find(function(x){return x.id===id;})) { showToast('المنشأة مضافة بالفعل','w'); return; }
+    _planEmps.push({id:id, name:name, sector:sector, riskLevel:risk, complianceScore:comp, lastVisit:lastVisit, source:'يدوي / ترشيح'});
+    _renderPlanTable();
+    showToast('تمت إضافة ' + name + ' إلى الخطة','s');
+  }
+
+  function _addChecked() {
+    var added = 0;
+    ${JSON.stringify(recommended)}.forEach(function(e){
+      var chk = document.getElementById('rec-chk-'+e.id);
+      if (chk && chk.checked) { _addEmpToPlan(e.id,e.name,e.sector,e.riskLevel,e.complianceScore+'%',e.lastVisit); added++; }
+    });
+    if (!added) showToast('لم يتم تحديد أي منشأة','w');
+  }
+
+  function _addAllRecommended() {
+    ${JSON.stringify(recommended)}.forEach(function(e){ _addEmpToPlan(e.id,e.name,e.sector,e.riskLevel,e.complianceScore+'%',e.lastVisit); });
+  }
+
+  function _searchManualEmp() {
+    var q = document.getElementById('manual-search') ? document.getElementById('manual-search').value.trim() : '';
+    var res = document.getElementById('manual-result');
+    if (!q || q.length < 3) { showToast('أدخل 3 أحرف على الأقل للبحث','w'); return; }
+    var all = (INSP_DATA.employers||[]).concat([
+      {id:'EMP-EXT-001', name:'شركة الخليج للمقاولات', crn:'5551234567', sector:'البناء', riskLevel:'متوسط', complianceScore:68, lastVisit:'2024-08-10'},
+      {id:'EMP-EXT-002', name:'مؤسسة النور للتجارة',   crn:'6667891234', sector:'التجارة', riskLevel:'منخفض', complianceScore:88, lastVisit:'2024-06-20'},
+      {id:'EMP-EXT-003', name:'شركة الفجر للصناعة',    crn:'7774561230', sector:'التصنيع',  riskLevel:'مرتفع', complianceScore:45, lastVisit:'2024-04-15'}
+    ]);
+    var found = all.filter(function(e){ return e.name.includes(q) || e.crn.includes(q); });
+    if (!found.length) { res.innerHTML = '<div class="alert alert-w" style="margin-top:8px">لم يتم العثور على منشأة تطابق البحث.</div>'; return; }
+    res.innerHTML = '<div style="margin-top:10px">' + found.map(function(e){
+      return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);border-radius:var(--rsm);margin-bottom:6px;background:var(--g50)">'
+        + '<div style="flex:1"><div class="fw7" style="font-size:13px">'+e.name+'</div><div style="font-size:11.5px;color:var(--text3)">'+e.crn+' — '+e.sector+'</div></div>'
+        + '<span class="badge b-session" style="font-size:10.5px">امتثال: '+e.complianceScore+'%</span>'
+        + '<button class="btn btn-accent btn-xs" onclick="_addEmpToPlan(\''+e.id+'\',\''+e.name+'\',\''+e.sector+'\',\''+e.riskLevel+'\',\''+e.complianceScore+'%\',\''+e.lastVisit+'\')">إضافة للخطة</button>'
+        + '</div>';
+    }).join('') + '</div>';
+  }
+
+  function _removeFromPlan(id) {
+    _planEmps = _planEmps.filter(function(x){return x.id!==id;});
+    _renderPlanTable();
+  }
+
+  function _renderPlanTable() {
+    var el = document.getElementById('plan-emp-table');
+    var cnt = document.getElementById('plan-emp-count');
+    if (cnt) cnt.textContent = _planEmps.length;
+    if (!el) return;
+    if (!_planEmps.length) {
+      el.innerHTML = '<div class="tx3 fs11" style="padding:14px">لم يتم إضافة أي منشأة بعد. استخدم الأقسام أعلاه لإضافة المنشآت المستهدفة.</div>';
+      return;
+    }
+    var rows = _planEmps.map(function(e,i){
+      return '<tr><td class="fw7">'+(i+1)+'</td><td class="fw7">'+e.name+'</td><td style="font-size:11.5px;color:var(--text3)">'+e.sector+'</td>'
+        +'<td><span class="badge b-session" style="font-size:10.5px">'+e.complianceScore+'</span></td>'
+        +'<td><span class="badge '+_badgeForRisk(e.riskLevel)+'">'+e.riskLevel+'</span></td>'
+        +'<td style="font-size:11.5px">'+e.lastVisit+'</td>'
+        +'<td><button class="btn btn-danger btn-xs" onclick="_removeFromPlan(\''+e.id+'\')">حذف</button></td></tr>';
+    }).join('');
+    el.innerHTML = '<div class="tbl-wrap"><table class="dtbl"><thead><tr><th>#</th><th>المنشأة</th><th>القطاع</th><th>الامتثال</th><th>الخطر</th><th>آخر زيارة</th><th>إزالة</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  function _badgeForRisk(r) { return r==='مرتفع'?'b-high':r==='متوسط'?'b-medium':'b-low'; }
+
+  function _savePlan(action) {
+    var period = document.getElementById('pd-period') ? document.getElementById('pd-period').value : '—';
+    var title  = document.getElementById('pd-title')  ? document.getElementById('pd-title').value.trim() : '';
+    if (!title) { showToast('يرجى إدخال اسم الخطة','w'); return; }
+    if (!_planEmps.length) { showToast('يرجى إضافة منشأة واحدة على الأقل','w'); return; }
+    if (action === 'draft') {
+      showToast('تم حفظ الخطة كمسودة — يمكنك إكمالها لاحقاً', 'i');
+    } else {
+      showToast('تم رفع خطة التفتيش لاعتماد مدير الدائرة', 's');
+    }
+  }
+
+  document.addEventListener('keydown', function(e){
+    if (e.key==='Enter') {
+      var el = document.getElementById('manual-search');
+      if (el && el === document.activeElement) _searchManualEmp();
+    }
+  });
+  <\/script>`;
+
+  return `<div class="pg-head"><div><h1>إعداد خطة تفتيش دورية جديدة</h1><p>بناء مقترح الخطة وتحديد المنشآت المستهدفة ثم رفعها للاعتماد</p></div>
+    <div class="pg-acts"><button class="btn btn-secondary btn-sm" onclick="navigateTo('inspection-plan-draft')">${ICONS.arrow_right}قائمة الخطط</button></div></div>
+
+  <!-- ── 1. بيانات الخطة ── -->
+  <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>بيانات الخطة الأساسية</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">اسم الخطة <span class="req">*</span></label>
+        <input class="fc" id="pd-title" placeholder="مثال: خطة التفتيش الدوري — الربع الثاني 2025"></div>
+      <div class="fgrp"><label class="flbl">الفترة الزمنية <span class="req">*</span></label>
+        <select class="fc" id="pd-period">
+          <option>الربع الثاني 2025 (أبريل–يونيو)</option>
+          <option>الربع الثالث 2025 (يوليو–سبتمبر)</option>
+          <option>الربع الرابع 2025 (أكتوبر–ديسمبر)</option>
+          <option>النصف الأول 2026</option>
+        </select></div>
+      <div class="fgrp"><label class="flbl">المفتشون المتاحون</label>
+        <select class="fc" multiple style="height:72px">
+          <option selected>حاتم سالم الزدجالي</option>
+          <option>مفتش ثانٍ (غير متاح حالياً)</option>
+        </select></div>
+      <div class="fgrp"><label class="flbl">ملاحظات</label>
+        <textarea class="fc" rows="3" placeholder="أي توجيهات أو ملاحظات خاصة بهذه الخطة..."></textarea></div>
+    </div></div></div>
+
+  <!-- ── 2. المنشآت المرشحة تلقائياً ── -->
+  <div class="card"><div class="ph">
+    <h3><span class="pico rd">${ICONS.warn}</span>المنشآت المرشحة تلقائياً (بناءً على تحليل المخاطر)</h3>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary btn-sm" onclick="_addChecked()">${ICONS.check}إضافة المحددة</button>
+      <button class="btn btn-ghost btn-sm" onclick="_addAllRecommended()">إضافة الكل</button>
+    </div></div>
+    <div class="tbl-wrap"><table class="dtbl">
+      <thead><tr><th style="width:36px"></th><th>المنشأة</th><th>السجل التجاري</th><th>القطاع</th><th>آخر زيارة</th><th>الخطر</th><th>الامتثال</th><th>الأولوية</th><th>إجراء</th></tr></thead>
+      <tbody>${recRows}</tbody>
+    </table></div></div>
+
+  <!-- ── 3. إضافة منشأة يدوياً ── -->
+  <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.plus}</span>إضافة منشأة يدوياً</h3>
+    <span style="font-size:11.5px;color:var(--text3)">إضافة منشآت غير مرشحة تلقائياً وفق تقدير الموظف</span></div>
+    <div class="pb" style="max-width:520px">
+      <div class="fgrp" style="margin-bottom:0">
+        <label class="flbl">البحث بالاسم أو رقم السجل التجاري</label>
+        <div style="display:flex;gap:8px">
+          <input class="fc" id="manual-search" placeholder="مثال: شركة التقنية / 1234567890" style="flex:1">
+          <button class="btn btn-primary" onclick="_searchManualEmp()">${ICONS.eye}بحث</button>
+        </div>
+      </div>
+      <div id="manual-result"></div>
+    </div></div>
+
+  <!-- ── 4. المنشآت المختارة للخطة ── -->
+  <div class="card"><div class="ph">
+    <h3><span class="pico bl">${ICONS.clipboard}</span>المنشآت المختارة للخطة</h3>
+    <span class="badge b-session" style="font-size:12px" id="plan-emp-count">0</span> منشأة</div>
+    <div id="plan-emp-table">
+      <div class="tx3 fs11" style="padding:14px">لم يتم إضافة أي منشأة بعد. استخدم الأقسام أعلاه لإضافة المنشآت المستهدفة.</div>
+    </div></div>
+
+  <!-- ── الإجراءات ── -->
+  <div class="dp"><div class="ph"><h3><span class="pico bl">${ICONS.pen}</span>حفظ الخطة</h3></div>
+    <div class="dp-body">
+      <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} بعد الرفع للاعتماد سيتلقى مدير الدائرة إشعاراً لمراجعة الخطة واعتمادها أو إعادتها.</div>
+      <div class="dp-acts">
+        <button class="btn btn-primary" onclick="_savePlan('approve')">${ICONS.check}رفع للاعتماد</button>
+        <button class="btn btn-secondary" onclick="_savePlan('draft')">حفظ كمسودة</button>
+        <button class="btn btn-ghost" onclick="navigateTo('inspection-plan-draft')">إلغاء</button>
+      </div>
+    </div></div>
+
+  ${script}`;
 }
 
 /* ── قائمة التقارير ── */
@@ -2743,7 +3279,7 @@ function renderReportDetails(role) {
     <div class="pg-acts"><button class="btn btn-secondary btn-sm" onclick="navigateTo('reports-list')">${ICONS.arrow_right}رجوع</button>
       <button class="btn btn-primary btn-sm" onclick="showToast('جارٍ التنزيل...','i')">${ICONS.download}تنزيل PDF</button></div></div>
   <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>معلومات التقرير</h3></div>
-  <div class="pb"><div class="fg fg-3">
+  <div class="pb"><div class="fg fg-2">
     <div class="fgrp"><label class="flbl">رقم التقرير</label><div class="fro fw7">${r.id}</div></div>
     <div class="fgrp"><label class="flbl">تاريخ الإصدار</label><div class="fro">${r.date}</div></div>
     <div class="fgrp"><label class="flbl">الفترة المشمولة</label><div class="fro">${r.period}</div></div>
