@@ -144,7 +144,7 @@ function renderDashboard(role) {
 
 function _recentItems(role) {
   if (role === 'field-inspector' || role === 'field-head') {
-    const _vpg = id => id.includes('MFJ') ? 'visit-surprise-details' : id.includes('MJD') ? 'visit-scheduled-details' : 'visit-periodic-details';
+    const _vpg = id => id.includes('-04-') ? 'visit-surprise-details' : id.includes('-05-') ? 'visit-scheduled-details' : 'visit-periodic-details';
     const rows = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise].slice(0, 4).map(v =>
       `<tr><td><a href="#" onclick="navigateTo('${_vpg(v.id)}','id=${v.id}')" class="txp fw7">${v.id}</a></td>
        <td>${v.employerName}</td><td>${statusBadge(v.status)}</td><td>${v.scheduledDate}</td>
@@ -174,13 +174,13 @@ function _recentItems(role) {
 /* ── قائمة البلاغات ── */
 function renderComplaintsList(role) {
   const isExt = role === 'employer' || role === 'insured';
-  const canCreate = INSP_CONFIG.roles[role].canCreate && (role === 'employer' || role === 'insured' || role === 'fund-staff');
+  const canCreate = INSP_CONFIG.roles[role] && INSP_CONFIG.roles[role].canCreate;
   const createBtn = canCreate ? `<button class="btn btn-primary" onclick="navigateTo('complaint-new')">${ICONS.plus}بلاغ جديد</button>` : '';
 
   const filters = _filterBar([
     { label: 'بحث برقم البلاغ أو الاسم', ph: 'أدخل رقم البلاغ...' },
-    { label: 'الحالة', type: 'select', opts: ['قيد الدراسة والتحقق','بانتظار اعتماد رئيس القسم','تم جدولة زيارة تفتيشية','تم إصدار قرار بشأن البلاغ','تم إغلاق البلاغ'] },
-    { label: 'نوع البلاغ', type: 'select', opts: ['مخالفة نظام العمل','تقصير في الاشتراكات','ظروف عمل غير آمنة','شكوى عمالية'] },
+    { label: 'الحالة', type: 'select', opts: ['بانتظار تعيين','قيد الدراسة والتحقق','قيد المراجعة الميدانية','بانتظار اعتماد رئيس الشكاوى','تم جدولة زيارة','صدر قرار','مُغلق'] },
+    { label: 'نوع البلاغ', type: 'select', opts: ['تسجيل عقد','تعديل تاريخ الالتحاق','تعديل تاريخ انتهاء الخدمة','تعديل الأجر'] },
     { label: 'الأولوية', type: 'select', opts: ['عاجل','مرتفع','متوسط','منخفض'] },
     { label: 'من تاريخ', type: 'date' },
     { label: 'إلى تاريخ', type: 'date' },
@@ -195,7 +195,7 @@ function renderComplaintsList(role) {
     const extraCols = isExt ? '' : `<td>${c.assignedTo || '<span class="tx3">غير معين</span>'}</td>`;
     return `<tr>
       <td><a href="#" onclick="navigateTo('complaint-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
-      <td>${c.type}<br><span class="fs11 tx3">${c.subtype}</span></td>
+      <td>${c.type}</td>
       ${isExt ? '' : `<td>${c.submittedByName || '—'}</td>`}
       <td>${c.employerName || '—'}</td>
       <td>${statusBadge(c.status)}</td>
@@ -222,114 +222,324 @@ function renderComplaintsList(role) {
 /* ── إنشاء بلاغ جديد ── */
 function renderComplaintNew(role) {
   const isFundStaff = role === 'fund-staff';
-  return `<div class="pg-head"><div><h1>إنشاء بلاغ جديد</h1><p>تعبئة نموذج البلاغ وإرساله</p></div>
+  const isInternal = role === 'fund-staff' || role === 'monitoring-employee';
+
+  /* بيانات المستخدم الحالي — مرتبطة بالجلسة لا بالاستعلام */
+  const _cu = {
+    'employer':            { name: 'طارق سعيد الكلباني',   civil: '08234567',   phone: '96891023456',  label: 'صاحب عمل' },
+    'insured':             { name: 'فاطمة سعيد العمري',    civil: '04567890',   phone: '96892345678',  label: 'مؤمن عليه' },
+    'fund-staff':          { name: 'منى راشد البلوشي',     civil: '07890123',   phone: '96895551234',  label: 'موظف الصندوق' },
+    'monitoring-employee': { name: 'سيف خلفان الأمري',     civil: '06789012',   phone: '96896667788',  label: 'موظف قسم المتابعة' },
+  }[role] || { name: '—', civil: '—', phone: '—', label: '' };
+
+  return `<div class="pg-head"><div><h1>تقديم بلاغ جديد</h1><p>تعبئة نموذج البلاغ وإرساله</p></div>
     <div class="pg-acts"><button class="btn btn-secondary" onclick="goHome()">${ICONS.arrow_right}رجوع</button></div></div>
-  <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>معلومات البلاغ الأساسية</h3></div>
-  <div class="pb"><div class="fg fg-3">
-    <div class="fgrp"><label class="flbl">نوع البلاغ <span class="req">*</span></label>
-      <select class="fc"><option>اختر النوع</option><option>مخالفة نظام العمل</option><option>تقصير في الاشتراكات التأمينية</option><option>ظروف عمل غير آمنة</option><option>انتهاك ساعات العمل</option><option>شكوى عمالية</option><option>إشارة خارجية</option></select></div>
-    <div class="fgrp"><label class="flbl">التصنيف الفرعي</label>
-      <select class="fc"><option>اختر التصنيف</option></select></div>
-    <div class="fgrp"><label class="flbl">قناة الإبلاغ</label>
-      <select class="fc"><option>منصة إلكترونية</option>${isFundStaff ? '<option>إحالة داخلية</option><option>إحالة رسمية خارجية</option>' : ''}</select></div>
-    <div class="fgrp"><label class="flbl">الأولوية <span class="req">*</span></label>
-      <select class="fc"><option>منخفض</option><option>متوسط</option><option>مرتفع</option>${isFundStaff ? '<option>عاجل</option>' : ''}</select></div>
-    <div class="fgrp"><label class="flbl">صاحب العمل <span class="req">*</span></label>
-      <select class="fc">${INSP_DATA.employers.map(e=>`<option>${e.name}</option>`).join('')}</select></div>
-    <div class="fgrp"><label class="flbl">العامل المعني (إن وجد)</label>
-      <select class="fc"><option>اختر العامل</option>${INSP_DATA.workers.map(w=>`<option>${w.name}</option>`).join('')}</select></div>
-    <div class="fgrp span-full"><label class="flbl">وصف البلاغ <span class="req">*</span></label>
-      <textarea class="fc" rows="4" placeholder="اكتب وصفاً مفصلاً للمخالفة أو الشكوى..."></textarea></div>
-  </div></div></div>
-  <div class="card"><div class="ph"><h3><span class="pico gr">${ICONS.upload}</span>المستندات المرفقة</h3></div>
+
+  <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.user}</span>بيانات مقدم البلاغ</h3>
+    <span style="font-size:11.5px;color:var(--text3)">مستوردة من بيانات الحساب المسجّل</span></div>
   <div class="pb">
+    <div style="display:flex;align-items:center;gap:14px;padding:14px;border-radius:var(--rsm);background:var(--g50);border:1px solid var(--border)">
+      <div style="width:44px;height:44px;border-radius:50%;background:var(--primary);color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${_cu.name.substring(0,2)}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;color:var(--text)">${_cu.name}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">رقم الهوية: ${_cu.civil} &nbsp;|&nbsp; الهاتف: ${_cu.phone}</div>
+      </div>
+      <span class="badge b-approved">${_cu.label}</span>
+    </div>
+    ${isInternal ? `<div class="fg fg-3 mt12">
+      <div class="fgrp"><label class="flbl">صفة مقدم البلاغ <span class="req">*</span></label>
+        <select class="fc">
+          <option value="insured">مؤمن عليه (عامل)</option>
+          <option value="employer">صاحب عمل</option>
+          <option value="fund-staff">موظف الصندوق — بلاغ داخلي</option>
+          <option value="external-ref">إحالة خارجية رسمية</option>
+        </select></div>
+      <div class="fgrp"><label class="flbl">جهة الإحالة الخارجية</label><input class="fc" placeholder="وزارة العمل، النيابة، المحكمة..."></div>
+      <div class="fgrp"><label class="flbl">قناة الإبلاغ</label>
+        <select class="fc">
+          <option>منصة إلكترونية</option>
+          <option>إحالة داخلية</option>
+          <option>إحالة رسمية خارجية</option>
+          <option>هاتف</option>
+          <option>بريد رسمي</option>
+        </select></div>
+    </div>` : ''}
+  </div></div>
+
+  <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.building}</span>بيانات صاحب العمل المعني</h3></div>
+  <div class="pb"><div class="fg fg-3">
+    <div class="fgrp"><label class="flbl">رقم السجل التجاري <span class="req">*</span></label>
+      <div style="display:flex;gap:8px"><input class="fc" placeholder="أدخل رقم السجل التجاري"><button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ الاستعلام من وزارة التجارة...','i')">استعلام</button></div></div>
+    <div class="fgrp"><label class="flbl">اسم المنشأة</label><input class="fc" placeholder="يُملأ تلقائياً بعد الاستعلام" readonly></div>
+    <div class="fgrp"><label class="flbl">القطاع</label><input class="fc" placeholder="يُملأ تلقائياً" readonly></div>
+    <div class="fgrp"><label class="flbl">رقم تواصل المنشأة</label><input class="fc" type="tel" placeholder="هاتف المنشأة"></div>
+    <div class="fgrp"><label class="flbl">بريد المنشأة الإلكتروني</label><input class="fc" type="email" placeholder="email@company.om"></div>
+    <div class="fgrp"><label class="flbl">العامل المعني بالبلاغ</label>
+      <div style="display:flex;gap:8px"><input class="fc" placeholder="رقم هوية العامل أو اسمه"><button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ البحث...','i')">بحث</button></div></div>
+  </div></div></div>
+
+  <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.file}</span>تفاصيل البلاغ</h3></div>
+  <div class="pb"><div class="fg fg-2">
+    <div class="fgrp"><label class="flbl">نوع البلاغ <span class="req">*</span></label>
+      <select class="fc" onchange="showToast('تم تحديث قائمة المستندات المطلوبة','i')">
+        <option value="">— اختر نوع البلاغ —</option>
+        <option value="contract">تسجيل عقد</option>
+        <option value="join-date">تعديل تاريخ الالتحاق</option>
+        <option value="end-date">تعديل تاريخ انتهاء الخدمة</option>
+        <option value="salary">تعديل الأجر</option>
+      </select></div>
+    <div class="fgrp"><label class="flbl">الأولوية</label>
+      <select class="fc"><option>منخفض</option><option selected>متوسط</option><option>مرتفع</option>${isFundStaff ? '<option>عاجل</option>' : ''}</select></div>
+    <div class="fgrp span-full"><label class="flbl">وصف البلاغ <span class="req">*</span></label>
+      <textarea class="fc" rows="5" placeholder="اكتب وصفاً تفصيلياً للشكوى أو المخالفة — التاريخ، المبالغ، الوقائع..."></textarea></div>
+  </div></div></div>
+
+  <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.check}</span>المستندات المطلوبة</h3>
+    <span style="font-size:11.5px;color:var(--text3)">تختلف حسب نوع البلاغ المختار</span></div>
+  <div class="pb">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:16px">
+      ${[
+        'عقد العمل أو إشعار التعيين',
+        'كشف الراتب الأخير / إيصال الدفع',
+        'صورة الهوية الوطنية للعامل',
+        'مستخرج من نظام حماية الأجور',
+        'أي مراسلات رسمية ذات صلة',
+      ].map(d => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border:1px solid var(--border);border-radius:var(--rsm);background:var(--g50)">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:14px">📋</span>
+            <span style="font-size:12.5px;color:var(--text2)">${d}</span>
+          </div>
+          <span class="badge b-returned">مطلوب</span>
+        </div>`).join('')}
+    </div>
     <div class="dz-box"><div class="dz-box-icon">${ICONS.upload}</div>
       <div class="dz-box-text">اسحب الملفات هنا أو انقر للرفع</div>
       <div class="dz-box-sub">PDF, DOC, JPG, ZIP — الحد الأقصى 10 MB لكل ملف</div></div>
   </div></div>
+
   <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.info}</span>إقرار وتأكيد</h3></div>
-  <div class="pb"><p style="font-size:12.5px;color:var(--text2);line-height:1.8">بالنقر على "إرسال البلاغ" أقر بأن جميع المعلومات المدخلة صحيحة ودقيقة، وأن تقديم معلومات مضللة يعرّض صاحبها للمساءلة القانونية.</p>
-  <div class="df ac g8 mt12">
-    <button class="btn btn-primary" onclick="showToast('تم إرسال البلاغ بنجاح','s')">${ICONS.check}إرسال البلاغ</button>
-    <button class="btn btn-ghost" onclick="showToast('تم الحفظ كمسودة','i')">حفظ كمسودة</button>
-    <button class="btn btn-secondary" onclick="goHome()">إلغاء</button>
-  </div></div></div>`;
+  <div class="pb">
+    <p style="font-size:12.5px;color:var(--text2);line-height:1.8">بالنقر على "إرسال البلاغ" أقر بأن جميع المعلومات المدخلة صحيحة ودقيقة، وأن تقديم معلومات مضللة يعرّض صاحبها للمساءلة القانونية. سيُرسَل رقم البلاغ المرجعي فور التقديم عبر الرسائل القصيرة.</p>
+    <div class="df ac g8 mt12">
+      <button class="btn btn-primary" onclick="showToast('تم إرسال البلاغ بنجاح — سيُرسَل الرقم المرجعي عبر الرسائل القصيرة','s')">${ICONS.check}إرسال البلاغ</button>
+      <button class="btn btn-ghost" onclick="showToast('تم الحفظ كمسودة','i')">حفظ كمسودة</button>
+      <button class="btn btn-secondary" onclick="goHome()">إلغاء</button>
+    </div>
+  </div></div>`;
 }
 
 /* ── تفاصيل البلاغ ── */
 function renderComplaintDetails(role) {
-  const id = getParam('id') || 'INSP-BLG-2025-0001';
+  const id = getParam('id') || '2025-01-000001';
   const c = INSP_DATA.complaints.find(x => x.id === id) || INSP_DATA.complaints[0];
+  if (!c) return `<div class="empty-st">${ICONS.inbox}<h4>البلاغ غير موجود</h4></div>`;
+
+  const isReadOnly = role === 'employer' || role === 'insured';
+
+  const basicPanel = `
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>البيانات الأساسية</h3></div>
+    <div class="pb"><div class="fg fg-3">
+      <div class="fgrp"><label class="flbl">رقم البلاغ</label><div class="fro fw7">${c.id}</div></div>
+      <div class="fgrp"><label class="flbl">تاريخ التقديم</label><div class="fro">${c.submitDate}</div></div>
+      <div class="fgrp"><label class="flbl">الموعد النهائي</label><div class="fro">${c.dueDate}</div></div>
+      <div class="fgrp"><label class="flbl">نوع البلاغ</label><div class="fro">${c.type}</div></div>
+      <div class="fgrp"><label class="flbl">قناة الإبلاغ</label><div class="fro">${c.channel}</div></div>
+      <div class="fgrp"><label class="flbl">الأولوية</label><div class="fro"><span class="badge ${_priClass(c.priority)}">${c.priority}</span></div></div>
+      <div class="fgrp"><label class="flbl">صاحب العمل</label><div class="fro txp fw7">${c.employerName}</div></div>
+      ${c.employerCRN ? `<div class="fgrp"><label class="flbl">السجل التجاري</label><div class="fro">${c.employerCRN}</div></div>` : ''}
+      <div class="fgrp"><label class="flbl">العامل المعني</label><div class="fro">${c.workerName || 'غير محدد'}</div></div>
+      ${!isReadOnly ? `<div class="fgrp"><label class="flbl">الموظف المختص</label><div class="fro">${c.assignedTo || '<span class="tx3">لم يُعيَّن بعد</span>'}</div></div>` : ''}
+      ${!isReadOnly && c.assignedInspector ? `<div class="fgrp"><label class="flbl">المفتش المكلف</label><div class="fro">${c.assignedInspector}</div></div>` : ''}
+      ${c.returnCount > 0 ? `<div class="fgrp"><label class="flbl">عدد مرات الإعادة</label><div class="fro"><span class="badge b-returned">${c.returnCount} / 2</span></div></div>` : ''}
+      <div class="fgrp span-full"><label class="flbl">وصف البلاغ</label><div class="fro" style="min-height:60px;white-space:pre-wrap">${c.description}</div></div>
+    </div></div></div>`;
+
+  const submitterPanel = `
+    <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.user}</span>بيانات مقدم البلاغ</h3></div>
+    <div class="pb"><div class="fg fg-3">
+      <div class="fgrp"><label class="flbl">الاسم</label><div class="fro fw7">${c.submittedByName}</div></div>
+      ${c.submittedByCivil ? `<div class="fgrp"><label class="flbl">رقم الهوية</label><div class="fro">${c.submittedByCivil}</div></div>` : ''}
+      ${c.submittedByPhone ? `<div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${c.submittedByPhone}</div></div>` : ''}
+      ${c.employerContact ? `<div class="fgrp"><label class="flbl">جهة التواصل بالمنشأة</label><div class="fro">${c.employerContact}</div></div>` : ''}
+      ${c.employerPhone ? `<div class="fgrp"><label class="flbl">هاتف المنشأة</label><div class="fro">${c.employerPhone}</div></div>` : ''}
+    </div></div></div>`;
+
+  const dataComparePanel = c.registeredData ? `
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.switch}</span>البيانات المسجلة مقابل البيانات المطلوبة</h3></div>
+    <div class="pb">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div style="border:1px solid var(--border);border-radius:var(--rsm);padding:14px;background:var(--g50)">
+          <div style="font-size:11.5px;font-weight:700;color:var(--text3);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)">ما هو مسجل في النظام حالياً</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            ${c.registeredData.joinDate ? `<div class="fgrp" style="margin:0"><label class="flbl">تاريخ الالتحاق</label><div class="fro">${c.registeredData.joinDate}</div></div>` : ''}
+            ${c.registeredData.contractReceiveDate ? `<div class="fgrp" style="margin:0"><label class="flbl">تاريخ استلام العقد</label><div class="fro">${c.registeredData.contractReceiveDate}</div></div>` : ''}
+            ${c.registeredData.salary ? `<div class="fgrp" style="margin:0"><label class="flbl">الأجر الأساسي</label><div class="fro">${c.registeredData.salary}</div></div>` : ''}
+            ${c.registeredData.allowances ? `<div class="fgrp" style="margin:0"><label class="flbl">البدلات</label><div class="fro">${c.registeredData.allowances}</div></div>` : ''}
+            ${c.registeredData.fullSalary ? `<div class="fgrp" style="margin:0"><label class="flbl">الأجر الكامل</label><div class="fro fw7">${c.registeredData.fullSalary}</div></div>` : ''}
+            ${c.registeredData.resignDate ? `<div class="fgrp" style="margin:0"><label class="flbl">تاريخ انتهاء الخدمة</label><div class="fro">${c.registeredData.resignDate}</div></div>` : ''}
+          </div>
+        </div>
+        <div style="border:1px solid var(--accent);border-radius:var(--rsm);padding:14px;background:#fffbf0">
+          <div style="font-size:11.5px;font-weight:700;color:var(--accent);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--accent)">البيانات المطلوب تعديلها</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            ${c.requestedData.changeType ? `<div class="fgrp" style="margin:0"><label class="flbl">نوع التعديل المطلوب</label><div class="fro fw7 txp">${c.requestedData.changeType}</div></div>` : ''}
+            ${c.requestedData.actualSalary ? `<div class="fgrp" style="margin:0"><label class="flbl">الأجر الفعلي المدّعى به</label><div class="fro fw7" style="color:var(--accent)">${c.requestedData.actualSalary}</div></div>` : ''}
+            ${c.requestedData.effectiveFrom ? `<div class="fgrp" style="margin:0"><label class="flbl">نافذ من تاريخ</label><div class="fro">${c.requestedData.effectiveFrom}</div></div>` : ''}
+            ${c.requestedData.notes ? `<div class="fgrp" style="margin:0"><label class="flbl">ملاحظات مقدم الطلب</label><div class="fro" style="font-size:12px;white-space:pre-wrap">${c.requestedData.notes}</div></div>` : ''}
+          </div>
+        </div>
+      </div>
+    </div></div>` : '';
+
+  const verPanel = c.verificationResults && c.verificationResults.length ? `
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.check}</span>نتائج التحقق من الأنظمة المتكاملة</h3></div>
+    <div class="pb">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+        ${c.verificationResults.map(vr => `
+          <div style="padding:8px 14px;border-radius:var(--rsm);border:1px solid var(--border);background:${vr.status==='مخالف'?'#fff5f5':vr.status==='موافق'?'#f0fff4':'#fffbf0'}">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:4px">${vr.source}</div>
+            <span class="badge ${vr.status==='مخالف'?'b-rejected':vr.status==='موافق'?'b-approved':'b-returned'}">${vr.status}</span>
+          </div>`).join('')}
+      </div>
+      ${c.verificationResults.map(vr => `
+        <div style="margin-bottom:14px;border:1px solid var(--border);border-radius:var(--rsm);overflow:hidden">
+          <div style="padding:10px 14px;background:var(--g50);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:13px;font-weight:700;color:var(--text)">${vr.source}</span>
+            <span class="badge ${vr.status==='مخالف'?'b-rejected':vr.status==='موافق'?'b-approved':'b-returned'}">${vr.status}</span>
+          </div>
+          <div style="padding:12px 14px">
+            ${vr.checks.map(ch => `
+              <div style="display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+                <span class="badge ${ch.result==='مخالف'?'b-rejected':ch.result==='موافق'?'b-approved':'b-returned'}" style="white-space:nowrap;flex-shrink:0">${ch.result}</span>
+                <div style="flex:1">
+                  <div style="font-size:12px;font-weight:600;color:var(--text2)">${ch.rule}</div>
+                  ${ch.value ? `<div style="font-size:11.5px;color:var(--text3);margin-top:2px">${ch.value}</div>` : ''}
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>`).join('')}
+    </div></div>` : '';
+
+  const docsPanel = c.requiredDocuments && c.requiredDocuments.length ? `
+    <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.upload}</span>المستندات المطلوبة (${c.requiredDocuments.length})</h3>
+      ${!isReadOnly ? `<button class="btn btn-secondary btn-sm" onclick="showToast('فتح نافذة الرفع','i')">${ICONS.plus}رفع مستند</button>` : ''}</div>
+    <div class="pb">
+      ${c.requiredDocuments.map(d => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border:1px solid var(--border);border-radius:var(--rsm);margin-bottom:8px;background:${d.status==='مرفق'?'var(--success-l)':'var(--g50)'}">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:16px">${d.status==='مرفق'?'📎':'📋'}</span>
+            <span style="font-size:13px;font-weight:600;color:var(--text)">${d.name}</span>
+          </div>
+          <span class="badge ${d.status==='مرفق'?'b-approved':'b-returned'}">${d.status}</span>
+        </div>`).join('')}
+    </div></div>` : '';
+
+  const attachmentsPanel = `
+    <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.upload}</span>المرفقات (${c.attachments.length})</h3>
+      ${!isReadOnly ? `<button class="btn btn-secondary btn-sm" onclick="showToast('فتح نافذة الرفع','i')">${ICONS.plus}إضافة</button>` : ''}</div>
+    <div class="pb">${c.attachments.length ? c.attachments.map(a => attRow(a)).join('') : '<div class="tx3 fs11">لا توجد مرفقات</div>'}</div></div>`;
+
+  const timelinePanel = `
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>السجل الزمني</h3></div>
+    <div class="pb">${_renderComplaintTimeline(c.timeline)}</div></div>`;
 
   const actionPanel = _buildComplaintActionPanel(role, c);
-  const invRes = c.investigationResults ? `
-    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.check}</span>نتائج التحقيق والقرار</h3></div>
-    <div class="pb"><div class="fg fg-2">
-      <div class="fgrp"><label class="flbl">نتيجة التحقيق</label><div class="fro">${c.investigationResults.outcome}</div></div>
-      <div class="fgrp"><label class="flbl">تاريخ القرار</label><div class="fro">${c.investigationResults.decisionDate || '—'}</div></div>
-      <div class="fgrp span-full"><label class="flbl">النتائج والملاحظات</label><div class="fro" style="min-height:60px">${c.investigationResults.findings}</div></div>
-      ${c.investigationResults.corrective ? `<div class="fgrp span-full"><label class="flbl">الإجراء التصحيحي</label><div class="fro">${c.investigationResults.corrective}</div></div>` : ''}
-      ${c.investigationResults.fine ? `<div class="fgrp"><label class="flbl">الغرامة المفروضة</label><div class="fro txd fw7">${c.investigationResults.fine}</div></div>` : ''}
-    </div></div></div>` : '';
 
   return `<div class="pg-head"><div><h1>${c.id}</h1><p>${c.type} — ${c.employerName}</p></div>
     <div class="pg-acts">${statusBadge(c.status)}<span class="badge ${_priClass(c.priority)}">${c.priority}</span>
       <button class="btn btn-secondary btn-sm" onclick="navigateTo('complaints-list')">${ICONS.arrow_right}رجوع</button></div></div>
   <div class="dashboard-auto-grid">
     <div>
-      <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>معلومات البلاغ</h3></div>
-      <div class="pb"><div class="fg fg-2">
-        <div class="fgrp"><label class="flbl">رقم البلاغ</label><div class="fro fw7">${c.id}</div></div>
-        <div class="fgrp"><label class="flbl">تاريخ التقديم</label><div class="fro">${c.submitDate}</div></div>
-        <div class="fgrp"><label class="flbl">نوع البلاغ</label><div class="fro">${c.type}</div></div>
-        <div class="fgrp"><label class="flbl">التصنيف الفرعي</label><div class="fro">${c.subtype}</div></div>
-        <div class="fgrp"><label class="flbl">قناة الإبلاغ</label><div class="fro">${c.channel}</div></div>
-        <div class="fgrp"><label class="flbl">الموعد النهائي</label><div class="fro">${c.dueDate}</div></div>
-        <div class="fgrp"><label class="flbl">صاحب العمل</label><div class="fro txp fw7">${c.employerName}</div></div>
-        <div class="fgrp"><label class="flbl">العامل المعني</label><div class="fro">${c.workerName || 'غير محدد'}</div></div>
-        <div class="fgrp"><label class="flbl">مقدّم البلاغ</label><div class="fro">${c.submittedByName}</div></div>
-        <div class="fgrp"><label class="flbl">الموظف المختص</label><div class="fro">${c.assignedTo || '<span class="tx3">لم يُعيَّن بعد</span>'}</div></div>
-        <div class="fgrp span-full"><label class="flbl">وصف البلاغ</label><div class="fro" style="min-height:70px;white-space:pre-wrap">${c.description}</div></div>
-      </div></div></div>
+      ${basicPanel}
+      ${submitterPanel}
+      ${dataComparePanel}
       ${actionPanel}
     </div>
     <div>
-      <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.upload}</span>المرفقات (${c.attachments.length})</h3><button class="btn btn-secondary btn-sm" onclick="showToast('فتح نافذة الرفع','i')">${ICONS.plus}إضافة</button></div>
-      <div class="pb">${c.attachments.length ? c.attachments.map(a => attRow(a)).join('') : '<div class="tx3 fs11">لا توجد مرفقات</div>'}</div></div>
+      ${verPanel}
+      ${docsPanel}
+      ${attachmentsPanel}
       ${renderNotes(c.notes, c.id)}
-      <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>سجل الأحداث</h3></div>
-      <div class="pb">${renderTimeline(c.timeline)}</div></div>
+      ${timelinePanel}
     </div>
-  </div>
-  ${invRes}`;
+  </div>`;
+}
+
+function _renderComplaintTimeline(timeline) {
+  if (!timeline || !timeline.length) return '<p style="color:var(--text3);font-size:12.5px">لا توجد سجلات</p>';
+  return `<div class="tl">${timeline.map((t, i) => `
+    <div class="tl-item">
+      <div class="tl-dot ${i === 0 ? '' : 'g'}">${ICONS.check}</div>
+      <div class="tl-c">
+        <div class="tl-hd">
+          <span class="tl-act">${t.action}</span>
+          <span class="tl-time">${t.date}</span>
+        </div>
+        ${t.step ? `<div style="font-size:11px;color:var(--primary);font-weight:600;margin-top:2px">${t.step}</div>` : ''}
+        <div class="tl-meta">${t.actor}${t.actorRole ? ` — ${INSP_CONFIG.roles[t.actorRole] ? INSP_CONFIG.roles[t.actorRole].nameAr : t.actorRole}` : ''}</div>
+      </div>
+    </div>`).join('')}</div>`;
 }
 
 function _buildComplaintActionPanel(role, c) {
   const s = c.status;
   let btns = [];
-  if (role === 'monitoring-employee') {
-    if (s.includes('بانتظار تعيين')) btns = ['بدء الدراسة','طلب استيفاء بيانات'];
-    else if (s.includes('قيد الدراسة')) btns = ['توجيه للرئيس المباشر','جدولة زيارة','إغلاق البلاغ','طلب استيفاء بيانات'];
-    else if (s.includes('تم إعادة')) btns = ['بدء الدراسة'];
+
+  if (role === 'fund-staff') {
+    if (s.includes('بانتظار تعيين')) btns = ['تعيين للمختص'];
+  } else if (role === 'monitoring-employee') {
+    if (s.includes('قيد الدراسة')) btns = ['إرسال للمفتش','طلب مستندات','رفض للغلق','إعادة للتصحيح'];
+    else if (s.includes('تم إعادة') || s.includes('بانتظار تعيين')) btns = ['بدء الدراسة','طلب مستندات'];
+  } else if (role === 'field-inspector') {
+    if (s.includes('قيد المراجعة الميدانية')) btns = ['رفع رأي مبدئي','رفع رأي نهائي','طلب مستندات','إحالة للفرع','إغلاق'];
   } else if (role === 'monitoring-head') {
-    if (s.includes('بانتظار اعتماد')) btns = ['اعتماد وإغلاق','إعادة للموظف','رفض مع السبب','إصدار القرار'];
-    else if (s.includes('قيد الدراسة')) btns = ['تعيين المختص'];
+    if (s.includes('اعتماد رئيس الشكاوى') || s.includes('بانتظار اعتماد')) btns = ['اعتماد','إغلاق','إعادة للتصحيح'];
+  } else if (role === 'field-head') {
+    if (s.includes('اعتماد رئيس التفتيش')) btns = ['اعتماد نهائي','رفض','إعادة للمفتش'];
   } else if (role === 'inspection-director') {
-    if (s.includes('يتطلب قرار')) btns = ['إصدار القرار','رفض مع السبب','إعادة للموظف'];
-    else btns = ['تصدير التقرير','طباعة'];
+    if (s.includes('موافقة المدير') || s.includes('يتطلب قرار') || s.includes('صدر قرار')) btns = ['موافقة وتحويل للمفتش','رفض'];
   } else if (role === 'employer' || role === 'insured') {
-    if (s.includes('بانتظار تعيين') || s.includes('تم إعادة')) btns = ['استيفاء البيانات وإعادة الإرسال'];
-    else if (s.includes('قرار')) btns = ['تقديم تظلم'];
-    else btns = ['طباعة'];
+    if (s.includes('بانتظار تصحيح') || s.includes('تم إعادة')) btns = ['استيفاء البيانات وإعادة الإرسال'];
+    else if (s.includes('صدر قرار') || s.includes('قرار')) btns = ['تقديم تظلم'];
   }
+
   if (!btns.length) return '';
 
-  const formHtml = role === 'monitoring-employee' ? `<div class="fg fg-2">
-    <div class="fgrp"><label class="flbl">إسناد لموظف</label><select class="fc"><option>سيف خلفان الأمري</option></select></div>
-    <div class="fgrp"><label class="flbl">ملاحظة الإجراء</label><input class="fc" placeholder="ملاحظة اختيارية..."></div>
-  </div>` : '';
+  const notesRequired = (role !== 'employer' && role !== 'insured');
+  const noteLabel = notesRequired ? `ملاحظة <span class="req">*</span>` : 'ملاحظة';
+  const notePlaceholder = notesRequired ? 'ملاحظة إلزامية — يجب كتابة ملاحظة قبل تنفيذ أي إجراء...' : 'ملاحظة اختيارية...';
 
-  return _dpanel('لوحة الإجراءات', btns, formHtml);
+  const actionBtnHtml = btns.map(b => {
+    const cls = INSP_CONFIG.actionStyles[b] || 'btn-secondary btn-sm';
+    return `<button class="btn ${cls}" onclick="showToast('تم تنفيذ: ${b}','s')">${b}</button>`;
+  }).join('');
+
+  return `
+    <div class="dp">
+      <div class="ph"><h3><span class="pico bl">${ICONS.pen}</span>لوحة الإجراءات</h3>
+        ${c.returnCount > 0 ? `<span class="badge b-returned" style="font-size:11px">إعادة ${c.returnCount}/2</span>` : ''}</div>
+      <div class="dp-body">
+        <div class="fgrp" style="margin-bottom:12px">
+          <label class="flbl">${noteLabel}</label>
+          <textarea class="fc" rows="3" placeholder="${notePlaceholder}" style="resize:vertical"></textarea>
+        </div>
+        <div style="margin-bottom:14px">
+          <label class="flbl">إرفاق مستندات</label>
+          <div class="dz-box" style="padding:14px;min-height:auto">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="font-size:22px;color:var(--text3)">${ICONS.upload}</div>
+              <div style="flex:1">
+                <div style="font-size:12.5px;font-weight:600;color:var(--text2)">اسحب الملفات هنا أو انقر للرفع</div>
+                <div style="font-size:11px;color:var(--text3)">PDF, DOC, JPG — الحد الأقصى 10 MB</div>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('فتح نافذة الرفع','i')">اختيار ملف</button>
+            </div>
+          </div>
+        </div>
+        <div class="dp-acts">${actionBtnHtml}</div>
+      </div>
+    </div>`;
 }
 
 /* ── قائمة التظلمات ── */
@@ -338,7 +548,7 @@ function renderAppealsList(role) {
   const createBtn = canCreate ? `<button class="btn btn-primary" onclick="navigateTo('appeal-new')">${ICONS.plus}تظلم جديد</button>` : '';
 
   const filters = _filterBar([
-    { label: 'بحث برقم التظلم', ph: 'INSP-TZL-...' },
+    { label: 'بحث برقم التظلم', ph: 'YYYY-02-...' },
     { label: 'الحالة', type: 'select', opts: ['تم تقديم التظلم','قيد الدراسة','تم قبول التظلم','تم رفض التظلم','تم إغلاق التظلم'] },
     { label: 'نوع التظلم', type: 'select', opts: ['تظلم على القرار','تظلم على محضر الزيارة','تظلم على إجراء الإغلاق','تظلم على قرار الحظر'] },
     { label: 'من تاريخ', type: 'date' },
@@ -391,7 +601,7 @@ function renderAppealNew(role) {
 
 /* ── تفاصيل التظلم ── */
 function renderAppealDetails(role) {
-  const id = getParam('id') || 'INSP-TZL-2025-0001';
+  const id = getParam('id') || '2025-02-000001';
   const a = INSP_DATA.appeals.find(x => x.id === id) || INSP_DATA.appeals[0];
 
   let actionPanel = '';
@@ -446,7 +656,7 @@ function renderVisitsList(role, type) {
   const canCreate = (role === 'field-head' || role === 'inspection-director') && type === 'surprise';
 
   const filters = _filterBar([
-    { label: 'بحث برقم الزيارة أو المنشأة', ph: 'ZYR-...' },
+    { label: 'بحث برقم الزيارة أو المنشأة', ph: 'YYYY-03-...' },
     { label: 'الحالة', type: 'select', opts: ['مجدولة','جارية','بانتظار مراجعة المحضر','تم اعتماد المحضر','مغلقة'] },
     { label: 'المفتش', type: 'select', opts: ['حاتم سالم الزدجالي','جميع المفتشين'] },
     { label: 'من تاريخ', type: 'date' },
@@ -483,6 +693,15 @@ function renderVisitDetails(role, type) {
   const id = getParam('id') || (INSP_DATA.visits[type][0] || {}).id;
   const v = (INSP_DATA.visits[type] || []).find(x => x.id === id) || INSP_DATA.visits[type][0];
   if (!v) return `<div class="empty-st">${ICONS.clipboard}<h4>الزيارة غير موجودة</h4></div>`;
+
+  /* المستخدمون الخارجيون لا يطّلعون على تفاصيل الزيارة */
+  if (role === 'employer' || role === 'insured') {
+    const typeLabel = { periodic: 'زيارة دورية', surprise: 'زيارة مفاجئة', scheduled: 'زيارة مجدولة' }[type];
+    return `<div class="pg-head"><div><h1>${v.id}</h1><p>${typeLabel}</p></div>
+      <div class="pg-acts">${statusBadge(v.status)}
+        <button class="btn btn-secondary btn-sm" onclick="navigateTo('visits-list')">${ICONS.arrow_right}رجوع</button></div></div>
+      <div class="alert alert-w" style="margin-top:16px">${ICONS.lock} تفاصيل هذه الزيارة غير متاحة. للاستفسار يرجى التواصل مع الصندوق.</div>`;
+  }
 
   const listPage = { periodic: 'visits-periodic-list', surprise: 'visits-surprise-list', scheduled: 'visits-scheduled-list' }[type];
   const typeLabel = { periodic: 'زيارة دورية', surprise: 'زيارة مفاجئة', scheduled: 'زيارة مجدولة' }[type];
@@ -581,7 +800,7 @@ function renderWorkerAnalysis(role) {
   const wComplaints = INSP_DATA.complaints.filter(c => c.workerId === w.id);
   const wAppeals   = INSP_DATA.appeals.filter(a => a.submittedByName === w.name || (INSP_DATA.complaints.filter(c=>c.workerId===w.id).map(c=>c.id).includes(a.relatedId)));
   const empVisits  = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled].filter(v => v.employerId === w.employerId);
-  const _vpg = id => id.includes('MFJ') ? 'visit-surprise-details' : id.includes('MJD') ? 'visit-scheduled-details' : 'visit-periodic-details';
+  const _vpg = id => id.includes('-04-') ? 'visit-surprise-details' : id.includes('-05-') ? 'visit-scheduled-details' : 'visit-periodic-details';
 
   const riskScore = w.riskLevel === 'مرتفع' ? 82 : w.riskLevel === 'متوسط' ? 48 : 15;
   const riskColor = w.riskLevel === 'مرتفع' ? 'var(--danger)' : w.riskLevel === 'متوسط' ? 'var(--warning)' : 'var(--success)';
@@ -681,7 +900,7 @@ function renderWorkerAnalysis(role) {
       <tbody>${wComplaints.map(c => `
         <tr>
           <td><a href="#" onclick="navigateTo('complaint-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
-          <td>${c.type}<br><span class="fs11 tx3">${c.subtype}</span></td>
+          <td>${c.type}</td>
           <td>${c.employerName}</td>
           <td>${statusBadge(c.status)}</td>
           <td><span class="badge ${_priClass(c.priority)}">${c.priority}</span></td>
@@ -700,7 +919,7 @@ function renderWorkerAnalysis(role) {
       <tbody>${empVisits.map(v => `
         <tr>
           <td><a href="#" onclick="navigateTo('${_vpg(v.id)}','id=${v.id}')" class="txp fw7">${v.id}</a></td>
-          <td>${v.id.includes('MFJ')?'مفاجئة':v.id.includes('MJD')?'مجدولة':'دورية'}</td>
+          <td>${v.id.includes('-04-')?'مفاجئة':v.id.includes('-05-')?'مجدولة':'دورية'}</td>
           <td>${v.inspectorName}</td>
           <td>${statusBadge(v.status)}</td>
           <td>${v.scheduledDate}</td>
@@ -722,6 +941,54 @@ function renderWorkerAnalysis(role) {
         </tr>`).join('')}
       </tbody></table></div></div>` : '';
 
+  const externalIntegration = `
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.switch}</span>بيانات الربط الخارجي</h3>
+      <span style="font-size:11px;color:var(--text3)">آخر تحديث: ${w.lastSyncDate || '2025-01-22'}</span></div>
+    <div class="pb">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">
+        ${[
+          { src: 'نظام حماية الأجور', val: w.wageProtection, ok: w.wageProtection === 'منتظم', detail: `آخر تحويل: ${w.salary} ر.ع` },
+          { src: 'وزارة العمل', val: w.workPermit || 'نشط', ok: true, detail: `تصريح العمل ساري` },
+          { src: 'الأحوال المدنية', val: 'مستعلم', ok: true, detail: `رقم الهوية: ${w.civil}` },
+          { src: 'سجلات الصندوق', val: w.insuranceStatus || 'مسجّل', ok: true, detail: `مؤمَّن منذ: ${w.insuredFrom}` },
+        ].map(s => `
+          <div style="border:1px solid ${s.ok?'var(--border)':'#fca5a5'};border-radius:var(--rsm);padding:12px 14px;background:${s.ok?'var(--g50)':'#fff5f5'}">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px">${s.src}</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <span class="badge ${s.ok?'b-approved':'b-rejected'}">${s.val}</span>
+            </div>
+            <div style="font-size:11.5px;color:var(--text2)">${s.detail}</div>
+          </div>`).join('')}
+      </div>
+    </div></div>`;
+
+  const salaryHistory = w.insuranceHistory && w.insuranceHistory.length ? `
+    <div class="dashboard-insights">
+      <div class="chart-card">
+        <div class="chart-head"><h3>تطور مبالغ الاشتراك (آخر 6 أشهر)</h3><span>بالريال العُماني</span></div>
+        <div class="chart-bars">
+          ${w.insuranceHistory.map(h => `
+            <div class="chart-bar-row">
+              <div class="chart-bar-meta"><span>${h.month}</span><strong>${h.amount}</strong></div>
+              <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${h.status==='مدفوع'?'85':h.status==='مدفوع متأخر'?'60':'20'}%;background:${h.status==='مدفوع'?'var(--success)':h.status==='مدفوع متأخر'?'var(--warning)':'var(--danger)'}"></div></div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head"><h3>مؤشرات الخطر</h3><span>${w.riskIndicators.length} مؤشر نشط</span></div>
+        <div class="chart-bars">
+          ${[['مرتفع', w.riskIndicators.filter(r=>r.severity==='مرتفع').length],
+             ['متوسط', w.riskIndicators.filter(r=>r.severity==='متوسط').length],
+             ['منخفض', w.riskIndicators.filter(r=>r.severity==='منخفض').length],
+          ].map(([l,v]) => `
+            <div class="chart-bar-row">
+              <div class="chart-bar-meta"><span>${l}</span><strong>${v}</strong></div>
+              <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(v/(w.riskIndicators.length||1)*100)}%;background:${l==='مرتفع'?'var(--danger)':l==='متوسط'?'var(--warning)':'var(--success)'}"></div></div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>` : '';
+
   return `<div class="pg-head"><div><h1>تحليل بيانات العمال</h1><p>ملف شامل للعامل مع كامل السجلات والمؤشرات المرتبطة</p></div>
     <div class="pg-acts"><button class="btn btn-secondary btn-sm">${ICONS.download}تصدير</button></div></div>
     ${workerSelector}
@@ -729,6 +996,8 @@ function renderWorkerAnalysis(role) {
       <div>${profileCard}</div>
       <div>${riskCard}</div>
     </div>
+    ${externalIntegration}
+    ${salaryHistory}
     ${insHistory}
     ${empHistory}
     ${complaintsSection}
@@ -748,7 +1017,7 @@ function renderEmployerAnalysis(role) {
   const eVisits    = [...INSP_DATA.visits.periodic.filter(v=>v.employerId===e.id),
                       ...INSP_DATA.visits.surprise.filter(v=>v.employerId===e.id),
                       ...INSP_DATA.visits.scheduled.filter(v=>v.employerId===e.id)];
-  const _vpg = id => id.includes('MFJ') ? 'visit-surprise-details' : id.includes('MJD') ? 'visit-scheduled-details' : 'visit-periodic-details';
+  const _vpg = id => id.includes('-04-') ? 'visit-surprise-details' : id.includes('-05-') ? 'visit-scheduled-details' : 'visit-periodic-details';
   const _csBadge = s => s==='منتظم'?'b-approved':s==='متأخر'?'b-rejected':'b-returned';
   const _vBadge  = s => s==='مرتفع'?'b-rejected':s==='متوسط'?'b-returned':'b-approved';
 
@@ -859,7 +1128,7 @@ function renderEmployerAnalysis(role) {
       <tbody>${eComplaints.map(c=>`
         <tr>
           <td><a href="#" onclick="navigateTo('complaint-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
-          <td>${c.type}<br><span class="fs11 tx3">${c.subtype}</span></td>
+          <td>${c.type}</td>
           <td>${c.workerName||'<span class="tx3">غير محدد</span>'}</td>
           <td>${statusBadge(c.status)}</td>
           <td><span class="badge ${_priClass(c.priority)}">${c.priority}</span></td>
@@ -876,7 +1145,7 @@ function renderEmployerAnalysis(role) {
       <tbody>${eVisits.map(v=>`
         <tr>
           <td><a href="#" onclick="navigateTo('${_vpg(v.id)}','id=${v.id}')" class="txp fw7">${v.id}</a></td>
-          <td>${v.id.includes('MFJ')?'مفاجئة':v.id.includes('MJD')?'مجدولة':'دورية'}</td>
+          <td>${v.id.includes('-04-')?'مفاجئة':v.id.includes('-05-')?'مجدولة':'دورية'}</td>
           <td>${v.inspectorName}</td>
           <td>${statusBadge(v.status)}</td>
           <td>${v.actualDate||v.scheduledDate}</td>
@@ -912,6 +1181,68 @@ function renderEmployerAnalysis(role) {
         </tr>`).join('')}
       </tbody></table></div></div>` : '';
 
+  const empExternalInteg = `
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.switch}</span>بيانات الربط الخارجي للمنشأة</h3>
+      <span style="font-size:11px;color:var(--text3)">آخر تحديث: 2025-01-22</span></div>
+    <div class="pb">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">
+        ${[
+          { src: 'وزارة التجارة والصناعة', val: e.status || 'مسجّل', ok: true, detail: `السجل التجاري: ${e.crn}` },
+          { src: 'وزارة العمل', val: 'منتظم', ok: true, detail: `تصاريح العمل: ${e.employees} عامل` },
+          { src: 'نظام حماية الأجور', val: e.contributions.status, ok: e.contributions.status==='منتظم', detail: `آخر سداد: ${e.contributions.lastPaid}` },
+          { src: 'سجلات الصندوق', val: e.contributions.arrears > 0 ? `متأخرات ${e.contributions.arrears.toLocaleString()} ر.ع` : 'لا متأخرات', ok: e.contributions.arrears === 0, detail: `${e.employees} مؤمَّن عليه نشط` },
+        ].map(s => `
+          <div style="border:1px solid ${s.ok?'var(--border)':'#fca5a5'};border-radius:var(--rsm);padding:12px 14px;background:${s.ok?'var(--g50)':'#fff5f5'}">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px">${s.src}</div>
+            <div style="margin-bottom:4px"><span class="badge ${s.ok?'b-approved':'b-rejected'}">${s.val}</span></div>
+            <div style="font-size:11.5px;color:var(--text2)">${s.detail}</div>
+          </div>`).join('')}
+      </div>
+    </div></div>`;
+
+  const empCharts = `<div class="dashboard-insights">
+    <div class="chart-card">
+      <div class="chart-head"><h3>الاشتراكات التأمينية (آخر 6 أشهر)</h3><span>بالريال العُماني</span></div>
+      <div class="chart-bars">
+        ${e.contributionHistory.slice(0,6).map(h => `
+          <div class="chart-bar-row">
+            <div class="chart-bar-meta"><span>${h.month}</span><strong>${h.amount}</strong></div>
+            <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${h.status==='منتظم'?'90':h.status==='متأخر'?'55':'15'}%;background:${h.status==='منتظم'?'var(--success)':h.status==='متأخر'?'var(--warning)':'var(--danger)'}"></div></div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head"><h3>توزيع المخالفات حسب النوع</h3><span>${e.violations.length} مخالفة إجمالاً</span></div>
+      <div class="chart-bars">
+        ${[
+          ['مخالفات السلامة', e.violations.filter(v=>v.type.includes('سلامة')).length],
+          ['تأخر اشتراكات', e.violations.filter(v=>v.type.includes('اشتراك')||v.type.includes('تأمين')).length],
+          ['عمالة غير نظامية', e.violations.filter(v=>v.type.includes('عمالة')||v.type.includes('أجنبية')).length],
+          ['مخالفات رواتب', e.violations.filter(v=>v.type.includes('رواتب')||v.type.includes('أجر')).length],
+          ['مخالفات أخرى', e.violations.filter(v=>!v.type.includes('سلامة')&&!v.type.includes('اشتراك')&&!v.type.includes('عمالة')&&!v.type.includes('رواتب')).length],
+        ].map(([l,v]) => `
+          <div class="chart-bar-row">
+            <div class="chart-bar-meta"><span>${l}</span><strong>${v}</strong></div>
+            <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(v/(e.violations.length||1)*100)}%;background:var(--danger)"></div></div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head"><h3>مقارنة الامتثال</h3><span>مع متوسط القطاع</span></div>
+      <div class="chart-bars">
+        ${[
+          [e.name.split(' ').slice(0,3).join(' '), e.complianceScore, _compColor(e.complianceScore)],
+          ['متوسط القطاع', 72, 'var(--warning)'],
+          ['أعلى امتثال في القطاع', 96, 'var(--success)'],
+        ].map(([l,v,c]) => `
+          <div class="chart-bar-row">
+            <div class="chart-bar-meta"><span>${l}</span><strong>${v}%</strong></div>
+            <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${v}%;background:${c}"></div></div>
+          </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+
   return `<div class="pg-head"><div><h1>تحليل بيانات أصحاب العمل</h1><p>ملف شامل للمنشأة مع كامل السجلات والمؤشرات المرتبطة</p></div>
     <div class="pg-acts"><button class="btn btn-secondary btn-sm">${ICONS.download}تصدير</button></div></div>
     ${employerSelector}
@@ -920,6 +1251,8 @@ function renderEmployerAnalysis(role) {
       <div>${profileCard}</div>
       <div>${complianceCard}</div>
     </div>
+    ${empExternalInteg}
+    ${empCharts}
     ${workersCard}
     ${violationsCard}
     ${contribCard}
@@ -997,10 +1330,10 @@ function renderRecordsReview(role) {
     ${_tblWrap(['رقم الزيارة','المنشأة','نوع الزيارة','تاريخ الرفع','الإجراء'],
       pending.map(v=>`<tr>
         <td class="fw7 txp">${v.id}</td><td>${v.employerName}</td>
-        <td>${v.id.includes('DWR')?'دورية':v.id.includes('MFJ')?'مفاجئة':'مجدولة'}</td>
+        <td>${v.id.includes('-03-')?'دورية':v.id.includes('-04-')?'مفاجئة':'مجدولة'}</td>
         <td>${v.actualDate || v.scheduledDate}</td>
         <td><div class="df ac g8">
-          <button class="btn btn-primary btn-xs" onclick="navigateTo('${v.id.includes('MFJ')?'visit-surprise-details':v.id.includes('MJD')?'visit-scheduled-details':'visit-periodic-details'}','id=${v.id}')">${ICONS.eye}مراجعة</button>
+          <button class="btn btn-primary btn-xs" onclick="navigateTo('${v.id.includes('-04-')?'visit-surprise-details':v.id.includes('-05-')?'visit-scheduled-details':'visit-periodic-details'}','id=${v.id}')">${ICONS.eye}مراجعة</button>
           <button class="btn btn-accent btn-xs" onclick="showToast('تم اعتماد المحضر','s')">اعتماد</button>
           <button class="btn btn-warning btn-xs" onclick="showToast('تم إعادة للمفتش','w')">إعادة</button>
         </div></td></tr>`).join(''))}`;
@@ -1009,10 +1342,10 @@ function renderRecordsReview(role) {
 /* ── الإجراءات التصحيحية (field-head) ── */
 function renderCorrectiveActions(role) {
   const actions = [
-    { visit: 'ZYR-DWR-2025-0002', employer: 'مصنع الإنتاج الغذائي', action: 'توفير معدات الحماية', deadline: '2025-01-19', status: 'معلق' },
-    { visit: 'ZYR-DWR-2025-0002', employer: 'مصنع الإنتاج الغذائي', action: 'تسجيل العمال غير المسجلين', deadline: '2025-01-13', status: 'منجز' },
-    { visit: 'ZYR-MFJ-2025-0001', employer: 'مصنع الإنتاج الغذائي', action: 'سداد الاشتراكات المتأخرة', deadline: '2025-01-26', status: 'جارٍ' },
-    { visit: 'ZYR-DWR-2024-0095', employer: 'مؤسسة البناء والتشييد', action: 'صرف الرواتب المتأخرة', deadline: '2024-12-15', status: 'منجز' },
+    { visit: '2025-03-000002', employer: 'مصنع الإنتاج الغذائي', action: 'توفير معدات الحماية', deadline: '2025-01-19', status: 'معلق' },
+    { visit: '2025-03-000002', employer: 'مصنع الإنتاج الغذائي', action: 'تسجيل العمال غير المسجلين', deadline: '2025-01-13', status: 'منجز' },
+    { visit: '2025-04-000001', employer: 'مصنع الإنتاج الغذائي', action: 'سداد الاشتراكات المتأخرة', deadline: '2025-01-26', status: 'جارٍ' },
+    { visit: '2024-03-000095', employer: 'مؤسسة البناء والتشييد', action: 'صرف الرواتب المتأخرة', deadline: '2024-12-15', status: 'منجز' },
   ];
   return `<div class="pg-head"><div><h1>متابعة الإجراءات التصحيحية</h1><p>رصد تنفيذ الإجراءات التصحيحية من قبل المنشآت</p></div>
     <div class="pg-acts"><button class="btn btn-secondary btn-sm">${ICONS.download}تصدير</button></div></div>
@@ -1063,7 +1396,7 @@ function renderInspectionPlansList(role) {
 
 /* ── تفاصيل خطة التفتيش (inspection-director) ── */
 function renderInspectionPlanDetails(role) {
-  const id = getParam('id') || 'KHT-2025-Q1';
+  const id = getParam('id') || '2025-07-000001';
   const p = INSP_DATA.inspectionPlans.find(x => x.id === id) || INSP_DATA.inspectionPlans[0];
 
   const pct = p.targetCount ? Math.round(p.completedCount / p.targetCount * 100) : 0;
@@ -1113,7 +1446,7 @@ function renderBanCasesList(role) {
 
 /* ── تفاصيل حالة الحظر (inspection-director) ── */
 function renderBanCaseDetails(role) {
-  const id = getParam('id') || 'INSP-HZR-2025-0001';
+  const id = getParam('id') || '2025-06-000001';
   const b = INSP_DATA.banCases.find(x => x.id === id) || INSP_DATA.banCases[0];
 
   return `<div class="pg-head"><div><h1>${b.id}</h1><p>حالة حظر — ${b.employerName}</p></div>
@@ -1259,7 +1592,7 @@ function renderPatternDetection(role) {
   const allV = INSP_DATA.employers.flatMap(e=>(e.violations||[]).map(v=>({...v, employer: e.name, employerId: e.id})));
   const allC = INSP_DATA.complaints;
   const allVisits = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled];
-  const _vpg = id => id.includes('MFJ') ? 'visit-surprise-details' : id.includes('MJD') ? 'visit-scheduled-details' : 'visit-periodic-details';
+  const _vpg = id => id.includes('-04-') ? 'visit-surprise-details' : id.includes('-05-') ? 'visit-scheduled-details' : 'visit-periodic-details';
   const _rb = r => r==='مرتفع'?'b-rejected':r==='متوسط'?'b-returned':'b-approved';
 
   /* ── Pattern 1: متكرر — تأخر الاشتراكات ── */
@@ -1497,7 +1830,7 @@ function renderReportDetails(role) {
 /* ── زيارات جهة العمل / المؤمن عليه ── */
 function renderEmployerVisitsList(role) {
   const all = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled];
-  const typeLabel = v => v.id.includes('DWR') ? 'دورية' : v.id.includes('MFJ') ? 'مفاجئة' : 'مجدولة';
+  const typeLabel = v => v.id.includes('-03-') ? 'دورية' : v.id.includes('-04-') ? 'مفاجئة' : 'مجدولة';
   const rows = all.map(v =>
     `<tr>
       <td class="fw7 txp">${v.id}</td>

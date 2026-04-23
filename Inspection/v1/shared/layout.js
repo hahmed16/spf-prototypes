@@ -358,6 +358,7 @@ function renderTimeline(timeline) {
           <span class="tl-act">${t.action}</span>
           <span class="tl-time">${t.date}</span>
         </div>
+        ${t.step ? `<div style="font-size:11px;color:var(--primary);font-weight:600;margin-top:2px">${t.step}</div>` : ''}
         <div class="tl-meta">${t.actor}${t.actorRole ? ` — ${INSP_CONFIG.roles[t.actorRole] ? INSP_CONFIG.roles[t.actorRole].nameAr : t.actorRole}` : ''}</div>
       </div>
     </div>`).join('')}</div>`;

@@ -186,9 +186,19 @@ const INSP_CONFIG = {
   /* ── ألوان حالات البلاغات ── */
   statusBadges: {
     'مسودة':                                                        'b-draft',
+    /* البلاغات — مسار جديد */
+    'بانتظار تعيين':                                               'b-submitted',
+    'قيد الدراسة والتحقق':                                         'b-invest',
+    'قيد المراجعة الميدانية':                                      'b-invest',
+    'تم جدولة زيارة':                                              'b-session',
+    'بانتظار اعتماد رئيس الشكاوى':                                 'b-phead',
+    'بانتظار اعتماد رئيس التفتيش':                                 'b-phead',
+    'بانتظار موافقة المدير':                                       'b-phead',
+    'صدر قرار':                                                    'b-decided',
+    'مُغلق':                                                       'b-closed',
+    /* قديم — للتوافق */
     'تم تقديم البلاغ — بانتظار تعيين المختص':                      'b-submitted',
     'مرفوع من جهة رسمية — بانتظار تعيين المختص':                   'b-submitted',
-    'قيد الدراسة والتحقق':                                         'b-invest',
     'قيد التحقق الميداني':                                         'b-invest',
     'بانتظار اعتماد رئيس القسم':                                   'b-phead',
     'يتطلب قرار المدير':                                           'b-phead',
@@ -227,8 +237,33 @@ const INSP_CONFIG = {
   actionStyles: {
     'حفظ كمسودة':                           'btn-ghost btn-sm',
     'إرسال البلاغ':                          'btn-primary btn-sm',
-    'تعيين المختص':                          'btn-primary btn-sm',
+    /* fund-staff */
+    'تعيين للمختص':                          'btn-primary btn-sm',
+    /* monitoring-employee */
+    'إرسال للمفتش':                          'btn-primary btn-sm',
+    'طلب مستندات':                           'btn-warning btn-sm',
+    'رفض للغلق':                             'btn-danger btn-sm',
+    'إعادة للتصحيح':                         'btn-warning btn-sm',
     'بدء الدراسة':                           'btn-primary btn-sm',
+    'إعادة إرسال للمفتش':                   'btn-primary btn-sm',
+    /* field-inspector */
+    'رفع رأي مبدئي':                         'btn-primary btn-sm',
+    'رفع رأي نهائي':                         'btn-accent btn-sm',
+    'إحالة للفرع':                           'btn-secondary btn-sm',
+    'إغلاق':                                 'btn-ghost btn-sm',
+    /* monitoring-head */
+    'اعتماد':                                'btn-accent btn-sm',
+    /* field-head */
+    'اعتماد نهائي':                          'btn-accent btn-sm',
+    'رفض':                                   'btn-danger btn-sm',
+    'إعادة للمفتش':                          'btn-warning btn-sm',
+    /* inspection-director */
+    'موافقة وتحويل للمفتش':                 'btn-accent btn-sm',
+    /* external */
+    'تقديم تظلم':                            'btn-warning btn-sm',
+    'استيفاء البيانات وإعادة الإرسال':      'btn-primary btn-sm',
+    /* قديم — للتوافق */
+    'تعيين المختص':                          'btn-primary btn-sm',
     'طلب استيفاء بيانات':                    'btn-warning btn-sm',
     'توجيه للرئيس المباشر':                 'btn-accent btn-sm',
     'إغلاق البلاغ':                          'btn-ghost btn-sm',
@@ -237,8 +272,7 @@ const INSP_CONFIG = {
     'اعتماد وإغلاق':                         'btn-accent btn-sm',
     'رفض مع السبب':                          'btn-danger btn-sm',
     'إصدار القرار':                          'btn-accent btn-sm',
-    'تقديم تظلم':                            'btn-warning btn-sm',
-    'استيفاء البيانات وإعادة الإرسال':      'btn-primary btn-sm',
+    /* زيارات */
     'بدء الزيارة':                           'btn-primary btn-sm',
     'رفع المحضر':                            'btn-primary btn-sm',
     'اعتماد المحضر':                         'btn-accent btn-sm',
