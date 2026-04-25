@@ -18,3 +18,5 @@ PR.zip
 .edge-profile-inspection/Crashpad/settings.dat
 .edge-profile-inspection/Crashpad/throttle_store.dat
 .edge-profile-inspection/Crashpad/reports/81c86513-472b-4427-89ab-c87aebb23551.dmp
+.claude/settings.local.json
+.claude/settings.local.json

@@ -14,6 +14,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   initLayout({ role: 'ops-analyst', activePage: 'ban-case-details', breadcrumb: [
     { label: 'الرئيسية', onclick: 'goHome()' },
+    { label: 'حالات الحظر', onclick: "navigateTo('ban-cases-list')" },
     { label: 'تفاصيل حالة الحظر' }
   ]});
   renderContent(renderBanCaseDetails('ops-analyst'));

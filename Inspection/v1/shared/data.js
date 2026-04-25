@@ -1268,6 +1268,196 @@ const INSP_DATA = {
         { date: '2024-11-10', action: 'رفع الحظر بعد إثبات الامتثال', actor: 'عبدالعزيز هلال الراشدي', actorRole: 'inspection-director' }
       ]
     }
-  ]
+  ],
 
+  jobSecurityRequests: [
+    {
+      id: 'JSR-2025-0001',
+      status: 'قيد المراجعة',
+      requestDate: '2025-01-15',
+      workerName: 'أحمد محمد العلي',
+      workerCivil: '28475910',
+      employerName: 'شركة البناء الحديث',
+      employerCRN: '1012345678',
+      terminationDate: '2025-01-10',
+      terminationReason: 'إنهاء العقد',
+      salary: 450,
+      employmentDuration: '3 سنوات',
+      notes: 'الطلب قيد المراجعة من قبل قسم المتابعة',
+      timeline: [
+        { date: '2025-01-15', action: 'تقديم طلب الأمان الوظيفي', actor: 'أحمد محمد العلي', actorRole: 'insured' },
+        { date: '2025-01-16', action: 'استلام الطلب للمراجعة', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' }
+      ]
+    },
+    {
+      id: 'JSR-2025-0002',
+      status: 'قيد المعالجة',
+      requestDate: '2025-01-18',
+      workerName: 'خالد بن سالم المعمري',
+      workerCivil: '28475913',
+      employerName: 'شركة المقاولات العمانية',
+      employerCRN: '1012345679',
+      terminationDate: '2025-01-12',
+      terminationReason: 'استقالة',
+      salary: 380,
+      employmentDuration: '2 سنة',
+      notes: 'جاري التحقق من الوثائق',
+      timeline: [
+        { date: '2025-01-18', action: 'تقديم طلب الأمان الوظيفي', actor: 'خالد بن سالم المعمري', actorRole: 'insured' },
+        { date: '2025-01-19', action: 'بدء عملية التحقق', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' }
+      ]
+    }
+  ],
+
+  familyBenefitRequests: [
+    {
+      id: 'FBR-2025-0001',
+      status: 'قيد المراجعة',
+      requestDate: '2025-01-20',
+      workerName: 'سالم بن حمد البوسعيدي',
+      workerCivil: '28475911',
+      employerName: 'شركة المقاولات العمانية',
+      employerCRN: '1012345679',
+      benefitType: 'منافع دخل الأسرة',
+      familyMembers: 5,
+      monthlyIncome: 350,
+      employmentDuration: '2 سنة',
+      notes: 'الطلب قيد المراجعة من قبل قسم المتابعة',
+      timeline: [
+        { date: '2025-01-20', action: 'تقديم طلب منافع دخل الأسرة', actor: 'سالم بن حمد البوسعيدي', actorRole: 'insured' },
+        { date: '2025-01-21', action: 'استلام الطلب للمراجعة', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' }
+      ]
+    },
+    {
+      id: 'FBR-2025-0002',
+      status: 'قيد المعالجة',
+      requestDate: '2025-01-22',
+      workerName: 'محمد بن علي الهنائي',
+      workerCivil: '28475914',
+      employerName: 'شركة الخدمات الطبية',
+      employerCRN: '1012345680',
+      benefitType: 'منافع دخل الأسرة',
+      familyMembers: 4,
+      monthlyIncome: 420,
+      employmentDuration: '3 سنوات',
+      notes: 'جاري التحقق من الأهلية',
+      timeline: [
+        { date: '2025-01-22', action: 'تقديم طلب منافع دخل الأسرة', actor: 'محمد بن علي الهنائي', actorRole: 'insured' },
+        { date: '2025-01-23', action: 'بدء عملية التحقق', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' }
+      ]
+    }
+  ],
+
+  maternityLeaveRequests: [
+    {
+      id: 'MLR-2025-0001',
+      status: 'قيد المراجعة',
+      requestDate: '2025-01-25',
+      workerName: 'فاطمة بنت سالم الهنائي',
+      workerCivil: '28475912',
+      employerName: 'شركة الخدمات الطبية',
+      employerCRN: '1012345680',
+      leaveType: 'إجازة أمومة',
+      expectedDeliveryDate: '2025-03-15',
+      leaveStartDate: '2025-03-01',
+      leaveDuration: '98 يوم',
+      monthlySalary: 420,
+      notes: 'الطلب قيد المراجعة من قبل قسم المتابعة',
+      timeline: [
+        { date: '2025-01-25', action: 'تقديم طلب إجازة الأمومة', actor: 'فاطمة بنت سالم الهنائي', actorRole: 'insured' },
+        { date: '2025-01-26', action: 'استلام الطلب للمراجعة', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' }
+      ]
+    },
+    {
+      id: 'MLR-2025-0002',
+      status: 'قيد المعالجة',
+      requestDate: '2025-01-27',
+      workerName: 'مريم بنت خالد البلوشية',
+      workerCivil: '28475915',
+      employerName: 'شركة التقنية الوطنية',
+      employerCRN: '1234567890',
+      leaveType: 'إجازة أمومة',
+      expectedDeliveryDate: '2025-04-20',
+      leaveStartDate: '2025-04-01',
+      leaveDuration: '98 يوم',
+      monthlySalary: 550,
+      notes: 'جاري التحقق من الوثائق الطبية',
+      timeline: [
+        { date: '2025-01-27', action: 'تقديم طلب إجازة الأمومة', actor: 'مريم بنت خالد البلوشية', actorRole: 'insured' },
+        { date: '2025-01-28', action: 'بدء عملية التحقق', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' }
+      ]
+    }
+  ],
+
+  nonPaymentCompanies: [
+    {
+      id: 'NPC-2025-0001',
+      status: 'قيد المراجعة',
+      companyName: 'شركة المقاولات المتقدمة',
+      crn: '1012345681',
+      region: 'مسقط',
+      arrearsAmount: 15000,
+      arrearsPeriod: '6 أشهر',
+      employeeCount: 45,
+      lastPaymentDate: '2024-07-15',
+      notes: 'الشركة متوقفة عن السداد منذ 6 أشهر',
+      timeline: [
+        { date: '2024-07-15', action: 'آخر دفع مسجل', actor: 'النظام', actorRole: 'system' },
+        { date: '2025-01-10', action: 'رفع الحالة للمراجعة', actor: 'شيماء وليد البريكي', actorRole: 'ops-analyst' }
+      ]
+    },
+    {
+      id: 'NPC-2025-0002',
+      status: 'قيد المعالجة',
+      companyName: 'مؤسسة البناء والتشييد المتكاملة',
+      crn: '1012345682',
+      region: 'شمال الباطنة',
+      arrearsAmount: 22000,
+      arrearsPeriod: '8 أشهر',
+      employeeCount: 60,
+      lastPaymentDate: '2024-05-20',
+      notes: 'جاري متابعة الإجراءات القانونية',
+      timeline: [
+        { date: '2024-05-20', action: 'آخر دفع مسجل', actor: 'النظام', actorRole: 'system' },
+        { date: '2025-01-12', action: 'بدء الإجراءات القانونية', actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
+      ]
+    }
+  ],
+
+  liquidationBankruptcy: [
+    {
+      id: 'LB-2025-0001',
+      status: 'قيد المراجعة',
+      companyName: 'شركة التجارة العامة',
+      crn: '1012345683',
+      region: 'شمال الباطنة',
+      caseType: 'تصفية',
+      filingDate: '2025-01-10',
+      employeeCount: 30,
+      totalAssets: 250000,
+      totalLiabilities: 320000,
+      notes: 'حالة تصفية طوعية',
+      timeline: [
+        { date: '2025-01-10', action: 'تقديم طلب التصفية', actor: 'الشركة', actorRole: 'employer' },
+        { date: '2025-01-11', action: 'استلام الطلب للمراجعة', actor: 'عبدالعزيز هلال الراشدي', actorRole: 'inspection-director' }
+      ]
+    },
+    {
+      id: 'LB-2025-0002',
+      status: 'قيد المعالجة',
+      companyName: 'شركة الصناعات المتقدمة',
+      crn: '1012345684',
+      region: 'ظفار',
+      caseType: 'إفلاس',
+      filingDate: '2025-01-05',
+      employeeCount: 50,
+      totalAssets: 180000,
+      totalLiabilities: 350000,
+      notes: 'حالة إفلاس إجباري',
+      timeline: [
+        { date: '2025-01-05', action: 'تقديم طلب الإفلاس', actor: 'الشركة', actorRole: 'employer' },
+        { date: '2025-01-06', action: 'بدء إجراءات الإفلاس', actor: 'عبدالعزيز هلال الراشدي', actorRole: 'inspection-director' }
+      ]
+    }
+  ]
 };

@@ -75,6 +75,8 @@ const INSP_CONFIG = {
         { label: 'قائمة التظلمات', page: 'appeals-list', icon: 'list', badge: 'appeals' },
         { label: 'تحليل بيانات العامل', page: 'worker-analysis', icon: 'chart', badge: null },
         { label: 'تحليل بيانات صاحب العمل', page: 'employer-analysis', icon: 'building', badge: null },
+        { label: 'تحليل جغرافي', page: 'geographic-analysis', icon: 'map', badge: null },
+        { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
     },
@@ -95,6 +97,8 @@ const INSP_CONFIG = {
         { label: 'إعادة التخصيص', page: 'reassignment', icon: 'switch', badge: null },
         { label: 'متابعة الأعمال المتأخرة', page: 'overdue-tracking', icon: 'clock', badge: 'overdue' },
         { label: 'مراقبة عبء العمل', page: 'workload-monitoring', icon: 'user', badge: null },
+        { label: 'تحليل جغرافي', page: 'geographic-analysis', icon: 'map', badge: null },
+        { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
     },
@@ -108,11 +112,14 @@ const INSP_CONFIG = {
       canCreate: true,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
+        { label: 'قائمة البلاغات', page: 'complaints-list', icon: 'inbox', badge: 'complaints' },
         { label: 'قائمة الزيارات الدورية', page: 'visits-periodic-list', icon: 'calendar', badge: null },
         { label: 'قائمة الزيارات المفاجئة', page: 'visits-surprise-list', icon: 'clipboard', badge: 'surprise' },
         { label: 'قائمة الزيارات المجدولة', page: 'visits-scheduled-list', icon: 'list', badge: 'scheduled' },
         { label: 'تحليل بيانات العامل', page: 'worker-analysis', icon: 'chart', badge: null },
         { label: 'تحليل بيانات صاحب العمل', page: 'employer-analysis', icon: 'building', badge: null },
+        { label: 'تحليل جغرافي', page: 'geographic-analysis', icon: 'map', badge: null },
+        { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
     },
@@ -126,6 +133,7 @@ const INSP_CONFIG = {
       canCreate: true,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
+        { label: 'قائمة البلاغات', page: 'complaints-list', icon: 'list', badge: 'complaints' },
         { label: 'قائمة الزيارات الدورية', page: 'visits-periodic-list', icon: 'calendar', badge: null },
         { label: 'قائمة الزيارات المفاجئة', page: 'visits-surprise-list', icon: 'clipboard', badge: null },
         { label: 'قائمة الزيارات المجدولة', page: 'visits-scheduled-list', icon: 'list', badge: null },
@@ -134,6 +142,8 @@ const INSP_CONFIG = {
         { label: 'إعادة توزيع المفتشين', page: 'inspector-redistribution', icon: 'switch', badge: null },
         { label: 'تحليل بيانات العامل', page: 'worker-analysis', icon: 'chart', badge: null },
         { label: 'تحليل بيانات صاحب العمل', page: 'employer-analysis', icon: 'building', badge: null },
+        { label: 'تحليل جغرافي', page: 'geographic-analysis', icon: 'map', badge: null },
+        { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
     },
@@ -155,6 +165,8 @@ const INSP_CONFIG = {
         { label: 'قائمة حالات الحظر', page: 'ban-cases-list', icon: 'lock', badge: null },
         { label: 'تحليل بيانات العامل', page: 'worker-analysis', icon: 'chart', badge: null },
         { label: 'تحليل بيانات صاحب العمل', page: 'employer-analysis', icon: 'building', badge: null },
+        { label: 'تحليل جغرافي', page: 'geographic-analysis', icon: 'map', badge: null },
+        { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
     },
@@ -177,6 +189,8 @@ const INSP_CONFIG = {
         { label: 'تحليل بيانات العمال', page: 'worker-analysis', icon: 'user', badge: null },
         { label: 'تحليل بيانات أصحاب العمل', page: 'employer-analysis', icon: 'building', badge: null },
         { label: 'إعداد خطة التفتيش الدوري', page: 'inspection-plan-draft', icon: 'pen', badge: null },
+        { label: 'تحليل جغرافي', page: 'geographic-analysis', icon: 'map', badge: null },
+        { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
     }

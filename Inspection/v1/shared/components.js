@@ -89,13 +89,20 @@ function renderDashboard(role) {
       { lbl: 'أنماط مكتشفة هذا الشهر', val: '2', sub: 'مؤشرات مخاطر', color: 'w' },
       { lbl: 'مقترحات خطة قيد المراجعة', val: '1', sub: 'للموافقة', color: 'i' },
     ],
+    'fund-staff': [
+      { lbl: 'البلاغات المستلمة', val: '4', sub: 'إجمالي مقدم', color: 'p' },
+      { lbl: 'بلاغات قيد المعالجة', val: '2', sub: 'بانتظار الإجراء', color: 'w' },
+      { lbl: 'طلبات معلقة', val: '1', sub: 'تستوجب مراجعة', color: 'i' },
+      { lbl: 'معالجة ناجحة', val: '3', sub: 'أُغلقت هذا الشهر', color: 's' },
+    ],
   };
 
   const _firstPage = {
     'employer': 'complaints-list', 'insured': 'complaints-list',
     'monitoring-employee': 'complaints-list', 'monitoring-head': 'complaints-list',
     'field-inspector': 'visits-periodic-list', 'field-head': 'visits-periodic-list',
-    'inspection-director': 'complaints-list', 'ops-analyst': 'risk-analysis'
+    'inspection-director': 'complaints-list', 'ops-analyst': 'risk-analysis',
+    'fund-staff': 'complaints-list'
   };
   const _navTarget = _firstPage[role] || 'dashboard';
   const cards = (kpis[role] || kpis['monitoring-employee']).map(k =>
@@ -3316,4 +3323,843 @@ function renderEmployerVisitsList(role) {
   return `<div class="pg-head"><div><h1>الزيارات التفتيشية</h1><p>جميع الزيارات المتعلقة بمنشأتك — ${all.length} زيارة</p></div></div>
     ${_filterBar([{label:'نوع الزيارة',type:'select',opts:['دورية','مفاجئة','مجدولة']},{label:'الحالة',type:'select',opts:['مجدولة','جارية','بانتظار مراجعة المحضر','تم اعتماد المحضر','مغلقة']},{label:'من تاريخ',type:'date'}])}
     ${_tblWrap(['رقم الزيارة','النوع','المفتش','الحالة','التاريخ المجدول','تاريخ التنفيذ','إجراء'], rows || _noData())}`;
+}
+
+/* ================================================================
+   المكونات المشتركة الجديدة - v2
+   ================================================================ */
+
+/* ── مكون توثيق المخاطبات ── */
+function renderDocumentationComponent(data) {
+  const docs = data.documents || [];
+  return `
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico bl">${ICONS.file}</div>توثيق المخاطبات</h3>
+        <span style="font-size:11.5px;color:var(--text3)">${docs.length} مستند</span>
+      </div>
+      <div class="pb">
+        ${docs.length ? docs.map(d => `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rsm);margin-bottom:8px;background:var(--g50)">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:16px">${d.type === 'email' ? '📧' : d.type === 'phone' ? '📞' : d.type === 'letter' ? '📄' : '📋'}</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">${d.title}</div>
+                <div style="font-size:11px;color:var(--text3)">${d.date} — ${d.sender}</div>
+              </div>
+            </div>
+            <div class="df ac g8">
+              <button class="ibtn" title="عرض" onclick="showToast('جارٍ فتح المستند...','i')">${ICONS.eye}</button>
+              <button class="ibtn" title="تنزيل" onclick="showToast('جارٍ تنزيل المستند...','i')">${ICONS.download}</button>
+            </div>
+          </div>
+        `).join('') : '<p style="color:var(--text3);font-size:12.5px">لا توجد مستندات موثقة</p>'}
+        <button class="btn btn-ghost btn-sm mt8" onclick="openAddDocumentationModal()">${ICONS.plus} إضافة مستند</button>
+      </div>
+    </div>
+  `;
+}
+
+function openAddDocumentationModal() {
+  openModal({
+    title: 'إضافة توثيق مخاطبة',
+    body: `
+      <div class="fg fg-2">
+        <div class="fgrp"><label class="flbl">نوع التواصل <span class="req">*</span></label>
+          <select class="fc" id="doc-type">
+            <option value="email">بريد إلكتروني</option>
+            <option value="phone">مكالمة هاتفية</option>
+            <option value="letter">خطاب رسمي</option>
+            <option value="meeting">اجتماع</option>
+          </select>
+        </div>
+        <div class="fgrp"><label class="flbl">التاريخ <span class="req">*</span></label>
+          <input type="date" class="fc" id="doc-date">
+        </div>
+        <div class="fgrp"><label class="flbl">عنوان التوثيق <span class="req">*</span></label>
+          <input class="fc" id="doc-title" placeholder="مثال: إشعار استيفاء البيانات">
+        </div>
+        <div class="fgrp"><label class="flbl">الجهة/المرسل</label>
+          <input class="fc" id="doc-sender" placeholder="مثال: وزارة العمل">
+        </div>
+        <div class="fgrp span-full"><label class="flbl">الوصف</label>
+          <textarea class="fc" id="doc-desc" rows="3" placeholder="وصف تفصيلي للتواصل..."></textarea>
+        </div>
+        <div class="fgrp span-full"><label class="flbl">المرفقات</label>
+          <div class="dz-box" style="padding:12px;min-height:60px">
+            <div style="text-align:center;color:var(--text3);font-size:12px">
+              <span style="font-size:24px;display:block;margin-bottom:4px">📎</span>
+              اسحب الملفات هنا أو انقر للاختيار
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+    footer: `
+      <button class="btn btn-primary" onclick="saveDocumentation()">${ICONS.check} حفظ التوثيق</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    `
+  });
+}
+
+function saveDocumentation() {
+  const type = document.getElementById('doc-type').value;
+  const date = document.getElementById('doc-date').value;
+  const title = document.getElementById('doc-title').value;
+
+  if (!type || !date || !title) {
+    showToast('يرجى ملء الحقول المطلوبة', 'w');
+    return;
+  }
+
+  closeModal();
+  showToast('تم حفظ التوثيق بنجاح', 's');
+}
+
+/* ── مكون تسجيل المكالمات المرئية ── */
+function renderVideoCallRecording(data) {
+  const recordings = data.recordings || [];
+  return `
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico tl">${ICONS.eye}</div>تسجيل المكالمات المرئية</h3>
+        <span style="font-size:11.5px;color:var(--text3)">${recordings.length} تسجيل</span>
+      </div>
+      <div class="pb">
+        ${recordings.length ? recordings.map(r => `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;border:1px solid var(--border);border-radius:var(--rsm);margin-bottom:8px;background:var(--g50)">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:48px;height:36px;background:var(--g200);border-radius:6px;display:flex;align-items:center;justify-content:center">
+                <span style="font-size:20px">🎥</span>
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">${r.title}</div>
+                <div style="font-size:11px;color:var(--text3)">${r.date} — ${r.duration} — ${r.participants}</div>
+              </div>
+            </div>
+            <div class="df ac g8">
+              <button class="btn btn-primary btn-xs" onclick="showToast('جارٍ تشغيل التسجيل...','i')">${ICONS.eye}مشاهدة</button>
+              <button class="ibtn" title="تنزيل" onclick="showToast('جارٍ تنزيل التسجيل...','i')">${ICONS.download}</button>
+            </div>
+          </div>
+        `).join('') : '<p style="color:var(--text3);font-size:12.5px">لا توجد تسجيلات</p>'}
+        <button class="btn btn-ghost btn-sm mt8" onclick="openAddRecordingModal()">${ICONS.plus} إضافة تسجيل</button>
+      </div>
+    </div>
+  `;
+}
+
+function openAddRecordingModal() {
+  openModal({
+    title: 'إضافة تسجيل مكالمة مرئية',
+    body: `
+      <div class="fg fg-2">
+        <div class="fgrp"><label class="flbl">عنوان التسجيل <span class="req">*</span></label>
+          <input class="fc" id="rec-title" placeholder="مثال: مكالمة مع صاحب العمل">
+        </div>
+        <div class="fgrp"><label class="flbl">التاريخ <span class="req">*</span></label>
+          <input type="date" class="fc" id="rec-date">
+        </div>
+        <div class="fgrp"><label class="flbl">المدة</label>
+          <input class="fc" id="rec-duration" placeholder="مثال: 15:30">
+        </div>
+        <div class="fgrp"><label class="flbl">المشاركون</label>
+          <input class="fc" id="rec-participants" placeholder="مثال: أحمد، محمد">
+        </div>
+        <div class="fgrp span-full"><label class="flbl">ملاحظات</label>
+          <textarea class="fc" id="rec-notes" rows="3" placeholder="ملاحظات حول المكالمة..."></textarea>
+        </div>
+        <div class="fgrp span-full"><label class="flbl">رفع التسجيل</label>
+          <div class="dz-box" style="padding:16px;min-height:80px">
+            <div style="text-align:center;color:var(--text3);font-size:12px">
+              <span style="font-size:32px;display:block;margin-bottom:6px">🎥</span>
+              اسحب ملف الفيديو هنا أو انقر للاختيار
+              <div style="font-size:10px;margin-top:4px">MP4, WebM (حد أقصى 500MB)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+    footer: `
+      <button class="btn btn-primary" onclick="saveRecording()">${ICONS.check} حفظ التسجيل</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    `
+  });
+}
+
+function saveRecording() {
+  const title = document.getElementById('rec-title').value;
+  const date = document.getElementById('rec-date').value;
+
+  if (!title || !date) {
+    showToast('يرجى ملء الحقول المطلوبة', 'w');
+    return;
+  }
+
+  closeModal();
+  showToast('تم حفظ التسجيل بنجاح', 's');
+}
+
+/* ── شاشة التحليل الجغرافي ── */
+function renderGeographicAnalysisScreen(role) {
+  const governorates = [
+    { name: 'محافظة مسقط', count: 45, trend: '+12%', lat: 23.58, lng: 58.38, color: '#c0392b' },
+    { name: 'محافظة ظفار', count: 23, trend: '+5%', lat: 17.02, lng: 54.09, color: '#e67e22' },
+    { name: 'محافظة شمال الباطنة', count: 18, trend: '-3%', lat: 24.56, lng: 56.78, color: '#f39c12' },
+    { name: 'محافظة جنوب الباطنة', count: 15, trend: '+8%', lat: 23.12, lng: 57.34, color: '#27ae60' },
+    { name: 'محافظة الداخلية', count: 12, trend: '+2%', lat: 22.89, lng: 57.45, color: '#2980b9' },
+    { name: 'محافظة شمال الشرقية', count: 10, trend: '+4%', lat: 22.56, lng: 59.12, color: '#8e44ad' },
+    { name: 'محافظة جنوب الشرقية', count: 8, trend: '+1%', lat: 19.23, lng: 57.34, color: '#16a085' },
+    { name: 'محافظة البريمي', count: 6, trend: '+3%', lat: 24.23, lng: 56.45, color: '#d35400' },
+    { name: 'محافظة الظاهرة', count: 5, trend: '+2%', lat: 23.45, lng: 56.12, color: '#7f8c8d' },
+    { name: 'محافظة مسندم', count: 3, trend: '+1%', lat: 26.12, lng: 56.34, color: '#c0392b' },
+    { name: 'محافظة الدقم', count: 4, trend: '+2%', lat: 19.45, lng: 54.23, color: '#e74c3c' },
+  ];
+
+  const maxCount = Math.max(...governorates.map(g => g.count));
+
+  return `<div class="pg-head"><div><h1>التحليل الجغرافي</h1><p>تحليل توزيع البلاغات والزيارات حسب المناطق الجغرافية</p></div>
+    <div class="pg-acts">
+      <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير التقرير...','i')">${ICONS.download}تصدير</button>
+    </div></div>
+
+    <div class="fg fg-2 mb12">
+      <div class="card" style="grid-column:span 2">
+        <div class="ph"><h3><span class="pico tl">${ICONS.map}</span>خريطة التوزيع الجغرافي - سلطنة عمان</h3></div>
+        <div class="pb" style="height:500px;border-radius:var(--rsm);overflow:hidden;position:relative">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d732432.123456789!2d53.0!3d21.0!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e8e4d7c7f8e9d1f%3A0x1234567890abcdef!2sOman!5e0!3m2!1sen!2som!4v1234567890123&z=6"
+            width="100%"
+            height="100%"
+            style="border:0"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+          <div style="position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.95);padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);max-width:280px">
+            <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text)">📍 المحافظات</div>
+            ${governorates.map(g => `
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px">
+                <div style="width:12px;height:12px;border-radius:50%;background:${g.color};border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div>
+                <div style="flex:1">
+                  <div style="font-weight:600;color:var(--text)">${g.name}</div>
+                  <div style="color:var(--text2)">${g.count} بلاغ</div>
+                </div>
+                <div style="font-size:10px;color:${g.trend.includes('+')?'var(--success)':'var(--danger)'};font-weight:600">${g.trend}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fg fg-2">
+      <div class="card">
+        <div class="ph"><h3><span class="pico bl">${ICONS.chart}</span>الإحصائيات حسب المحافظة</h3></div>
+        <div class="pb">
+          ${governorates.map(g => `
+            <div style="margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                <span style="font-size:12px;font-weight:600;color:var(--text)">${g.name}</span>
+                <span style="font-size:12px;font-weight:700;color:${g.color}">${g.count}</span>
+              </div>
+              <div style="height:6px;background:var(--g200);border-radius:3px;overflow:hidden">
+                <div style="height:100%;width:${(g.count/maxCount)*100}%;background:${g.color};border-radius:3px"></div>
+              </div>
+              <div style="font-size:10px;color:${g.trend.includes('+')?'var(--success)':'var(--danger)'};margin-top:2px">${g.trend} عن الشهر الماضي</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ph"><h3><span class="pico gr">${ICONS.filter}</span>فلاتر التحليل</h3></div>
+        <div class="pb">
+          <div class="fg fg-2">
+            <div class="fgrp"><label class="flbl">الفترة</label>
+              <select class="fc">
+                <option>آخر 30 يوم</option>
+                <option>آخر 90 يوم</option>
+                <option>آخر 6 أشهر</option>
+                <option>سنة 2025</option>
+              </select>
+            </div>
+            <div class="fgrp"><label class="flbl">النوع</label>
+              <select class="fc">
+                <option>الكل</option>
+                <option>بلاغات</option>
+                <option>زيارات</option>
+                <option>تظلمات</option>
+              </select>
+            </div>
+            <div class="fgrp"><label class="flbl">الحالة</label>
+              <select class="fc">
+                <option>الكل</option>
+                <option>مفتوحة</option>
+                <option>مغلقة</option>
+                <option>قيد المراجعة</option>
+              </select>
+            </div>
+            <div class="fgrp"><label class="flbl">الأولوية</label>
+              <select class="fc">
+                <option>الكل</option>
+                <option>عاجل</option>
+                <option>مرتفع</option>
+                <option>متوسط</option>
+                <option>منخفض</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm mt8" style="width:100%">${ICONS.search} تطبيق الفلاتر</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── شاشة السجل الزمني ── */
+function renderTimelineScreen(role) {
+  const defaultRequestId = 'CMP-2025-0001';
+  const requestId = getParam('id') || defaultRequestId;
+
+  const findEntityTimeline = (id) => {
+    const complaint = INSP_DATA.complaints.find(c => c.id === id);
+    if (complaint && complaint.timeline) {
+      return {
+        type: 'complaint',
+        id: complaint.id,
+        name: complaint.type,
+        timeline: complaint.timeline
+      };
+    }
+
+    const visit = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled].find(v => v.id === id);
+    if (visit && visit.timeline) {
+      return {
+        type: 'visit',
+        id: visit.id,
+        name: visit.employerName,
+        timeline: visit.timeline
+      };
+    }
+
+    const appeal = INSP_DATA.appeals.find(a => a.id === id);
+    if (appeal && appeal.timeline) {
+      return {
+        type: 'appeal',
+        id: appeal.id,
+        name: appeal.type,
+        timeline: appeal.timeline
+      };
+    }
+
+    return null;
+  };
+
+  const entity = findEntityTimeline(requestId);
+  const timeline = entity ? entity.timeline : [];
+
+  const entityOptions = [
+    ...INSP_DATA.complaints.map(c => ({ id: c.id, name: `${c.id} — ${c.type}` })),
+    ...INSP_DATA.appeals.map(a => ({ id: a.id, name: `${a.id} — ${a.type}` })),
+    ...[...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled].map(v => ({ id: v.id, name: `${v.id} — ${v.employerName}` }))
+  ];
+
+  return `<div class="pg-head"><div><h1>السجل الزمني</h1><p>سجل جميع الأنشطة والإجراءات على النظام</p></div>
+    <div class="pg-acts">
+      <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير السجلات...','i')">${ICONS.download}تصدير</button>
+    </div></div>
+
+    <div class="card mb12">
+      <div class="ph"><h3><span class="pico gr">${ICONS.filter}</span>اختيار الطلب</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp">
+            <label class="flbl">رقم الطلب</label>
+            <select id="timeline-request-select" class="fc" onchange="updateTimelineRequest()">
+              ${entityOptions.map(opt => `<option value="${opt.id}" ${opt.id === requestId ? 'selected' : ''}>${opt.name}</option>`).join('')}
+            </select>
+          </div>
+          <div class="fgrp">
+            <label class="flbl">&nbsp;</label>
+            <button class="btn btn-primary" onclick="updateTimelineRequest()">${ICONS.search}عرض السجل الزمني</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${entity ? `
+    <div class="card">
+      <div class="ph">
+        <h3><span class="pico bl">${ICONS.clock}</span>سجل الأنشطة — ${entity.id}</h3>
+        <span style="font-size:11.5px;color:var(--text3)">${entity.name} • ${timeline.length} نشاط</span>
+      </div>
+      <div class="pb">
+        ${timeline.length ? renderTimeline(timeline) : '<div class="tx3 fs11">لا توجد أنشطة مسجلة لهذا الطلب</div>'}
+      </div>
+    </div>` : `
+    <div class="card">
+      <div class="pb" style="text-align:center;padding:40px">
+        <span style="font-size:48px;display:block;margin-bottom:12px">📋</span>
+        <h4>لم يتم العثور على الطلب</h4>
+        <p style="color:var(--text3)">الرجاء اختيار طلب صحيح من القائمة أعلاه</p>
+      </div>
+    </div>`}`;
+}
+
+/* ── طلبات الأمان الوظيفي ── */
+function renderJobSecurityRequestsList(role) {
+  const requests = INSP_DATA.jobSecurityRequests || [];
+  const rows = requests.map(r => `
+    <tr>
+      <td><a href="#" onclick="navigateTo('job-security-request-details','id=${r.id}')" class="txp fw7">${r.id}</a></td>
+      <td>${r.workerName}</td>
+      <td>${r.workerCivil}</td>
+      <td>${r.employerName}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td>${r.requestDate}</td>
+      <td><div class="df ac g8">
+        <button class="btn btn-primary btn-xs" onclick="navigateTo('job-security-request-details','id=${r.id}')">${ICONS.eye}عرض</button>
+      </div></td>
+    </tr>`).join('');
+
+  return `<div class="pg-head"><div><h1>طلبات الأمان الوظيفي</h1><p>جميع طلبات الأمان الوظيفي — ${requests.length} طلب</p></div>
+    <div class="pg-acts">
+      <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير القائمة...','i')">${ICONS.download}تصدير</button>
+    </div></div>
+    ${_filterBar([{label:'الحالة',type:'select',opts:['الكل','قيد المراجعة','قيد المعالجة','معتمد','مرفوض']},{label:'من تاريخ',type:'date'}])}
+    ${_tblWrap(['رقم الطلب','اسم العامل','الرقم المدني','المنشأة','الحالة','تاريخ الطلب','إجراء'], rows || _noData())}`;
+}
+
+function renderJobSecurityRequestDetails(role) {
+  const requestId = getParam('id') || 'JSR-2025-0001';
+  const request = INSP_DATA.jobSecurityRequests?.find(r => r.id === requestId) || {
+    id: requestId,
+    status: 'قيد المراجعة',
+    requestDate: '2025-01-15',
+    workerName: 'أحمد محمد العلي',
+    workerCivil: '28475910',
+    employerName: 'شركة البناء الحديث',
+    employerCRN: '1012345678',
+    terminationDate: '2025-01-10',
+    terminationReason: 'إنهاء العقد',
+    salary: 450,
+    employmentDuration: '3 سنوات',
+  };
+
+  return `<div class="pg-head"><div><h1>${request.id}</h1><p>تفاصيل طلب الأمان الوظيفي</p></div>
+    <div class="pg-acts">
+      <button class="btn btn-secondary btn-sm" onclick="navigateTo('job-security-requests-list')">${ICONS.arrow_right}رجوع</button>
+      <button class="btn btn-primary btn-sm" onclick="showToast('جارٍ طباعة الطلب...','i')">${ICONS.download}طباعة</button>
+    </div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>بيانات الطلب</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">رقم الطلب</label><div class="fro fw7">${request.id}</div></div>
+      <div class="fgrp"><label class="flbl">تاريخ التقديم</label><div class="fro">${request.requestDate}</div></div>
+      <div class="fgrp"><label class="flbl">الحالة</label><div class="fro">${statusBadge(request.status)}</div></div>
+      <div class="fgrp"><label class="flbl">تاريخ الإنهاء</label><div class="fro">${request.terminationDate}</div></div>
+      <div class="fgrp"><label class="flbl">سبب الإنهاء</label><div class="fro">${request.terminationReason}</div></div>
+      <div class="fgrp"><label class="flbl">مدة التوظيف</label><div class="fro">${request.employmentDuration}</div></div>
+    </div></div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.user}</span>بيانات العامل</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">الاسم</label><div class="fro fw7">${request.workerName}</div></div>
+      <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro">${request.workerCivil}</div></div>
+      <div class="fgrp"><label class="flbl">الأجر الأساسي</label><div class="fro fw7">${request.salary} ر.ع / شهر</div></div>
+    </div></div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.building}</span>بيانات المنشأة</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">اسم المنشأة</label><div class="fro fw7">${request.employerName}</div></div>
+      <div class="fgrp"><label class="flbl">السجل التجاري</label><div class="fro">${request.employerCRN}</div></div>
+    </div></div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.shield}</span>لوحة التحقق من الإنهاء</h3></div>
+    <div class="pb">
+      ${renderChecklist([
+        { item: 'التحقق من صحة الإنهاء', done: true },
+        { item: 'مراجعة عقد العمل', done: true },
+        { item: 'التحقق من استحقاق المنافع', done: false },
+        { item: 'مراجعة السجل الوظيفي', done: false },
+        { item: 'التأكد من عدم وجود مخالفات', done: false },
+      ])}
+    </div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico gr">${ICONS.chart}</span>لوحة التحليل المالي</h3></div>
+    <div class="pb">
+      <div class="fg fg-2">
+        <div class="fgrp"><label class="flbl">إجمالي المستحقات</label><div class="fro fw7" style="color:var(--primary)">1,350 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">المبالغ المدفوعة</label><div class="fro fw7" style="color:var(--success)">900 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">المتبقي</label><div class="fro fw7" style="color:var(--danger)">450 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">حالة الدفع</label><div class="fro"><span class="badge b-returned">غير مكتمل</span></div></div>
+      </div>
+    </div></div>
+
+    ${renderNotes(request.notes, request.id)}
+    ${renderTimeline(request.timeline)}`;
+}
+
+/* ── طلبات منافع دخل الأسرة ── */
+function renderFamilyBenefitRequestsList(role) {
+  const requests = INSP_DATA.familyBenefitRequests || [];
+  const rows = requests.map(r => `
+    <tr>
+      <td><a href="#" onclick="navigateTo('family-benefit-request-details','id=${r.id}')" class="txp fw7">${r.id}</a></td>
+      <td>${r.workerName}</td>
+      <td>${r.workerCivil}</td>
+      <td>${r.employerName}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td>${r.requestDate}</td>
+      <td><div class="df ac g8">
+        <button class="btn btn-primary btn-xs" onclick="navigateTo('family-benefit-request-details','id=${r.id}')">${ICONS.eye}عرض</button>
+      </div></td>
+    </tr>`).join('');
+
+  return `<div class="pg-head"><div><h1>طلبات منافع دخل الأسرة</h1><p>جميع طلبات منافع دخل الأسرة — ${requests.length} طلب</p></div>
+    <div class="pg-acts">
+      <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير القائمة...','i')">${ICONS.download}تصدير</button>
+    </div></div>
+    ${_filterBar([{label:'الحالة',type:'select',opts:['الكل','قيد المراجعة','قيد المعالجة','معتمد','مرفوض']},{label:'من تاريخ',type:'date'}])}
+    ${_tblWrap(['رقم الطلب','اسم العامل','الرقم المدني','المنشأة','الحالة','تاريخ الطلب','إجراء'], rows || _noData())}`;
+}
+
+function renderFamilyBenefitRequestDetails(role) {
+  const requestId = getParam('id') || 'FBR-2025-0001';
+  const request = INSP_DATA.familyBenefitRequests?.find(r => r.id === requestId) || {
+    id: requestId,
+    status: 'قيد المراجعة',
+    requestDate: '2025-01-20',
+    workerName: 'سالم بن حمد البوسعيدي',
+    workerCivil: '28475911',
+    employerName: 'شركة المقاولات العمانية',
+    employerCRN: '1012345679',
+    benefitType: 'منافع دخل الأسرة',
+    familyMembers: 5,
+    monthlyIncome: 350,
+    employmentDuration: '2 سنة',
+  };
+
+  return `<div class="pg-head"><div><h1>${request.id}</h1><p>تفاصيل طلب منافع دخل الأسرة</p></div>
+    <div class="pg-acts">
+      <button class="btn btn-secondary btn-sm" onclick="navigateTo('family-benefit-requests-list')">${ICONS.arrow_right}رجوع</button>
+      <button class="btn btn-primary btn-sm" onclick="showToast('جارٍ طباعة الطلب...','i')">${ICONS.download}طباعة</button>
+    </div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>بيانات الطلب</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">رقم الطلب</label><div class="fro fw7">${request.id}</div></div>
+      <div class="fgrp"><label class="flbl">تاريخ التقديم</label><div class="fro">${request.requestDate}</div></div>
+      <div class="fgrp"><label class="flbl">الحالة</label><div class="fro">${statusBadge(request.status)}</div></div>
+      <div class="fgrp"><label class="flbl">نوع المنفعة</label><div class="fro">${request.benefitType}</div></div>
+      <div class="fgrp"><label class="flbl">عدد أفراد الأسرة</label><div class="fro fw7">${request.familyMembers} أفراد</div></div>
+      <div class="fgrp"><label class="flbl">مدة التوظيف</label><div class="fro">${request.employmentDuration}</div></div>
+    </div></div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.user}</span>بيانات العامل</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">الاسم</label><div class="fro fw7">${request.workerName}</div></div>
+      <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro">${request.workerCivil}</div></div>
+      <div class="fgrp"><label class="flbl">الدخل الشهري</label><div class="fro fw7">${request.monthlyIncome} ر.ع / شهر</div></div>
+    </div></div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.building}</span>بيانات المنشأة</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">اسم المنشأة</label><div class="fro fw7">${request.employerName}</div></div>
+      <div class="fgrp"><label class="flbl">السجل التجاري</label><div class="fro">${request.employerCRN}</div></div>
+    </div></div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.shield}</span>لوحة التحقق من الأهلية</h3></div>
+    <div class="pb">
+      ${renderChecklist([
+        { item: 'التحقق من حالة التوظيف', done: true },
+        { item: 'مراجعة عدد أفراد الأسرة', done: true },
+        { item: 'التحقق من الدخل الشهري', done: false },
+        { item: 'مراجعة السجل الوظيفي', done: false },
+        { item: 'التأكد من عدم وجود مخالفات', done: false },
+      ])}
+    </div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico gr">${ICONS.chart}</span>لوحة التحليل المالي</h3></div>
+    <div class="pb">
+      <div class="fg fg-2">
+        <div class="fgrp"><label class="flbl">إجمالي المستحقات</label><div class="fro fw7" style="color:var(--primary)">1,750 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">المبالغ المدفوعة</label><div class="fro fw7" style="color:var(--success)">1,200 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">المتبقي</label><div class="fro fw7" style="color:var(--danger)">550 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">حالة الدفع</label><div class="fro"><span class="badge b-returned">غير مكتمل</span></div></div>
+      </div>
+    </div></div>
+
+    ${renderNotes(request.notes, request.timeline)}
+    ${renderTimeline(request.timeline)}`;
+}
+
+/* ── طلبات إجازة الأمومة ── */
+function renderMaternityLeaveRequestsList(role) {
+  const requests = INSP_DATA.maternityLeaveRequests || [];
+  const rows = requests.map(r => `
+    <tr>
+      <td><a href="#" onclick="navigateTo('maternity-leave-request-details','id=${r.id}')" class="txp fw7">${r.id}</a></td>
+      <td>${r.workerName}</td>
+      <td>${r.workerCivil}</td>
+      <td>${r.employerName}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td>${r.requestDate}</td>
+      <td><div class="df ac g8">
+        <button class="btn btn-primary btn-xs" onclick="navigateTo('maternity-leave-request-details','id=${r.id}')">${ICONS.eye}عرض</button>
+      </div></td>
+    </tr>`).join('');
+
+  return `<div class="pg-head"><div><h1>طلبات إجازة الأمومة</h1><p>جميع طلبات إجازة الأمومة — ${requests.length} طلب</p></div>
+    <div class="pg-acts">
+      <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير القائمة...','i')">${ICONS.download}تصدير</button>
+    </div></div>
+    ${_filterBar([{label:'الحالة',type:'select',opts:['الكل','قيد المراجعة','قيد المعالجة','معتمد','مرفوض']},{label:'من تاريخ',type:'date'}])}
+    ${_tblWrap(['رقم الطلب','اسم العامل','الرقم المدني','المنشأة','الحالة','تاريخ الطلب','إجراء'], rows || _noData())}`;
+}
+
+function renderMaternityLeaveRequestDetails(role) {
+  const requestId = getParam('id') || 'MLR-2025-0001';
+  const request = INSP_DATA.maternityLeaveRequests?.find(r => r.id === requestId) || {
+    id: requestId,
+    status: 'قيد المراجعة',
+    requestDate: '2025-01-25',
+    workerName: 'فاطمة بنت سالم الهنائي',
+    workerCivil: '28475912',
+    employerName: 'شركة الخدمات الطبية',
+    employerCRN: '1012345680',
+    leaveType: 'إجازة أمومة',
+    expectedDeliveryDate: '2025-03-15',
+    leaveStartDate: '2025-03-01',
+    leaveDuration: '98 يوم',
+    monthlySalary: 420,
+  };
+
+  return `<div class="pg-head"><div><h1>${request.id}</h1><p>تفاصيل طلب إجازة الأمومة</p></div>
+    <div class="pg-acts">
+      <button class="btn btn-secondary btn-sm" onclick="navigateTo('maternity-leave-requests-list')">${ICONS.arrow_right}رجوع</button>
+      <button class="btn btn-primary btn-sm" onclick="showToast('جارٍ طباعة الطلب...','i')">${ICONS.download}طباعة</button>
+    </div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>بيانات الطلب</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">رقم الطلب</label><div class="fro fw7">${request.id}</div></div>
+      <div class="fgrp"><label class="flbl">تاريخ التقديم</label><div class="fro">${request.requestDate}</div></div>
+      <div class="fgrp"><label class="flbl">الحالة</label><div class="fro">${statusBadge(request.status)}</div></div>
+      <div class="fgrp"><label class="flbl">نوع الإجازة</label><div class="fro">${request.leaveType}</div></div>
+      <div class="fgrp"><label class="flbl">تاريخ الولادة المتوقع</label><div class="fro">${request.expectedDeliveryDate}</div></div>
+      <div class="fgrp"><label class="flbl">مدة الإجازة</label><div class="fro fw7">${request.leaveDuration}</div></div>
+    </div></div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.user}</span>بيانات العامل</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">الاسم</label><div class="fro fw7">${request.workerName}</div></div>
+      <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro">${request.workerCivil}</div></div>
+      <div class="fgrp"><label class="flbl">الراتب الشهري</label><div class="fro fw7">${request.monthlySalary} ر.ع / شهر</div></div>
+    </div></div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.building}</span>بيانات المنشأة</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">اسم المنشأة</label><div class="fro fw7">${request.employerName}</div></div>
+      <div class="fgrp"><label class="flbl">السجل التجاري</label><div class="fro">${request.employerCRN}</div></div>
+    </div></div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.shield}</span>لوحة التحقق من الأهلية</h3></div>
+    <div class="pb">
+      ${renderChecklist([
+        { item: 'التحقق من فترة التأمين', done: true },
+        { item: 'مراجعة تاريخ بداية الإجازة', done: true },
+        { item: 'التحقق من الوثائق الطبية', done: false },
+        { item: 'مراجعة السجل الوظيفي', done: false },
+        { item: 'التأكد من عدم وجود مخالفات', done: false },
+      ])}
+    </div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico gr">${ICONS.chart}</span>لوحة التحليل المالي</h3></div>
+    <div class="pb">
+      <div class="fg fg-2">
+        <div class="fgrp"><label class="flbl">إجمالي المستحقات</label><div class="fro fw7" style="color:var(--primary)">1,372 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">المبالغ المدفوعة</label><div class="fro fw7" style="color:var(--success)">840 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">المتبقي</label><div class="fro fw7" style="color:var(--danger)">532 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">حالة الدفع</label><div class="fro"><span class="badge b-returned">غير مكتمل</span></div></div>
+      </div>
+    </div></div>
+
+    ${renderNotes(request.notes, request.timeline)}
+    ${renderTimeline(request.timeline)}`;
+}
+
+/* ── الشركات المتوقفة عن السداد ── */
+function renderNonPaymentCompaniesList(role) {
+  const companies = INSP_DATA.nonPaymentCompanies || [];
+  const rows = companies.map(c => `
+    <tr>
+      <td><a href="#" onclick="navigateTo('non-payment-company-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
+      <td>${c.companyName}</td>
+      <td>${c.crn}</td>
+      <td>${c.region}</td>
+      <td>${statusBadge(c.status)}</td>
+      <td>${c.arrearsAmount} ر.ع</td>
+      <td><div class="df ac g8">
+        <button class="btn btn-primary btn-xs" onclick="navigateTo('non-payment-company-details','id=${c.id}')">${ICONS.eye}عرض</button>
+      </div></td>
+    </tr>`).join('');
+
+  return `<div class="pg-head"><div><h1>الشركات المتوقفة عن السداد</h1><p>جميع الشركات المتوقفة عن السداد — ${companies.length} شركة</p></div>
+    <div class="pg-acts">
+      <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير القائمة...','i')">${ICONS.download}تصدير</button>
+    </div></div>
+    ${_filterBar([{label:'الحالة',type:'select',opts:['الكل','قيد المراجعة','قيد المعالجة','معتمد','مرفوض']},{label:'المنطقة',type:'select',opts:['الكل','مسقط','شمال الباطنة','ظفار','الداخلية']}])}
+    ${_tblWrap(['رقم الشركة','اسم الشركة','السجل التجاري','المنطقة','الحالة','المتأخرات','إجراء'], rows || _noData())}`;
+}
+
+function renderNonPaymentCompanyDetails(role) {
+  const companyId = getParam('id') || 'NPC-2025-0001';
+  const company = INSP_DATA.nonPaymentCompanies?.find(c => c.id === companyId) || {
+    id: companyId,
+    status: 'قيد المراجعة',
+    companyName: 'شركة المقاولات المتقدمة',
+    crn: '1012345681',
+    region: 'مسقط',
+    arrearsAmount: 15000,
+    arrearsPeriod: '6 أشهر',
+    employeeCount: 45,
+    lastPaymentDate: '2024-07-15',
+  };
+
+  return `<div class="pg-head"><div><h1>${company.id}</h1><p>تفاصيل الشركة المتوقفة عن السداد</p></div>
+    <div class="pg-acts">
+      <button class="btn btn-secondary btn-sm" onclick="navigateTo('non-payment-companies-list')">${ICONS.arrow_right}رجوع</button>
+      <button class="btn btn-primary btn-sm" onclick="showToast('جارٍ طباعة التقرير...','i')">${ICONS.download}طباعة</button>
+    </div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>بيانات الشركة</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">رقم الشركة</label><div class="fro fw7">${company.id}</div></div>
+      <div class="fgrp"><label class="flbl">اسم الشركة</label><div class="fro fw7">${company.companyName}</div></div>
+      <div class="fgrp"><label class="flbl">السجل التجاري</label><div class="fro">${company.crn}</div></div>
+      <div class="fgrp"><label class="flbl">المنطقة</label><div class="fro">${company.region}</div></div>
+      <div class="fgrp"><label class="flbl">عدد الموظفين</label><div class="fro fw7">${company.employeeCount} موظف</div></div>
+      <div class="fgrp"><label class="flbl">آخر دفع</label><div class="fro">${company.lastPaymentDate}</div></div>
+    </div></div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.alert}</span>بيانات المتأخرات</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">إجمالي المتأخرات</label><div class="fro fw7" style="color:var(--danger)">${company.arrearsAmount.toLocaleString()} ر.ع</div></div>
+      <div class="fgrp"><label class="flbl">فترة التأخير</label><div class="fro fw7">${company.arrearsPeriod}</div></div>
+      <div class="fgrp"><label class="flbl">الحالة</label><div class="fro">${statusBadge(company.status)}</div></div>
+      <div class="fgrp"><label class="flbl">مستوى الخطورة</label><div class="fro"><span class="badge b-high">مرتفع</span></div></div>
+    </div></div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.shield}</span>لوحة التحقق من المخالفات</h3></div>
+    <div class="pb">
+      ${renderChecklist([
+        { item: 'التحقق من سجل الدفعات', done: true },
+        { item: 'مراجعة عدد الموظفين', done: true },
+        { item: 'التحقق من الإشعارات المرسلة', done: false },
+        { item: 'مراجعة السجل القانوني', done: false },
+        { item: 'التأكد من عدم وجود نزاعات', done: false },
+      ])}
+    </div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico gr">${ICONS.chart}</span>لوحة التحليل المالي</h3></div>
+    <div class="pb">
+      <div class="fg fg-2">
+        <div class="fgrp"><label class="flbl">إجمالي المستحقات</label><div class="fro fw7" style="color:var(--primary)">18,000 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">المبالغ المدفوعة</label><div class="fro fw7" style="color:var(--success)">3,000 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">المتبقي</label><div class="fro fw7" style="color:var(--danger)">15,000 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">حالة الدفع</label><div class="fro"><span class="badge b-returned">غير مكتمل</span></div></div>
+      </div>
+    </div></div>
+
+    ${renderNotes(company.notes, company.timeline)}
+    ${renderTimeline(company.timeline)}`;
+}
+
+/* ── التصفية والإفلاس ── */
+function renderLiquidationBankruptcyList(role) {
+  const cases = INSP_DATA.liquidationBankruptcy || [];
+  const rows = cases.map(c => `
+    <tr>
+      <td><a href="#" onclick="navigateTo('liquidation-bankruptcy-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
+      <td>${c.companyName}</td>
+      <td>${c.crn}</td>
+      <td>${c.region}</td>
+      <td>${statusBadge(c.status)}</td>
+      <td>${c.caseType}</td>
+      <td><div class="df ac g8">
+        <button class="btn btn-primary btn-xs" onclick="navigateTo('liquidation-bankruptcy-details','id=${c.id}')">${ICONS.eye}عرض</button>
+      </div></td>
+    </tr>`).join('');
+
+  return `<div class="pg-head"><div><h1>حالات التصفية والإفلاس</h1><p>جميع حالات التصفية والإفلاس — ${cases.length} حالة</p></div>
+    <div class="pg-acts">
+      <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير القائمة...','i')">${ICONS.download}تصدير</button>
+    </div></div>
+    ${_filterBar([{label:'الحالة',type:'select',opts:['الكل','قيد المراجعة','قيد المعالجة','معتمد','مرفوض']},{label:'نوع الحالة',type:'select',opts:['الكل','تصفية','إفلاس']}])}
+    ${_tblWrap(['رقم الحالة','اسم الشركة','السجل التجاري','المنطقة','الحالة','النوع','إجراء'], rows || _noData())}`;
+}
+
+function renderLiquidationBankruptcyDetails(role) {
+  const caseId = getParam('id') || 'LB-2025-0001';
+  const caseData = INSP_DATA.liquidationBankruptcy?.find(c => c.id === caseId) || {
+    id: caseId,
+    status: 'قيد المراجعة',
+    companyName: 'شركة التجارة العامة',
+    crn: '1012345682',
+    region: 'شمال الباطنة',
+    caseType: 'تصفية',
+    filingDate: '2025-01-10',
+    employeeCount: 30,
+    totalAssets: 250000,
+    totalLiabilities: 320000,
+  };
+
+  return `<div class="pg-head"><div><h1>${caseData.id}</h1><p>تفاصيل حالة التصفية والإفلاس</p></div>
+    <div class="pg-acts">
+      <button class="btn btn-secondary btn-sm" onclick="navigateTo('liquidation-bankruptcy-list')">${ICONS.arrow_right}رجوع</button>
+      <button class="btn btn-primary btn-sm" onclick="showToast('جارٍ طباعة التقرير...','i')">${ICONS.download}طباعة</button>
+    </div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>بيانات الحالة</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">رقم الحالة</label><div class="fro fw7">${caseData.id}</div></div>
+      <div class="fgrp"><label class="flbl">اسم الشركة</label><div class="fro fw7">${caseData.companyName}</div></div>
+      <div class="fgrp"><label class="flbl">السجل التجاري</label><div class="fro">${caseData.crn}</div></div>
+      <div class="fgrp"><label class="flbl">المنطقة</label><div class="fro">${caseData.region}</div></div>
+      <div class="fgrp"><label class="flbl">نوع الحالة</label><div class="fro fw7">${caseData.caseType}</div></div>
+      <div class="fgrp"><label class="flbl">تاريخ التسجيل</label><div class="fro">${caseData.filingDate}</div></div>
+    </div></div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.alert}</span>الوضع المالي</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">إجمالي الأصول</label><div class="fro fw7" style="color:var(--success)">${caseData.totalAssets.toLocaleString()} ر.ع</div></div>
+      <div class="fgrp"><label class="flbl">إجمالي الالتزامات</label><div class="fro fw7" style="color:var(--danger)">${caseData.totalLiabilities.toLocaleString()} ر.ع</div></div>
+      <div class="fgrp"><label class="flbl">عدد الموظفين</label><div class="fro fw7">${caseData.employeeCount} موظف</div></div>
+      <div class="fgrp"><label class="flbl">الحالة</label><div class="fro">${statusBadge(caseData.status)}</div></div>
+    </div></div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.shield}</span>لوحة التحقق من الإجراءات</h3></div>
+    <div class="pb">
+      ${renderChecklist([
+        { item: 'التحقق من الوثائق القانونية', done: true },
+        { item: 'مراجعة الأصول والالتزامات', done: true },
+        { item: 'التحقق من حقوق الموظفين', done: false },
+        { item: 'مراجعة السجل القانوني', done: false },
+        { item: 'التأكد من عدم وجود نزاعات', done: false },
+      ])}
+    </div></div>
+
+    <div class="card"><div class="ph"><h3><span class="pico gr">${ICONS.chart}</span>لوحة التحليل المالي</h3></div>
+    <div class="pb">
+      <div class="fg fg-2">
+        <div class="fgrp"><label class="flbl">صافي الأصول</label><div class="fro fw7" style="color:var(--danger)">-70,000 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">نسبة التغطية</label><div class="fro fw7">78%</div></div>
+        <div class="fgrp"><label class="flbl">المبالغ المحصلة</label><div class="fro fw7" style="color:var(--success)">150,000 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">حالة التسوية</label><div class="fro"><span class="badge b-returned">قيد المعالجة</span></div></div>
+      </div>
+    </div></div>
+
+    ${renderNotes(caseData.notes, caseData.timeline)}
+    ${renderTimeline(caseData.timeline)}`;
 }

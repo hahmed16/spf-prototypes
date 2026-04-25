@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(grep -n \"\\\\\\\\bالرئيس\\\\\\\\b\\\\|رئيس القسم\" \"c:/SPF/BA Engagement/Prototypes/Directorate-WorkInjuries/shared/data.js\")",
-      "PowerShell($file = \"c:\\\\SPF\\\\BA Engagement\\\\Prototypes\\\\Directorate-WorkInjuries\\\\hospital-delegate\\\\licensing-new.html\"; $content = Get-Content $file -Raw -Encoding UTF8; $lines = $content -split \"`n\"; for \\($i = 26; $i -lt 35; $i++\\) { Write-Host \\(\"Line \" + \\($i+1\\) + \": \" + $lines[$i].Substring\\(0, [Math]::Min\\(120, $lines[$i].Length\\)\\)\\) })"
+      "PowerShell($file = \"c:\\\\SPF\\\\BA Engagement\\\\Prototypes\\\\Directorate-WorkInjuries\\\\hospital-delegate\\\\licensing-new.html\"; $content = Get-Content $file -Raw -Encoding UTF8; $lines = $content -split \"`n\"; for \\($i = 26; $i -lt 35; $i++\\) { Write-Host \\(\"Line \" + \\($i+1\\) + \": \" + $lines[$i].Substring\\(0, [Math]::Min\\(120, $lines[$i].Length\\)\\)\\) })",
+      "Bash(unzip -p \"متطلبات نظام التفتيش_.docx\" word/document.xml)",
+      "Bash(grep -v '^$')",
+      "Bash(awk 'NF>0')",
+      "Bash(awk '/طلبات|شكوى|التحقق|التحليل|المصادر|نطاق|الخدمات|الشركات|التصفية|الافلاس|الامومة|الاسرة|الوظيفي|دخل|السداد|مخاطبة|تقرير|اعتماد|غلق|زيارة|ميدانية/ {print NR\": \"$0}')",
+      "Bash(grep \"\\\\.html$\")"
     ]
   }
 }

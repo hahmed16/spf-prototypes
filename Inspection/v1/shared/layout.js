@@ -373,6 +373,17 @@ function renderTimeline(timeline) {
     </div>`).join('')}</div>`;
 }
 
+/* ── Update Timeline Request ── */
+function updateTimelineRequest() {
+  const select = document.getElementById('timeline-request-select');
+  if (select) {
+    const requestId = select.value;
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('id', requestId);
+    window.location.href = currentUrl.toString();
+  }
+}
+
 /* ── Notes HTML ── */
 function renderNotes(notes, id) {
   return `
