@@ -12,6 +12,9 @@
   .rp-header small { font-size: 11px; color: rgba(255,255,255,.8); margin-right: auto }
   .rp-back { font-size: 12px; color: rgba(255,255,255,.8); cursor: pointer }
   .rp-back:hover { color: #fff }
+  .rcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px }
+  .rcard { padding: 16px; cursor: pointer; transition: all 0.2s }
+  .rcard:hover { transform: translateY(-2px) }
 </style>
 </head>
 <body>
@@ -33,22 +36,10 @@
       <div class="rcard" onclick="location.href='employer/dashboard.html'">
         <div class="rc-type ext">خارجي</div>
         <div class="rc-name">المستخدم الخارجي (جهة العمل)</div>
-        <div class="rc-cnt" style="margin-top:6px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="1" y="3" width="15" height="18"/><path d="M16 8h4l3 13H16z"/></svg>
-          طارق سعيد الكلباني — شركة التقنية الوطنية
-        </div>
-        <div class="rc-cnt" style="margin-top:4px"><span class="rc-pend">2 بلاغات</span></div>
-        <div class="rc-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="15,18 9,12 15,6"/></svg></div>
       </div>
       <div class="rcard" onclick="location.href='insured/dashboard.html'">
         <div class="rc-type ext">خارجي</div>
         <div class="rc-name">المستخدم الخارجي (المؤمن عليه)</div>
-        <div class="rc-cnt" style="margin-top:6px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          أسماء محمد الحارثي — مصنع الإنتاج الغذائي
-        </div>
-        <div class="rc-cnt" style="margin-top:4px"><span class="rc-pend">1 بلاغ</span></div>
-        <div class="rc-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="15,18 9,12 15,6"/></svg></div>
       </div>
     </div>
   </div>
@@ -59,33 +50,15 @@
       <div class="rcard" onclick="location.href='fund-staff/complaints-list.html'">
         <div class="rc-type int">داخلي</div>
         <div class="rc-name">مستخدم داخلي للصندوق</div>
-        <div class="rc-cnt" style="margin-top:6px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          منى راشد البلوشي — الصندوق
-        </div>
-        <div class="rc-cnt" style="margin-top:4px">تسجيل وإحالة البلاغات الداخلية</div>
-        <div class="rc-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="15,18 9,12 15,6"/></svg></div>
       </div>
       <div class="rcard" onclick="location.href='monitoring-employee/dashboard.html'">
         <div class="rc-type int">داخلي</div>
         <div class="rc-name">موظف قسم المتابعة والبلاغات</div>
-        <div class="rc-cnt" style="margin-top:6px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          سيف خلفان الأمري — قسم المتابعة
-        </div>
-        <div class="rc-cnt" style="margin-top:4px"><span class="rc-pend">4 بلاغات</span></div>
-        <div class="rc-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="15,18 9,12 15,6"/></svg></div>
       </div>
       <div class="rcard" onclick="location.href='monitoring-head/dashboard.html'">
         <div class="rc-type int">داخلي</div>
         <div class="rc-name">رئيس قسم المتابعة والبلاغات</div>
-        <div class="rc-cnt" style="margin-top:6px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          نجلاء عبدالله القاسمي — قسم المتابعة
         </div>
-        <div class="rc-cnt" style="margin-top:4px"><span class="rc-pend">2 معلق</span></div>
-        <div class="rc-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="15,18 9,12 15,6"/></svg></div>
-      </div>
     </div>
   </div>
 
@@ -95,23 +68,11 @@
       <div class="rcard" onclick="location.href='field-inspector/dashboard.html'">
         <div class="rc-type int">داخلي</div>
         <div class="rc-name">المفتش الميداني</div>
-        <div class="rc-cnt" style="margin-top:6px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          حاتم سالم الزدجالي — قسم التفتيش
         </div>
-        <div class="rc-cnt" style="margin-top:4px"><span class="rc-pend">1 زيارة مجدولة</span></div>
-        <div class="rc-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="15,18 9,12 15,6"/></svg></div>
-      </div>
       <div class="rcard" onclick="location.href='field-head/dashboard.html'">
         <div class="rc-type int">داخلي</div>
         <div class="rc-name">رئيس قسم التفتيش الميداني</div>
-        <div class="rc-cnt" style="margin-top:6px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          ريما يوسف النبهانية — قسم التفتيش
         </div>
-        <div class="rc-cnt" style="margin-top:4px"><span class="rc-pend">1 محضر معلق</span></div>
-        <div class="rc-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="15,18 9,12 15,6"/></svg></div>
-      </div>
     </div>
   </div>
 
@@ -121,23 +82,11 @@
       <div class="rcard" onclick="location.href='inspection-director/dashboard.html'">
         <div class="rc-type int">داخلي</div>
         <div class="rc-name">مدير دائرة التفتيش</div>
-        <div class="rc-cnt" style="margin-top:6px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          عبدالعزيز هلال الراشدي — دائرة التفتيش
         </div>
-        <div class="rc-cnt" style="margin-top:4px"><span class="rc-pend">1 حظر نشط</span></div>
-        <div class="rc-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="15,18 9,12 15,6"/></svg></div>
-      </div>
       <div class="rcard" onclick="location.href='ops-analyst/dashboard.html'">
         <div class="rc-type int">داخلي</div>
         <div class="rc-name">محلل العمليات</div>
-        <div class="rc-cnt" style="margin-top:6px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          شيماء وليد البريكي — التحليل والتخطيط
         </div>
-        <div class="rc-cnt" style="margin-top:4px">تحليل المخاطر وإعداد الخطط</div>
-        <div class="rc-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="15,18 9,12 15,6"/></svg></div>
-      </div>
     </div>
   </div>
 </div>
