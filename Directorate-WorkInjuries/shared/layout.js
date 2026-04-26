@@ -374,6 +374,16 @@ function formatDateTime(d) {
   return formatDate(parts[0]) + (parts[1] ? ` — ${parts[1]}` : '');
 }
 
+/* ── Normalize display value (shared by all inlined panels) ── */
+function normalizeDisplay(value, fallback = '—') {
+  if (value === null || value === undefined) return fallback;
+  const text = String(value).trim();
+  if (!text) return fallback;
+  const lower = text.toLowerCase();
+  if (lower === 'undefined' || lower === 'null') return fallback;
+  return text;
+}
+
 /* ── Content Getter ── */
 function getContent() {
   return document.getElementById('app-content');
