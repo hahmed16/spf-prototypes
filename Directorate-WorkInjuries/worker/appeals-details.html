@@ -10,7 +10,7 @@
 <script src="../shared/config.js"></script>
 <script src="../shared/data.js"></script>
 <script src="../shared/layout.js"></script>
-<script src="../shared/components.js"></script>
+<script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'worker', activePage: 'appeals-list' });
 
@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
   else if (appeal.status === 'تم إعادة التظلم لاستيفاء البيانات') workerActions = ['استيفاء البيانات المطلوبة وإعادة الإرسال'];
 
   const origReq = WI_DATA.allowances.find(r => r.id === appeal.originalRequestId);
+  const atts  = appeal.attachments || [];
+  const notes = appeal.notes || [];
+  const tl    = appeal.timeline || [];
 
   getContent().innerHTML = `
     <div class="pg-head">
@@ -38,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
+    <!-- ملخص التظلم -->
     <div class="card" style="border-right:4px solid var(--primary)">
       <div class="pb-c">
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
@@ -49,7 +53,20 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    ${renderApplicantPanel(appeal.applicant)}
+    <!-- بيانات مقدم الطلب -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${appeal.applicant.role || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${appeal.applicant.name || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${appeal.applicant.civil || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(appeal.applicant.phone, 'غير متوفر')}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(appeal.applicant.email, 'غير متوفر')}</div></div>
+          ${appeal.applicant.employeeId ? `<div class="fgrp"><label class="flbl">الرقم الوظيفي</label><div class="fro">${appeal.applicant.employeeId}</div></div>` : ''}
+        </div>
+      </div>
+    </div>
 
     <!-- ملخص الطلب الأصلي -->
     <div class="card card-ro">
@@ -59,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">رقم الطلب الأصلي</label><div class="fro" style="font-family:monospace"><a href="allowances-details.html?id=${appeal.originalRequestId}" style="color:var(--primary);font-weight:700">${appeal.originalRequestId}</a></div></div>
           <div class="fgrp"><label class="flbl">نوع الطلب</label><div class="fro">${appeal.originalRequestType}</div></div>
           <div class="fgrp"><label class="flbl">حالة الطلب الأصلي</label><div class="fro">${origReq ? statusBadge(origReq.status) : '—'}</div></div>
+          ${origReq?.submitDate ? `<div class="fgrp"><label class="flbl">تاريخ تقديم الطلب الأصلي</label><div class="fro">${origReq.submitDate}</div></div>` : ''}
         </div>
       </div>
     </div>
@@ -71,8 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">نوع القرار</label><div class="fro"><span class="badge b-rejected">${appeal.decision.type}</span></div></div>
           <div class="fgrp"><label class="flbl">تاريخ القرار</label><div class="fro">${appeal.decision.date}</div></div>
           <div class="fgrp"><label class="flbl">الجهة مُصدِرة القرار</label><div class="fro">${appeal.decision.issuer}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ علمك بالقرار</label><div class="fro">${appeal.decision.knowledgeDate}</div></div>
-          <div class="fgrp span-2"><label class="flbl">مضمون القرار</label><div class="fro">${appeal.decision.details}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ علمك بالقرار</label><div class="fro" style="font-weight:700;color:var(--danger)">${appeal.decision.knowledgeDate}</div></div>
+          <div class="fgrp span-2"><label class="flbl">مضمون القرار</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:8px">${appeal.decision.details}</div></div>
         </div>
       </div>
     </div>
@@ -88,12 +106,110 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    ${appeal.session ? renderSessionPanel(appeal.session) : ''}
-    ${appeal.finalDecision ? renderFinalAppealDecisionPanel(appeal.finalDecision) : ''}
-    ${renderAttachmentsPanel(appeal.attachments, true)}
-    ${renderOperationalNotes(appeal.notes, true)}
-    ${workerActions.length ? renderDecisionPanel({ actions: workerActions, title: 'الإجراءات المتاحة لك' }) : ''}
-    ${renderTimeline(appeal.timeline)}`;
+    ${appeal.session ? `
+    <!-- بيانات الجلسة -->
+    <div class="card card-cum">
+      <div class="ph"><h3><div class="pico tl">${ICONS.calendar}</div>بيانات الجلسة</h3><span class="stg-lbl">جلسة العرض</span></div>
+      <div class="pb">
+        <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info}<span>هذه بيانات الجلسة الخاصة بطلبك للاطلاع فقط — يُحددها فريق لجنة التظلمات.</span></div>
+        <div class="fg fg-3" style="margin-bottom:14px">
+          <div class="fgrp"><label class="flbl">رقم الجلسة</label><div class="fro" style="font-family:monospace">${appeal.session.id || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">المؤسسة الصحية</label><div class="fro">${appeal.session.institution || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ ووقت الجلسة</label><div class="fro">${appeal.session.date ? `${formatDate(appeal.session.date)}${appeal.session.time ? ` — ${appeal.session.time}` : ''}` : '—'}</div></div>
+          <div class="fgrp"><label class="flbl">اكتمال النصاب</label><div class="fro"><span class="badge ${appeal.session.quorum ? 'b-approved' : 'b-returned'}">${appeal.session.quorum ? 'النصاب مكتمل' : 'النصاب غير مكتمل'}</span></div></div>
+        </div>
+        ${appeal.session.members?.length ? `
+        <div class="flbl" style="margin-bottom:8px">أعضاء اللجنة</div>
+        <div class="tbl-wrap"><table class="dtbl">
+          <thead><tr><th>الاسم</th><th>التخصص</th><th>المنصب</th><th>حالة الحضور</th></tr></thead>
+          <tbody>${appeal.session.members.map(m => `<tr><td>${m.name}</td><td>${m.specialty}</td><td>${m.role}</td><td><span class="badge ${m.attendance === 'حاضر' ? 'b-approved' : m.attendance === 'غائب' ? 'b-rejected' : 'b-phead'}">${m.attendance || 'مجدول'}</span></td></tr>`).join('')}</tbody>
+        </table></div>` : ''}
+      </div>
+    </div>` : ''}
+
+    ${appeal.finalDecision ? `
+    <!-- القرار النهائي للجنة التظلمات -->
+    <div class="card card-cum">
+      <div class="ph"><h3><div class="pico gr">${ICONS.shield}</div>القرار النهائي — لجنة التظلمات</h3><span class="stg-lbl">قرار نهائي</span></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">نوع القرار النهائي</label><div class="fro"><span class="badge ${appeal.finalDecision.type === 'إلغاء القرار الأصلي' ? 'b-approved' : appeal.finalDecision.type === 'تأييد القرار الأصلي' ? 'b-rejected' : 'b-phead'}">${appeal.finalDecision.type || '—'}</span></div></div>
+          <div class="fgrp"><label class="flbl">تاريخ القرار</label><div class="fro">${formatDate(appeal.finalDecision.date)}</div></div>
+          <div class="fgrp"><label class="flbl">الأعضاء الموقعون</label><div class="fro">${appeal.finalDecision.signatories?.join('، ') || '—'}</div></div>
+          <div class="fgrp span-full"><label class="flbl">مضمون القرار التفصيلي</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${appeal.finalDecision.content || '—'}</div></div>
+          <div class="fgrp span-full"><label class="flbl">أثر القرار على الطلب الأصلي</label><div class="fro" style="font-weight:600">${appeal.finalDecision.effect || '—'}</div></div>
+        </div>
+      </div>
+    </div>` : ''}
+
+    <!-- المرفقات -->
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico or">${ICONS.upload}</div>المرفقات <span style="font-size:11px;font-weight:400;color:var(--text3)">(${atts.length} مرفق)</span></h3>
+        <button class="btn btn-secondary btn-xs" onclick="openAddAttachmentModal()">${ICONS.plus} إضافة مرفق</button>
+      </div>
+      <div class="pb">
+        ${atts.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد مرفقات</div>' : atts.map(att => {
+          const ext = att.name?.split('.').pop()?.toLowerCase() || 'oth';
+          const icoMap = { pdf: 'file', doc: 'file', docx: 'file', jpg: 'img', jpeg: 'img', png: 'img' };
+          return `<div class="att-row"><div class="att-ico ${icoMap[ext] || 'oth'}">${ICONS.file}</div><div class="att-info"><div class="att-name">${att.name}</div><div class="att-meta">${att.type} · رفعه: ${att.uploadedBy} (${att.role}) · ${att.uploadDate} · ${att.size || ''}</div></div><div class="att-acts"><button class="ibtn" title="تحميل" onclick="showToast('جارٍ تحميل الملف...','i')">${ICONS.download}</button></div></div>`;
+        }).join('')}
+        <div style="margin-top:10px">
+          ${renderModernUploadComponent({ idPrefix: 'gen-att', subTitle: 'PDF, Word, صور — الحجم الأقصى 20 ميغابايت' })}
+        </div>
+      </div>
+    </div>
+
+    <!-- الملاحظات التشغيلية -->
+    <div class="card op-notes-card collapsed" data-notes-init="0">
+      <div class="ph op-notes-head" onclick="toggleOperationalNotes(this.closest('.op-notes-card'))">
+        <h3><div class="pico gy">${ICONS.note}</div>الملاحظات التشغيلية <span style="font-size:11px;font-weight:400;color:var(--text3)">(لا تغيّر حالة الطلب)</span></h3>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="op-notes-chevron">${ICONS.arrow_left}</span>
+          <button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();openAddNoteModal(currentRequestId)">${ICONS.plus} إضافة ملاحظة</button>
+        </div>
+      </div>
+      <div class="pb">
+        ${notes.length === 0 ? '<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">لا توجد ملاحظات تشغيلية</div>' : notes.map(n => `<div class="note-item"><div class="note-av">${n.author?.charAt(0) || '؟'}</div><div class="note-c"><div class="note-hd"><span class="note-auth">${n.author}</span><span class="note-role">${n.role}</span><span class="note-time">${n.time}</span></div><div class="note-txt">${n.text}</div></div></div>`).join('')}
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <textarea class="fc" id="quick-note-input" placeholder="أكتب ملاحظة سريعة..." rows="2" style="flex:1"></textarea>
+          <button class="btn btn-secondary btn-sm" style="align-self:flex-end" onclick="quickAddNote()">حفظ</button>
+        </div>
+      </div>
+    </div>
+
+    ${workerActions.length > 0 ? `
+    <!-- الإجراءات المتاحة للعامل -->
+    <div class="dp">
+      <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>الإجراءات المتاحة لك</h3></div>
+      <div class="dp-body">
+        <div class="fgrp">
+          <label class="flbl">ملاحظاتك <span style="font-weight:400;color:var(--text3)">(اختياري)</span></label>
+          <textarea class="fc" id="decision-notes" placeholder="أكتب ملاحظاتك هنا..." rows="3"></textarea>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">إرفاق ملفات داعمة <span style="font-weight:400;color:var(--text3)">(اختياري)</span></label>
+          ${renderModernUploadComponent({ idPrefix: 'decision-att', subTitle: 'يمكن رفع عدة ملفات دفعة واحدة' })}
+        </div>
+        <div class="dp-acts">
+          ${workerActions.map(a => `<button class="btn ${WI_CONFIG.actionStyles[a] || 'btn-secondary btn-sm'}" onclick="executeAction('${a}')">${a}</button>`).join('')}
+        </div>
+      </div>
+    </div>` : ''}
+
+    <!-- السجل الزمني -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني الكامل للتظلم</h3></div>
+      <div class="pb">
+        <div class="tl">
+          ${tl.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد أحداث</div>' : tl.map(e => {
+            const dc = e.type === 'success' ? 's' : e.type === 'danger' ? 'd' : e.type === 'warning' ? 'w' : '';
+            const ic = e.type === 'success' ? ICONS.check : e.type === 'danger' ? ICONS.x : e.type === 'warning' ? ICONS.warn : ICONS.clock;
+            return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus ? `<div class="tl-states">${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus.substring(0, 300)}</span><span>${ICONS.arrow_right}</span>` : ''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus.substring(0, 300)}</span></div>` : ''}${e.note ? `<div class="tl-note">${e.note}</div>` : ''}</div></div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
 });
 </script>
 </body>

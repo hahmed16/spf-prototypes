@@ -10,7 +10,7 @@
 <script src="../shared/config.js"></script>
 <script src="../shared/data.js"></script>
 <script src="../shared/layout.js"></script>
-<script src="../shared/components.js"></script>
+<script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'supervisory-committee', activePage: 'licensing-list' });
 const params = new URLSearchParams(window.location.search);
@@ -18,11 +18,29 @@ const req = WI_DATA.licensing.find(r => r.id === params.get('id')) || WI_DATA.li
 setBreadcrumb([{ label: 'الترخيص', page: 'licensing-list' }, { label: `ملف ${req.institution.name}` }]);
 
 document.addEventListener('DOMContentLoaded', () => {
+  const inst = req.institution || {};
+  const docs = req.doctors || [];
+  const confirmedCount = docs.filter(d=>d.confirmStatus==='تم التأكيد').length;
+  const cd = req.committeeDecision;
+
+  const committeeDecisionHtml = cd ? `
+  <div class="card card-cum">
+    <div class="ph"><h3><div class="pico gr">${ICONS.pen}</div>القرار الأخير للجنة الطبية الإشرافية</h3><span class="stg-lbl">قرار اللجنة</span></div>
+    <div class="pb">
+      <div class="fg fg-3">
+        <div class="fgrp"><label class="flbl">نوع القرار</label><div class="fro"><span class="badge ${cd.type==='موافقة'||cd.type==='اعتماد الترخيص'?'b-approved':cd.type==='رفض'?'b-rejected':'b-phead'}">${cd.type||'—'}</span></div></div>
+        <div class="fgrp"><label class="flbl">تاريخ القرار</label><div class="fro">${formatDate(cd.date)}</div></div>
+        <div class="fgrp span-full"><label class="flbl">مضمون القرار التفصيلي</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${cd.content||'—'}</div></div>
+        ${cd.signatories?.length?`<div class="fgrp span-full"><label class="flbl">الأعضاء الموقعون</label><div class="fro">${cd.signatories.join('، ')}</div></div>`:''}
+      </div>
+    </div>
+  </div>` : '';
+
   getContent().innerHTML = `
     <div class="pg-head">
       <div>
         <h1>ملف المؤسسة الصحية المرخصة</h1>
-        <p>${req.institution.name} — للاطلاع فقط</p>
+        <p>${inst.name} — للاطلاع فقط</p>
       </div>
       <div class="pg-acts">
         <button class="btn btn-secondary" onclick="window.location.href='licensing-list.html'">${ICONS.arrow_left} رجوع</button>
@@ -34,20 +52,54 @@ document.addEventListener('DOMContentLoaded', () => {
       <span>هذا الملف للاطلاع فقط من قِبل اللجنة الطبية الإشرافية — لا يمكن تعديل أي بيانات.</span>
     </div>
 
-    <!-- ملخص -->
+    <!-- ملخص المؤسسة -->
     <div class="card" style="border-right:4px solid var(--primary)">
       <div class="pb-c">
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
-          <div><div class="flbl" style="margin-bottom:4px">اسم المؤسسة</div><div style="font-size:16px;font-weight:800;color:var(--primary)">${req.institution.name}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">رقم الترخيص الحالي</div><div style="font-family:monospace;font-weight:700">${req.activeLicense?.number || '—'}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">حالة الترخيص</div>${req.activeLicense ? `<span class="badge b-active">نشط</span>` : `<span class="badge b-phead">معلق</span>`}</div>
-          <div><div class="flbl" style="margin-bottom:4px">تاريخ الانتهاء</div><div>${req.activeLicense?.expiryDate || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">اسم المؤسسة</div><div style="font-size:16px;font-weight:800;color:var(--primary)">${inst.name}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">رقم الترخيص الحالي</div><div style="font-family:monospace;font-weight:700">${req.activeLicense?.number||'—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">حالة الترخيص</div>${req.activeLicense?`<span class="badge b-active">نشط</span>`:`<span class="badge b-phead">معلق</span>`}</div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ الانتهاء</div><div>${req.activeLicense?.expiryDate||'—'}</div></div>
         </div>
       </div>
     </div>
 
-    ${renderInstitutionPanel(req.institution)}
-    ${renderDoctorsPanel(req.doctors, false)}
+    <!-- بيانات المؤسسة الصحية -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات المؤسسة الصحية</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">اسم المؤسسة</label><div class="fro" style="font-weight:700">${inst.name||'—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro" style="font-family:monospace">${inst.cr||'—'}</div></div>
+          <div class="fgrp"><label class="flbl">حالة السجل التجاري</label><div class="fro"><span class="badge ${inst.crStatus==='سارٍ'?'b-approved':'b-expired'}">${inst.crStatus||'—'}</span> <span style="font-size:11px;color:var(--text3)">(ينتهي: ${formatDate(inst.crExpiry)})</span></div></div>
+          <div class="fgrp"><label class="flbl">نوع المؤسسة</label><div class="fro">${inst.type||'—'}</div></div>
+          <div class="fgrp"><label class="flbl">المحافظة / الولاية</label><div class="fro">${inst.governorate||'—'}</div></div>
+          <div class="fgrp"><label class="flbl">العنوان</label><div class="fro">${inst.address||'—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${inst.phone||'—'}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${inst.email||'—'}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- الأطباء المرشحون للجنة -->
+    <div class="card card-ro">
+      <div class="ph">
+        <h3><div class="pico bl">${ICONS.user}</div>الأطباء المرشحون للجنة</h3>
+        <span style="font-size:12px;color:${confirmedCount===docs.length?'var(--accent)':'var(--warning)'}">
+          ${confirmedCount} / ${docs.length} مؤكد
+        </span>
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>الاسم</th><th>الرقم المدني</th><th>التخصص</th><th>المنصب</th><th>التأكيد</th><th>الازدواجية</th></tr></thead>
+            <tbody>
+              ${docs.map(d=>`<tr><td style="font-weight:600">${d.name}</td><td style="font-family:monospace;font-size:11.5px">${d.civil}</td><td>${d.specialty}</td><td>${d.role}</td><td><span class="badge ${d.confirmStatus==='تم التأكيد'?'b-approved':d.confirmStatus==='رفض'?'b-rejected':'b-phead'}">${d.confirmStatus}</span></td><td><span class="badge ${d.duplicateCheck==='لا يوجد تعارض'?'b-approved':'b-rejected'}">${d.duplicateCheck}</span></td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
     <!-- سجل التراخيص -->
     <div class="card card-ro">
@@ -58,27 +110,18 @@ document.addEventListener('DOMContentLoaded', () => {
             <thead><tr><th>رقم الترخيص</th><th>تاريخ الإصدار</th><th>تاريخ الانتهاء</th><th>المدة</th><th>الحالة</th></tr></thead>
             <tbody>
               <tr>
-                <td style="font-family:monospace;color:var(--primary)">${req.institution.currentLicenseNo || 'LIC-INST-2022-0045'}</td>
-                <td>2022-08-15</td>
-                <td>2025-08-14</td>
-                <td>36 شهراً</td>
+                <td style="font-family:monospace;color:var(--primary)">${inst.currentLicenseNo||'LIC-INST-2022-0045'}</td>
+                <td>2022-08-15</td><td>2025-08-14</td><td>36 شهراً</td>
                 <td><span class="badge b-closed">منتهي</span></td>
               </tr>
-              ${req.activeLicense ? `
-              <tr>
-                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${req.activeLicense.number}</td>
-                <td>${req.activeLicense.issueDate}</td>
-                <td>${req.activeLicense.expiryDate}</td>
-                <td>${req.activeLicense.months} شهراً</td>
-                <td><span class="badge b-active">نشط</span></td>
-              </tr>` : ''}
+              ${req.activeLicense?`<tr><td style="font-family:monospace;font-weight:700;color:var(--primary)">${req.activeLicense.number}</td><td>${req.activeLicense.issueDate}</td><td>${req.activeLicense.expiryDate}</td><td>${req.activeLicense.months} شهراً</td><td><span class="badge b-active">نشط</span></td></tr>`:''}
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- طلبات الترخيص -->
+    <!-- طلبات الترخيص والتجديد -->
     <div class="card card-ro">
       <div class="ph"><h3><div class="pico gy">${ICONS.list}</div>طلبات الترخيص والتجديد</h3></div>
       <div class="pb-0">
@@ -99,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    ${req.committeeDecision ? renderCommitteeDecisionPanel(req.committeeDecision, 'القرار الأخير للجنة الطبية الإشرافية') : ''}`;
+    ${committeeDecisionHtml}`;
 });
 </script>
 </body>

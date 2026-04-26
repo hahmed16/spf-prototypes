@@ -10,7 +10,7 @@
 <script src="../shared/config.js"></script>
 <script src="../shared/data.js"></script>
 <script src="../shared/layout.js"></script>
-<script src="../shared/components.js"></script>
+<script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'supervisory-rapporteur', activePage: 'sessions-list' });
 const params = new URLSearchParams(window.location.search);
@@ -25,6 +25,10 @@ setBreadcrumb([
 ]);
 
 document.addEventListener('DOMContentLoaded', () => {
+  const inst = req.institution || {};
+  const docs = req.doctors || [];
+  const confirmedCount = docs.filter(d=>d.confirmStatus==='تم التأكيد').length;
+
   getContent().innerHTML = `
     <div class="pg-head">
       <div><h1>إدخال قرار اللجنة الطبية الإشرافية</h1>
@@ -40,14 +44,14 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb-c">
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
           <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-family:monospace;font-weight:800;color:var(--primary)">${req.id}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">المؤسسة</div><div style="font-weight:600">${req.institution.name}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">المؤسسة</div><div style="font-weight:600">${inst.name||'—'}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">نوع الطلب</div><span class="badge b-direct">${req.requestType}</span></div>
           <div><div class="flbl" style="margin-bottom:4px">الحالة</div>${statusBadge(req.status)}</div>
         </div>
       </div>
     </div>
 
-    <!-- بيانات الطلب الكاملة للاطلاع -->
+    <!-- بيانات الطلب للاطلاع (قابلة للطي) -->
     <div style="border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;margin-bottom:16px">
       <div style="padding:10px 18px;background:var(--g100);border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:space-between"
         onclick="toggleData()">
@@ -55,15 +59,47 @@ document.addEventListener('DOMContentLoaded', () => {
         <span id="tog-icon">${ICONS.arrow_left}</span>
       </div>
       <div id="req-data" style="display:none">
-        ${renderInstitutionPanel(req.institution)}
-        ${renderDoctorsPanel(req.doctors, false)}
+        <!-- بيانات المؤسسة الصحية -->
         <div class="card card-ro" style="margin:0;border-radius:0;border-left:none;border-right:none">
-          <div class="ph"><h3><div class="pico ${req.verification.minMet?'gr':'rd'}">${req.verification.minMet?ICONS.check:ICONS.warn}</div>التحقق من اشتراطات الترخيص</h3></div>
+          <div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات المؤسسة الصحية</h3></div>
           <div class="pb">
             <div class="fg fg-3">
-              <div class="fgrp"><label class="flbl">إجمالي الأطباء</label><div class="fro"><strong>${req.verification.totalDoctors}</strong></div></div>
-              <div class="fgrp"><label class="flbl">المؤكدون</label><div class="fro"><strong style="color:${req.verification.confirmedDoctors===req.verification.totalDoctors?'var(--accent)':'var(--warning)'}">${req.verification.confirmedDoctors}/${req.verification.totalDoctors}</strong></div></div>
-              <div class="fgrp"><label class="flbl">استيفاء الحد الأدنى</label><div class="fro"><span class="badge ${req.verification.minMet?'b-approved':'b-returned'}">${req.verification.minMet?'مستوفى':'غير مستوفى'}</span></div></div>
+              <div class="fgrp"><label class="flbl">اسم المؤسسة</label><div class="fro" style="font-weight:700">${inst.name||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro" style="font-family:monospace">${inst.cr||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">حالة السجل التجاري</label><div class="fro"><span class="badge ${inst.crStatus==='سارٍ'?'b-approved':'b-expired'}">${inst.crStatus||'—'}</span></div></div>
+              <div class="fgrp"><label class="flbl">نوع المؤسسة</label><div class="fro">${inst.type||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">المحافظة</label><div class="fro">${inst.governorate||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">العنوان</label><div class="fro">${inst.address||'—'}</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- الأطباء المرشحون -->
+        <div class="card card-ro" style="margin:0;border-radius:0;border-left:none;border-right:none">
+          <div class="ph">
+            <h3><div class="pico bl">${ICONS.user}</div>الأطباء المرشحون للجنة</h3>
+            <span style="font-size:12px;color:${confirmedCount===docs.length?'var(--accent)':'var(--warning)'}">
+              ${confirmedCount} / ${docs.length} مؤكد
+            </span>
+          </div>
+          <div class="pb-0">
+            <div class="tbl-wrap">
+              <table class="dtbl">
+                <thead><tr><th>الاسم</th><th>الرقم المدني</th><th>التخصص</th><th>المنصب</th><th>التأكيد</th><th>الازدواجية</th></tr></thead>
+                <tbody>${docs.map(d=>`<tr><td style="font-weight:600">${d.name}</td><td style="font-family:monospace;font-size:11.5px">${d.civil}</td><td>${d.specialty}</td><td>${d.role}</td><td><span class="badge ${d.confirmStatus==='تم التأكيد'?'b-approved':d.confirmStatus==='رفض'?'b-rejected':'b-phead'}">${d.confirmStatus}</span></td><td><span class="badge ${d.duplicateCheck==='لا يوجد تعارض'?'b-approved':'b-rejected'}">${d.duplicateCheck}</span></td></tr>`).join('')}</tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- التحقق من الاشتراطات -->
+        <div class="card card-ro" style="margin:0;border-radius:0;border-left:none;border-right:none">
+          <div class="ph"><h3><div class="pico ${req.verification?.minMet?'gr':'rd'}">${req.verification?.minMet?ICONS.check:ICONS.warn}</div>التحقق من اشتراطات الترخيص</h3></div>
+          <div class="pb">
+            <div class="fg fg-3">
+              <div class="fgrp"><label class="flbl">إجمالي الأطباء</label><div class="fro"><strong>${req.verification?.totalDoctors||0}</strong></div></div>
+              <div class="fgrp"><label class="flbl">المؤكدون</label><div class="fro"><strong style="color:${req.verification?.confirmedDoctors===req.verification?.totalDoctors?'var(--accent)':'var(--warning)'}">${req.verification?.confirmedDoctors||0}/${req.verification?.totalDoctors||0}</strong></div></div>
+              <div class="fgrp"><label class="flbl">استيفاء الحد الأدنى</label><div class="fro"><span class="badge ${req.verification?.minMet?'b-approved':'b-returned'}">${req.verification?.minMet?'مستوفى':'غير مستوفى'}</span></div></div>
             </div>
           </div>
         </div>
@@ -116,8 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <div class="fgrp">
-          <label class="flbl">إرفاق ملف (اختياري)</label>
-          <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4">
+          <label class="flbl">إرفاق ملف داعم <span style="font-weight:400;color:var(--text3)">(اختياري)</span></label>
+          ${renderModernUploadComponent({ idPrefix: 'decision-att', subTitle: 'PDF, Word, صور — الحجم الأقصى 20 ميغابايت' })}
         </div>
 
         <div class="dp-acts">

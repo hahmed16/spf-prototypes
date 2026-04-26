@@ -10,7 +10,7 @@
 <script src="../shared/config.js"></script>
 <script src="../shared/data.js"></script>
 <script src="../shared/layout.js"></script>
-<script src="../shared/components.js"></script>
+<script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'institution-rapporteur', activePage: 'sessions-list' });
 const params = new URLSearchParams(window.location.search);
@@ -25,6 +25,20 @@ setBreadcrumb([
 ]);
 
 document.addEventListener('DOMContentLoaded', () => {
+  const app  = req.applicant  || {};
+  const ins  = req.insured    || {};
+  const emp  = req.employer   || {};
+  const inj  = req.injury     || {};
+  const inv  = req.investigation;
+  const pds  = req.sickLeavePeriods || [];
+  const atts = req.attachments || [];
+  const isWork = req.type === 'إصابة عمل';
+  const totalDays = pds.reduce((s,p)=>s+(p.days||0),0);
+
+  const attHtml = atts.length===0
+    ?`<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد مرفقات</div>`
+    :atts.map(att=>{const ext=att.name?.split('.').pop()?.toLowerCase()||'oth';const icoMap={pdf:'pdf',doc:'doc',docx:'doc',jpg:'img',jpeg:'img',png:'img',mp3:'media',wav:'media',mp4:'media'};const svgMap={pdf:ICONS.file,doc:ICONS.file,img:ICONS.eye,media:ICONS.clock,oth:ICONS.file};const ico=icoMap[ext]||'oth';return `<div class="att-row"><div class="att-ico ${ico}">${svgMap[ico]||ICONS.file}</div><div class="att-info"><div class="att-name">${att.name}</div><div class="att-meta">${att.type} · ${att.uploadedBy} · ${att.uploadDate}</div></div><div class="att-acts"><button class="ibtn" onclick="showToast('جارٍ تحميل الملف...','i')">${ICONS.download}</button></div></div>`;}).join('');
+
   getContent().innerHTML = `
     <div class="pg-head">
       <div>
@@ -42,14 +56,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="flbl" style="margin-bottom:8px">ملخص الحالة المعروضة</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
           <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-family:monospace;font-weight:700;color:var(--primary)">${req.id}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">المؤمن عليه</div><div style="font-weight:600">${req.insured.name}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">نوع الطلب</div><div>${req.type} — ${req.subtype||''}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">المؤمن عليه</div><div style="font-weight:600">${ins.name||'—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">نوع الطلب</div><div>${req.type}${req.subtype?` — ${req.subtype}`:''}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">الحالة</div>${statusBadge(req.status)}</div>
         </div>
       </div>
     </div>
 
-    <!-- كامل بيانات الحالة — للاطلاع -->
+    <!-- كامل بيانات الحالة للاطلاع (قابلة للطي) -->
     <div style="border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;margin-bottom:16px">
       <div style="padding:10px 18px;background:var(--g100);border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:space-between"
         onclick="toggleCaseData()">
@@ -57,13 +71,119 @@ document.addEventListener('DOMContentLoaded', () => {
         <span id="toggle-icon">${ICONS.arrow_left}</span>
       </div>
       <div id="case-data-body" style="display:none;padding:0">
-        ${renderApplicantPanel(req.applicant)}
-        ${renderInsuredPersonPanel(req.insured)}
-        ${renderEmployerPanel(req.employer)}
-        ${renderInjuryDataPanel(req.injury, req.type)}
-        ${req.investigation ? renderInvestigationReport(req.investigation, false) : ''}
-        ${renderSickLeavePeriodsPanel(req.sickLeavePeriods||[], false)}
-        ${renderAttachmentsPanel(req.attachments, false)}
+
+        <!-- بيانات مقدم الطلب -->
+        <div class="card" style="margin:0;border-radius:0;border-left:none;border-right:none">
+          <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب</h3></div>
+          <div class="pb">
+            <div class="fg fg-3">
+              <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${app.role||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${app.name||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${app.civil||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(app.phone,'غير متوفر')}</div></div>
+              <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(app.email,'غير متوفر')}</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- بيانات المؤمن عليه -->
+        <div class="card card-ro" style="margin:0;border-radius:0;border-left:none;border-right:none">
+          <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات المؤمن عليه / المستفيد</h3></div>
+          <div class="pb">
+            <div class="fg fg-4">
+              <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${ins.name||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${ins.civil||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${formatDate(ins.dob)}</div></div>
+              <div class="fgrp"><label class="flbl">الجنس</label><div class="fro">${ins.gender||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${ins.nationality||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${ins.insuranceStatus==='نشط'?'b-approved':'b-rejected'}">${ins.insuranceStatus||'—'}</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- بيانات جهة العمل -->
+        <div class="card card-ro" style="margin:0;border-radius:0;border-left:none;border-right:none">
+          <div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات جهة العمل</h3></div>
+          <div class="pb">
+            <div class="fg fg-3">
+              <div class="fgrp"><label class="flbl">اسم جهة العمل</label><div class="fro">${emp.name||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro" style="font-family:monospace">${emp.cr||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${emp.jobTitle||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">تاريخ الالتحاق بالعمل</label><div class="fro">${formatDate(emp.joinDate)}</div></div>
+              <div class="fgrp"><label class="flbl">موقع العمل / الفرع</label><div class="fro">${emp.location||'—'}</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- بيانات الإصابة أو المرض -->
+        <div class="card card-ro" style="margin:0;border-radius:0;border-left:none;border-right:none">
+          <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>بيانات ${isWork?'الإصابة':'المرض المهني'}</h3></div>
+          <div class="pb">
+            <div class="fg fg-3">
+              <div class="fgrp"><label class="flbl">نوع الحالة</label><div class="fro">${normalizeDisplay(inj.caseType||inj.diagnosis)}</div></div>
+              <div class="fgrp"><label class="flbl">تاريخ الواقعة / الاشتباه</label><div class="fro">${formatDate(inj.incidentDate||inj.firstSuspicion)}</div></div>
+              ${isWork?`
+              <div class="fgrp"><label class="flbl">الجزء المصاب</label><div class="fro">${inj.bodyPart||'—'}</div></div>
+              <div class="fgrp span-full"><label class="flbl">مكان الواقعة</label><div class="fro">${inj.location||'—'}</div></div>
+              <div class="fgrp span-full"><label class="flbl">وصف تفصيلي للواقعة</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${inj.description||'—'}</div></div>
+              ${inj.witnesses==='نعم'?`<div class="fgrp"><label class="flbl">الشهود</label><div class="fro">${inj.witnessNames||'—'}</div></div>`:''}`:`
+              <div class="fgrp span-full"><label class="flbl">المواد / العوامل المسببة</label><div class="fro">${inj.chemicalAgents||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">مدة التعرض المهني</label><div class="fro">${inj.exposureDuration||'—'}</div></div>
+              <div class="fgrp span-full"><label class="flbl">وصف بيئة العمل</label><div class="fro">${normalizeDisplay(inj.workEnvironment)}</div></div>
+              <div class="fgrp span-full"><label class="flbl">الوصف التفصيلي للحالة</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${normalizeDisplay(inj.description)}</div></div>`}
+            </div>
+          </div>
+        </div>
+
+        ${inv?`
+        <!-- تقرير التحقيق -->
+        <div class="card card-cum" style="margin:0;border-radius:0;border-left:none;border-right:none">
+          <div class="ph"><h3><div class="pico pu">${ICONS.search}</div>تقرير التحقيق</h3><span class="stg-lbl">مرحلة التحقيق</span></div>
+          <div class="pb">
+            <div class="fg" style="gap:14px">
+              <div class="fgrp"><label class="flbl">ملخص التحقيق</label><div class="fro" style="min-height:70px;align-items:flex-start;padding-top:10px">${inv.summary||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">نتائج التحقق من البيانات</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${inv.findings||'—'}</div></div>
+              <div class="fgrp span-full"><label class="flbl">محضر التحقيق / الإفادات</label><div class="fro" style="min-height:70px;align-items:flex-start;padding-top:10px">${inv.record||'—'}</div></div>
+              <div class="fg fg-3">
+                <div class="fgrp"><label class="flbl">توصية الموظف</label><div class="fro">${inv.employeeRecommendation?`<span class="badge ${inv.employeeRecommendation==='موافقة'?'b-approved':'b-rejected'}">${inv.employeeRecommendation}</span>`:'—'}</div></div>
+                <div class="fgrp span-2"><label class="flbl">ملاحظات الموظف</label><div class="fro">${inv.employeeNotes||'—'}</div></div>
+              </div>
+              ${inv.headNotes||inv.headDecision?`
+              <div style="border-top:1px dashed var(--border);padding-top:14px;margin-top:4px">
+                <div class="flbl" style="margin-bottom:10px;font-size:11px;color:var(--primary)">— ملاحظات واعتماد رئيس القسم —</div>
+                <div class="fg fg-2">
+                  <div class="fgrp"><label class="flbl">قرار رئيس القسم</label><div class="fro">${inv.headDecision?`<span class="badge ${inv.headDecision.includes('اعتماد')?'b-approved':inv.headDecision.includes('رفض')?'b-rejected':'b-phead'}">${inv.headDecision}</span>`:'—'}</div></div>
+                  <div class="fgrp"><label class="flbl">ملاحظات رئيس القسم</label><div class="fro">${inv.headNotes||'—'}</div></div>
+                </div>
+              </div>`:''}
+            </div>
+          </div>
+        </div>`:'' }
+
+        <!-- فترات الإجازات المرضية -->
+        <div class="card card-cum" style="margin:0;border-radius:0;border-left:none;border-right:none">
+          <div class="ph">
+            <h3><div class="pico gr">${ICONS.calendar}</div>فترات الإجازات المرضية</h3>
+            <span style="font-size:12px;color:var(--text3)">الإجمالي: <strong>${totalDays}</strong> يوم</span>
+          </div>
+          <div class="pb-0">
+            <div class="tbl-wrap">
+              ${pds.length===0?`<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد فترات إجازة مسجلة</div>`:`
+              <table class="dtbl">
+                <thead><tr><th>#</th><th>من تاريخ</th><th>إلى تاريخ</th><th>عدد الأيام</th><th>الحالة</th><th>أضافها</th></tr></thead>
+                <tbody>${pds.map((p,i)=>`<tr><td>${i+1}</td><td>${formatDate(p.from)}</td><td>${formatDate(p.to)}</td><td><strong>${p.days}</strong> يوم</td><td><span class="badge ${p.status==='معتمدة'?'b-approved':p.status==='مرفوضة'?'b-rejected':'b-phead'}">${p.status}</span></td><td>${p.addedBy||'—'}</td></tr>`).join('')}</tbody>
+                <tfoot><tr><td colspan="3" style="font-weight:700;text-align:right;padding:8px 14px">الإجمالي</td><td colspan="3" style="font-weight:700;padding:8px 14px">${totalDays} يوم</td></tr></tfoot>
+              </table>`}
+            </div>
+          </div>
+        </div>
+
+        <!-- المرفقات -->
+        <div class="card" style="margin:0;border-radius:0;border-left:none;border-right:none">
+          <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات <span style="font-size:11px;font-weight:400;color:var(--text3)">(${atts.length} مرفق)</span></h3></div>
+          <div class="pb">${attHtml}</div>
+        </div>
+
       </div>
     </div>
 
@@ -82,51 +202,30 @@ document.addEventListener('DOMContentLoaded', () => {
           </select>
         </div>
 
-        <!-- حقول الموافقة -->
         <div id="approval-section" style="display:none">
           <div class="fg fg-2" style="gap:14px">
-            <div class="fgrp">
-              <label class="flbl">فترة الإجازة الموصى بها — من</label>
-              <input type="date" class="fc" id="leave-from">
-            </div>
-            <div class="fgrp">
-              <label class="flbl">فترة الإجازة الموصى بها — إلى</label>
-              <input type="date" class="fc" id="leave-to">
-            </div>
-            <div class="fgrp">
-              <label class="flbl">نسبة العجز (إن انطبقت) %</label>
-              <input type="number" class="fc" id="disability-pct" min="0" max="100" placeholder="0">
-            </div>
-            <div class="fgrp">
-              <label class="flbl">نوع العجز</label>
-              <select class="fc" id="disability-type">
-                <option>—</option>
-                <option>مؤقت</option>
-                <option>دائم جزئي</option>
-                <option>دائم كلي</option>
-              </select>
-            </div>
+            <div class="fgrp"><label class="flbl">فترة الإجازة الموصى بها — من</label><input type="date" class="fc" id="leave-from"></div>
+            <div class="fgrp"><label class="flbl">فترة الإجازة الموصى بها — إلى</label><input type="date" class="fc" id="leave-to"></div>
+            <div class="fgrp"><label class="flbl">نسبة العجز (إن انطبقت) %</label><input type="number" class="fc" id="disability-pct" min="0" max="100" placeholder="0"></div>
+            <div class="fgrp"><label class="flbl">نوع العجز</label><select class="fc" id="disability-type"><option>—</option><option>مؤقت</option><option>دائم جزئي</option><option>دائم كلي</option></select></div>
           </div>
         </div>
 
-        <!-- حقول الرفض -->
         <div id="rejection-section" style="display:none">
           <div class="fgrp">
             <label class="flbl">سبب الرفض الطبي <span class="req">*</span></label>
-            <textarea class="fc" id="rejection-reason" rows="3"
-              placeholder="اذكر الأسباب الطبية التي تستند إليها في الرفض..."></textarea>
+            <textarea class="fc" id="rejection-reason" rows="3" placeholder="اذكر الأسباب الطبية التي تستند إليها في الرفض..."></textarea>
           </div>
         </div>
 
         <div class="fgrp">
           <label class="flbl">الملاحظات الطبية التفصيلية</label>
-          <textarea class="fc" id="medical-notes" rows="5"
-            placeholder="مضمون القرار التفصيلي، الملاحظات الطبية، التوصيات..."></textarea>
+          <textarea class="fc" id="medical-notes" rows="5" placeholder="مضمون القرار التفصيلي، الملاحظات الطبية، التوصيات..."></textarea>
         </div>
 
         <div class="fgrp">
-          <label class="flbl">إرفاق ملف (اختياري)</label>
-          <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4">
+          <label class="flbl">إرفاق ملف داعم <span style="font-weight:400;color:var(--text3)">(اختياري)</span></label>
+          ${renderModernUploadComponent({ idPrefix: 'decision-att', subTitle: 'PDF, Word, صور — الحجم الأقصى 20 ميغابايت' })}
         </div>
 
         <div class="dp-acts">
@@ -176,9 +275,7 @@ function saveDecision() {
   });
 }
 
-function saveDraft() {
-  showToast('تم حفظ مسودة القرار', 'i');
-}
+function saveDraft() { showToast('تم حفظ مسودة القرار', 'i'); }
 
 function postponeCase() {
   confirmAction({
