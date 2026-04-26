@@ -801,6 +801,11 @@ function renderComplaintDetails(role) {
     <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>السجل الزمني</h3></div>
     <div class="pb">${_renderComplaintTimeline(c.timeline)}</div></div>`;
 
+  /* ── المراسلات ── */
+  const correspondencePanel = isInternal ? `
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.mail}</span>المراسلات</h3></div>
+    <div class="pb" id="correspondence-container"></div></div>` : '';
+
   /* ── لوحة الإجراءات ── */
   const rolePanels = showWorkflowPanels ? _renderCumulativeRolePanels(c) : '';
   const actionPanel = (isExternal && (isDraft || isReturned)) ? '' : _buildComplaintActionPanel(role, c);
@@ -843,7 +848,18 @@ function renderComplaintDetails(role) {
   ${actionPanel}
   ${attachmentsPanel}
   ${showWorkflowPanels ? renderNotes(c.notes, c.id) : ''}
-  ${timelinePanel}`;
+  ${timelinePanel}
+  ${correspondencePanel}
+
+  <script>
+    // Initialize correspondence documentation
+    (function() {
+      const correspondenceContainer = document.getElementById('correspondence-container');
+      if (correspondenceContainer && typeof renderCorrespondenceDocumentation === 'function') {
+        correspondenceContainer.innerHTML = renderCorrespondenceDocumentation('complaints', '${c.id}', '${role}');
+      }
+    })();
+  </script>`;
 }
 
 function _renderComplaintTimeline(timeline) {
@@ -1484,7 +1500,21 @@ function renderAppealDetails(role) {
   ${!isExternal ? renderNotes(a.notes, a.id) : ''}
 
   <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>السجل الزمني</h3></div>
-  <div class="pb">${renderTimeline(a.timeline)}</div></div>`;
+  <div class="pb">${renderTimeline(a.timeline)}</div></div>
+
+  ${!isExternal ? `
+  <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.mail}</span>المراسلات</h3></div>
+  <div class="pb" id="correspondence-container"></div></div>
+
+  <script>
+    // Initialize correspondence documentation
+    (function() {
+      const correspondenceContainer = document.getElementById('correspondence-container');
+      if (correspondenceContainer && typeof renderCorrespondenceDocumentation === 'function') {
+        correspondenceContainer.innerHTML = renderCorrespondenceDocumentation('appeals', '${a.id}', '${role}');
+      }
+    })();
+  </script>` : ''}`;
 }
 
 /* ── قائمة الزيارات ── */
@@ -1633,7 +1663,31 @@ function renderVisitDetails(role, type) {
   ${actionPanel}
 
   <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>سجل الأحداث</h3></div>
-  <div class="pb">${renderTimeline(v.timeline)}</div></div>`;
+  <div class="pb">${renderTimeline(v.timeline)}</div></div>
+
+  <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.video}</span>تسجيلات المكالمات المرئية</h3></div>
+  <div class="pb" id="video-call-container"></div></div>
+
+  <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.mail}</span>المراسلات</h3></div>
+  <div class="pb" id="correspondence-container"></div></div>
+
+  <script>
+    // Initialize correspondence documentation
+    (function() {
+      const correspondenceContainer = document.getElementById('correspondence-container');
+      if (correspondenceContainer && typeof renderCorrespondenceDocumentation === 'function') {
+        correspondenceContainer.innerHTML = renderCorrespondenceDocumentation('visits', '${v.id}', '${role}');
+      }
+    })();
+
+    // Initialize video call recording
+    (function() {
+      const videoCallContainer = document.getElementById('video-call-container');
+      if (videoCallContainer && typeof renderVideoCallRecording === 'function') {
+        videoCallContainer.innerHTML = renderVideoCallRecording('${v.id}', '${role}');
+      }
+    })();
+  </script>`;
 }
 
 /* ── جدولة زيارة جديدة ── */
@@ -3765,14 +3819,14 @@ function renderJobSecurityRequestsList(role) {
   const requests = INSP_DATA.jobSecurityRequests || [];
   const rows = requests.map(r => `
     <tr>
-      <td><a href="#" onclick="navigateTo('job-security-request-details','id=${r.id}')" class="txp fw7">${r.id}</a></td>
+      <td><a href="#" onclick="navigateTo('../services/job-security-request-details','id=${r.id}')" class="txp fw7">${r.id}</a></td>
       <td>${r.workerName}</td>
       <td>${r.workerCivil}</td>
       <td>${r.employerName}</td>
       <td>${statusBadge(r.status)}</td>
       <td>${r.requestDate}</td>
       <td><div class="df ac g8">
-        <button class="btn btn-primary btn-xs" onclick="navigateTo('job-security-request-details','id=${r.id}')">${ICONS.eye}عرض</button>
+        <button class="btn btn-primary btn-xs" onclick="navigateTo('../services/job-security-request-details','id=${r.id}')">${ICONS.eye}عرض</button>
       </div></td>
     </tr>`).join('');
 
@@ -3788,7 +3842,7 @@ function renderJobSecurityRequestDetails(role) {
   const requestId = getParam('id') || 'JSR-2025-0001';
   const request = INSP_DATA.jobSecurityRequests?.find(r => r.id === requestId) || {
     id: requestId,
-    status: 'قيد المراجعة',
+    status: 'محال للتفتيش',
     requestDate: '2025-01-15',
     workerName: 'أحمد محمد العلي',
     workerCivil: '28475910',
@@ -3796,15 +3850,206 @@ function renderJobSecurityRequestDetails(role) {
     employerCRN: '1012345678',
     terminationDate: '2025-01-10',
     terminationReason: 'إنهاء العقد',
-    salary: 450,
+    salary: 4500,
     employmentDuration: '3 سنوات',
   };
 
+  // قواعد التحقق من طلبات الأمان الوظيفي
+  const rules = [
+    {
+      id: 'JSR-001',
+      title: 'التحقق من قيمة الأجر الأخير',
+      description: 'مقارنة قيمة الأجر الأخير بتسلسل الأجر في نفس العقد بحيث لا تتجاوز الزيادة أكثر من 25%',
+      status: 'failed',
+      severity: 'critical',
+      details: 'الأجر الأخير 4,500 ريال يزيد بنسبة 35% عن متوسط الأجر في العقد (3,333 ريال)'
+    },
+    {
+      id: 'JSR-002',
+      title: 'التحقق من قيمة الأجر الأخير مقارنة بالأجر في آخر عقد',
+      description: 'مقارنة قيمة الأجر الأخير بالأجر في آخر عقد مسجل إن وجد بما لا يتجاوز 50%',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'JSR-003',
+      title: 'التحقق من الأجر المسجل للعاملين الآخرين',
+      description: 'التحقق من الأجر المسجل للعاملين الآخرين المسجلين بنفس المنشأة بحيث لا يتجاوز الفرق متوسط أجر العمال للمنشآت الفردية',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'JSR-004',
+      title: 'التحقق من أجر العمال',
+      description: 'التحقق من أجر العمال بحيث لا يتجاوز الفرق 75% من أعلى راتب',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'JSR-005',
+      title: 'التحقق من مدة آخر عقد',
+      description: 'التحقق من مدة آخر عقد بحيث لا تقل عن 6 أشهر (المادة 87) من اللائحة',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'JSR-006',
+      title: 'التحقق من صلة القرابة',
+      description: 'التحقق من صلة القرابة بين أصحاب المنشأة والعامل عليه (القبيلة) و (شجرة العائلة)',
+      status: 'passed',
+      severity: 'warning'
+    },
+    {
+      id: 'JSR-007',
+      title: 'التحقق من حالات سابقة في نظام التفتيش',
+      description: 'التحقق من وجود حالات سابقة في نظام التفتيش للعامل عليه والمنشأة',
+      status: 'failed',
+      severity: 'critical',
+      details: 'وجدت 3 حالات سابقة للمنشأة في نظام التفتيش خلال العامين الماضيين'
+    },
+    {
+      id: 'JSR-008',
+      title: 'التحقق من وجود تسجيل وهمي/بطلان تأمين',
+      description: 'التحقق من وجود تسجيل وهمي / بطلان تأمين بالمنشأة أو العامل عليه سابقاً',
+      status: 'passed',
+      severity: 'warning'
+    },
+    {
+      id: 'JSR-009',
+      title: 'التحقق من سداد الاشتراكات',
+      description: 'التحقق من سداد الاشتراكات من عدمه للعامل عليه والمنشأة',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'JSR-010',
+      title: 'التحقق من الأجور المسجلة في نظام حماية الأجور',
+      description: 'التحقق من الأجور المسجلة في نظام حماية الأجور ومقارنتها بالمسجل في الصندوق وكذلك تسلسل الأجور المسجلة بنظام حماية الأجور - واسم المنشأة المصروف منها الراتب',
+      status: 'failed',
+      severity: 'critical',
+      details: 'توجد اختلافات بين الأجور المسجلة في نظام حماية الأجور والصندوق'
+    },
+    {
+      id: 'JSR-011',
+      title: 'التحقق من المشاريع المسندة للشركة',
+      description: 'التحقق من المشاريع المسندة للشركة وهل العامل عليه يتبع للمشروع وتاريخ انتهاء المشروع',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'JSR-012',
+      title: 'التحقق من أنشطة الدرجة الرابعة',
+      description: 'التحقق من أن الطلب يتبع الأنشطة البسيطة في الدرجة الرابعة كمحل البقالة والخياطة والمقاهي',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'JSR-013',
+      title: 'التحقق من وجود عقود إيجارات سارية',
+      description: 'التحقق من وجود عقود إيجارات سارية',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'JSR-014',
+      title: 'التحقق من فروع المنشأة وموقعها',
+      description: 'التحقق من فروع المنشأة وموقعها',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'JSR-015',
+      title: 'التحقق من وجود نزاع عمالي أو قضية في المحكمة',
+      description: 'التحقق من وجود نزاع عمالي أو قضية في المحكمة',
+      status: 'passed',
+      severity: 'warning'
+    },
+    {
+      id: 'JSR-016',
+      title: 'التحقق من الموقع الجغرافي للمنشأة',
+      description: 'التحقق من الموقع الجغرافي للمنشأة',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'JSR-017',
+      title: 'التحقق من عدم وجود العامل على مقاعد الدراسة',
+      description: 'التحقق من عدم وجود العامل عليه على مقاعد الدراسة',
+      status: 'passed',
+      severity: 'info'
+    }
+  ];
+
+  const passedRules = rules.filter(r => r.status === 'passed').length;
+  const failedRules = rules.filter(r => r.status === 'failed').length;
+  const pendingRules = rules.filter(r => r.status === 'pending').length;
+
+  const rulesHtml = rules.map(rule => `
+    <div class="rule-item">
+      <div class="rule-status ${rule.status}">
+        ${rule.status === 'passed' ? ICONS.check : rule.status === 'failed' ? ICONS.x : ICONS.clock}
+      </div>
+      <div class="rule-content">
+        <div class="rule-title">${rule.title}</div>
+        <div class="rule-description">${rule.description}</div>
+        <div class="rule-meta">
+          <span class="rule-badge ${rule.severity}">${rule.id}</span>
+          <span class="rule-badge ${rule.severity}">${rule.severity === 'critical' ? 'حرج' : rule.severity === 'warning' ? 'تحذير' : 'معلومات'}</span>
+        </div>
+        ${rule.details ? `<div class="violation-details"><h5>⚠️ تفاصيل الانتهاك:</h5><p>${rule.details}</p></div>` : ''}
+      </div>
+    </div>
+  `).join('');
+
   return `<div class="pg-head"><div><h1>${request.id}</h1><p>تفاصيل طلب الأمان الوظيفي</p></div>
     <div class="pg-acts">
-      <button class="btn btn-secondary btn-sm" onclick="navigateTo('job-security-requests-list')">${ICONS.arrow_right}رجوع</button>
+      <button class="btn btn-secondary btn-sm" onclick="navigateTo('../services/job-security-requests-list')">${ICONS.arrow_right}رجوع</button>
       <button class="btn btn-primary btn-sm" onclick="showToast('جارٍ طباعة الطلب...','i')">${ICONS.download}طباعة</button>
     </div></div>
+
+    ${failedRules > 0 ? `
+    <div class="inspection-alert">
+      ${ICONS.alert}
+      <div class="inspection-alert-content">
+        <h4>⚠️ تم تحويل الطلب للتفتيش</h4>
+        <p>تم اكتشاف ${failedRules} انتهاك(s) في قواعد التحقق. يتطلب الأمر مراجعة تفصيلية.</p>
+      </div>
+    </div>
+    ` : ''}
+
+    <div class="risk-assessment">
+      <h3>${ICONS.shield} تقييم المخاطر</h3>
+      <div class="risk-level">
+        <span class="risk-label">مستوى الخطر:</span>
+        <div class="risk-bar-container">
+          <div class="risk-bar ${failedRules > 2 ? 'high' : failedRules > 0 ? 'medium' : 'low'}" style="width: ${failedRules > 2 ? '85%' : failedRules > 0 ? '55%' : '15%'}"></div>
+        </div>
+        <span class="risk-label">${failedRules > 2 ? 'مرتفع' : failedRules > 0 ? 'متوسط' : 'منخفض'}</span>
+      </div>
+      <div class="risk-recommendations">
+        <h4>📋 التوصيات:</h4>
+        <ul>
+          <li>إجراء تحقيق شامل في الانتهاكات المكتشفة</li>
+          <li>مراجعة الوثائق الداعمة للطلب</li>
+          <li>التواصل مع المنشأة والعامل للحصول على توضيحات</li>
+          <li>تحديث حالة الطلب بعد إكمال التحقيق</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="rules-section">
+      <div class="rules-header">
+        <h3>${ICONS.list} قواعد التحقق</h3>
+        <div class="rules-stats">
+          <div class="rule-stat passed">${ICONS.check} ${passedRules} متوافق</div>
+          <div class="rule-stat failed">${ICONS.x} ${failedRules} انتهاك</div>
+          <div class="rule-stat pending">${ICONS.clock} ${pendingRules} قيد المراجعة</div>
+        </div>
+      </div>
+      <div class="rules-list">
+        ${rulesHtml}
+      </div>
+    </div>
 
     <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>بيانات الطلب</h3></div>
     <div class="pb"><div class="fg fg-2">
@@ -3843,9 +4088,9 @@ function renderJobSecurityRequestDetails(role) {
     <div class="card"><div class="ph"><h3><span class="pico gr">${ICONS.chart}</span>لوحة التحليل المالي</h3></div>
     <div class="pb">
       <div class="fg fg-2">
-        <div class="fgrp"><label class="flbl">إجمالي المستحقات</label><div class="fro fw7" style="color:var(--primary)">1,350 ر.ع</div></div>
-        <div class="fgrp"><label class="flbl">المبالغ المدفوعة</label><div class="fro fw7" style="color:var(--success)">900 ر.ع</div></div>
-        <div class="fgrp"><label class="flbl">المتبقي</label><div class="fro fw7" style="color:var(--danger)">450 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">إجمالي المستحقات</label><div class="fro fw7" style="color:var(--primary)">13,500 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">المبالغ المدفوعة</label><div class="fro fw7" style="color:var(--success)">9,000 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">المتبقي</label><div class="fro fw7" style="color:var(--danger)">4,500 ر.ع</div></div>
         <div class="fgrp"><label class="flbl">حالة الدفع</label><div class="fro"><span class="badge b-returned">غير مكتمل</span></div></div>
       </div>
     </div></div>
@@ -3859,14 +4104,14 @@ function renderFamilyBenefitRequestsList(role) {
   const requests = INSP_DATA.familyBenefitRequests || [];
   const rows = requests.map(r => `
     <tr>
-      <td><a href="#" onclick="navigateTo('family-benefit-request-details','id=${r.id}')" class="txp fw7">${r.id}</a></td>
+      <td><a href="#" onclick="navigateTo('../services/family-benefits-request-details','id=${r.id}')" class="txp fw7">${r.id}</a></td>
       <td>${r.workerName}</td>
       <td>${r.workerCivil}</td>
       <td>${r.employerName}</td>
       <td>${statusBadge(r.status)}</td>
       <td>${r.requestDate}</td>
       <td><div class="df ac g8">
-        <button class="btn btn-primary btn-xs" onclick="navigateTo('family-benefit-request-details','id=${r.id}')">${ICONS.eye}عرض</button>
+        <button class="btn btn-primary btn-xs" onclick="navigateTo('../services/family-benefits-request-details','id=${r.id}')">${ICONS.eye}عرض</button>
       </div></td>
     </tr>`).join('');
 
@@ -3882,7 +4127,7 @@ function renderFamilyBenefitRequestDetails(role) {
   const requestId = getParam('id') || 'FBR-2025-0001';
   const request = INSP_DATA.familyBenefitRequests?.find(r => r.id === requestId) || {
     id: requestId,
-    status: 'قيد المراجعة',
+    status: 'محال للتفتيش',
     requestDate: '2025-01-20',
     workerName: 'سالم بن حمد البوسعيدي',
     workerCivil: '28475911',
@@ -3894,11 +4139,194 @@ function renderFamilyBenefitRequestDetails(role) {
     employmentDuration: '2 سنة',
   };
 
+  // قواعد التحقق من طلبات منافع دخل الأسرة
+  const rules = [
+    {
+      id: 'FBR-001',
+      title: 'التحقق من شرط الإقامة للمنتفعين',
+      description: 'التحقق من شرط الإقامة للمنتفعين حسب المادة 5 من اللائحة',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'FBR-002',
+      title: 'التحقق من الحالة الاجتماعية لأفراد الأسرة',
+      description: 'التحقق من الحالة الاجتماعية لأفراد الأسرة في حال تكرار الزواج',
+      status: 'passed',
+      severity: 'warning'
+    },
+    {
+      id: 'FBR-003',
+      title: 'التحقق من ممتلكات الأسرة',
+      description: 'التحقق من ممتلكات الأسرة',
+      status: 'failed',
+      severity: 'critical',
+      details: 'توجد ممتلكات مسجلة باسم أحد أفراد الأسرة تتجاوز الحد المسموح'
+    },
+    {
+      id: 'FBR-004',
+      title: 'التحقق من العروض الوظيفية للأفراد',
+      description: 'التحقق من العروض الوظيفية للأفراد العائلة',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'FBR-005',
+      title: 'التحقق من أعمار أفراد الأسرة',
+      description: 'التحقق من أعمار أفراد الأسرة حسب ما ذكر بالمادة 81 بالقانون',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'FBR-006',
+      title: 'التحقق من عقود العمل المسجلة وغير المسجلة',
+      description: 'التحقق من عقود العمل المسجلة وغير مسجلة في الصندوق ووزارة العمل',
+      status: 'failed',
+      severity: 'critical',
+      details: 'توجد عقود عمل غير مسجلة في الصندوق لعضوين من الأسرة'
+    },
+    {
+      id: 'FBR-007',
+      title: 'التحقق من التحاق أحد أفراد الأسرة بمقاعد الدراسة',
+      description: 'التحقق من التحاق أحد أفرار الأسرة بمقاعد الدراسة',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'FBR-008',
+      title: 'التحقق من السجلات التجارية المسجلة',
+      description: 'التحقق من السجلات التجارية المسجلة باسم افراد العائلة',
+      status: 'passed',
+      severity: 'warning'
+    },
+    {
+      id: 'FBR-009',
+      title: 'مراجعة التقارير الطبية',
+      description: 'التقارير الطبية',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'FBR-010',
+      title: 'التحقق من الجنسية',
+      description: 'التحقق من الجنسية',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'FBR-011',
+      title: 'مراجعة شجرة العائلة',
+      description: 'شجرة العائلة',
+      status: 'passed',
+      severity: 'warning'
+    },
+    {
+      id: 'FBR-012',
+      title: 'التحقق من المنافع المقدمة من الصندوق',
+      description: 'التحقق من المنافع المقدمة من الصندوق',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'FBR-013',
+      title: 'التحقق من بيانات وزارة التنمية',
+      description: 'التحقق من بيانات وزارة التنمية والجمعيات التابعة لها',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'FBR-014',
+      title: 'التحقق من مكان إقامة أفراد الأسرة',
+      description: 'التحقق من مكان اقامة أفراد الأسرة',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'FBR-015',
+      title: 'مراجعة بيانات البحث الاجتماعي',
+      description: 'بيانات البحث الاجتماعي لأثبات رعاية كبار السن',
+      status: 'passed',
+      severity: 'warning'
+    },
+    {
+      id: 'FBR-016',
+      title: 'التحقق من بيانات الأجور',
+      description: 'بيانات الاجور التي يستلمها افراد الأسرة من وظائفهم',
+      status: 'passed',
+      severity: 'info'
+    }
+  ];
+
+  const passedRules = rules.filter(r => r.status === 'passed').length;
+  const failedRules = rules.filter(r => r.status === 'failed').length;
+  const pendingRules = rules.filter(r => r.status === 'pending').length;
+
+  const rulesHtml = rules.map(rule => `
+    <div class="rule-item">
+      <div class="rule-status ${rule.status}">
+        ${rule.status === 'passed' ? ICONS.check : rule.status === 'failed' ? ICONS.x : ICONS.clock}
+      </div>
+      <div class="rule-content">
+        <div class="rule-title">${rule.title}</div>
+        <div class="rule-description">${rule.description}</div>
+        <div class="rule-meta">
+          <span class="rule-badge ${rule.severity}">${rule.id}</span>
+          <span class="rule-badge ${rule.severity}">${rule.severity === 'critical' ? 'حرج' : rule.severity === 'warning' ? 'تحذير' : 'معلومات'}</span>
+        </div>
+        ${rule.details ? `<div class="violation-details"><h5>⚠️ تفاصيل الانتهاك:</h5><p>${rule.details}</p></div>` : ''}
+      </div>
+    </div>
+  `).join('');
+
   return `<div class="pg-head"><div><h1>${request.id}</h1><p>تفاصيل طلب منافع دخل الأسرة</p></div>
     <div class="pg-acts">
-      <button class="btn btn-secondary btn-sm" onclick="navigateTo('family-benefit-requests-list')">${ICONS.arrow_right}رجوع</button>
+      <button class="btn btn-secondary btn-sm" onclick="navigateTo('../services/family-benefits-requests-list')">${ICONS.arrow_right}رجوع</button>
       <button class="btn btn-primary btn-sm" onclick="showToast('جارٍ طباعة الطلب...','i')">${ICONS.download}طباعة</button>
     </div></div>
+
+    ${failedRules > 0 ? `
+    <div class="inspection-alert">
+      ${ICONS.alert}
+      <div class="inspection-alert-content">
+        <h4>⚠️ تم تحويل الطلب للتفتيش</h4>
+        <p>تم اكتشاف ${failedRules} انتهاك(s) في قواعد التحقق. يتطلب الأمر مراجعة تفصيلية.</p>
+      </div>
+    </div>
+    ` : ''}
+
+    <div class="risk-assessment">
+      <h3>${ICONS.shield} تقييم المخاطر</h3>
+      <div class="risk-level">
+        <span class="risk-label">مستوى الخطر:</span>
+        <div class="risk-bar-container">
+          <div class="risk-bar ${failedRules > 2 ? 'high' : failedRules > 0 ? 'medium' : 'low'}" style="width: ${failedRules > 2 ? '75%' : failedRules > 0 ? '45%' : '20%'}"></div>
+        </div>
+        <span class="risk-label">${failedRules > 2 ? 'مرتفع' : failedRules > 0 ? 'متوسط' : 'منخفض'}</span>
+      </div>
+      <div class="risk-recommendations">
+        <h4>📋 التوصيات:</h4>
+        <ul>
+          <li>مراجعة ممتلكات الأسرة المسجلة</li>
+          <li>التأكد من تسجيل جميع عقود العمل في الصندوق</li>
+          <li>طلب وثائق إضافية تثبت الحالة المالية</li>
+          <li>إجراء زيارة ميدانية للتحقق من الوضع</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="rules-section">
+      <div class="rules-header">
+        <h3>${ICONS.list} قواعد التحقق</h3>
+        <div class="rules-stats">
+          <div class="rule-stat passed">${ICONS.check} ${passedRules} متوافق</div>
+          <div class="rule-stat failed">${ICONS.x} ${failedRules} انتهاك</div>
+          <div class="rule-stat pending">${ICONS.clock} ${pendingRules} قيد المراجعة</div>
+        </div>
+      </div>
+      <div class="rules-list">
+        ${rulesHtml}
+      </div>
+    </div>
 
     <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>بيانات الطلب</h3></div>
     <div class="pb"><div class="fg fg-2">
@@ -3944,7 +4372,7 @@ function renderFamilyBenefitRequestDetails(role) {
       </div>
     </div></div>
 
-    ${renderNotes(request.notes, request.timeline)}
+    ${renderNotes(request.notes, request.id)}
     ${renderTimeline(request.timeline)}`;
 }
 
@@ -3953,14 +4381,14 @@ function renderMaternityLeaveRequestsList(role) {
   const requests = INSP_DATA.maternityLeaveRequests || [];
   const rows = requests.map(r => `
     <tr>
-      <td><a href="#" onclick="navigateTo('maternity-leave-request-details','id=${r.id}')" class="txp fw7">${r.id}</a></td>
+      <td><a href="#" onclick="navigateTo('../services/maternity-leave-request-details','id=${r.id}')" class="txp fw7">${r.id}</a></td>
       <td>${r.workerName}</td>
       <td>${r.workerCivil}</td>
       <td>${r.employerName}</td>
       <td>${statusBadge(r.status)}</td>
       <td>${r.requestDate}</td>
       <td><div class="df ac g8">
-        <button class="btn btn-primary btn-xs" onclick="navigateTo('maternity-leave-request-details','id=${r.id}')">${ICONS.eye}عرض</button>
+        <button class="btn btn-primary btn-xs" onclick="navigateTo('../services/maternity-leave-request-details','id=${r.id}')">${ICONS.eye}عرض</button>
       </div></td>
     </tr>`).join('');
 
@@ -3976,7 +4404,7 @@ function renderMaternityLeaveRequestDetails(role) {
   const requestId = getParam('id') || 'MLR-2025-0001';
   const request = INSP_DATA.maternityLeaveRequests?.find(r => r.id === requestId) || {
     id: requestId,
-    status: 'قيد المراجعة',
+    status: 'محال للتفتيش',
     requestDate: '2025-01-25',
     workerName: 'فاطمة بنت سالم الهنائي',
     workerCivil: '28475912',
@@ -3986,14 +4414,148 @@ function renderMaternityLeaveRequestDetails(role) {
     expectedDeliveryDate: '2025-03-15',
     leaveStartDate: '2025-03-01',
     leaveDuration: '98 يوم',
-    monthlySalary: 420,
+    monthlySalary: 4200,
   };
+
+  // قواعد التحقق من طلبات إجازة الأمومة
+  const rules = [
+    {
+      id: 'MLR-001',
+      title: 'التحقق من الإجازة من جهة معتمدة',
+      description: 'التحقق من الإجازة صادرة من جهة معتمدة في وزارة الصحة',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'MLR-002',
+      title: 'التحقق من ارتفاع الأجر قبل الإجازة',
+      description: 'التحقق من وجود ارتفاع في الأجر لمدة سنة سابقة قبل الإجازة بنسبة 20%',
+      status: 'failed',
+      severity: 'critical',
+      details: 'تم ارتفاع الأجر بنسبة 35% خلال السنة السابقة للإجازة'
+    },
+    {
+      id: 'MLR-003',
+      title: 'التحقق من تشابه الأسماء',
+      description: 'التحقق من وجود تشابه بالأسماء بين صاحب المنشأة المسجل فيها والعاملة عليها',
+      status: 'passed',
+      severity: 'warning'
+    },
+    {
+      id: 'MLR-004',
+      title: 'التحقق من مدة العقد',
+      description: 'التحقق من مدة العقد قبل بحيث لا تقل المدة عن 9 أشهر منذ الالتحاق',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'MLR-005',
+      title: 'التحقق من درجة السجل التجاري',
+      description: 'التحقق من درجة السجل في وزارة التجارة بحيث لا تكون من الدرجة الرابعة',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'MLR-006',
+      title: 'التحقق من وجود عمال آخرين',
+      description: 'التحقق من وجود عمال آخرين في المنشأة من عدمه - ضبط الطلب في حال وجود عمال أقل من 3 نشطين',
+      status: 'failed',
+      severity: 'critical',
+      details: 'المنشأة لديها عاملان نشطين فقط، أقل من الحد المطلوب (3 عمال)'
+    },
+    {
+      id: 'MLR-007',
+      title: 'التحقق من صحة صرف الأجر',
+      description: 'التحقق من صحة صرف الأجر من حماية الأجور ونظام الصندوق',
+      status: 'passed',
+      severity: 'info'
+    },
+    {
+      id: 'MLR-008',
+      title: 'التحقق من الكيان القانوني',
+      description: 'التحقق من الكيان القانوني للمنشأة بحيث لا تكون ضمن الشركات المصفاة أو المفلسة',
+      status: 'passed',
+      severity: 'warning'
+    },
+    {
+      id: 'MLR-009',
+      title: 'التحقق من المبالغ غير المسددة',
+      description: 'التحقق من وجود مبالغ غير مسددة للعاملة عليها أو المنشأة لأكثر من 3 أشهر',
+      status: 'passed',
+      severity: 'info'
+    }
+  ];
+
+  const passedRules = rules.filter(r => r.status === 'passed').length;
+  const failedRules = rules.filter(r => r.status === 'failed').length;
+  const pendingRules = rules.filter(r => r.status === 'pending').length;
+
+  const rulesHtml = rules.map(rule => `
+    <div class="rule-item">
+      <div class="rule-status ${rule.status}">
+        ${rule.status === 'passed' ? ICONS.check : rule.status === 'failed' ? ICONS.x : ICONS.clock}
+      </div>
+      <div class="rule-content">
+        <div class="rule-title">${rule.title}</div>
+        <div class="rule-description">${rule.description}</div>
+        <div class="rule-meta">
+          <span class="rule-badge ${rule.severity}">${rule.id}</span>
+          <span class="rule-badge ${rule.severity}">${rule.severity === 'critical' ? 'حرج' : rule.severity === 'warning' ? 'تحذير' : 'معلومات'}</span>
+        </div>
+        ${rule.details ? `<div class="violation-details"><h5>⚠️ تفاصيل الانتهاك:</h5><p>${rule.details}</p></div>` : ''}
+      </div>
+    </div>
+  `).join('');
 
   return `<div class="pg-head"><div><h1>${request.id}</h1><p>تفاصيل طلب إجازة الأمومة</p></div>
     <div class="pg-acts">
-      <button class="btn btn-secondary btn-sm" onclick="navigateTo('maternity-leave-requests-list')">${ICONS.arrow_right}رجوع</button>
+      <button class="btn btn-secondary btn-sm" onclick="navigateTo('../services/maternity-leave-requests-list')">${ICONS.arrow_right}رجوع</button>
       <button class="btn btn-primary btn-sm" onclick="showToast('جارٍ طباعة الطلب...','i')">${ICONS.download}طباعة</button>
     </div></div>
+
+    ${failedRules > 0 ? `
+    <div class="inspection-alert">
+      ${ICONS.alert}
+      <div class="inspection-alert-content">
+        <h4>⚠️ تم تحويل الطلب للتفتيش</h4>
+        <p>تم اكتشاف ${failedRules} انتهاك(s) في قواعد التحقق. يتطلب الأمر مراجعة تفصيلية.</p>
+      </div>
+    </div>
+    ` : ''}
+
+    <div class="risk-assessment">
+      <h3>${ICONS.shield} تقييم المخاطر</h3>
+      <div class="risk-level">
+        <span class="risk-label">مستوى الخطر:</span>
+        <div class="risk-bar-container">
+          <div class="risk-bar ${failedRules > 2 ? 'high' : failedRules > 0 ? 'medium' : 'low'}" style="width: ${failedRules > 2 ? '80%' : failedRules > 0 ? '50%' : '15%'}"></div>
+        </div>
+        <span class="risk-label">${failedRules > 2 ? 'مرتفع' : failedRules > 0 ? 'متوسط' : 'منخفض'}</span>
+      </div>
+      <div class="risk-recommendations">
+        <h4>📋 التوصيات:</h4>
+        <ul>
+          <li>مراجعة نمط الأجور قبل الإجازة</li>
+          <li>التحقق من عدد العمال النشطين في المنشأة</li>
+          <li>طلب وثائق إضافية من وزارة الصحة</li>
+          <li>مراجعة السجل الوظيفي للعاملة</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="rules-section">
+      <div class="rules-header">
+        <h3>${ICONS.list} قواعد التحقق</h3>
+        <div class="rules-stats">
+          <div class="rule-stat passed">${ICONS.check} ${passedRules} متوافق</div>
+          <div class="rule-stat failed">${ICONS.x} ${failedRules} انتهاك</div>
+          <div class="rule-stat pending">${ICONS.clock} ${pendingRules} قيد المراجعة</div>
+        </div>
+      </div>
+      <div class="rules-list">
+        ${rulesHtml}
+      </div>
+    </div>
 
     <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>بيانات الطلب</h3></div>
     <div class="pb"><div class="fg fg-2">
@@ -4032,14 +4594,14 @@ function renderMaternityLeaveRequestDetails(role) {
     <div class="card"><div class="ph"><h3><span class="pico gr">${ICONS.chart}</span>لوحة التحليل المالي</h3></div>
     <div class="pb">
       <div class="fg fg-2">
-        <div class="fgrp"><label class="flbl">إجمالي المستحقات</label><div class="fro fw7" style="color:var(--primary)">1,372 ر.ع</div></div>
-        <div class="fgrp"><label class="flbl">المبالغ المدفوعة</label><div class="fro fw7" style="color:var(--success)">840 ر.ع</div></div>
-        <div class="fgrp"><label class="flbl">المتبقي</label><div class="fro fw7" style="color:var(--danger)">532 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">إجمالي المستحقات</label><div class="fro fw7" style="color:var(--primary)">13,720 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">المبالغ المدفوعة</label><div class="fro fw7" style="color:var(--success)">8,400 ر.ع</div></div>
+        <div class="fgrp"><label class="flbl">المتبقي</label><div class="fro fw7" style="color:var(--danger)">5,320 ر.ع</div></div>
         <div class="fgrp"><label class="flbl">حالة الدفع</label><div class="fro"><span class="badge b-returned">غير مكتمل</span></div></div>
       </div>
     </div></div>
 
-    ${renderNotes(request.notes, request.timeline)}
+    ${renderNotes(request.notes, request.id)}
     ${renderTimeline(request.timeline)}`;
 }
 
@@ -4048,14 +4610,14 @@ function renderNonPaymentCompaniesList(role) {
   const companies = INSP_DATA.nonPaymentCompanies || [];
   const rows = companies.map(c => `
     <tr>
-      <td><a href="#" onclick="navigateTo('non-payment-company-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
+      <td><a href="#" onclick="navigateTo('../services/companies-stopped-payment-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
       <td>${c.companyName}</td>
       <td>${c.crn}</td>
       <td>${c.region}</td>
       <td>${statusBadge(c.status)}</td>
       <td>${c.arrearsAmount} ر.ع</td>
       <td><div class="df ac g8">
-        <button class="btn btn-primary btn-xs" onclick="navigateTo('non-payment-company-details','id=${c.id}')">${ICONS.eye}عرض</button>
+        <button class="btn btn-primary btn-xs" onclick="navigateTo('../services/companies-stopped-payment-details','id=${c.id}')">${ICONS.eye}عرض</button>
       </div></td>
     </tr>`).join('');
 
@@ -4083,7 +4645,7 @@ function renderNonPaymentCompanyDetails(role) {
 
   return `<div class="pg-head"><div><h1>${company.id}</h1><p>تفاصيل الشركة المتوقفة عن السداد</p></div>
     <div class="pg-acts">
-      <button class="btn btn-secondary btn-sm" onclick="navigateTo('non-payment-companies-list')">${ICONS.arrow_right}رجوع</button>
+      <button class="btn btn-secondary btn-sm" onclick="navigateTo('../services/companies-stopped-payment-list')">${ICONS.arrow_right}رجوع</button>
       <button class="btn btn-primary btn-sm" onclick="showToast('جارٍ طباعة التقرير...','i')">${ICONS.download}طباعة</button>
     </div></div>
 
@@ -4126,7 +4688,7 @@ function renderNonPaymentCompanyDetails(role) {
       </div>
     </div></div>
 
-    ${renderNotes(company.notes, company.timeline)}
+    ${renderNotes(company.notes, company.id)}
     ${renderTimeline(company.timeline)}`;
 }
 
@@ -4135,14 +4697,14 @@ function renderLiquidationBankruptcyList(role) {
   const cases = INSP_DATA.liquidationBankruptcy || [];
   const rows = cases.map(c => `
     <tr>
-      <td><a href="#" onclick="navigateTo('liquidation-bankruptcy-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
+      <td><a href="#" onclick="navigateTo('../services/liquidation-bankruptcy-case-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
       <td>${c.companyName}</td>
       <td>${c.crn}</td>
       <td>${c.region}</td>
       <td>${statusBadge(c.status)}</td>
       <td>${c.caseType}</td>
       <td><div class="df ac g8">
-        <button class="btn btn-primary btn-xs" onclick="navigateTo('liquidation-bankruptcy-details','id=${c.id}')">${ICONS.eye}عرض</button>
+        <button class="btn btn-primary btn-xs" onclick="navigateTo('../services/liquidation-bankruptcy-case-details','id=${c.id}')">${ICONS.eye}عرض</button>
       </div></td>
     </tr>`).join('');
 
@@ -4171,7 +4733,7 @@ function renderLiquidationBankruptcyDetails(role) {
 
   return `<div class="pg-head"><div><h1>${caseData.id}</h1><p>تفاصيل حالة التصفية والإفلاس</p></div>
     <div class="pg-acts">
-      <button class="btn btn-secondary btn-sm" onclick="navigateTo('liquidation-bankruptcy-list')">${ICONS.arrow_right}رجوع</button>
+      <button class="btn btn-secondary btn-sm" onclick="navigateTo('../services/liquidation-bankruptcy-cases-list')">${ICONS.arrow_right}رجوع</button>
       <button class="btn btn-primary btn-sm" onclick="showToast('جارٍ طباعة التقرير...','i')">${ICONS.download}طباعة</button>
     </div></div>
 
@@ -4214,6 +4776,115 @@ function renderLiquidationBankruptcyDetails(role) {
       </div>
     </div></div>
 
-    ${renderNotes(caseData.notes, caseData.timeline)}
+    ${renderNotes(caseData.notes, caseData.id)}
     ${renderTimeline(caseData.timeline)}`;
+}
+
+/* ── Services Render Functions ── */
+function renderCompaniesStoppedPaymentList() {
+  const companies = INSP_DATA.companiesStoppedPayment || [];
+  const rows = companies.map(c => `
+    <tr>
+      <td><a href="#" onclick="navigateTo('../services/companies-stopped-payment-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
+      <td>${c.establishmentName}</td>
+      <td>${c.commercialNumber}</td>
+      <td>${c.insuredCount} مؤمن</td>
+      <td>${formatDate(c.stopDate)}</td>
+      <td>${statusBadge(c.status)}</td>
+      <td>${riskBadge(c.riskLevel)}</td>
+      <td><div class="df ac g8">
+        <button class="btn btn-primary btn-xs" onclick="navigateTo('../services/companies-stopped-payment-details','id=${c.id}')">${ICONS.eye}عرض</button>
+      </div></td>
+    </tr>`).join('');
+
+  return `<div class="pg-head"><div><h1>المنشآت المتوقفة عن الدفع</h1><p>متابعة وإدارة المنشآت المتوقفة عن دفع المساهمات — ${companies.length} منشأة</p></div>
+    <div class="pg-acts">
+      <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير البيانات...','i')">${ICONS.download}تصدير</button>
+    </div></div>
+    ${_filterBar([{label:'بحث',type:'text',ph:'رقم المنشأة، اسم المنشأة، الرقم التجاري...'},{label:'الحالة',type:'select',opts:['الكل','قيد المراجعة','قيد التحليل','بانتظار القرار','تم الاعتماد','تم الرفض','طلب معلومات إضافية']},{label:'مستوى المخاطرة',type:'select',opts:['الكل','عالي','متوسط','منخفض']},{label:'من تاريخ',type:'date'}])}
+    <div class="stats-cards">
+      <div class="stat-card">
+        <div class="stat-icon">🏢</div>
+        <div class="stat-info">
+          <div class="stat-value">${companies.length}</div>
+          <div class="stat-label">إجمالي المنشآت</div>
+        </div>
+      </div>
+      <div class="stat-card warning">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-info">
+          <div class="stat-value">${companies.filter(c => c.status === 'قيد المراجعة').length}</div>
+          <div class="stat-label">قيد المراجعة</div>
+        </div>
+      </div>
+      <div class="stat-card danger">
+        <div class="stat-icon">🔴</div>
+        <div class="stat-info">
+          <div class="stat-value">${companies.filter(c => c.riskLevel === 'عالي').length}</div>
+          <div class="stat-label">خطر عالي</div>
+        </div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+          <div class="stat-value">${companies.filter(c => c.status === 'تم الاعتماد').length}</div>
+          <div class="stat-label">تم الاعتماد</div>
+        </div>
+      </div>
+    </div>
+    ${_tblWrap(['رقم المنشأة','اسم المنشأة','الرقم التجاري','عدد المؤمن عليهم','تاريخ التوقف','الحالة','مستوى المخاطرة','الإجراءات'], rows || _noData())}`;
+}
+
+function renderLiquidationBankruptcyCasesList() {
+  const cases = INSP_DATA.liquidationBankruptcy || [];
+  const rows = cases.map(c => `
+    <tr>
+      <td><a href="#" onclick="navigateTo('../services/liquidation-bankruptcy-case-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
+      <td>${c.establishmentName}</td>
+      <td>${c.commercialNumber}</td>
+      <td><span class="badge ${c.caseType === 'إفلاس' ? 'b-rejected' : 'b-phead'}">${c.caseType}</span></td>
+      <td>${formatDate(c.submissionDate)}</td>
+      <td>${statusBadge(c.status)}</td>
+      <td>${c.insuredCount} مؤمن</td>
+      <td><div class="df ac g8">
+        <button class="btn btn-primary btn-xs" onclick="navigateTo('../services/liquidation-bankruptcy-case-details','id=${c.id}')">${ICONS.eye}عرض</button>
+      </div></td>
+    </tr>`).join('');
+
+  return `<div class="pg-head"><div><h1>قضايا التصفية والإفلاس</h1><p>متابعة وإدارة قضايا التصفية والإفلاس — ${cases.length} قضية</p></div>
+    <div class="pg-acts">
+      <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير البيانات...','i')">${ICONS.download}تصدير</button>
+    </div></div>
+    ${_filterBar([{label:'بحث',type:'text',ph:'رقم القضية، اسم المنشأة، الرقم التجاري...'},{label:'الحالة',type:'select',opts:['الكل','قيد المراجعة','قيد التحليل','بانتظار القرار','تم الاعتماد','تم الرفض','طلب معلومات إضافية']},{label:'نوع القضية',type:'select',opts:['الكل','تصفية','إفلاس']},{label:'من تاريخ',type:'date'}])}
+    <div class="stats-cards">
+      <div class="stat-card">
+        <div class="stat-icon">⚖️</div>
+        <div class="stat-info">
+          <div class="stat-value">${cases.length}</div>
+          <div class="stat-label">إجمالي القضايا</div>
+        </div>
+      </div>
+      <div class="stat-card warning">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-info">
+          <div class="stat-value">${cases.filter(c => c.status === 'قيد المراجعة').length}</div>
+          <div class="stat-label">قيد المراجعة</div>
+        </div>
+      </div>
+      <div class="stat-card danger">
+        <div class="stat-icon">🔴</div>
+        <div class="stat-info">
+          <div class="stat-value">${cases.filter(c => c.caseType === 'إفلاس').length}</div>
+          <div class="stat-label">إفلاس</div>
+        </div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+          <div class="stat-value">${cases.filter(c => c.status === 'تم الاعتماد').length}</div>
+          <div class="stat-label">تم الاعتماد</div>
+        </div>
+      </div>
+    </div>
+    ${_tblWrap(['رقم القضية','اسم المنشأة','الرقم التجاري','نوع القضية','تاريخ التقديم','الحالة','عدد المؤمن عليهم','الإجراءات'], rows || _noData())}`;
 }

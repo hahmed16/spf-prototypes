@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تفاصيل طلب إجازة الأمومة - نظام التفتيش</title>
+  <link rel="stylesheet" href="../shared/style.css">
+  <script src="../shared/config.js"></script>
+  <script src="../shared/data.js"></script>
+  <script src="../shared/layout.js"></script>
+  <script src="../shared/components.js"></script>
+  <script src="../shared/enhanced-components.js"></script>
+  <style>
+    .details-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    .request-header { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3); }
+    .request-header h1 { margin: 0 0 10px 0; font-size: 28px; font-weight: 700; }
+    .request-meta { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px; }
+    .meta-item { background: rgba(255, 255, 255, 0.2); padding: 8px 15px; border-radius: 20px; font-size: 14px; }
+    .meta-label { font-weight: 600; margin-left: 5px; }
+    .tabs-container { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); overflow: hidden; margin-bottom: 25px; }
+    .tabs-header { display: flex; background: #f8f9fa; border-bottom: 2px solid #e9ecef; padding: 0; }
+    .tab-button { flex: 1; padding: 18px 25px; border: none; background: none; cursor: pointer; font-size: 16px; font-weight: 600; color: #6c757d; transition: all 0.3s ease; position: relative; }
+    .tab-button:hover { background: #e9ecef; color: #495057; }
+    .tab-button.active { color: #f5576c; background: white; }
+    .tab-button.active::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #f093fb, #f5576c); }
+    .tab-content { padding: 30px; display: none; }
+    .tab-content.active { display: block; }
+    .info-section { margin-bottom: 30px; }
+    .section-title { font-size: 20px; font-weight: 700; color: #2c3e50; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #f093fb; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 25px; }
+    .info-card { background: #f8f9fa; padding: 20px; border-radius: 10px; border-right: 4px solid #f093fb; }
+    .info-card h3 { margin: 0 0 10px 0; color: #f093fb; font-size: 16px; }
+    .info-card p { margin: 5px 0; color: #495057; line-height: 1.6; }
+    .info-card .value { font-weight: 600; color: #2c3e50; }
+    .status-badge { display: inline-block; padding: 6px 15px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-approved { background: #d4edda; color: #155724; }
+    .status-rejected { background: #f8d7da; color: #721c24; }
+    .status-under-review { background: #cce5ff; color: #004085; }
+    .documents-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+    .document-item { background: white; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; }
+    .document-item:hover { border-color: #f093fb; box-shadow: 0 2px 8px rgba(240, 147, 251, 0.2); }
+    .document-icon { width: 40px; height: 40px; background: #f093fb; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .document-info h4 { margin: 0 0 5px 0; font-size: 14px; color: #2c3e50; }
+    .document-info p { margin: 0; font-size: 12px; color: #6c757d; }
+    .timeline { position: relative; padding-right: 30px; }
+    .timeline::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 3px; background: #e9ecef; }
+    .timeline-item { position: relative; margin-bottom: 25px; padding-right: 25px; }
+    .timeline-item::before { content: ''; position: absolute; right: -8px; top: 5px; width: 16px; height: 16px; background: #f093fb; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 3px #f093fb; }
+    .timeline-item.completed::before { background: #28a745; box-shadow: 0 0 0 3px #28a745; }
+    .timeline-item.pending::before { background: #ffc107; box-shadow: 0 0 0 3px #ffc107; }
+    .timeline-date { font-size: 13px; color: #6c757d; margin-bottom: 5px; }
+    .timeline-content { background: white; padding: 15px; border-radius: 8px; border-right: 4px solid #f093fb; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); }
+    .timeline-content h4 { margin: 0 0 10px 0; color: #2c3e50; }
+    .timeline-content p { margin: 0; color: #495057; line-height: 1.6; }
+    .analysis-section { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+    .analysis-section h3 { margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; }
+    .risk-indicator { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+    .risk-bar { flex: 1; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden; }
+    .risk-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+    .risk-low { background: #28a745; }
+    .risk-medium { background: #ffc107; }
+    .risk-high { background: #dc3545; }
+    .recommendation-box { background: white; padding: 20px; border-radius: 10px; border-right: 4px solid #28a745; margin-bottom: 15px; }
+    .recommendation-box.warning { border-right-color: #ffc107; }
+    .recommendation-box.danger { border-right-color: #dc3545; }
+    .recommendation-box h4 { margin: 0 0 10px 0; color: #2c3e50; }
+    .recommendation-box p { margin: 0; color: #495057; line-height: 1.6; }
+    .action-buttons { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 25px; }
+    .action-button { padding: 12px 25px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+    .btn-approve { background: #28a745; color: white; }
+    .btn-approve:hover { background: #218838; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3); }
+    .btn-reject { background: #dc3545; color: white; }
+    .btn-reject:hover { background: #c82333; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3); }
+    .btn-request-info { background: #ffc107; color: #212529; }
+    .btn-request-info:hover { background: #e0a800; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3); }
+    .btn-secondary { background: #6c757d; color: white; }
+    .btn-secondary:hover { background: #5a6268; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3); }
+    .notes-section { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 25px; }
+    .notes-section h3 { margin: 0 0 15px 0; color: #2c3e50; }
+    .notes-textarea { width: 100%; min-height: 120px; padding: 15px; border: 1px solid #ced4da; border-radius: 8px; font-size: 14px; font-family: inherit; resize: vertical; }
+    .notes-textarea:focus { outline: none; border-color: #f093fb; box-shadow: 0 0 0 3px rgba(240, 147, 251, 0.1); }
+
+    /* Inspection-specific styles */
+    .inspection-alert { background: linear-gradient(135deg, var(--danger) 0%, var(--danger-h) 100%); color: white; padding: 16px 20px; border-radius: var(--r); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; box-shadow: var(--shm); }
+    .inspection-alert svg { width: 24px; height: 24px; flex-shrink: 0; }
+    .inspection-alert-content h4 { margin: 0 0 4px 0; font-size: 14px; font-weight: 700; }
+    .inspection-alert-content p { margin: 0; font-size: 12px; opacity: 0.9; }
+    .rules-section { background: #fff; border: 1px solid var(--border); border-radius: var(--rlg); margin-bottom: 16px; overflow: hidden; box-shadow: var(--sh); }
+    .rules-header { background: linear-gradient(180deg, var(--primary-l) 0%, #f6fbf8 100%); padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .rules-header h3 { margin: 0; font-size: 14px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+    .rules-stats { display: flex; gap: 12px; font-size: 11px; }
+    .rule-stat { display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 12px; background: #fff; border: 1px solid var(--border); }
+    .rule-stat.passed { border-color: var(--success); color: var(--success); }
+    .rule-stat.failed { border-color: var(--danger); color: var(--danger); }
+    .rule-stat.pending { border-color: var(--warning); color: var(--warning); }
+    .rules-list { padding: 0; }
+    .rule-item { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 12px; transition: var(--tr); }
+    .rule-item:last-child { border-bottom: none; }
+    .rule-item:hover { background: var(--g50); }
+    .rule-status { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+    .rule-status.passed { background: var(--success-l); color: var(--success); }
+    .rule-status.failed { background: var(--danger-l); color: var(--danger); }
+    .rule-status.pending { background: var(--warning-l); color: var(--warning); }
+    .rule-status svg { width: 14px; height: 14px; }
+    .rule-content { flex: 1; min-width: 0; }
+    .rule-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.4; }
+    .rule-description { font-size: 12px; color: var(--text2); line-height: 1.5; margin-bottom: 6px; }
+    .rule-meta { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text3); }
+    .rule-badge { padding: 2px 8px; border-radius: 10px; font-weight: 600; font-size: 10px; }
+    .rule-badge.critical { background: var(--danger-l); color: var(--danger); }
+    .rule-badge.warning { background: var(--warning-l); color: var(--warning); }
+    .rule-badge.info { background: var(--info-l); color: var(--info); }
+    .violation-details { background: var(--danger-l); border: 1px solid var(--danger); border-radius: var(--rsm); padding: 10px 12px; margin-top: 8px; font-size: 11px; color: var(--text); }
+    .violation-details h5 { margin: 0 0 4px 0; font-size: 11px; font-weight: 700; color: var(--danger); }
+    .violation-details p { margin: 0; line-height: 1.4; }
+    .risk-assessment { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-h) 100%); color: white; padding: 20px; border-radius: var(--rlg); margin-bottom: 16px; }
+    .risk-assessment h3 { margin: 0 0 12px 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .risk-level { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .risk-bar-container { flex: 1; height: 8px; background: rgba(255,255,255,0.3); border-radius: 999px; overflow: hidden; }
+    .risk-bar { height: 100%; border-radius: 999px; transition: width 0.3s ease; }
+    .risk-bar.high { background: var(--danger); }
+    .risk-bar.medium { background: var(--warning); }
+    .risk-bar.low { background: var(--success); }
+    .risk-label { font-size: 14px; font-weight: 700; min-width: 80px; }
+    .risk-recommendations { background: rgba(255,255,255,0.15); border-radius: var(--rsm); padding: 12px; }
+    .risk-recommendations h4 { margin: 0 0 8px 0; font-size: 13px; font-weight: 600; }
+    .risk-recommendations ul { margin: 0; padding-right: 16px; font-size: 12px; line-height: 1.6; }
+    .risk-recommendations li { margin-bottom: 4px; }
+
+    @media (max-width: 768px) {
+      .request-header { padding: 20px; }
+      .request-header h1 { font-size: 22px; }
+      .request-meta { flex-direction: column; gap: 10px; }
+      .tabs-header { flex-direction: column; }
+      .tab-button { padding: 15px; }
+      .info-grid { grid-template-columns: 1fr; }
+      .action-buttons { flex-direction: column; }
+      .action-button { width: 100%; }
+      .rules-stats { flex-direction: column; gap: 6px; }
+      .rule-item { flex-direction: column; gap: 8px; }
+      .rule-status { margin-top: 0; }
+    }
+  </style>
+</head>
+<body>
+  <script src="../shared/config.js"></script>
+  <script src="../shared/data.js"></script>
+  <script src="../shared/layout.js"></script>
+  <script src="../shared/components.js"></script>
+  <script>
+    const pageContent = `
+    <div class="details-container">
+      <div class="request-header">
+        <h1>طلب إجازة الأمومة #MLR-2025-0001</h1>
+        <div class="request-meta">
+          <div class="meta-item"><span class="meta-label">تاريخ الطلب:</span><span>25/01/2025</span></div>
+          <div class="meta-item"><span class="meta-label">الحالة:</span><span class="status-badge status-under-review">قيد المراجعة</span></div>
+          <div class="meta-item"><span class="meta-label">الموظف المسؤول:</span><span>أحمد محمد</span></div>
+        </div>
+      </div>
+
+      <div class="tabs-container">
+        <div class="tabs-header">
+          <button class="tab-button active" onclick="switchTab('overview')">نظرة عامة</button>
+          <button class="tab-button" onclick="switchTab('pregnancy')">معلومات الحمل</button>
+          <button class="tab-button" onclick="switchTab('leave')">تفاصيل الإجازة</button>
+          <button class="tab-button" onclick="switchTab('rules')">قواعد التحقق</button>
+          <button class="tab-button" onclick="switchTab('geographic')">الموقع الجغرافي</button>
+          <button class="tab-button" onclick="switchTab('decision')">القرار</button>
+        </div>
+
+        <div id="overview" class="tab-content active">
+          <div class="info-section">
+            <h2 class="section-title">معلومات الموظفة</h2>
+            <div class="info-grid">
+              <div class="info-card">
+                <h3>البيانات الشخصية</h3>
+                <p><span class="value">الاسم:</span> فاطمة بنت سالم الهنائي</p>
+                <p><span class="value">رقم الهوية:</span> 28475912</p>
+                <p><span class="value">الجنسية:</span> عمانية</p>
+                <p><span class="value">تاريخ الميلاد:</span> 15/06/1992</p>
+              </div>
+              <div class="info-card">
+                <h3>معلومات الوظيفة</h3>
+                <p><span class="value">القسم:</span> الموارد البشرية</p>
+                <p><span class="value">المسمى الوظيفي:</span> مسؤول توظيف</p>
+                <p><span class="value">تاريخ التعيين:</span> 01/03/2020</p>
+                <p><span class="value">سنوات الخبرة:</span> 5 سنوات</p>
+              </div>
+              <div class="info-card">
+                <h3>حالة الطلب</h3>
+                <p><span class="value">تاريخ التقديم:</span> 25/01/2025</p>
+                <p><span class="value">تاريخ آخر تحديث:</span> 30/01/2025</p>
+                <p><span class="value">المرحلة الحالية:</span> التحقق من القواعد</p>
+                <p><span class="value">المدة المتبقية:</span> 3 أيام عمل</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h2 class="section-title">الملخص التنفيذي</h2>
+            <div class="analysis-section">
+              <p>قدمت فاطمة بنت سالم الهنائي طلباً للحصول على إجازة أمومة مدتها 98 يوماً تبدأ من 01/03/2025. الموظفة تعمل في المؤسسة منذ 5 سنوات وتستوفي جميع شروط الأهلية لإجازة الأمومة وفقاً للائحة العمل. تم تقديم جميع المستندات الطبية المطلوبة وهي قيد المراجعة حالياً.</p>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h2 class="section-title">المستندات المرفقة</h2>
+            <div class="documents-list">
+              <div class="document-item"><div class="document-icon">📄</div><div class="document-info"><h4>شهادة طبية للحمل</h4><p>تم التحقق - صالح</p></div></div>
+              <div class="document-item"><div class="document-icon">📄</div><div class="document-info"><h4>تقرير الحمل التفصيلي</h4><p>تم التحقق - صالح</p></div></div>
+              <div class="document-item"><div class="document-icon">📄</div><div class="document-info"><h4>صورة الهوية الوطنية</h4><p>تم التحقق - صالح</p></div></div>
+              <div class="document-item"><div class="document-icon">📄</div><div class="document-info"><h4>طلب الإجازة الرسمي</h4><p>تم التحقق - صالح</p></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="pregnancy" class="tab-content">
+          <div class="info-section">
+            <h2 class="section-title">معلومات الحمل</h2>
+            <div class="info-grid">
+              <div class="info-card">
+                <h3>تفاصيل الحمل</h3>
+                <p><span class="value">تاريخ الولادة المتوقع:</span> 15/03/2025</p>
+                <p><span class="value">مدة الحمل الحالية:</span> 32 أسبوع</p>
+                <p><span class="value">نوع الحمل:</span> طبيعي</p>
+                <p><span class="value">عدد الأجنة:</span> جنين واحد</p>
+              </div>
+              <div class="info-card">
+                <h3>التاريخ الطبي</h3>
+                <p><span class="value">تاريخ آخر فحص:</span> 20/01/2025</p>
+                <p><span class="value">الطبيب المعالج:</span> د. محمد أحمد</p>
+                <p><span class="value">المستشفى:</span> مستشفى مسقط</p>
+                <p><span class="value">حالة الأم:</span> مستقرة</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="leave" class="tab-content">
+          <div class="info-section">
+            <h2 class="section-title">تفاصيل الإجازة</h2>
+            <div class="info-grid">
+              <div class="info-card">
+                <h3>فترة الإجازة</h3>
+                <p><span class="value">تاريخ البدء:</span> 01/03/2025</p>
+                <p><span class="value">تاريخ الانتهاء:</span> 07/06/2025</p>
+                <p><span class="value">مدة الإجازة:</span> 98 يوم</p>
+                <p><span class="value">نوع الإجازة:</span> إجازة أمومة</p>
+              </div>
+              <div class="info-card">
+                <h3>التعويض المالي</h3>
+                <p><span class="value">الراتب الشهري:</span> 4,200 ريال</p>
+                <p><span class="value">نسبة التعويض:</span> 100%</p>
+                <p><span class="value">المبلغ الإجمالي:</span> 13,720 ريال</p>
+                <p><span class="value">طريقة الصرف:</span> شهري</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="rules" class="tab-content">
+          <div id="rules-content"></div>
+        </div>
+
+        <div id="geographic" class="tab-content">
+          <div id="geographic-content"></div>
+        </div>
+
+        <div id="decision" class="tab-content">
+          <div class="info-section">
+            <h2 class="section-title">اتخاذ القرار</h2>
+            <div class="analysis-section">
+              <p>بناءً على التحليل الشامل للطلب، يرجى اختيار القرار المناسب وتوثيق الأسباب.</p>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h2 class="section-title">خيارات القرار</h2>
+            <div class="action-buttons">
+              <button class="action-button btn-approve" onclick="submitDecision('approve')">✓ الموافقة على الطلب</button>
+              <button class="action-button btn-request-info" onclick="submitDecision('request-info')">ℹ طلب معلومات إضافية</button>
+              <button class="action-button btn-reject" onclick="submitDecision('reject')">✕ رفض الطلب</button>
+              <button class="action-button btn-secondary" onclick="submitDecision('defer')">⏰ تأجيل القرار</button>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h2 class="section-title">ملاحظات القرار</h2>
+            <div class="notes-section">
+              <h3>أضف ملاحظاتك</h3>
+              <textarea class="notes-textarea" placeholder="أدخل ملاحظاتك وأسباب القرار هنا..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    `;
+
+    function switchTab(tabId) {
+      const tabElement = document.getElementById(tabId);
+      if (!tabElement) {
+        console.error(`Tab element with id '${tabId}' not found`);
+        return;
+      }
+
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+      tabElement.classList.add('active');
+
+      // Find and activate the corresponding button
+      const buttons = document.querySelectorAll('.tab-button');
+      buttons.forEach(button => {
+        if (button.getAttribute('onclick') && button.getAttribute('onclick').includes(`'${tabId}'`)) {
+          button.classList.add('active');
+        }
+      });
+
+      if (tabId === 'rules') loadRulesContent();
+      if (tabId === 'geographic') loadGeographicContent();
+    }
+
+    function loadRulesContent() {
+      const rulesContent = document.getElementById('rules-content');
+      if (rulesContent.innerHTML.trim() === '') {
+        rulesContent.innerHTML = renderMaternityLeaveRequestDetails('monitoring-employee');
+      }
+    }
+
+    function loadGeographicContent() {
+      const geographicContent = document.getElementById('geographic-content');
+      if (geographicContent.innerHTML.trim() === '') {
+        geographicContent.innerHTML = renderGeographicMaps('maternity-leave', 'MLR-2025-0001', 'monitoring-employee');
+      }
+    }
+
+    function submitDecision(decision) {
+      const notes = document.querySelector('.notes-textarea').value;
+      alert(`تم إرسال القرار: ${decision}\nالملاحظات: ${notes}`);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initLayout({
+        role: 'monitoring-employee',
+        activePage: 'maternity-leave-request-details',
+        breadcrumb: [
+          { label: 'الرئيسية', onclick: 'goHome()' },
+          { label: 'طلبات إجازة الأمومة', onclick: "navigateTo('../services/maternity-leave-requests-list')" },
+          { label: 'تفاصيل الطلب' }
+        ]
+      });
+      renderContent(pageContent);
+    });
+  </script>
+</body>
+</html>

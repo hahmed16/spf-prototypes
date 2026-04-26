@@ -562,3 +562,417 @@ select.fc { cursor: pointer }
 .ci-box.part { background: var(--warning-l); border-color: var(--warning) }
 .ci-lbl { font-size: 12.5px; color: var(--text2) }
 .ci-lbl.done { color: var(--text3); text-decoration: line-through }
+
+/* ── Correspondence Documentation Component ── */
+.correspondence-container { background: var(--surface); border-radius: var(--rlg); border: 1px solid var(--border); box-shadow: var(--sh); overflow: hidden }
+
+.correspondence-header { background: linear-gradient(180deg, var(--primary-l) 0%, #f6fbf8 100%); padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 20px }
+
+.correspondence-title h3 { margin: 0 0 4px 0; font-size: 16px; font-weight: 700; color: var(--primary) }
+.correspondence-subtitle { margin: 0; font-size: 12px; color: var(--text3) }
+
+.correspondence-actions { display: flex; gap: 10px }
+.correspondence-actions .btn { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: var(--rsm); font-size: 13px; font-weight: 600; cursor: pointer; transition: var(--tr); border: none }
+.correspondence-actions .btn-primary { background: var(--primary); color: #fff }
+.correspondence-actions .btn-primary:hover { background: var(--primary-h); transform: translateY(-1px) }
+.correspondence-actions .btn-secondary { background: var(--g100); color: var(--text); border: 1px solid var(--border) }
+.correspondence-actions .btn-secondary:hover { background: var(--g200); border-color: var(--border2) }
+.btn-icon { font-size: 14px }
+
+.correspondence-filters { background: var(--g50); padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end }
+
+.filter-group { display: flex; flex-direction: column; gap: 6px }
+.filter-group label { font-size: 12px; font-weight: 600; color: var(--text3) }
+.filter-select, .filter-input { padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--rsm); font-size: 13px; min-width: 150px; transition: var(--tr) }
+.filter-select:focus, .filter-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(10, 92, 54, 0.1) }
+.filter-input { min-width: 200px }
+
+.correspondence-list { padding: 16px 24px; max-height: 600px; overflow-y: auto }
+
+.correspondence-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rsm); margin-bottom: 12px; transition: var(--tr) }
+.correspondence-item:hover { border-color: var(--primary); box-shadow: var(--sh) }
+.correspondence-item.incoming { border-right: 4px solid var(--info) }
+.correspondence-item.outgoing { border-right: 4px solid var(--primary) }
+
+.correspondence-item-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; gap: 12px }
+
+.correspondence-item-info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0 }
+.correspondence-type-icon { font-size: 20px; flex-shrink: 0 }
+.correspondence-item-details { flex: 1; min-width: 0 }
+.correspondence-item-title { margin: 0 0 4px 0; font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.correspondence-item-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text3) }
+.correspondence-reference { font-weight: 600; color: var(--text2) }
+
+.correspondence-item-badges { display: flex; gap: 6px; flex-shrink: 0 }
+.badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap }
+.badge-pending { background: var(--warning-l); color: var(--warning) }
+.badge-sent { background: var(--success-l); color: var(--success) }
+.badge-under_review { background: var(--info-l); color: var(--info) }
+.badge-completed { background: var(--g200); color: var(--text3) }
+.badge-high { background: var(--danger-l); color: var(--danger) }
+.badge-medium { background: var(--warning-l); color: var(--warning) }
+.badge-low { background: var(--g200); color: var(--text3) }
+
+.correspondence-item-body { padding: 0 16px 12px 16px }
+
+.correspondence-parties { display: flex; gap: 24px; margin-bottom: 8px }
+.correspondence-party { display: flex; gap: 6px; font-size: 12px }
+.party-label { color: var(--text3); font-weight: 600 }
+.party-value { color: var(--text2) }
+
+.correspondence-content { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 8px }
+
+.correspondence-attachments { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.attachments-label { font-size: 11px; font-weight: 600; color: var(--text3) }
+.attachments-list { display: flex; gap: 8px; flex-wrap: wrap }
+.attachment-item { background: var(--g100); padding: 4px 10px; border-radius: var(--rsm); font-size: 11px; color: var(--primary); cursor: pointer; transition: var(--tr); border: 1px solid var(--border) }
+.attachment-item:hover { background: var(--primary-l); border-color: var(--primary) }
+
+.correspondence-item-footer { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--g50); border-top: 1px solid var(--border) }
+
+.correspondence-item-meta { display: flex; gap: 16px; font-size: 11px; color: var(--text3) }
+.created-by, .created-at { display: flex; align-items: center; gap: 4px }
+
+.correspondence-item-actions { display: flex; gap: 4px }
+.btn-action { width: 32px; height: 32px; border: none; background: var(--g100); border-radius: var(--rsm); cursor: pointer; transition: var(--tr); display: flex; align-items: center; justify-content: center; font-size: 14px }
+.btn-action:hover { background: var(--g200); transform: scale(1.05) }
+.btn-action.btn-view:hover { background: var(--info-l); color: var(--info) }
+.btn-action.btn-edit:hover { background: var(--warning-l); color: var(--warning) }
+.btn-action.btn-delete:hover { background: var(--danger-l); color: var(--danger) }
+
+.correspondence-empty { text-align: center; padding: 60px 20px; color: var(--text3) }
+.empty-icon { font-size: 48px; margin-bottom: 16px }
+.correspondence-empty h3 { margin: 0 0 8px 0; font-size: 16px; color: var(--text2) }
+.correspondence-empty p { margin: 0; font-size: 13px }
+
+.correspondence-stats { background: var(--g50); padding: 12px 24px; border-top: 1px solid var(--border); display: flex; gap: 24px; flex-wrap: wrap }
+.stat-item { display: flex; gap: 8px; font-size: 12px }
+.stat-label { color: var(--text3) }
+.stat-value { font-weight: 700; color: var(--primary) }
+
+/* Modal Styles */
+.modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000 }
+.modal-content { background: var(--surface); border-radius: var(--rlg); max-width: 700px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shm) }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--g50) }
+.modal-header h3 { margin: 0; font-size: 16px; font-weight: 700; color: var(--text) }
+.modal-close { width: 32px; height: 32px; border: none; background: var(--g100); border-radius: var(--rsm); cursor: pointer; font-size: 20px; color: var(--text3); transition: var(--tr) }
+.modal-close:hover { background: var(--g200); color: var(--text) }
+.modal-body { padding: 24px }
+
+/* Form Styles */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px }
+.form-group { display: flex; flex-direction: column; gap: 6px }
+.form-group label { font-size: 13px; font-weight: 600; color: var(--text2) }
+.form-group input, .form-group select, .form-group textarea { padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--rsm); font-size: 13px; transition: var(--tr); font-family: inherit }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(10, 92, 54, 0.1) }
+.form-group textarea { resize: vertical; min-height: 100px }
+.form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px }
+
+/* File Upload Styles */
+.file-upload { position: relative }
+.file-upload input[type="file"] { display: none }
+.file-label { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border: 2px dashed var(--border); border-radius: var(--rsm); cursor: pointer; transition: var(--tr); background: var(--g50) }
+.file-label:hover { border-color: var(--primary); background: var(--primary-l) }
+.file-label span:first-child { font-size: 18px }
+.file-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px }
+.file-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--g100); border-radius: var(--rsm); border: 1px solid var(--border) }
+.file-name { flex: 1; font-size: 12px; color: var(--text2) }
+.file-size { font-size: 11px; color: var(--text3) }
+.file-remove { width: 24px; height: 24px; border: none; background: var(--danger-l); color: var(--danger); border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: var(--tr) }
+.file-remove:hover { background: var(--danger); color: #fff }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .correspondence-header { flex-direction: column; align-items: flex-start }
+  .correspondence-actions { width: 100%; flex-direction: column }
+  .correspondence-actions .btn { width: 100%; justify-content: center }
+  .correspondence-filters { flex-direction: column; align-items: stretch }
+  .filter-select, .filter-input { min-width: 100% }
+  .correspondence-item-header { flex-direction: column; align-items: flex-start }
+  .correspondence-item-badges { width: 100%; justify-content: flex-start }
+  .correspondence-parties { flex-direction: column; gap: 8px }
+  .correspondence-item-footer { flex-direction: column; align-items: flex-start; gap: 12px }
+  .correspondence-stats { flex-direction: column; gap: 12px }
+  .form-row { grid-template-columns: 1fr }
+  .modal-content { width: 95%; max-height: 95vh }
+}
+
+/* ================================================================
+   Geographic Maps Component Styles
+   ================================================================ */
+.geographic-maps-container { background: var(--surface); border-radius: var(--rlg); border: 1px solid var(--border); overflow: hidden }
+.geographic-maps-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; background: var(--g50); border-bottom: 1px solid var(--border) }
+.geographic-maps-title { flex: 1 }
+.geographic-maps-title h3 { margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: var(--text) }
+.geographic-maps-subtitle { margin: 0; font-size: 13px; color: var(--text3) }
+.geographic-maps-actions { display: flex; gap: 12px }
+
+.geographic-maps-filters { display: flex; gap: 16px; padding: 16px 24px; background: var(--g100); border-bottom: 1px solid var(--border); flex-wrap: wrap }
+.geographic-maps-filters .filter-group { display: flex; align-items: center; gap: 8px }
+.geographic-maps-filters .filter-group label { font-size: 12px; font-weight: 600; color: var(--text2); white-space: nowrap }
+.geographic-maps-filters .filter-select, .geographic-maps-filters .filter-input { min-width: 150px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--rsm); font-size: 13px; transition: var(--tr) }
+.geographic-maps-filters .filter-select:focus, .geographic-maps-filters .filter-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(10, 92, 54, 0.1) }
+
+.geographic-maps-content { display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: 400px }
+.geographic-maps-map { background: var(--g50); border-left: 1px solid var(--border); display: flex; align-items: center; justify-content: center; padding: 24px }
+.map-placeholder { text-align: center; max-width: 300px }
+.map-placeholder-icon { font-size: 48px; margin-bottom: 16px }
+.map-placeholder h4 { margin: 0 0 8px 0; font-size: 16px; font-weight: 700; color: var(--text) }
+.map-placeholder p { margin: 0 0 16px 0; font-size: 13px; color: var(--text3) }
+.map-legend { display: flex; gap: 16px; justify-content: center; margin-top: 16px }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2) }
+.legend-color { width: 12px; height: 12px; border-radius: 50% }
+.legend-active { background: var(--success) }
+.legend-warning { background: var(--warning) }
+.legend-danger { background: var(--danger) }
+
+.geographic-maps-list { overflow-y: auto; max-height: 400px; padding: 16px }
+.geographic-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rsm); margin-bottom: 12px; transition: var(--tr) }
+.geographic-item:hover { border-color: var(--primary); box-shadow: var(--sh) }
+.geographic-item.active { border-left: 4px solid var(--success) }
+.geographic-item.inactive { border-left: 4px solid var(--text3) }
+
+.geographic-item-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--g200) }
+.geographic-item-info { display: flex; align-items: center; gap: 12px; flex: 1 }
+.geographic-item-icon { font-size: 24px }
+.geographic-item-details { flex: 1 }
+.geographic-item-title { margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: var(--text) }
+.geographic-item-meta { display: flex; gap: 12px; font-size: 12px; color: var(--text3) }
+.geographic-region, .geographic-sector { display: flex; align-items: center; gap: 4px }
+.geographic-item-badges { display: flex; gap: 8px }
+
+.geographic-item-body { padding: 12px 16px }
+.geographic-location { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px }
+.location-label { color: var(--text3); font-weight: 600 }
+.location-value { color: var(--text2) }
+.geographic-coordinates { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 12px; color: var(--text3) }
+.coordinates-label { font-weight: 600 }
+.coordinates-value { font-family: monospace }
+
+.geographic-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding-top: 12px; border-top: 1px solid var(--g200) }
+.geo-stat { display: flex; flex-direction: column; gap: 4px; text-align: center }
+.geo-stat-label { font-size: 11px; color: var(--text3) }
+.geo-stat-value { font-size: 14px; font-weight: 700; color: var(--primary) }
+
+.geographic-item-footer { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--g50); border-top: 1px solid var(--g200) }
+.geographic-item-meta { font-size: 11px; color: var(--text3) }
+.last-visit { display: flex; align-items: center; gap: 4px }
+.geographic-item-actions { display: flex; gap: 8px }
+
+.geographic-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; text-align: center }
+.geographic-empty .empty-icon { font-size: 48px; margin-bottom: 16px }
+.geographic-empty h3 { margin: 0 0 8px 0; font-size: 16px; font-weight: 700; color: var(--text) }
+.geographic-empty p { margin: 0; font-size: 13px; color: var(--text3) }
+
+.geographic-maps-stats { background: var(--g50); padding: 12px 24px; border-top: 1px solid var(--border); display: flex; gap: 24px; flex-wrap: wrap }
+
+/* Geographic Maps Responsive */
+@media (max-width: 768px) {
+  .geographic-maps-header { flex-direction: column; align-items: flex-start }
+  .geographic-maps-actions { width: 100%; flex-direction: column }
+  .geographic-maps-actions .btn { width: 100%; justify-content: center }
+  .geographic-maps-filters { flex-direction: column; align-items: stretch }
+  .geographic-maps-filters .filter-select, .geographic-maps-filters .filter-input { min-width: 100% }
+  .geographic-maps-content { grid-template-columns: 1fr }
+  .geographic-maps-map { border-left: none; border-bottom: 1px solid var(--border); min-height: 250px }
+  .geographic-maps-list { max-height: 300px }
+  .geographic-item-header { flex-direction: column; align-items: flex-start }
+  .geographic-item-badges { width: 100%; justify-content: flex-start }
+  .geographic-stats { grid-template-columns: repeat(2, 1fr) }
+  .geographic-item-footer { flex-direction: column; align-items: flex-start; gap: 12px }
+  .geographic-maps-stats { flex-direction: column; gap: 12px }
+}
+
+/* Geographic Analysis Screen Styles */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px }
+.stat-card { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--g50); border-radius: var(--rsm); border: 1px solid var(--border) }
+.stat-icon { font-size: 32px }
+.stat-info { flex: 1 }
+.stat-value { font-size: 24px; font-weight: 800; color: var(--primary); line-height: 1.2 }
+.stat-label { font-size: 12px; color: var(--text3); margin-top: 4px }
+
+.regions-stats { display: flex; flex-direction: column; gap: 12px }
+.region-stat-item { padding: 16px; background: var(--g50); border-radius: var(--rsm); border: 1px solid var(--border) }
+.region-stat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px }
+.region-name { font-size: 14px; font-weight: 700; color: var(--text) }
+.region-code { font-size: 12px; color: var(--text3); background: var(--g200); padding: 4px 8px; border-radius: var(--rsm) }
+.region-stat-details { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px }
+.region-stat { display: flex; flex-direction: column; gap: 4px }
+.region-stat-label { font-size: 11px; color: var(--text3) }
+.region-stat-value { font-size: 14px; font-weight: 700; color: var(--primary) }
+
+.full-width { grid-column: 1 / -1 }
+
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: 1fr }
+  .region-stat-details { grid-template-columns: repeat(2, 1fr) }
+}
+
+/* ================================================================
+   Video Call Recording Component Styles
+   ================================================================ */
+.video-call-recording-container { background: var(--surface); border-radius: var(--rlg); border: 1px solid var(--border); overflow: hidden }
+.video-call-recording-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; background: var(--g50); border-bottom: 1px solid var(--border) }
+.video-call-recording-title { flex: 1 }
+.video-call-recording-title h3 { margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: var(--text) }
+.video-call-recording-subtitle { margin: 0; font-size: 13px; color: var(--text3) }
+.video-call-recording-actions { display: flex; gap: 12px }
+
+.video-call-recording-filters { display: flex; gap: 16px; padding: 16px 24px; background: var(--g100); border-bottom: 1px solid var(--border); flex-wrap: wrap }
+.video-call-recording-filters .filter-group { display: flex; align-items: center; gap: 8px }
+.video-call-recording-filters .filter-group label { font-size: 12px; font-weight: 600; color: var(--text2); white-space: nowrap }
+.video-call-recording-filters .filter-select, .video-call-recording-filters .filter-input { min-width: 150px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--rsm); font-size: 13px; transition: var(--tr) }
+.video-call-recording-filters .filter-select:focus, .video-call-recording-filters .filter-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(10, 92, 54, 0.1) }
+
+.video-call-recording-list { overflow-y: auto; max-height: 500px; padding: 16px }
+.video-call-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rsm); margin-bottom: 12px; transition: var(--tr) }
+.video-call-item:hover { border-color: var(--primary); box-shadow: var(--sh) }
+.video-call-item.completed { border-left: 4px solid var(--success) }
+.video-call-item.in_progress { border-left: 4px solid var(--warning) }
+.video-call-item.failed { border-left: 4px solid var(--danger) }
+
+.video-call-item-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--g200) }
+.video-call-item-info { display: flex; align-items: center; gap: 12px; flex: 1 }
+.video-call-item-icon { font-size: 24px }
+.video-call-item-details { flex: 1 }
+.video-call-item-title { margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: var(--text) }
+.video-call-item-meta { display: flex; gap: 12px; font-size: 12px; color: var(--text3) }
+.video-call-date, .video-call-time, .video-call-duration { display: flex; align-items: center; gap: 4px }
+.video-call-item-badges { display: flex; gap: 8px }
+
+.video-call-item-body { padding: 12px 16px }
+.video-call-participants { margin-bottom: 12px }
+.participants-label { font-size: 12px; font-weight: 600; color: var(--text3); margin-bottom: 8px; display: block }
+.participants-list { display: flex; flex-wrap: wrap; gap: 8px }
+.participant-item { background: var(--g100); padding: 4px 10px; border-radius: 12px; font-size: 11px; color: var(--text2) }
+.video-call-notes { background: var(--g50); padding: 10px 12px; border-radius: var(--rsm) }
+.notes-label { font-size: 12px; font-weight: 600; color: var(--text3); margin-bottom: 6px; display: block }
+.notes-content { margin: 0; font-size: 13px; color: var(--text2); line-height: 1.5 }
+
+.video-call-item-footer { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--g50); border-top: 1px solid var(--g200) }
+.video-call-item-meta { font-size: 11px; color: var(--text3) }
+.video-call-item-actions { display: flex; gap: 8px }
+
+.video-call-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; text-align: center }
+.video-call-empty .empty-icon { font-size: 48px; margin-bottom: 16px }
+.video-call-empty h3 { margin: 0 0 8px 0; font-size: 16px; font-weight: 700; color: var(--text) }
+.video-call-empty p { margin: 0; font-size: 13px; color: var(--text3) }
+
+.video-call-recording-stats { background: var(--g50); padding: 12px 24px; border-top: 1px solid var(--border); display: flex; gap: 24px; flex-wrap: wrap }
+
+/* Video Player Modal */
+.modal-large { max-width: 900px; width: 95% }
+.video-player-container { background: #000; border-radius: var(--rsm); overflow: hidden; margin-bottom: 20px }
+.video-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 24px; text-align: center; color: #fff }
+.video-placeholder-icon { font-size: 64px; margin-bottom: 16px }
+.video-placeholder h4 { margin: 0 0 8px 0; font-size: 18px; font-weight: 700 }
+.video-placeholder p { margin: 0 0 20px 0; font-size: 14px; opacity: 0.8 }
+.video-controls { display: flex; gap: 12px; justify-content: center }
+.video-control-btn { padding: 10px 20px; border: none; background: rgba(255, 255, 255, 0.2); color: #fff; border-radius: var(--rsm); cursor: pointer; font-size: 14px; transition: var(--tr) }
+.video-control-btn:hover { background: rgba(255, 255, 255, 0.3) }
+
+.video-details { background: var(--g50); padding: 16px; border-radius: var(--rsm) }
+.video-detail-item { display: flex; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border) }
+.video-detail-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none }
+.detail-label { font-size: 12px; font-weight: 600; color: var(--text3); min-width: 100px }
+.detail-value { font-size: 13px; color: var(--text2); flex: 1 }
+
+/* Video Call Recording Responsive */
+@media (max-width: 768px) {
+  .video-call-recording-header { flex-direction: column; align-items: flex-start }
+  .video-call-recording-actions { width: 100%; flex-direction: column }
+  .video-call-recording-actions .btn { width: 100%; justify-content: center }
+  .video-call-recording-filters { flex-direction: column; align-items: stretch }
+  .video-call-recording-filters .filter-select, .video-call-recording-filters .filter-input { min-width: 100% }
+  .video-call-item-header { flex-direction: column; align-items: flex-start }
+  .video-call-item-badges { width: 100%; justify-content: flex-start }
+  .video-call-item-footer { flex-direction: column; align-items: flex-start; gap: 12px }
+  .video-call-recording-stats { flex-direction: column; gap: 12px }
+  .modal-large { width: 95%; max-height: 95vh }
+  .video-controls { flex-direction: column }
+  .video-detail-item { flex-direction: column; gap: 4px }
+}
+
+/* ================================================================
+   Violations & Penalties Component Styles
+   ================================================================ */
+.violations-penalties-container { background: var(--surface); border-radius: var(--rlg); border: 1px solid var(--border); overflow: hidden }
+.violations-penalties-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; background: var(--g50); border-bottom: 1px solid var(--border) }
+.violations-penalties-title { flex: 1 }
+.violations-penalties-title h3 { margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: var(--text) }
+.violations-penalties-subtitle { margin: 0; font-size: 13px; color: var(--text3) }
+.violations-penalties-actions { display: flex; gap: 12px }
+
+.violations-penalties-filters { display: flex; gap: 16px; padding: 16px 24px; background: var(--g100); border-bottom: 1px solid var(--border); flex-wrap: wrap }
+.violations-penalties-filters .filter-group { display: flex; align-items: center; gap: 8px }
+.violations-penalties-filters .filter-group label { font-size: 12px; font-weight: 600; color: var(--text2); white-space: nowrap }
+.violations-penalties-filters .filter-select, .violations-penalties-filters .filter-input { min-width: 150px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--rsm); font-size: 13px; transition: var(--tr) }
+.violations-penalties-filters .filter-select:focus, .violations-penalties-filters .filter-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(10, 92, 54, 0.1) }
+
+.violations-penalties-list { overflow-y: auto; max-height: 500px; padding: 16px }
+.violation-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rsm); margin-bottom: 12px; transition: var(--tr) }
+.violation-item:hover { border-color: var(--primary); box-shadow: var(--sh) }
+.violation-item.critical { border-left: 4px solid var(--danger) }
+.violation-item.high { border-left: 4px solid var(--warning) }
+.violation-item.medium { border-left: 4px solid var(--info) }
+.violation-item.low { border-left: 4px solid var(--success) }
+.violation-item.active { background: var(--danger-l) }
+.violation-item.resolved { background: var(--success-l) }
+
+.violation-item-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--g200) }
+.violation-item-info { display: flex; align-items: center; gap: 12px; flex: 1 }
+.violation-item-icon { font-size: 24px }
+.violation-item-details { flex: 1 }
+.violation-item-title { margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: var(--text) }
+.violation-item-meta { display: flex; gap: 12px; font-size: 12px; color: var(--text3) }
+.violation-category, .violation-date { display: flex; align-items: center; gap: 4px }
+.violation-item-badges { display: flex; gap: 8px }
+
+.violation-item-body { padding: 12px 16px }
+.violation-details { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px }
+.violation-detail { display: flex; flex-direction: column; gap: 4px }
+.detail-label { font-size: 11px; color: var(--text3); font-weight: 600 }
+.detail-value { font-size: 13px; color: var(--text2) }
+
+.corrective-actions { margin-bottom: 12px }
+.actions-label { font-size: 12px; font-weight: 600; color: var(--text3); margin-bottom: 8px; display: block }
+.actions-list { display: flex; flex-direction: column; gap: 6px }
+.action-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--g50); border-radius: var(--rsm); border: 1px solid var(--border) }
+.action-item.pending { border-left: 3px solid var(--warning) }
+.action-item.in_progress { border-left: 3px solid var(--info) }
+.action-item.completed { border-left: 3px solid var(--success) }
+.action-item.failed { border-left: 3px solid var(--danger) }
+.action-status { font-size: 14px }
+.action-description { flex: 1; font-size: 12px; color: var(--text2) }
+.action-deadline { font-size: 11px; color: var(--text3) }
+
+.violation-evidence { margin-bottom: 12px }
+.evidence-label { font-size: 12px; font-weight: 600; color: var(--text3); margin-bottom: 8px; display: block }
+.evidence-list { display: flex; flex-wrap: wrap; gap: 8px }
+.evidence-item { background: var(--g100); padding: 4px 10px; border-radius: 12px; font-size: 11px; color: var(--text2); cursor: pointer; transition: var(--tr) }
+.evidence-item:hover { background: var(--g200); color: var(--primary) }
+
+.violation-item-footer { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--g50); border-top: 1px solid var(--g200) }
+.violation-item-meta { font-size: 11px; color: var(--text3) }
+.violation-item-actions { display: flex; gap: 8px }
+
+.violations-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; text-align: center }
+.violations-empty .empty-icon { font-size: 48px; margin-bottom: 16px }
+.violations-empty h3 { margin: 0 0 8px 0; font-size: 16px; font-weight: 700; color: var(--text) }
+.violations-empty p { margin: 0; font-size: 13px; color: var(--text3) }
+
+.violations-penalties-stats { background: var(--g50); padding: 12px 24px; border-top: 1px solid var(--border); display: flex; gap: 24px; flex-wrap: wrap }
+
+/* Violations & Penalties Responsive */
+@media (max-width: 768px) {
+  .violations-penalties-header { flex-direction: column; align-items: flex-start }
+  .violations-penalties-actions { width: 100%; flex-direction: column }
+  .violations-penalties-actions .btn { width: 100%; justify-content: center }
+  .violations-penalties-filters { flex-direction: column; align-items: stretch }
+  .violations-penalties-filters .filter-select, .violations-penalties-filters .filter-input { min-width: 100% }
+  .violation-item-header { flex-direction: column; align-items: flex-start }
+  .violation-item-badges { width: 100%; justify-content: flex-start }
+  .violation-details { grid-template-columns: 1fr }
+  .violation-item-footer { flex-direction: column; align-items: flex-start; gap: 12px }
+  .violations-penalties-stats { flex-direction: column; gap: 12px }
+}

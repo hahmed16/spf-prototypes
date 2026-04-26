@@ -41,6 +41,7 @@ const ICONS = {
   chart: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
   building: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="18"/><path d="M16 8h4l3 13H16z"/><line x1="5" y1="7" x2="5" y2="7"/><line x1="9" y1="7" x2="9" y2="7"/><line x1="5" y1="11" x2="5" y2="11"/><line x1="9" y1="11" x2="9" y2="11"/><line x1="5" y1="15" x2="9" y2="15"/></svg>`,
   user: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  video: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23,7 16,12 23,17 23,7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>`,
 };
 
 /* ── إنشاء التخطيط الرئيسي ── */
@@ -386,6 +387,12 @@ function updateTimelineRequest() {
 
 /* ── Notes HTML ── */
 function renderNotes(notes, id) {
+  const noteItems = Array.isArray(notes)
+    ? notes
+    : (typeof notes === 'string' && notes.trim()
+        ? [{ text: notes, author: 'النظام', date: '—' }]
+        : []);
+  notes = noteItems;
   return `
     <div class="op-notes-card card mb0" id="notes-card">
       <div class="ph op-notes-head" onclick="toggleNotes()">
@@ -447,4 +454,89 @@ function barChart(data, colorVar = '--primary') {
         <div class="chart-bar-fill" style="width:${Math.round((d.value/max)*100)}%;background:var(${colorVar})"></div>
       </div>
     </div>`).join('');
+}
+
+/* ── Services Helper Functions ── */
+function getCurrentUserRole() {
+  return INSP_DATA.users[CURRENT_ROLE] || { role: CURRENT_ROLE, name: 'مستخدم النظام' };
+}
+
+function switchTab(tabName) {
+  // Remove active class from all tabs and panes
+  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+  document.querySelectorAll('.tab-pane, .tab-panel').forEach(pane => pane.classList.remove('active'));
+
+  // Add active class to selected tab and pane
+  const tabElement = document.querySelector(`[data-tab="${tabName}"]`);
+  const paneElement = document.getElementById(tabName) || document.getElementById(tabName + '-panel');
+
+  if (tabElement) tabElement.classList.add('active');
+  if (paneElement) paneElement.classList.add('active');
+
+  // Update URL without reloading
+  const newUrl = new URL(window.location);
+  newUrl.searchParams.set('tab', tabName);
+  window.history.pushState({}, '', newUrl);
+}
+
+function goBack() {
+  const referrer = document.referrer;
+  if (referrer && referrer.includes(window.location.hostname)) {
+    window.history.back();
+  } else {
+    // Default fallback based on current file
+    const currentPath = window.location.pathname;
+    if (currentPath.includes('details')) {
+      // Go to list page
+      const listPage = currentPath.replace('-details', '-list').replace('case-details', 'cases-list');
+      window.location.href = listPage;
+    } else {
+      window.location.href = '../role-selection.html';
+    }
+  }
+}
+
+function getStatusBadgeClass(status) {
+  const statusClasses = {
+    'قيد المراجعة': 'b-invest',
+    'قيد التحليل': 'b-invest',
+    'بانتظار القرار': 'b-phead',
+    'تم الاعتماد': 'b-approved',
+    'تم الرفض': 'b-rejected',
+    'طلب معلومات إضافية': 'b-returned',
+    'قيد المعالجة': 'b-invest',
+    'معتمد': 'b-approved',
+    'مرفوض': 'b-rejected',
+    'مسودة': 'b-draft',
+    'مكتمل': 'b-closed'
+  };
+  return statusClasses[status] || 'b-draft';
+}
+
+function getRiskBadgeClass(riskLevel) {
+  const riskClasses = {
+    'عالي': 'b-rejected',
+    'متوسط': 'b-phead',
+    'منخفض': 'b-approved',
+    'مرتفع': 'b-rejected'
+  };
+  return riskClasses[riskLevel] || 'b-draft';
+}
+
+function getEligibilityBadgeClass(eligibility) {
+  const eligibilityClasses = {
+    'مستحق': 'b-approved',
+    'متوسط': 'b-phead',
+    'تحت التحقق': 'b-invest',
+    'غير مستحق': 'b-rejected'
+  };
+  return eligibilityClasses[eligibility] || 'b-draft';
+}
+
+function getCaseTypeBadgeClass(caseType) {
+  const caseTypeClasses = {
+    'إفلاس': 'b-rejected',
+    'تصفية': 'b-phead'
+  };
+  return caseTypeClasses[caseType] || 'b-draft';
 }

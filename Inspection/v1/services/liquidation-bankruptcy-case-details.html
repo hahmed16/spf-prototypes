@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تفاصيل قضية التصفية والإفلاس - نظام التفتيش</title>
+  <link rel="stylesheet" href="../shared/style.css">
+  <style>
+    .details-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .request-header {
+      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
+    }
+
+    .request-header h1 {
+      margin: 0 0 10px 0;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .request-meta {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+
+    .meta-item {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+
+    .meta-label {
+      font-weight: 600;
+      margin-left: 5px;
+    }
+
+    .tabs-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      margin-bottom: 25px;
+    }
+
+    .tabs-header {
+      display: flex;
+      background: #f8f9fa;
+      border-bottom: 2px solid #e9ecef;
+      padding: 0;
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 18px 25px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      color: #6c757d;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .tab-button:hover {
+      background: #e9ecef;
+      color: #495057;
+    }
+
+    .tab-button.active {
+      color: #2c3e50;
+      background: white;
+    }
+
+    .tab-button.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #2c3e50, #34495e);
+    }
+
+    .tab-content {
+      padding: 30px;
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .info-section {
+      margin-bottom: 30px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 3px solid #2c3e50;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .info-card {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      border-right: 4px solid #2c3e50;
+    }
+
+    .info-card h3 {
+      margin: 0 0 10px 0;
+      color: #2c3e50;
+      font-size: 16px;
+    }
+
+    .info-card p {
+      margin: 5px 0;
+      color: #495057;
+      line-height: 1.6;
+    }
+
+    .info-card .value {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 15px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .status-active {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-pending {
+      background: #cce5ff;
+      color: #004085;
+    }
+
+    .status-completed {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-critical {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .case-type-badge {
+      display: inline-block;
+      padding: 6px 15px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .type-liquidation {
+      background: #e3f2fd;
+      color: #0d47a1;
+    }
+
+    .type-bankruptcy {
+      background: #fff3e0;
+      color: #e65100;
+    }
+
+    .case-summary {
+      background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+    }
+
+    .case-summary h3 {
+      margin: 0 0 15px 0;
+      font-size: 18px;
+    }
+
+    .case-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .case-item {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    .case-item .label {
+      font-size: 13px;
+      opacity: 0.9;
+      margin-bottom: 5px;
+    }
+
+    .case-item .value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .creditors-table {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .creditors-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .creditors-table th {
+      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      color: white;
+      padding: 15px;
+      text-align: right;
+      font-weight: 600;
+    }
+
+    .creditors-table td {
+      padding: 15px;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .creditors-table tr:hover {
+      background: #f8f9fa;
+    }
+
+    .documents-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
+    .document-item {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .document-item:hover {
+      border-color: #2c3e50;
+      box-shadow: 0 2px 8px rgba(44, 62, 80, 0.2);
+    }
+
+    .document-icon {
+      width: 40px;
+      height: 40px;
+      background: #2c3e50;
+      color: white;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .document-info h4 {
+      margin: 0 0 5px 0;
+      font-size: 14px;
+      color: #2c3e50;
+    }
+
+    .document-info p {
+      margin: 0;
+      font-size: 12px;
+      color: #6c757d;
+    }
+
+    .timeline {
+      position: relative;
+      padding-right: 30px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: #e9ecef;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 25px;
+      padding-right: 25px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: 5px;
+      width: 16px;
+      height: 16px;
+      background: #2c3e50;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 0 0 3px #2c3e50;
+    }
+
+    .timeline-item.completed::before {
+      background: #28a745;
+      box-shadow: 0 0 0 3px #28a745;
+    }
+
+    .timeline-item.pending::before {
+      background: #ffc107;
+      box-shadow: 0 0 0 3px #ffc107;
+    }
+
+    .timeline-item.critical::before {
+      background: #dc3545;
+      box-shadow: 0 0 0 3px #dc3545;
+    }
+
+    .timeline-date {
+      font-size: 13px;
+      color: #6c757d;
+      margin-bottom: 5px;
+    }
+
+    .timeline-content {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      border-right: 4px solid #2c3e50;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .timeline-content h4 {
+      margin: 0 0 10px 0;
+      color: #2c3e50;
+    }
+
+    .timeline-content p {
+      margin: 0;
+      color: #495057;
+      line-height: 1.6;
+    }
+
+    .analysis-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .analysis-section h3 {
+      margin: 0 0 15px 0;
+      color: #2c3e50;
+      font-size: 18px;
+    }
+
+    .progress-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 8px;
+      background: #e9ecef;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-high {
+      background: #28a745;
+    }
+
+    .progress-medium {
+      background: #ffc107;
+    }
+
+    .progress-low {
+      background: #dc3545;
+    }
+
+    .recommendation-box {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      border-right: 4px solid #28a745;
+      margin-bottom: 15px;
+    }
+
+    .recommendation-box.warning {
+      border-right-color: #ffc107;
+    }
+
+    .recommendation-box.danger {
+      border-right-color: #dc3545;
+    }
+
+    .recommendation-box h4 {
+      margin: 0 0 10px 0;
+      color: #2c3e50;
+    }
+
+    .recommendation-box p {
+      margin: 0;
+      color: #495057;
+      line-height: 1.6;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 25px;
+    }
+
+    .action-button {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-approve {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-approve:hover {
+      background: #218838;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-reject {
+      background: #dc3545;
+      color: white;
+    }
+
+    .btn-reject:hover {
+      background: #c82333;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-warning {
+      background: #ffc107;
+      color: #212529;
+    }
+
+    .btn-warning:hover {
+      background: #e0a800;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+    }
+
+    .notes-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 25px;
+    }
+
+    .notes-section h3 {
+      margin: 0 0 15px 0;
+      color: #2c3e50;
+    }
+
+    .notes-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 15px;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    .notes-textarea:focus {
+      outline: none;
+      border-color: #2c3e50;
+      box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+    }
+
+    .assets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+    }
+
+    .asset-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #e9ecef;
+      transition: all 0.3s ease;
+    }
+
+    .asset-card:hover {
+      border-color: #2c3e50;
+      box-shadow: 0 4px 12px rgba(44, 62, 80, 0.15);
+    }
+
+    .asset-card h4 {
+      margin: 0 0 10px 0;
+      color: #2c3e50;
+      font-size: 16px;
+    }
+
+    .asset-card .asset-type {
+      font-size: 12px;
+      color: #6c757d;
+      margin-bottom: 10px;
+    }
+
+    .asset-card .asset-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #28a745;
+    }
+
+    .asset-card .asset-status {
+      font-size: 13px;
+      margin-top: 10px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      display: inline-block;
+    }
+
+    .status-available {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-sold {
+      background: #cce5ff;
+      color: #004085;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    @media (max-width: 768px) {
+      .request-header {
+        padding: 20px;
+      }
+
+      .request-header h1 {
+        font-size: 22px;
+      }
+
+      .request-meta {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .tabs-header {
+        flex-direction: column;
+      }
+
+      .tab-button {
+        padding: 15px;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .case-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .assets-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .action-button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script src="../shared/config.js"></script>
+  <script src="../shared/data.js"></script>
+  <script src="../shared/layout.js"></script>
+  <script src="../shared/components.js"></script>
+  <div class="details-container">
+    <div class="request-header">
+      <h1>قضية تصفية وإفلاس #LB-2024-0012</h1>
+      <div class="request-meta">
+        <div class="meta-item">
+          <span class="meta-label">اسم المنشأة:</span>
+          <span>شركة النور للتقنية</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">نوع القضية:</span>
+          <span class="case-type-badge type-liquidation">تصفية</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">الحالة:</span>
+          <span class="status-badge status-active">نشطة</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">تاريخ البدء:</span>
+          <span>05/02/2024</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs-container">
+      <div class="tabs-header">
+        <button class="tab-button active" onclick="switchTab('overview')">نظرة عامة</button>
+        <button class="tab-button" onclick="switchTab('assets')">الأصول</button>
+        <button class="tab-button" onclick="switchTab('creditors')">الدائنون</button>
+        <button class="tab-button" onclick="switchTab('progress')">سير الإجراءات</button>
+        <button class="tab-button" onclick="switchTab('decision')">القرارات</button>
+      </div>
+
+      <div id="overview" class="tab-content active">
+        <div class="info-section">
+          <h2 class="section-title">معلومات القضية</h2>
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>بيانات القضية</h3>
+              <p><span class="value">رقم القضية:</span> LB-2024-0012</p>
+              <p><span class="value">نوع القضية:</span> تصفية قضائية</p>
+              <p><span class="value">تاريخ رفع القضية:</span> 05/02/2024</p>
+              <p><span class="value">المحكمة المختصة:</span> المحكمة التجارية بالرياض</p>
+            </div>
+            <div class="info-card">
+              <h3>معلومات المنشأة</h3>
+              <p><span class="value">الاسم:</span> شركة النور للتقنية</p>
+              <p><span class="value">السجل التجاري:</span> 1010345678</p>
+              <p><span class="value">تاريخ التأسيس:</span> 20/01/2015</p>
+              <p><span class="value">النشاط:</span> تقنية المعلومات</p>
+            </div>
+            <div class="info-card">
+              <h3>المصفي القضائي</h3>
+              <p><span class="value">الاسم:</span> محمد عبدالله العلي</p>
+              <p><span class="value">الترخيص:</span> مصفٍ قضائي معتمد</p>
+              <p><span class="value">تاريخ التعيين:</span> 10/02/2024</p>
+              <p><span class="value">رقم الهاتف:</span> 0509876543</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h2 class="section-title">ملخص القضية</h2>
+          <div class="case-summary">
+            <h3>حالة التصفية الحالية</h3>
+            <div class="case-grid">
+              <div class="case-item">
+                <div class="label">إجمالي الأصول</div>
+                <div class="value">3.2M ر.س</div>
+              </div>
+              <div class="case-item">
+                <div class="label">إجمالي الديون</div>
+                <div class="value">4.8M ر.س</div>
+              </div>
+              <div class="case-item">
+                <div class="label">نسبة الإكمال</div>
+                <div class="value">65%</div>
+              </div>
+              <div class="case-item">
+                <div class="label">عدد الدائنين</div>
+                <div class="value">23</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h2 class="section-title">المستندات القانونية</h2>
+          <div class="documents-list">
+            <div class="document-item">
+              <div class="document-icon">⚖️</div>
+              <div class="document-info">
+                <h4>حكم التصفية</h4>
+                <p>تم التحقق - ساري</p>
+              </div>
+            </div>
+            <div class="document-item">
+              <div class="document-icon">📄</div>
+              <div class="document-info">
+                <h4>قرار تعيين المصفي</h4>
+                <p>تم التحقق - رسمي</p>
+              </div>
+            </div>
+            <div class="document-item">
+              <div class="document-icon">📋</div>
+              <div class="document-info">
+                <h4>قائمة الأصول</h4>
+                <p>تم التحقق - محدث</p>
+              </div>
+            </div>
+            <div class="document-item">
+              <div class="document-icon">📊</div>
+              <div class="document-info">
+                <h4>قائمة الدائنين</h4>
+                <p>تم التحقق - نهائي</p>
+              </div>
+            </div>
+            <div class="document-item">
+              <div class="document-icon">📝</div>
+              <div class="document-info">
+                <h4>خطة التصفية</h4>
+                <p>معتمدة - قيد التنفيذ</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="assets" class="tab-content">
+        <div class="info-section">
+          <h2 class="section-title">ملخص الأصول</h2>
+          <div class="case-summary">
+            <h3>توزيع الأصول حسب النوع</h3>
+            <div class="case-grid">
+              <div class="case-item">
+                <div class="label">أصول ثابتة</div>
+                <div class="value">1.8M ر.س</div>
+              </div>
+              <div class="case-item">
+                <div class="label">أصول متداولة</div>
+                <div class="value">900K ر.س</div>
+              </div>
+              <div class="case-item">
+                <div class="label">نقدية</div>
+                <div class="value">500K ر.س</div>
+              </div>
+              <div class="case-item">
+                <div class="label">تم بيعها</div>
+                <div class="value">2.1M ر.س</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h2 class="section-title">تفاصيل الأصول</h2>
+          <div class="assets-grid">
+            <div class="asset-card">
+              <h4>مقر الشركة الرئيسي</h4>
+              <div class="asset-type">أصل ثابت - عقار</div>
+              <div class="asset-value">1,200,000 ر.س</div>
+              <div class="asset-status status-sold">تم البيع</div>
+            </div>
+            <div class="asset-card">
+              <h4>معدات تقنية</h4>
+              <div class="asset-type">أصل ثابت - معدات</div>
+              <div class="asset-value">450,000 ر.س</div>
+              <div class="asset-status status-sold">تم البيع</div>
+            </div>
+            <div class="asset-card">
+              <h4>سيارات الشركة</h4>
+              <div class="asset-type">أصل ثابت - مركبات</div>
+              <div class="asset-value">150,000 ر.س</div>
+              <div class="asset-status status-pending">قيد البيع</div>
+            </div>
+            <div class="asset-card">
+              <h4>مخزون البضائع</h4>
+              <div class="asset-type">أصل متداول</div>
+              <div class="asset-value">350,000 ر.س</div>
+              <div class="asset-status status-sold">تم البيع</div>
+            </div>
+            <div class="asset-card">
+              <h4>الذمم المدينة</h4>
+              <div class="asset-type">أصل متداول</div>
+              <div class="asset-value">280,000 ر.س</div>
+              <div class="asset-status status-pending">قيد التحصيل</div>
+            </div>
+            <div class="asset-card">
+              <h4>النقدية في البنك</h4>
+              <div class="asset-type">نقدية</div>
+              <div class="asset-value">500,000 ر.س</div>
+              <div class="asset-status status-available">متاحة</div>
+            </div>
+            <div class="asset-card">
+              <h4>برمجيات وتراخيص</h4>
+              <div class="asset-type">أصل غير ملموس</div>
+              <div class="asset-value">270,000 ر.س</div>
+              <div class="asset-status status-pending">قيد التقييم</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="creditors" class="tab-content">
+        <div class="info-section">
+          <h2 class="section-title">ملخص الديون</h2>
+          <div class="case-summary">
+            <h3>توزيع الديون حسب الأولوية</h3>
+            <div class="case-grid">
+              <div class="case-item">
+                <div class="label">ديون ممتازة</div>
+                <div class="value">1.5M ر.س</div>
+              </div>
+              <div class="case-item">
+                <div class="label">ديون عادية</div>
+                <div class="value">2.8M ر.س</div>
+              </div>
+              <div class="case-item">
+                <div class="label">ديون ثانوية</div>
+                <div class="value">500K ر.س</div>
+              </div>
+              <div class="case-item">
+                <div class="label">تم السداد</div>
+                <div class="value">1.8M ر.س</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h2 class="section-title">قائمة الدائنين</h2>
+          <div class="creditors-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>اسم الدائن</th>
+                  <th>النوع</th>
+                  <th>المبلغ</th>
+                  <th>الأولوية</th>
+                  <th>الحالة</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>المؤسسة العامة للتأمينات الاجتماعية</td>
+                  <td>جهة حكومية</td>
+                  <td>850,000 ريال</td>
+                  <td>ممتازة</td>
+                  <td><span class="status-badge status-pending">قيد السداد</span></td>
+                </tr>
+                <tr>
+                  <td>البنك الأهلي التجاري</td>
+                  <td>بنك</td>
+                  <td>1,200,000 ريال</td>
+                  <td>ممتازة</td>
+                  <td><span class="status-badge status-pending">قيد السداد</span></td>
+                </tr>
+                <tr>
+                  <td>مؤسسة التوريدات الصناعية</td>
+                  <td>مورد</td>
+                  <td>450,000 ريال</td>
+                  <td>عادية</td>
+                  <td><span class="status-badge status-completed">تم السداد</span></td>
+                </tr>
+                <tr>
+                  <td>شركة الخليج للمقاولات</td>
+                  <td>مورد</td>
+                  <td>380,000 ريال</td>
+                  <td>عادية</td>
+                  <td><span class="status-badge status-completed">تم السداد</span></td>
+                </tr>
+                <tr>
+                  <td>العاملون - رواتب</td>
+                  <td>أفراد</td>
+                  <td>650,000 ريال</td>
+                  <td>ممتازة</td>
+                  <td><span class="status-badge status-completed">تم السداد</span></td>
+                </tr>
+                <tr>
+                  <td>مصنع الأمل للإلكترونيات</td>
+                  <td>مورد</td>
+                  <td>520,000 ريال</td>
+                  <td>عادية</td>
+                  <td><span class="status-badge status-pending">قيد السداد</span></td>
+                </tr>
+                <tr>
+                  <td>شركة النقل السريع</td>
+                  <td>مورد خدمة</td>
+                  <td>180,000 ريال</td>
+                  <td>عادية</td>
+                  <td><span class="status-badge status-pending">قيد السداد</span></td>
+                </tr>
+                <tr>
+                  <td>المساهمون</td>
+                  <td>أفراد</td>
+                  <td>570,000 ريال</td>
+                  <td>ثانوية</td>
+                  <td><span class="status-badge status-pending">معلق</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="progress" class="tab-content">
+        <div class="info-section">
+          <h2 class="section-title">تقدم الإجراءات</h2>
+          <div class="analysis-section">
+            <div class="progress-indicator">
+              <span>نسبة الإنجاز:</span>
+              <div class="progress-bar">
+                <div class="progress-fill progress-high" style="width: 65%"></div>
+              </div>
+              <span>65%</span>
+            </div>
+            <p>تقدم إجراءات التصفية بشكل جيد. تم إنجاز معظم المراحل الأساسية ويعمل المصفي القضائي على إتمام المراحل المتبقية.</p>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h2 class="section-title">سجل الإجراءات</h2>
+          <div class="timeline">
+            <div class="timeline-item completed">
+              <div class="timeline-date">05/02/2024 - 09:00</div>
+              <div class="timeline-content">
+                <h4>رفع دعوى التصفية</h4>
+                <p>تم رفع دعوى التصفية القضائية ضد شركة النور للتقنية أمام المحكمة التجارية بالرياض.</p>
+              </div>
+            </div>
+            <div class="timeline-item completed">
+              <div class="timeline-date">08/02/2024 - 14:30</div>
+              <div class="timeline-content">
+                <h4>إصدار حكم التصفية</h4>
+                <p>أصدرت المحكمة حكم التصفية القضائية وقررت تعيين مصفٍ قضائي للإشراف على العملية.</p>
+              </div>
+            </div>
+            <div class="timeline-item completed">
+              <div class="timeline-date">10/02/2024 - 10:00</div>
+              <div class="timeline-content">
+                <h4>تعيين المصفي القضائي</h4>
+                <p>تم تعيين السيد محمد عبدالله العلي كمصفٍ قضائي معتمد للإشراف على عملية التصفية.</p>
+              </div>
+            </div>
+            <div class="timeline-item completed">
+              <div class="timeline-date">15/02/2024 - 11:00</div>
+              <div class="timeline-content">
+                <h4>جرد الأصول</h4>
+                <p>أكمل المصفي القضائي جرد جميع أصول الشركة وتقييمها بقيمة إجمالية 3.2 مليون ريال.</p>
+              </div>
+            </div>
+            <div class="timeline-item completed">
+              <div class="timeline-date">20/02/2024 - 09:30</div>
+              <div class="timeline-content">
+                <h4>إعداد قائمة الدائنين</h4>
+                <p>تم إعداد قائمة نهائية بجميع الدائنين بإجمالي ديون 4.8 مليون ريال موزعة على 23 دائن.</p>
+              </div>
+            </div>
+            <div class="timeline-item completed">
+              <div class="timeline-date">01/03/2024 - 14:00</div>
+              <div class="timeline-content">
+                <h4>بدء بيع الأصول</h4>
+                <p>بدأت عملية بيع الأصول. تم بيع المقر الرئيسي والمعدات التقنية بمبلغ إجمالي 1.65 مليون ريال.</p>
+              </div>
+            </div>
+            <div class="timeline-item completed">
+              <div class="timeline-date">15/03/2024 - 10:30</div>
+              <div class="timeline-content">
+                <h4>السداد الأول للدائنين</h4>
+                <p>تم السداد الأول للدائنين من ذوي الأولوية العالية بمبلغ 1.8 مليون ريال.</p>
+              </div>
+            </div>
+            <div class="timeline-item pending">
+              <div class="timeline-date">26/04/2024 - حالياً</div>
+              <div class="timeline-content">
+                <h4>إكمال بيع الأصول المتبقية</h4>
+                <p>جارٍ إكمال بيع الأصول المتبقية وتحصيل الذمم المدينة. المتوقع الانتهاء خلال 30 يوماً.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="decision" class="tab-content">
+        <div class="info-section">
+          <h2 class="section-title">القرارات والإجراءات</h2>
+          <div class="analysis-section">
+            <p>بناءً على التقدم الحالي في إجراءات التصفية، يرجى مراجعة الحالة واتخاذ القرارات المناسبة.</p>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h2 class="section-title">خيارات الإجراءات</h2>
+          <div class="action-buttons">
+            <button class="action-button btn-approve" onclick="submitDecision('continue')">
+              ✓ متابعة الإجراءات
+            </button>
+            <button class="action-button btn-warning" onclick="submitDecision('modify')">
+              ⚙️ تعديل خطة التصفية
+            </button>
+            <button class="action-button btn-reject" onclick="submitDecision('terminate')">
+              ✕ إنهاء التصفية
+            </button>
+            <button class="action-button btn-secondary" onclick="submitDecision('extend')">
+              ⏰ تمديد المهلة
+            </button>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h2 class="section-title">ملاحظات القرار</h2>
+          <div class="notes-section">
+            <h3>أضف ملاحظاتك</h3>
+            <textarea class="notes-textarea" placeholder="أدخل ملاحظاتك وأسباب القرار هنا..."></textarea>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h2 class="section-title">ملخص الوضع الحالي</h2>
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>الإنجازات</h3>
+              <p><span class="value">الأصول المباعة:</span> 2.1 مليون ريال</p>
+              <p><span class="value">الديون المسددة:</span> 1.8 مليون ريال</p>
+              <p><span class="value">الدائنين المستفيدين:</span> 5 دائنين</p>
+              <p><span class="value">نسبة الإنجاز:</span> 65%</p>
+            </div>
+            <div class="info-card">
+              <h3>المتبقي</h3>
+              <p><span class="value">أصول للبيع:</span> 1.1 مليون ريال</p>
+              <p><span class="value">ديون معلقة:</span> 3.0 مليون ريال</p>
+              <p><span class="value">دائنين منتظرين:</span> 18 دائن</p>
+              <p><span class="value">المدة المتبقية:</span> 60 يوماً</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h2 class="section-title">التوصيات</h2>
+          <div class="recommendation-box">
+            <h4>✓ توصية بالمتابعة</h4>
+            <p>يُنصح بمتابعة الإجراءات الحالية بنفس الخطة الموضوعة. التقدم جيد والمصفي القضائي يؤدي مهامه بكفاءة.</p>
+          </div>
+          <div class="recommendation-box warning">
+            <h4>⚠ نقاط يجب مراعاتها</h4>
+            <p>يجب التركيز على تحصيل الذمم المدينة وبيع الأصول المتبقية بأعلى سعر ممكن لزيادة عائدات التصفية.</p>
+          </div>
+          <div class="recommendation-box">
+            <h4>📋 الخطوات القادمة</h4>
+            <p>1. إكمال بيع السيارات والمعدات المتبقية<br>2. تحصيل الذمم المدينة<br>3. توزيع العائدات على الدائنين المتبقين<br>4. إعداد التقرير النهائي</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+
+      // Remove active class from all tab buttons
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+      });
+
+      // Show selected tab content
+      document.getElementById(tabId).classList.add('active');
+
+      // Add active class to clicked button
+      event.target.classList.add('active');
+    }
+
+    function submitDecision(decision) {
+      const notes = document.querySelector('.notes-textarea').value;
+      alert(`تم إرسال القرار: ${decision}\nالملاحظات: ${notes}`);
+      // In real implementation, this would submit to backend
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize with first tab active
+      switchTab('overview');
+    });
+  </script>
+</body>
+</html>

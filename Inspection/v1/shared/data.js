@@ -1437,37 +1437,222 @@ const INSP_DATA = {
 
   liquidationBankruptcy: [
     {
-      id: 'LB-2025-0001',
+      id: 'LB-2024-001',
       status: 'قيد المراجعة',
-      companyName: 'شركة التجارة العامة',
-      crn: '1012345683',
-      region: 'شمال الباطنة',
-      caseType: 'تصفية',
-      filingDate: '2025-01-10',
-      employeeCount: 30,
-      totalAssets: 250000,
-      totalLiabilities: 320000,
-      notes: 'حالة تصفية طوعية',
+      establishmentName: 'شركة المقاولات المتقدمة',
+      commercialNumber: '12345678',
+      caseType: 'إفلاس',
+      submissionDate: '2024-04-20',
+      insuredCount: 78,
+      totalAssets: 450000,
+      totalLiabilities: 890000,
+      notes: 'قضية إفلاس إجباري',
       timeline: [
-        { date: '2025-01-10', action: 'تقديم طلب التصفية', actor: 'الشركة', actorRole: 'employer' },
-        { date: '2025-01-11', action: 'استلام الطلب للمراجعة', actor: 'عبدالعزيز هلال الراشدي', actorRole: 'inspection-director' }
+        { date: '2024-04-20', action: 'تقديم طلب الإفلاس', actor: 'النظام', actorRole: 'system' },
+        { date: '2024-04-21', action: 'استلام الطلب', actor: 'النظام', actorRole: 'system' }
       ]
     },
     {
-      id: 'LB-2025-0002',
-      status: 'قيد المعالجة',
-      companyName: 'شركة الصناعات المتقدمة',
-      crn: '1012345684',
-      region: 'ظفار',
-      caseType: 'إفلاس',
-      filingDate: '2025-01-05',
-      employeeCount: 50,
-      totalAssets: 180000,
-      totalLiabilities: 350000,
-      notes: 'حالة إفلاس إجباري',
+      id: 'LB-2024-002',
+      status: 'قيد التحليل',
+      establishmentName: 'مؤسسة التجارة الدولية',
+      commercialNumber: '23456789',
+      caseType: 'تصفية',
+      submissionDate: '2024-04-19',
+      insuredCount: 23,
+      totalAssets: 120000,
+      totalLiabilities: 95000,
+      notes: 'قضية تصفية طوعية',
       timeline: [
-        { date: '2025-01-05', action: 'تقديم طلب الإفلاس', actor: 'الشركة', actorRole: 'employer' },
-        { date: '2025-01-06', action: 'بدء إجراءات الإفلاس', actor: 'عبدالعزيز هلال الراشدي', actorRole: 'inspection-director' }
+        { date: '2024-04-19', action: 'تقديم طلب التصفية', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'LB-2024-003',
+      status: 'تم الاعتماد',
+      establishmentName: 'شركة الصناعات الخفيفة',
+      commercialNumber: '34567890',
+      caseType: 'تصفية',
+      submissionDate: '2024-04-18',
+      insuredCount: 45,
+      totalAssets: 280000,
+      totalLiabilities: 310000,
+      notes: 'تم اعتماد القضية',
+      timeline: [
+        { date: '2024-04-18', action: 'تقديم طلب التصفية', actor: 'النظام', actorRole: 'system' },
+        { date: '2024-04-25', action: 'اعتماد القضية', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'LB-2024-004',
+      status: 'طلب معلومات إضافية',
+      establishmentName: 'مؤسسة الخدمات المتخصصة',
+      commercialNumber: '45678901',
+      caseType: 'إفلاس',
+      submissionDate: '2024-04-17',
+      insuredCount: 12,
+      totalAssets: 45000,
+      totalLiabilities: 180000,
+      notes: 'طلب معلومات إضافية',
+      timeline: [
+        { date: '2024-04-17', action: 'تقديم طلب الإفلاس', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'LB-2024-005',
+      status: 'تم الرفض',
+      establishmentName: 'شركة التطوير العمراني',
+      commercialNumber: '56789012',
+      caseType: 'تصفية',
+      submissionDate: '2024-04-16',
+      insuredCount: 56,
+      totalAssets: 520000,
+      totalLiabilities: 480000,
+      notes: 'تم رفض القضية',
+      timeline: [
+        { date: '2024-04-16', action: 'تقديم طلب التصفية', actor: 'النظام', actorRole: 'system' },
+        { date: '2024-04-28', action: 'رفض القضية', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'LB-2024-006',
+      status: 'قيد المراجعة',
+      establishmentName: 'مؤسسة الأعمال الحرة',
+      commercialNumber: '67890123',
+      caseType: 'إفلاس',
+      submissionDate: '2024-04-15',
+      insuredCount: 18,
+      totalAssets: 78000,
+      totalLiabilities: 145000,
+      notes: 'قيد المراجعة',
+      timeline: [
+        { date: '2024-04-15', action: 'تقديم طلب الإفلاس', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'LB-2024-007',
+      status: 'قيد التحليل',
+      establishmentName: 'شركة الاستثمارات الحديثة',
+      commercialNumber: '78901234',
+      caseType: 'تصفية',
+      submissionDate: '2024-04-14',
+      insuredCount: 34,
+      totalAssets: 195000,
+      totalLiabilities: 220000,
+      notes: 'قيد التحليل',
+      timeline: [
+        { date: '2024-04-14', action: 'تقديم طلب التصفية', actor: 'النظام', actorRole: 'system' }
+      ]
+    }
+  ],
+
+  companiesStoppedPayment: [
+    {
+      id: 'CSP-2024-001',
+      establishmentName: 'شركة البناء والتعمير',
+      commercialNumber: '12345678',
+      insuredCount: 45,
+      stopDate: '2024-04-20',
+      status: 'قيد المراجعة',
+      riskLevel: 'عالي',
+      totalDue: 125000,
+      monthsDue: 6,
+      notes: 'الشركة متوقفة عن الدفع منذ 6 أشهر',
+      timeline: [
+        { date: '2024-04-20', action: 'توقف عن الدفع', actor: 'النظام', actorRole: 'system' },
+        { date: '2024-04-21', action: 'إشعار المنشأة', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'CSP-2024-002',
+      establishmentName: 'مؤسسة التجارة العامة',
+      commercialNumber: '23456789',
+      insuredCount: 12,
+      stopDate: '2024-04-19',
+      status: 'قيد التحليل',
+      riskLevel: 'متوسط',
+      totalDue: 45000,
+      monthsDue: 4,
+      notes: 'جاري تحليل الوضع المالي',
+      timeline: [
+        { date: '2024-04-19', action: 'توقف عن الدفع', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'CSP-2024-003',
+      establishmentName: 'شركة الخدمات اللوجستية',
+      commercialNumber: '34567890',
+      insuredCount: 28,
+      stopDate: '2024-04-18',
+      status: 'تم الاعتماد',
+      riskLevel: 'منخفض',
+      totalDue: 32000,
+      monthsDue: 3,
+      notes: 'تم اعتماد الحالة',
+      timeline: [
+        { date: '2024-04-18', action: 'توقف عن الدفع', actor: 'النظام', actorRole: 'system' },
+        { date: '2024-04-25', action: 'اعتماد الحالة', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'CSP-2024-004',
+      establishmentName: 'مؤسسة الأعمال الصغيرة',
+      commercialNumber: '45678901',
+      insuredCount: 8,
+      stopDate: '2024-04-17',
+      status: 'طلب معلومات إضافية',
+      riskLevel: 'عالي',
+      totalDue: 18000,
+      monthsDue: 2,
+      notes: 'طلب معلومات إضافية',
+      timeline: [
+        { date: '2024-04-17', action: 'توقف عن الدفع', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'CSP-2024-005',
+      establishmentName: 'شركة الصناعات الحديثة',
+      commercialNumber: '56789012',
+      insuredCount: 67,
+      stopDate: '2024-04-16',
+      status: 'تم الرفض',
+      riskLevel: 'عالي',
+      totalDue: 250000,
+      monthsDue: 12,
+      notes: 'تم رفض الحالة',
+      timeline: [
+        { date: '2024-04-16', action: 'توقف عن الدفع', actor: 'النظام', actorRole: 'system' },
+        { date: '2024-04-28', action: 'رفض الحالة', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'CSP-2024-006',
+      establishmentName: 'مؤسسة الخدمات المهنية',
+      commercialNumber: '67890123',
+      insuredCount: 15,
+      stopDate: '2024-04-15',
+      status: 'قيد المراجعة',
+      riskLevel: 'متوسط',
+      totalDue: 38000,
+      monthsDue: 5,
+      notes: 'قيد المراجعة',
+      timeline: [
+        { date: '2024-04-15', action: 'توقف عن الدفع', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'CSP-2024-007',
+      establishmentName: 'شركة التطوير العقاري',
+      commercialNumber: '78901234',
+      insuredCount: 52,
+      stopDate: '2024-04-14',
+      status: 'قيد التحليل',
+      riskLevel: 'منخفض',
+      totalDue: 67000,
+      monthsDue: 7,
+      notes: 'قيد التحليل',
+      timeline: [
+        { date: '2024-04-14', action: 'توقف عن الدفع', actor: 'النظام', actorRole: 'system' }
       ]
     }
   ]
