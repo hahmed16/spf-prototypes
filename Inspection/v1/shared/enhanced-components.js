@@ -3,11 +3,150 @@
  * Contains advanced components for correspondence, maps, video calls, timeline, etc.
  */
 
-// ==================== CORRESPONDENCE DOCUMENTATION COMPONENT ====================
+// ==================== CONTACT LOG COMPONENT ====================
 
-/**
- * Sample correspondence data for demonstration
- */
+const _CL_METHODS = { 'هاتف': '📞', 'واتساب': '💬', 'بريد إلكتروني': '📧', 'مقابلة شخصية': '🤝', 'أخرى': '📋' };
+
+const contactLogData = {
+  complaints: [
+    { id: 1, date: '2025-01-12', time: '09:15', method: 'هاتف', party: 'صاحب العمل — شركة الأفق للمقاولات', action: 'تم الاتصال لإبلاغه بتسجيل البلاغ وطلب توضيح حول تواريخ التوظيف. أفاد بأنه سيراجع السجلات وسيرسل المستندات خلال يومين.', recordedBy: 'سيف الأمري' },
+    { id: 2, date: '2025-01-14', time: '13:40', method: 'واتساب', party: 'المؤمن عليه — محمد سالم الحارثي', action: 'إرسال رسالة تأكيد استلام البلاغ وطلب إرسال صورة من عقد العمل. استجاب المؤمن عليه بإرسال الصور خلال ساعة.', recordedBy: 'سيف الأمري' },
+    { id: 3, date: '2025-01-20', time: '11:00', method: 'بريد إلكتروني', party: 'صاحب العمل — شركة الأفق للمقاولات', action: 'إرسال خطاب رسمي يطلب الحضور للمقر بتاريخ 2025-01-25. لم يرد حتى الآن.', recordedBy: 'منى البلوشي' },
+  ],
+  visits: [
+    { id: 1, date: '2025-01-18', time: '10:30', method: 'هاتف', party: 'صاحب العمل — شركة الأفق للمقاولات', action: 'إبلاغ المنشأة بموعد الزيارة الدورية المقررة بتاريخ 2025-01-22 وطلب توفير الوصول للسجلات. تأكيد الحضور من مدير الموارد البشرية.', recordedBy: 'حاتم الزدجالي' },
+    { id: 2, date: '2025-01-22', time: '15:45', method: 'مقابلة شخصية', party: 'مدير الموارد البشرية — شركة الأفق للمقاولات', action: 'تسليم نسخة من محضر الزيارة ومناقشة المخالفات المرصودة. طلب صاحب العمل مهلة 30 يوماً لتصحيح المخالفات.', recordedBy: 'حاتم الزدجالي' },
+  ],
+  appeals: [
+    { id: 1, date: '2025-02-05', time: '12:00', method: 'هاتف', party: 'مقدم التظلم — صاحب العمل', action: 'إبلاغه بقيد التظلم وتوقع البت فيه خلال 15 يوم عمل. تأكيد استلام جميع المستندات المطلوبة.', recordedBy: 'سيف الأمري' },
+  ],
+};
+
+function renderCorrespondenceDocumentation(entityType, entityId, userRole) {
+  const list = (contactLogData[entityType] || []);
+  const mid = 'clm-' + entityType + '-' + (entityId || '').replace(/[^a-z0-9]/gi, '-');
+  const tid = 'clt-' + entityType + '-' + (entityId || '').replace(/[^a-z0-9]/gi, '-');
+
+  const rows = list.length ? list.map(r => `
+    <tr>
+      <td style="white-space:nowrap">${r.date}<br><span class="tx3 fs11">${r.time}</span></td>
+      <td style="white-space:nowrap">${_CL_METHODS[r.method] || '📋'} ${r.method}</td>
+      <td style="white-space:nowrap">${r.party}</td>
+      <td style="max-width:340px;white-space:normal;line-height:1.6;font-size:12.5px">${r.action}</td>
+      <td class="tx3 fs11" style="white-space:nowrap">${r.recordedBy}</td>
+    </tr>`).join('') :
+    `<tr><td colspan="5" class="tx3 fs11" style="text-align:center;padding:20px">لا توجد تواصلات مسجلة بعد</td></tr>`;
+
+  return `
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span class="tx3 fs11">${list.length} تواصل مسجل</span>
+        <button class="btn btn-primary btn-sm" onclick="openContactLogModal('${mid}')">+ تسجيل تواصل</button>
+      </div>
+      <div class="tbl-wrap" id="${tid}">
+        <table class="dtbl">
+          <thead><tr>
+            <th>التاريخ والوقت</th>
+            <th>وسيلة التواصل</th>
+            <th>الجهة</th>
+            <th>الإجراء والرد</th>
+            <th>بواسطة</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="${mid}" class="modal" style="display:none" onclick="if(event.target===this)closeContactLogModal('${mid}')">
+      <div class="modal-content" style="max-width:520px">
+        <div class="modal-header">
+          <h3>تسجيل تواصل جديد</h3>
+          <button class="modal-close" onclick="closeContactLogModal('${mid}')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="${mid}-form" onsubmit="saveContactLog(event,'${entityType}','${tid}','${mid}')">
+            <div class="fg fg-2" style="margin-bottom:0">
+              <div class="fgrp">
+                <label class="flbl">وسيلة التواصل <span class="req">*</span></label>
+                <select class="fc" name="method" required>
+                  ${Object.keys(_CL_METHODS).map(m => `<option>${m}</option>`).join('')}
+                </select>
+              </div>
+              <div class="fgrp">
+                <label class="flbl">الجهة المتواصل معها <span class="req">*</span></label>
+                <input type="text" class="fc" name="party" placeholder="مثل: صاحب العمل، المؤمن عليه…" required>
+              </div>
+              <div class="fgrp">
+                <label class="flbl">التاريخ <span class="req">*</span></label>
+                <input type="date" class="fc" name="date" required>
+              </div>
+              <div class="fgrp">
+                <label class="flbl">الوقت <span class="req">*</span></label>
+                <input type="time" class="fc" name="time" required>
+              </div>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">الإجراء والرد <span class="req">*</span></label>
+              <textarea class="fc" name="action" rows="4" placeholder="صف ما تم التواصل بشأنه والرد أو الإجراء المتخذ…" required style="resize:vertical"></textarea>
+            </div>
+            <div style="display:flex;gap:8px;padding-top:4px">
+              <button type="submit" class="btn btn-primary btn-sm">حفظ</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="closeContactLogModal('${mid}')">إلغاء</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>`;
+}
+
+function openContactLogModal(mid) {
+  const m = document.getElementById(mid);
+  if (!m) return;
+  m.querySelector('form').reset();
+  m.style.display = 'flex';
+}
+
+function closeContactLogModal(mid) {
+  const m = document.getElementById(mid);
+  if (m) m.style.display = 'none';
+}
+
+function saveContactLog(event, entityType, tid, mid) {
+  event.preventDefault();
+  const form = event.target;
+  const fd = new FormData(form);
+  const rec = {
+    id: Date.now(),
+    date: fd.get('date'),
+    time: fd.get('time'),
+    method: fd.get('method'),
+    party: fd.get('party'),
+    action: fd.get('action'),
+    recordedBy: 'المستخدم الحالي',
+  };
+  if (!contactLogData[entityType]) contactLogData[entityType] = [];
+  contactLogData[entityType].unshift(rec);
+
+  const tbody = document.querySelector('#' + tid + ' tbody');
+  if (tbody) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="white-space:nowrap">${rec.date}<br><span class="tx3 fs11">${rec.time}</span></td>
+      <td style="white-space:nowrap">${_CL_METHODS[rec.method] || '📋'} ${rec.method}</td>
+      <td style="white-space:nowrap">${rec.party}</td>
+      <td style="max-width:340px;white-space:normal;line-height:1.6;font-size:12.5px">${rec.action}</td>
+      <td class="tx3 fs11" style="white-space:nowrap">${rec.recordedBy}</td>`;
+    const emptyRow = tbody.querySelector('td[colspan]');
+    if (emptyRow) emptyRow.closest('tr').remove();
+    tbody.insertBefore(tr, tbody.firstChild);
+    const countEl = tbody.closest('div').previousElementSibling?.querySelector('span');
+    if (countEl) countEl.textContent = contactLogData[entityType].length + ' تواصل مسجل';
+  }
+  closeContactLogModal(mid);
+  showToast('تم تسجيل التواصل بنجاح', 's');
+}
+
+// legacy alias — kept so any old calls still work
 const sampleCorrespondenceData = {
   complaints: [
     {
@@ -77,17 +216,9 @@ const sampleCorrespondenceData = {
   ]
 };
 
-// Store correspondence data in memory for CRUD operations
-let correspondenceData = JSON.parse(JSON.stringify(sampleCorrespondenceData));
+// ==================== LEGACY HELPERS (used by video-call, violations components) ====================
 
-/**
- * Render Correspondence Documentation Component
- * @param {string} entityType - Type of entity (complaints, visits, appeals)
- * @param {string} entityId - ID of the specific entity
- * @param {string} userRole - Current user role
- * @returns {string} HTML content for correspondence component
- */
-function renderCorrespondenceDocumentation(entityType, entityId, userRole) {
+function _legacyRenderCorrespondenceDocumentation(entityType, entityId, userRole) {
   const correspondenceList = correspondenceData[entityType] || [];
 
   return `
@@ -379,196 +510,7 @@ function formatDateTime(dateString) {
   return date.toLocaleString('ar-SA');
 }
 
-/**
- * Action functions
- */
-function addCorrespondence(entityType, entityId) {
-  const modal = document.getElementById(`correspondence-modal-${entityType}-${entityId}`);
-  const title = document.getElementById('correspondence-modal-title');
-  const form = document.getElementById(`correspondence-form-${entityType}-${entityId}`);
-
-  title.textContent = 'إضافة مراسلة جديدة';
-  form.reset();
-  form.dataset.editId = '';
-  modal.style.display = 'block';
-}
-
-function editCorrespondence(entityType, itemId) {
-  const item = correspondenceData[entityType].find(c => c.id === itemId);
-  if (!item) return;
-
-  const modal = document.getElementById(`correspondence-modal-${entityType}-1`);
-  const title = document.getElementById('correspondence-modal-title');
-  const form = document.getElementById(`correspondence-form-${entityType}-1`);
-
-  title.textContent = 'تعديل المراسلة';
-  form.dataset.editId = itemId;
-
-  form.querySelector('[name="type"]').value = item.type;
-  form.querySelector('[name="date"]').value = item.date;
-  form.querySelector('[name="sender"]').value = item.sender;
-  form.querySelector('[name="recipient"]').value = item.recipient;
-  form.querySelector('[name="subject"]').value = item.subject;
-  form.querySelector('[name="reference"]').value = item.reference;
-  form.querySelector('[name="priority"]').value = item.priority;
-  form.querySelector('[name="status"]').value = item.status;
-  form.querySelector('[name="content"]').value = item.content;
-
-  modal.style.display = 'block';
-}
-
-function viewCorrespondence(entityType, itemId) {
-  const item = correspondenceData[entityType].find(c => c.id === itemId);
-  if (!item) return;
-
-  alert(`تفاصيل المراسلة:\n\nالموضوع: ${item.subject}\nالمرسل: ${item.sender}\nالمستلم: ${item.recipient}\nالتاريخ: ${formatDate(item.date)}\nالحالة: ${getStatusText(item.status)}\nالأولوية: ${getPriorityText(item.priority)}\n\nالمحتوى:\n${item.content}`);
-}
-
-function deleteCorrespondence(entityType, itemId) {
-  if (confirm('هل أنت متأكد من حذف هذه المراسلة؟')) {
-    correspondenceData[entityType] = correspondenceData[entityType].filter(c => c.id !== itemId);
-    refreshCorrespondenceList(entityType, '1');
-  }
-}
-
-function closeCorrespondenceModal(entityType, entityId) {
-  const modal = document.getElementById(`correspondence-modal-${entityType}-${entityId}`);
-  modal.style.display = 'none';
-}
-
-function saveCorrespondence(event, entityType, entityId) {
-  event.preventDefault();
-  const form = event.target;
-  const formData = new FormData(form);
-  const editId = form.dataset.editId;
-
-  const correspondenceItem = {
-    type: formData.get('type'),
-    date: formData.get('date'),
-    sender: formData.get('sender'),
-    recipient: formData.get('recipient'),
-    subject: formData.get('subject'),
-    reference: formData.get('reference') || '',
-    priority: formData.get('priority'),
-    status: formData.get('status'),
-    content: formData.get('content'),
-    attachments: [],
-    createdAt: new Date().toISOString(),
-    createdBy: 'المستخدم الحالي'
-  };
-
-  if (editId) {
-    const index = correspondenceData[entityType].findIndex(c => c.id === parseInt(editId));
-    if (index !== -1) {
-      correspondenceData[entityType][index] = { ...correspondenceData[entityType][index], ...correspondenceItem, id: parseInt(editId) };
-    }
-  } else {
-    correspondenceItem.id = Math.max(...correspondenceData[entityType].map(c => c.id), 0) + 1;
-    correspondenceData[entityType].push(correspondenceItem);
-  }
-
-  closeCorrespondenceModal(entityType, entityId);
-  refreshCorrespondenceList(entityType, entityId);
-}
-
-function filterCorrespondence(entityType, entityId) {
-  const typeFilter = document.getElementById(`filter-type-${entityType}-${entityId}`).value;
-  const statusFilter = document.getElementById(`filter-status-${entityType}-${entityId}`).value;
-  const priorityFilter = document.getElementById(`filter-priority-${entityType}-${entityId}`).value;
-
-  let filtered = correspondenceData[entityType];
-
-  if (typeFilter !== 'all') {
-    filtered = filtered.filter(c => c.type === typeFilter);
-  }
-  if (statusFilter !== 'all') {
-    filtered = filtered.filter(c => c.status === statusFilter);
-  }
-  if (priorityFilter !== 'all') {
-    filtered = filtered.filter(c => c.priority === priorityFilter);
-  }
-
-  const listContainer = document.getElementById(`correspondence-list-${entityType}-${entityId}`);
-  listContainer.innerHTML = filtered.length > 0
-    ? filtered.map(item => renderCorrespondenceItem(item, entityType, 'internal')).join('')
-    : renderEmptyCorrespondence();
-}
-
-function filterCorrespondenceByStatus(entityType, entityId, status) {
-  document.getElementById(`filter-status-${entityType}-${entityId}`).value = status;
-  filterCorrespondence(entityType, entityId);
-}
-
-function filterCorrespondenceByPriority(entityType, entityId, priority) {
-  document.getElementById(`filter-priority-${entityType}-${entityId}`).value = priority;
-  filterCorrespondence(entityType, entityId);
-}
-
-function searchCorrespondence(entityType, entityId, searchTerm) {
-  const listContainer = document.getElementById(`correspondence-list-${entityType}-${entityId}`);
-
-  if (!searchTerm || searchTerm.trim() === '') {
-    listContainer.innerHTML = correspondenceData[entityType].length > 0
-      ? correspondenceData[entityType].map(item => renderCorrespondenceItem(item, entityType, 'internal')).join('')
-      : renderEmptyCorrespondence();
-    return;
-  }
-
-  const term = searchTerm.toLowerCase();
-  const filtered = correspondenceData[entityType].filter(c =>
-    c.subject.toLowerCase().includes(term) ||
-    c.sender.toLowerCase().includes(term) ||
-    c.recipient.toLowerCase().includes(term) ||
-    c.content.toLowerCase().includes(term) ||
-    c.reference.toLowerCase().includes(term)
-  );
-
-  listContainer.innerHTML = filtered.length > 0
-    ? filtered.map(item => renderCorrespondenceItem(item, entityType, 'internal')).join('')
-    : renderEmptyCorrespondence();
-}
-
-function exportCorrespondence(entityType, entityId) {
-  const data = correspondenceData[entityType];
-  const csvContent = [
-    ['النوع', 'التاريخ', 'المرسل', 'المستلم', 'الموضوع', 'المرجع', 'الحالة', 'الأولوية', 'المحتوى'],
-    ...data.map(c => [
-      c.type === 'incoming' ? 'واردة' : 'صادرة',
-      c.date,
-      c.sender,
-      c.recipient,
-      c.subject,
-      c.reference,
-      getStatusText(c.status),
-      getPriorityText(c.priority),
-      c.content
-    ])
-  ].map(row => row.join(',')).join('\n');
-
-  const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `correspondence_${entityType}_${entityId}.csv`;
-  link.click();
-}
-
-function viewAttachment(filename) {
-  alert(`عرض المرفق: ${filename}\n\nفي النظام الفعلي، سيتم فتح الملف في عارض المرفقات.`);
-}
-
-function refreshCorrespondenceList(entityType, entityId) {
-  const listContainer = document.getElementById(`correspondence-list-${entityType}-${entityId}`);
-  listContainer.innerHTML = correspondenceData[entityType].length > 0
-    ? correspondenceData[entityType].map(item => renderCorrespondenceItem(item, entityType, 'internal')).join('')
-    : renderEmptyCorrespondence();
-
-  document.getElementById(`stat-total-${entityType}-${entityId}`).textContent = correspondenceData[entityType].length;
-  document.getElementById(`stat-incoming-${entityType}-${entityId}`).textContent = correspondenceData[entityType].filter(c => c.type === 'incoming').length;
-  document.getElementById(`stat-outgoing-${entityType}-${entityId}`).textContent = correspondenceData[entityType].filter(c => c.type === 'outgoing').length;
-  document.getElementById(`stat-pending-${entityType}-${entityId}`).textContent = correspondenceData[entityType].filter(c => c.status === 'pending').length;
-}
-
-// File upload handling
+// File upload handling (used by modals across the system)
 document.addEventListener('change', function(e) {
   if (e.target && e.target.id && e.target.id.startsWith('correspondence-files-')) {
     const fileList = document.getElementById(e.target.id.replace('correspondence-files-', 'file-list-'));
