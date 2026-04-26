@@ -803,7 +803,7 @@ function renderComplaintDetails(role) {
 
   /* ── لوحة الإجراءات ── */
   const rolePanels = showWorkflowPanels ? _renderCumulativeRolePanels(c) : '';
-  const actionPanel = _buildComplaintActionPanel(role, c);
+  const actionPanel = (isExternal && (isDraft || isReturned)) ? '' : _buildComplaintActionPanel(role, c);
 
   /* ── إجراءات المسودة للخارجيين ── */
   const draftActionsPanel = isDraft ? `
@@ -1125,23 +1125,59 @@ function renderAppealsList(role) {
 
 /* ── إنشاء تظلم جديد ── */
 function renderAppealNew(role) {
-  /* eligible complaints: those with a final decision or closure */
-  const closedStatuses = ['تم اغلاق البلاغ','تم حفظ البلاغ','تم رفض البلاغ','تم قبول التظلم','اغلاق'];
-  const eligibleComplaints = INSP_DATA.complaints.filter(c => {
-    const matchRole = role === 'employer' ? c.submittedBy === 'employer' || c.employerId
-                    : role === 'insured'  ? c.submittedBy === 'insured'
-                    : true;
-    const hasFinalStatus = closedStatuses.some(s => c.status.includes('تم اغلاق') || c.status.includes('تم حفظ') || c.status.includes('تم رفض') || c.status.includes('اغلاق'));
-    return matchRole && hasFinalStatus;
-  });
+  const currentUser = INSP_DATA.users[role] || {};
+  const currentEmployer = role === 'employer'
+    ? INSP_DATA.employers.find(e => e.name === currentUser.dept) || INSP_DATA.employers[0]
+    : null;
+  const currentEmployerId = currentEmployer ? currentEmployer.id : null;
+  const currentInsuredCivil = role === 'insured' ? currentUser.civil : null;
+  const allVisits = [...(INSP_DATA.visits.periodic || []), ...(INSP_DATA.visits.surprise || []), ...(INSP_DATA.visits.scheduled || [])];
+  const allBans = INSP_DATA.bans || [];
 
-  /* eligible visits: those with approved or completed reports */
-  const allVisits = [...(INSP_DATA.visits.periodic||[]), ...(INSP_DATA.visits.surprise||[]), ...(INSP_DATA.visits.scheduled||[])];
-  const eligibleVisits = allVisits.filter(v => {
-    const matchRole = role === 'employer' ? v.employerId === (INSP_DATA.employers.find(e=>e.name===INSP_DATA.users[role]?.dept)||{}).id || true : true;
-    const hasFinalStatus = v.status && (v.status.includes('تم اعتماد') || v.status.includes('مغلقة') || v.status.includes('بانتظار مراجعة'));
-    return hasFinalStatus;
-  });
+  function isFinalComplaint(c) {
+    const status = c.status || '';
+    return (
+      !!(c.investigationResults && (c.investigationResults.decisionDate || c.investigationResults.outcome)) ||
+      status.includes('تم إغلاق') ||
+      status.includes('تم اغلاق') ||
+      status.includes('مغلق') ||
+      status.includes('تم حفظ') ||
+      status.includes('تم رفض') ||
+      status.includes('تم قبول')
+    );
+  }
+
+  function isComplaintVisibleToRole(c) {
+    if (role === 'employer') {
+      return !!currentEmployerId && (
+        c.employerId === currentEmployerId ||
+        c.partyEmployerId === currentEmployerId ||
+        c.submittedBy === 'employer'
+      );
+    }
+    if (role === 'insured') {
+      return !!currentInsuredCivil && (
+        c.submittedByCivil === currentInsuredCivil ||
+        c.workerCivil === currentInsuredCivil ||
+        c.partyInsuredCivil === currentInsuredCivil
+      );
+    }
+    return true;
+  }
+
+  const eligibleComplaints = INSP_DATA.complaints.filter(c => isComplaintVisibleToRole(c) && isFinalComplaint(c));
+
+  const eligibleVisits = role === 'employer'
+    ? allVisits.filter(v => !!currentEmployerId && v.employerId === currentEmployerId && v.status && (v.status.includes('تم اعتماد') || v.status.includes('مكتملة') || v.status.includes('مغلقة')))
+    : [];
+
+  const eligibleBans = role === 'employer'
+    ? allBans.filter(b => !!currentEmployerId && b.employerId === currentEmployerId)
+    : [];
+
+  const availableAppealTypes = role === 'insured'
+    ? ['complaint']
+    : ['complaint', 'visit', 'ban'];
 
   const complaintOpts = eligibleComplaints.length
     ? eligibleComplaints.map(c => `<option value="${c.id}">${c.id} — ${c.type} (${c.status})</option>`).join('')
@@ -1151,6 +1187,39 @@ function renderAppealNew(role) {
     ? eligibleVisits.map(v => `<option value="${v.id}">${v.id} — ${v.employerName} (${v.status})</option>`).join('')
     : `<option value="">لا توجد زيارات مؤهلة</option>`;
 
+  const banOpts = eligibleBans.length
+    ? eligibleBans.map(b => `<option value="${b.id}">${b.id} — ${b.employerName}</option>`).join('')
+    : `<option value="">لا توجد قرارات حظر مؤهلة</option>`;
+
+  const appealTypeCards = [];
+  if (availableAppealTypes.includes('complaint')) {
+    appealTypeCards.push(`
+      <button class="card" id="atype-complaint" style="border:2px solid transparent;cursor:pointer;text-align:center;padding:20px;transition:.2s"
+        onclick="_selectAppealType('complaint')">
+        <div style="font-size:28px;margin-bottom:10px">📋</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">تظلم على قرار بلاغ</div>
+        <div style="font-size:12px;color:var(--text3)">الاعتراض على القرار النهائي الصادر على البلاغ بعد استكمال معالجته</div>
+      </button>`);
+  }
+  if (availableAppealTypes.includes('visit')) {
+    appealTypeCards.push(`
+      <button class="card" id="atype-visit" style="border:2px solid transparent;cursor:pointer;text-align:center;padding:20px;transition:.2s"
+        onclick="_selectAppealType('visit')">
+        <div style="font-size:28px;margin-bottom:10px">🏭</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">تظلم على محضر زيارة</div>
+        <div style="font-size:12px;color:var(--text3)">الاعتراض على محضر زيارة تفتيشية معتمد يتعلق بمنشأتك</div>
+      </button>`);
+  }
+  if (availableAppealTypes.includes('ban')) {
+    appealTypeCards.push(`
+      <button class="card" id="atype-ban" style="border:2px solid transparent;cursor:pointer;text-align:center;padding:20px;transition:.2s"
+        onclick="_selectAppealType('ban')">
+        <div style="font-size:28px;margin-bottom:10px">🚫</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">تظلم على قرار حظر</div>
+        <div style="font-size:12px;color:var(--text3)">الاعتراض على قرار الحظر الصادر بحق المنشأة</div>
+      </button>`);
+  }
+
   return `<div class="pg-head"><div><h1>تقديم تظلم جديد</h1><p>اختر نوع التظلم أولاً ثم حدد البند المتظلم منه</p></div>
     <div class="pg-acts"><button class="btn btn-secondary" onclick="navigateTo('appeals-list')">${ICONS.arrow_right}رجوع</button></div></div>
 
@@ -1159,24 +1228,7 @@ function renderAppealNew(role) {
   <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>الخطوة الأولى: اختر نوع التظلم</h3></div>
   <div class="pb">
     <div id="appeal-type-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
-      <button class="card" id="atype-complaint" style="border:2px solid transparent;cursor:pointer;text-align:center;padding:20px;transition:.2s"
-        onclick="_selectAppealType('complaint')">
-        <div style="font-size:28px;margin-bottom:10px">📋</div>
-        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">تظلم على قرار بلاغ</div>
-        <div style="font-size:12px;color:var(--text3)">الاعتراض على قرار إغلاق أو رفض بلاغ صادر عن الصندوق</div>
-      </button>
-      <button class="card" id="atype-visit" style="border:2px solid transparent;cursor:pointer;text-align:center;padding:20px;transition:.2s"
-        onclick="_selectAppealType('visit')">
-        <div style="font-size:28px;margin-bottom:10px">🏭</div>
-        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">تظلم على محضر زيارة</div>
-        <div style="font-size:12px;color:var(--text3)">الاعتراض على محضر زيارة تفتيشية صادر بعد الزيارة</div>
-      </button>
-      <button class="card" id="atype-ban" style="border:2px solid transparent;cursor:pointer;text-align:center;padding:20px;transition:.2s"
-        onclick="_selectAppealType('ban')">
-        <div style="font-size:28px;margin-bottom:10px">🚫</div>
-        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">تظلم على قرار حظر</div>
-        <div style="font-size:12px;color:var(--text3)">الاعتراض على قرار الحظر الصادر بحق المنشأة</div>
-      </button>
+      ${appealTypeCards.join('')}
     </div>
   </div></div>
 
@@ -1202,7 +1254,7 @@ function renderAppealNew(role) {
         <label class="flbl">رقم قرار الحظر المتظلم منه <span class="req">*</span></label>
         <select class="fc">
           <option value="">— اختر قرار الحظر —</option>
-          ${INSP_DATA.bans && INSP_DATA.bans.length ? INSP_DATA.bans.map(b=>`<option value="${b.id}">${b.id} — ${b.employerName}</option>`).join('') : '<option value="2025-06-000001">2025-06-000001 — مؤسسة البناء والتشييد المتكاملة</option>'}
+          ${banOpts}
         </select>
       </div>
       <div id="related-preview" style="display:none;margin-top:12px;padding:14px;border:1px solid var(--border);border-radius:var(--rsm);background:var(--g50)">
@@ -1238,10 +1290,12 @@ function renderAppealNew(role) {
   </div>
 
   <script>
+  var _appealAvailableTypes = ${JSON.stringify(availableAppealTypes)};
   var _appealComplaintsData = ${JSON.stringify(eligibleComplaints.map(c=>({id:c.id,type:c.type,status:c.status,employerName:c.employerName,submitDate:c.submitDate})))};
   var _appealVisitsData = ${JSON.stringify(eligibleVisits.map(v=>({id:v.id,employerName:v.employerName,status:v.status,scheduledDate:v.scheduledDate||v.actualDate})))};
   var _appealTypeLabels = { complaint:'تظلم على قرار بلاغ', visit:'تظلم على محضر زيارة', ban:'تظلم على قرار حظر' };
   function _selectAppealType(type) {
+    if(_appealAvailableTypes.indexOf(type) === -1) return;
     ['complaint','visit','ban'].forEach(function(t){
       var btn = document.getElementById('atype-'+t);
       if(btn){ btn.style.border = t===type ? '2px solid var(--primary)' : '2px solid transparent';

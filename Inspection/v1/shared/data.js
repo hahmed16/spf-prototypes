@@ -626,7 +626,7 @@ const INSP_DATA = {
       id: '2025-01-000006',
       type: 'شكوى عدم التسجيل',
       channel: 'إحالة رسمية خارجية',
-      status: 'قيد المراجعة',
+      status: 'تم إغلاق البلاغ',
       submittedBy: 'external-ref',
       submittedByName: 'وزارة العمل',
       submittedByCivil: null,
@@ -651,15 +651,26 @@ const INSP_DATA = {
       requestedData: null,
       requiredDocuments: [],
       verificationResults: [],
+      investigationResults: {
+        outcome: 'ثبوت المخالفة ومعالجتها',
+        findings: 'تم التحقق من ملف العمال المحال من وزارة العمل واتضح وجود نواقص في التسجيل تم تصحيحها واستكمالها من قبل المنشأة.',
+        corrective: 'استكمال تسجيل العقود الناقصة وتحديث بيانات الالتحاق في النظام خلال المهلة المحددة.',
+        fine: null,
+        decisionDate: '2025-01-22'
+      },
       attachments: [
         { name: 'خطاب الإحالة الرسمية.pdf',    size: '1.1 MB', date: '2025-01-12', type: 'pdf' },
         { name: 'ملف المخالفات السابقة.pdf',    size: '2.3 MB', date: '2025-01-12', type: 'pdf' }
       ],
       timeline: [
         { date: '2025-01-12 10:00', step: 'استلام الإحالة', action: 'تم استلام الإحالة الرسمية من وزارة العمل', actor: 'منى راشد البلوشي', actorRole: 'fund-staff' },
-        { date: '2025-01-12 10:30', step: 'تسجيل البلاغ',  action: 'تم تسجيل البلاغ في النظام',                actor: 'منى راشد البلوشي', actorRole: 'fund-staff' }
+        { date: '2025-01-12 10:30', step: 'تسجيل البلاغ',  action: 'تم تسجيل البلاغ في النظام',                actor: 'منى راشد البلوشي', actorRole: 'fund-staff' },
+        { date: '2025-01-18 12:15', step: 'استكمال المعالجة', action: 'تم استكمال التحقق من بيانات العقود الناقصة وتصحيح وضع المنشأة', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' },
+        { date: '2025-01-22 09:45', step: 'إغلاق البلاغ', action: 'تم اعتماد نتيجة المعالجة وإغلاق البلاغ', actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
       ],
-      notes: []
+      notes: [
+        { text: 'أغلقت الإحالة بعد استكمال تسجيل العقود الناقصة وتصحيح بيانات العمال في النظام.', author: 'سيف خلفان الأمري', date: '2025-01-22', role: 'monitoring-employee' }
+      ]
     },
 
     /* ── بلاغ 7: مسودة لدى مقدم الطلب (الصندوق) ── */
