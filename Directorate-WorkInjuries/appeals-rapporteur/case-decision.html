@@ -10,11 +10,11 @@
 <script src="../shared/config.js"></script>
 <script src="../shared/data.js"></script>
 <script src="../shared/layout.js"></script>
-<script src="../shared/components.js"></script>
+<script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'appeals-rapporteur', activePage: 'sessions-list' });
 const params = new URLSearchParams(window.location.search);
-const appealId = params.get('appeal') || 'APP-2025-000067';
+const appealId  = params.get('appeal')  || 'APP-2025-000067';
 const sessionId = params.get('session') || 'APP-SES-2025-0023';
 const appeal = WI_DATA.appeals.find(a=>a.id===appealId) || WI_DATA.appeals[0];
 const origReq = WI_DATA.allowances.find(r=>r.id===appeal?.originalRequestId);
@@ -26,6 +26,17 @@ setBreadcrumb([
 ]);
 
 document.addEventListener('DOMContentLoaded', () => {
+  const app = appeal.applicant || {};
+  const dec = appeal.decision  || {};
+  const ins = origReq?.insured    || {};
+  const inj = origReq?.injury     || {};
+  const atts = origReq?.attachments || [];
+  const isWork = origReq?.type === 'إصابة عمل';
+
+  const attHtml = atts.length===0
+    ?`<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد مرفقات</div>`
+    :atts.map(att=>{const ext=att.name?.split('.').pop()?.toLowerCase()||'oth';const icoMap={pdf:'pdf',doc:'doc',docx:'doc',jpg:'img',jpeg:'img',png:'img',mp3:'media',wav:'media',mp4:'media'};const svgMap={pdf:ICONS.file,doc:ICONS.file,img:ICONS.eye,media:ICONS.clock,oth:ICONS.file};const ico=icoMap[ext]||'oth';return `<div class="att-row"><div class="att-ico ${ico}">${svgMap[ico]||ICONS.file}</div><div class="att-info"><div class="att-name">${att.name}</div><div class="att-meta">${att.type} · ${att.uploadedBy} · ${att.uploadDate}</div></div><div class="att-acts"><button class="ibtn" onclick="showToast('جارٍ تحميل الملف...','i')">${ICONS.download}</button></div></div>`;}).join('');
+
   getContent().innerHTML = `
     <div class="pg-head">
       <div><h1>إدخال القرار النهائي للتظلم</h1>
@@ -42,14 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb-c">
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
           <div><div class="flbl" style="margin-bottom:4px">رقم التظلم</div><div style="font-family:monospace;font-weight:800;color:var(--primary)">${appeal.id}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">مقدم التظلم</div><div style="font-weight:600">${appeal.applicant.name}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">سبب التظلم</div><div>${appeal.appealReason}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">مقدم التظلم</div><div style="font-weight:600">${app.name||'—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">سبب التظلم</div><div>${appeal.appealReason||'—'}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">حالة التظلم</div>${statusBadge(appeal.status)}</div>
         </div>
       </div>
     </div>
 
-    <!-- بيانات الطلب الأصلي والقرار المتظلم منه -->
+    <!-- بيانات التظلم والطلب الأصلي (قابلة للطي) -->
     <div style="border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;margin-bottom:16px">
       <div style="padding:10px 18px;background:var(--g100);border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:space-between"
         onclick="toggleData()">
@@ -57,28 +68,77 @@ document.addEventListener('DOMContentLoaded', () => {
         <span id="toggle-icon">${ICONS.arrow_left}</span>
       </div>
       <div id="appeal-data-body" style="display:none">
-        ${renderApplicantPanel(appeal.applicant)}
+
+        <!-- بيانات مقدم التظلم -->
+        <div class="card" style="margin:0;border-radius:0;border-left:none;border-right:none">
+          <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم التظلم</h3></div>
+          <div class="pb">
+            <div class="fg fg-3">
+              <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${app.role||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${app.name||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${app.civil||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(app.phone,'غير متوفر')}</div></div>
+              <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(app.email,'غير متوفر')}</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- القرار المتظلم منه -->
         <div class="card card-ro" style="margin:0;border-radius:0;border-left:none;border-right:none">
           <div class="ph"><h3><div class="pico rd">${ICONS.warn}</div>القرار المتظلم منه</h3></div>
           <div class="pb">
             <div class="fg fg-3">
-              <div class="fgrp"><label class="flbl">نوع القرار</label><div class="fro"><span class="badge b-rejected">${appeal.decision.type}</span></div></div>
-              <div class="fgrp"><label class="flbl">الجهة مُصدِرة القرار</label><div class="fro">${appeal.decision.issuer}</div></div>
-              <div class="fgrp"><label class="flbl">تاريخ القرار</label><div class="fro">${appeal.decision.date}</div></div>
-              <div class="fgrp span-full"><label class="flbl">مضمون القرار</label><div class="fro">${appeal.decision.details}</div></div>
+              <div class="fgrp"><label class="flbl">نوع القرار</label><div class="fro"><span class="badge b-rejected">${dec.type||'—'}</span></div></div>
+              <div class="fgrp"><label class="flbl">الجهة مُصدِرة القرار</label><div class="fro">${dec.issuer||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">تاريخ القرار</label><div class="fro">${dec.date||'—'}</div></div>
+              <div class="fgrp span-full"><label class="flbl">مضمون القرار</label><div class="fro">${dec.details||'—'}</div></div>
             </div>
           </div>
         </div>
+
+        <!-- أسباب وتفاصيل التظلم -->
         <div class="card card-ro" style="margin:0;border-radius:0;border-left:none;border-right:none">
           <div class="ph"><h3><div class="pico or">${ICONS.note}</div>أسباب وتفاصيل التظلم</h3></div>
           <div class="pb">
-            <div class="fgrp"><label class="flbl">تفاصيل سبب التظلم</label><div class="fro" style="min-height:50px;align-items:flex-start;padding-top:8px">${appeal.appealDetails}</div></div>
+            <div class="fgrp"><label class="flbl">تفاصيل سبب التظلم</label><div class="fro" style="min-height:50px;align-items:flex-start;padding-top:8px">${appeal.appealDetails||'—'}</div></div>
           </div>
         </div>
-        ${origReq ? `
-        ${renderInsuredPersonPanel(origReq.insured)}
-        ${renderInjuryDataPanel(origReq.injury, origReq.type)}
-        ${renderAttachmentsPanel(origReq.attachments, false)}` : ''}
+
+        ${origReq?`
+        <!-- بيانات المؤمن عليه من الطلب الأصلي -->
+        <div class="card card-ro" style="margin:0;border-radius:0;border-left:none;border-right:none">
+          <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات المؤمن عليه (من الطلب الأصلي)</h3></div>
+          <div class="pb">
+            <div class="fg fg-4">
+              <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${ins.name||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${ins.civil||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${formatDate(ins.dob)}</div></div>
+              <div class="fgrp"><label class="flbl">الجنس</label><div class="fro">${ins.gender||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${ins.nationality||'—'}</div></div>
+              <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${ins.insuranceStatus==='نشط'?'b-approved':'b-rejected'}">${ins.insuranceStatus||'—'}</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- بيانات الإصابة من الطلب الأصلي -->
+        <div class="card card-ro" style="margin:0;border-radius:0;border-left:none;border-right:none">
+          <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>بيانات ${isWork?'الإصابة':'المرض المهني'} (من الطلب الأصلي)</h3></div>
+          <div class="pb">
+            <div class="fg fg-3">
+              <div class="fgrp"><label class="flbl">نوع الحالة</label><div class="fro">${normalizeDisplay(inj.caseType||inj.diagnosis)}</div></div>
+              <div class="fgrp"><label class="flbl">تاريخ الواقعة</label><div class="fro">${formatDate(inj.incidentDate||inj.firstSuspicion)}</div></div>
+              ${isWork?`<div class="fgrp"><label class="flbl">الجزء المصاب</label><div class="fro">${inj.bodyPart||'—'}</div></div>`:''}
+              <div class="fgrp span-full"><label class="flbl">وصف الحالة</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${normalizeDisplay(inj.description)}</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- المرفقات من الطلب الأصلي -->
+        <div class="card" style="margin:0;border-radius:0;border-left:none;border-right:none">
+          <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات (من الطلب الأصلي)</h3></div>
+          <div class="pb">${attHtml}</div>
+        </div>`:''}
+
       </div>
     </div>
 
@@ -101,7 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
           </select>
         </div>
 
-        <!-- تفاصيل التعديل -->
         <div id="modify-section" style="display:none">
           <div class="fgrp">
             <label class="flbl">وصف التعديل المقترح <span class="req">*</span></label>
@@ -122,8 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <div class="fgrp">
-          <label class="flbl">إرفاق ملف (اختياري)</label>
-          <input type="file" class="fc" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp3,.wav,.mp4">
+          <label class="flbl">إرفاق ملف داعم <span style="font-weight:400;color:var(--text3)">(اختياري)</span></label>
+          ${renderModernUploadComponent({ idPrefix: 'decision-att', subTitle: 'PDF, Word, صور — الحجم الأقصى 20 ميغابايت' })}
         </div>
 
         <div class="dp-acts">
@@ -148,12 +207,12 @@ function onTypeChange() {
 }
 
 function saveFinalDecision() {
-  const type = document.getElementById('final-decision-type').value;
+  const type    = document.getElementById('final-decision-type').value;
   const content = document.getElementById('decision-content').value.trim();
-  const effect = document.getElementById('decision-effect').value.trim();
-  if (!type) { showToast('يرجى اختيار نوع القرار النهائي','w'); return; }
+  const effect  = document.getElementById('decision-effect').value.trim();
+  if (!type)    { showToast('يرجى اختيار نوع القرار النهائي','w'); return; }
   if (!content) { showToast('يرجى كتابة مضمون القرار التفصيلي','w'); return; }
-  if (!effect) { showToast('يرجى تحديد أثر القرار على الطلب الأصلي','w'); return; }
+  if (!effect)  { showToast('يرجى تحديد أثر القرار على الطلب الأصلي','w'); return; }
 
   confirmAction({
     title: 'تأكيد اعتماد القرار النهائي',

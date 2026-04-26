@@ -10,7 +10,7 @@
 <script src="../shared/config.js"></script>
 <script src="../shared/data.js"></script>
 <script src="../shared/layout.js"></script>
-<script src="../shared/components.js"></script>
+<script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'supervisory-committee', activePage: 'licensing-list' });
 const params = new URLSearchParams(window.location.search);
@@ -18,19 +18,80 @@ const req = WI_DATA.licensing.find(r => r.id === params.get('id')) || WI_DATA.li
 currentRequestId = req.id;
 setBreadcrumb([{ label: 'الترخيص', page: 'licensing-list' }, { label: `تفاصيل ${req.id}` }]);
 
-// حالة التوقيع لهذه اللجنة
 let mySigned = false;
 
 document.addEventListener('DOMContentLoaded', renderPage);
 
 function renderPage() {
   const hasDecision = req.committeeDecision !== null;
-  const canSign = hasDecision && !mySigned;
+  const inst = req.institution || {};
+  const docs = req.doctors || [];
+  const confirmedCount = docs.filter(d=>d.confirmStatus==='تم التأكيد').length;
+  const sess = req.session;
+  const cd = req.committeeDecision;
+  const lic = req.activeLicense;
+  const licExpiringSoon = lic && (new Date(lic.expiryDate) - new Date() < 90 * 24 * 60 * 60 * 1000);
+  const atts = req.attachments || [];
+  const notes = req.notes || [];
+  const tl = req.timeline || [];
+
+  const sessionHtml = sess ? `
+  <div class="card card-cum">
+    <div class="ph"><h3><div class="pico tl">${ICONS.calendar}</div>بيانات الجلسة</h3><span class="stg-lbl">جلسة العرض</span></div>
+    <div class="pb">
+      <div class="fg fg-3" style="margin-bottom:14px">
+        <div class="fgrp"><label class="flbl">رقم الجلسة</label><div class="fro" style="font-family:monospace">${sess.id||'—'}</div></div>
+        <div class="fgrp"><label class="flbl">المؤسسة الصحية</label><div class="fro">${sess.institution||'—'}</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ ووقت الجلسة</label><div class="fro">${sess.date?`${formatDate(sess.date)}${sess.time?` — ${sess.time}`:''}` : '—'}</div></div>
+        <div class="fgrp"><label class="flbl">الحد الادني للحضور</label><div class="fro"><span class="badge ${sess.quorum?'b-approved':'b-returned'}">${sess.quorum?'الحد الادني مكتمل':'الحد الادني غير مكتمل'}</span></div></div>
+      </div>
+      ${sess.members?.length?`<div class="flbl" style="margin-bottom:8px">أعضاء اللجنة</div><div class="tbl-wrap"><table class="dtbl"><thead><tr><th>الاسم</th><th>التخصص</th><th>المنصب</th><th>حالة الحضور</th></tr></thead><tbody>${sess.members.map(m=>`<tr><td>${m.name}</td><td>${m.specialty}</td><td>${m.role}</td><td><span class="badge ${m.attendance==='حاضر'?'b-approved':m.attendance==='غائب'?'b-rejected':'b-phead'}">${m.attendance||'مجدول'}</span></td></tr>`).join('')}</tbody></table></div>`:''}
+    </div>
+  </div>` : '';
+
+  const committeeDecisionHtml = cd ? `
+  <div class="card card-cum">
+    <div class="ph"><h3><div class="pico gr">${ICONS.pen}</div>قرار اللجنة الطبية الإشرافية</h3><span class="stg-lbl">قرار اللجنة</span></div>
+    <div class="pb">
+      <div class="fg fg-3">
+        <div class="fgrp"><label class="flbl">نوع القرار</label><div class="fro"><span class="badge ${cd.type==='موافقة'||cd.type==='اعتماد الترخيص'?'b-approved':cd.type==='رفض'?'b-rejected':'b-phead'}">${cd.type||'—'}</span></div></div>
+        <div class="fgrp"><label class="flbl">تاريخ القرار</label><div class="fro">${formatDate(cd.date)}</div></div>
+        <div class="fgrp span-full"><label class="flbl">مضمون القرار التفصيلي</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${cd.content||'—'}</div></div>
+        ${cd.signatories?.length?`<div class="fgrp span-full"><label class="flbl">الأعضاء الموقعون</label><div class="fro">${cd.signatories.join('، ')}</div></div>`:''}
+      </div>
+    </div>
+  </div>` : '';
+
+  const activeLicenseHtml = lic ? `
+  <div class="card card-cum">
+    <div class="ph"><h3><div class="pico gr">${ICONS.shield}</div>بيانات الترخيص النشط</h3><span class="stg-lbl">ترخيص معتمد</span></div>
+    <div class="pb">
+      ${licExpiringSoon?`<div class="alert alert-w" style="margin-bottom:12px">${ICONS.warn}<span>الترخيص ينتهي قريباً.</span></div>`:''}
+      <div class="fg fg-4">
+        <div class="fgrp"><label class="flbl">رقم الترخيص</label><div class="fro" style="font-family:monospace;font-weight:700;color:var(--primary)">${lic.number||'—'}</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ الإصدار</label><div class="fro">${formatDate(lic.issueDate)}</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ الانتهاء</label><div class="fro" style="${licExpiringSoon?'color:var(--warning);font-weight:700':''}">${formatDate(lic.expiryDate)}</div></div>
+        <div class="fgrp"><label class="flbl">مدة الصلاحية</label><div class="fro">${lic.months} شهراً</div></div>
+      </div>
+    </div>
+  </div>` : '';
+
+  const attHtml = atts.length===0
+    ?`<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد مرفقات</div>`
+    :atts.map(att=>{const ext=att.name?.split('.').pop()?.toLowerCase()||'oth';const icoMap={pdf:'pdf',doc:'doc',docx:'doc',jpg:'img',jpeg:'img',png:'img',mp3:'media',wav:'media',mp4:'media'};const svgMap={pdf:ICONS.file,doc:ICONS.file,img:ICONS.eye,media:ICONS.clock,oth:ICONS.file};const ico=icoMap[ext]||'oth';return `<div class="att-row"><div class="att-ico ${ico}">${svgMap[ico]||ICONS.file}</div><div class="att-info"><div class="att-name">${att.name}</div><div class="att-meta">${att.type} · ${att.uploadedBy} · ${att.uploadDate}</div></div><div class="att-acts"><button class="ibtn" onclick="showToast('جارٍ تحميل الملف...','i')">${ICONS.download}</button></div></div>`;}).join('');
+
+  const notesHtml = notes.length===0
+    ?`<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">لا توجد ملاحظات</div>`
+    :notes.map(n=>`<div class="note-item"><div class="note-av">${n.author?.charAt(0)||'؟'}</div><div class="note-c"><div class="note-hd"><span class="note-auth">${n.author}</span><span class="note-role">${n.role}</span><span class="note-time">${n.time}</span></div><div class="note-txt">${n.text}</div></div></div>`).join('');
+
+  const tlHtml = tl.length===0
+    ?`<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد أحداث</div>`
+    :tl.map(e=>{const dc=e.type==='success'?'s':e.type==='danger'?'d':e.type==='warning'?'w':'';const ic=e.type==='success'?ICONS.check:e.type==='danger'?ICONS.x:e.type==='warning'?ICONS.warn:ICONS.clock;return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus?`<div class="tl-states">${e.fromStatus?`<span class="badge b-draft" style="font-size:10px">${e.fromStatus.substring(0,300)}</span><span>${ICONS.arrow_right}</span>`:''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus]||'b-draft'}" style="font-size:10px">${e.toStatus.substring(0,300)}</span></div>`:''} ${e.note?`<div class="tl-note">${e.note}</div>`:''}</div></div>`;}).join('');
 
   getContent().innerHTML = `
     <div class="pg-head">
       <div>
-        <h1>تفاصيل طلب ${req.requestType === 'جديد' ? 'الترخيص' : 'التجديد'}</h1>
+        <h1>تفاصيل طلب ${req.requestType==='جديد'?'الترخيص':'التجديد'}</h1>
         <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
       </div>
       <div class="pg-acts">
@@ -43,7 +104,7 @@ function renderPage() {
       <span>اللجنة الطبية الإشرافية تطّلع على الطلب ثم تحضر الجلسة وتُدخل القرار عبر المقرر، ثم توقّع إلكترونياً على القرار النهائي.</span>
     </div>
 
-    <!-- ملخص -->
+    <!-- ملخص الطلب -->
     <div class="card" style="border-right:4px solid var(--primary)">
       <div class="pb-c">
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
@@ -55,30 +116,77 @@ function renderPage() {
       </div>
     </div>
 
-    ${renderInstitutionPanel(req.institution)}
-    ${renderDoctorsPanel(req.doctors, false)}
+    <!-- بيانات المؤسسة الصحية -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات المؤسسة الصحية</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">اسم المؤسسة</label><div class="fro" style="font-weight:700">${inst.name||'—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro" style="font-family:monospace">${inst.cr||'—'}</div></div>
+          <div class="fgrp"><label class="flbl">حالة السجل التجاري</label><div class="fro"><span class="badge ${inst.crStatus==='سارٍ'?'b-approved':'b-expired'}">${inst.crStatus||'—'}</span> <span style="font-size:11px;color:var(--text3)">(ينتهي: ${formatDate(inst.crExpiry)})</span></div></div>
+          <div class="fgrp"><label class="flbl">نوع المؤسسة</label><div class="fro">${inst.type||'—'}</div></div>
+          <div class="fgrp"><label class="flbl">المحافظة / الولاية</label><div class="fro">${inst.governorate||'—'}</div></div>
+          <div class="fgrp"><label class="flbl">العنوان</label><div class="fro">${inst.address||'—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${inst.phone||'—'}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${inst.email||'—'}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- الأطباء المرشحون -->
+    <div class="card card-ro">
+      <div class="ph">
+        <h3><div class="pico bl">${ICONS.user}</div>الأطباء المرشحون للجنة</h3>
+        <span style="font-size:12px;color:${confirmedCount===docs.length?'var(--accent)':'var(--warning)'}">
+          ${confirmedCount} / ${docs.length} مؤكد
+        </span>
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>الاسم</th><th>الرقم المدني</th><th>التخصص</th><th>المنصب</th><th>التأكيد</th><th>الازدواجية</th></tr></thead>
+            <tbody>
+              ${docs.map(d=>`<tr><td style="font-weight:600">${d.name}</td><td style="font-family:monospace;font-size:11.5px">${d.civil}</td><td>${d.specialty}</td><td>${d.role}</td><td><span class="badge ${d.confirmStatus==='تم التأكيد'?'b-approved':d.confirmStatus==='رفض'?'b-rejected':'b-phead'}">${d.confirmStatus}</span></td><td><span class="badge ${d.duplicateCheck==='لا يوجد تعارض'?'b-approved':'b-rejected'}">${d.duplicateCheck}</span></td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
     <!-- التحقق من الاشتراطات -->
     <div class="card card-ro">
-      <div class="ph"><h3><div class="pico ${req.verification.minMet?'gr':'rd'}">${req.verification.minMet?ICONS.check:ICONS.warn}</div>التحقق من اشتراطات الترخيص</h3></div>
+      <div class="ph"><h3><div class="pico ${req.verification?.minMet?'gr':'rd'}">${req.verification?.minMet?ICONS.check:ICONS.warn}</div>التحقق من اشتراطات الترخيص</h3></div>
       <div class="pb">
         <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">إجمالي الأطباء</label><div class="fro"><strong>${req.verification.totalDoctors}</strong></div></div>
+          <div class="fgrp"><label class="flbl">إجمالي الأطباء</label><div class="fro"><strong>${req.verification?.totalDoctors||0}</strong></div></div>
           <div class="fgrp"><label class="flbl">المؤكدون</label>
-            <div class="fro"><strong style="color:${req.verification.confirmedDoctors===req.verification.totalDoctors?'var(--accent)':'var(--warning)'}">${req.verification.confirmedDoctors} / ${req.verification.totalDoctors}</strong></div>
+            <div class="fro"><strong style="color:${req.verification?.confirmedDoctors===req.verification?.totalDoctors?'var(--accent)':'var(--warning)'}">${req.verification?.confirmedDoctors||0} / ${req.verification?.totalDoctors||0}</strong></div>
           </div>
           <div class="fgrp"><label class="flbl">استيفاء الحد الأدنى</label>
-            <div class="fro"><span class="badge ${req.verification.minMet?'b-approved':'b-returned'}">${req.verification.minMet?'مستوفى':'غير مستوفى'}</span></div>
+            <div class="fro"><span class="badge ${req.verification?.minMet?'b-approved':'b-returned'}">${req.verification?.minMet?'مستوفى':'غير مستوفى'}</span></div>
           </div>
         </div>
       </div>
     </div>
 
-    ${req.session ? renderSessionPanel(req.session) : ''}
-    ${req.committeeDecision ? renderCommitteeDecisionPanel(req.committeeDecision, 'قرار اللجنة الطبية الإشرافية') : ''}
-    ${req.activeLicense ? renderActiveLicensePanel(req.activeLicense) : ''}
-    ${renderAttachmentsPanel(req.attachments, false)}
-    ${renderOperationalNotes(req.notes, false)}
+    ${sessionHtml}
+    ${committeeDecisionHtml}
+    ${activeLicenseHtml}
+
+    <!-- المرفقات -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات <span style="font-size:11px;font-weight:400;color:var(--text3)">(${atts.length} مرفق)</span></h3></div>
+      <div class="pb">${attHtml}</div>
+    </div>
+
+    <!-- الملاحظات التشغيلية -->
+    <div class="card op-notes-card collapsed" data-notes-init="0">
+      <div class="ph op-notes-head" onclick="toggleOperationalNotes(this.closest('.op-notes-card'))">
+        <h3><div class="pico gy">${ICONS.note}</div>الملاحظات التشغيلية <span style="font-size:11px;font-weight:400;color:var(--text3)">(لا تغيّر حالة الطلب)</span></h3>
+        <span class="op-notes-chevron">${ICONS.arrow_left}</span>
+      </div>
+      <div class="pb">${notesHtml}</div>
+    </div>
 
     <!-- التوقيع الإلكتروني -->
     ${hasDecision ? `
@@ -99,7 +207,7 @@ function renderPage() {
         </div>
         <div class="fgrp" style="margin-bottom:16px">
           <label class="flbl">القرار المراد التوقيع عليه</label>
-          <div class="fro"><span class="badge ${req.committeeDecision.type==='اعتماد الترخيص'?'b-approved':'b-rejected'}">${req.committeeDecision.type}</span></div>
+          <div class="fro"><span class="badge ${cd?.type==='اعتماد الترخيص'?'b-approved':'b-rejected'}">${cd?.type||'—'}</span></div>
         </div>
         <button class="btn btn-accent btn-lg" onclick="doElectronicSign()">
           ${ICONS.pen} توقيع إلكتروني على قرار الجلسة
@@ -111,7 +219,11 @@ function renderPage() {
       <span>لم يُدخَل قرار الجلسة بعد — يقوم المقرر بإدخال القرار ثم يُتاح لك التوقيع.</span>
     </div>`}
 
-    ${renderTimeline(req.timeline)}`;
+    <!-- السجل الزمني -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني الكامل للطلب</h3></div>
+      <div class="pb"><div class="tl">${tlHtml}</div></div>
+    </div>`;
 }
 
 function doElectronicSign() {
