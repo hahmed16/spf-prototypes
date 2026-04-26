@@ -38,6 +38,31 @@ function _noData() {
   return `<div class="empty-st">${ICONS.inbox}<h4>لا توجد سجلات</h4><p>لم يتم العثور على بيانات تطابق معايير البحث</p></div>`;
 }
 
+/* ── Tab view helpers ── */
+function _tabView(tabId, tabs, defaultIdx) {
+  if (!defaultIdx) defaultIdx = 0;
+  const nav = tabs.map((t, i) => {
+    const badge = t.badge ? `<span class="tab-badge">${t.badge}</span>` : '';
+    return `<button class="dtab-btn${i===defaultIdx?' active':''}" onclick="_switchTab('${tabId}',${i},this)">${t.label}${badge}</button>`;
+  }).join('');
+  const panes = tabs.map((t, i) =>
+    `<div class="dtab-pane${i===defaultIdx?' active':''}" id="${tabId}-${i}">${t.content}</div>`
+  ).join('');
+  return `<div class="dtabs" id="${tabId}"><div class="dtabs-nav">${nav}</div>${panes}</div>`;
+}
+function _switchTab(tabId, idx, btn) {
+  const el = document.getElementById(tabId);
+  if (!el) return;
+  el.querySelectorAll('.dtab-btn').forEach((b, i) => b.classList.toggle('active', i===idx));
+  el.querySelectorAll('.dtab-pane').forEach((p, i) => p.classList.toggle('active', i===idx));
+}
+function _summaryBar(items) {
+  const cells = items.map(([label, val]) =>
+    `<div class="dsb-item"><span class="dsb-label">${label}</span><div class="dsb-val">${val}</div></div>`
+  ).join('');
+  return `<div class="dsb">${cells}</div>`;
+}
+
 /* ── لوحة البيانات ── */
 function renderDashboard(role) {
   const kpis = {
@@ -831,35 +856,56 @@ function renderComplaintDetails(role) {
       </div>
     </div></div>` : '';
 
-  return `<div class="pg-head"><div><h1>${c.id}</h1><p>${c.type} — ${c.employerName}</p></div>
+  const pgHead = `<div class="pg-head"><div><h1>${c.id}</h1><p>${c.type} — ${c.employerName}</p></div>
     <div class="pg-acts">${statusBadge(c.status)}<span class="badge ${_priClass(c.priority)}">${c.priority}</span>
-      <button class="btn btn-secondary btn-sm" onclick="navigateTo('complaints-list')">${ICONS.arrow_right}رجوع</button></div></div>
+      <button class="btn btn-secondary btn-sm" onclick="navigateTo('complaints-list')">${ICONS.arrow_right}رجوع</button></div></div>`;
 
-  ${requestPanel}
-  ${submitterPanel}
-  ${employerPanel}
-  ${workerPanel}
-  ${returnedActionPanel}
-  ${draftActionsPanel}
-  ${dataComparePanel}
-  ${verPanel}
-  ${docsPanel}
-  ${rolePanels}
-  ${actionPanel}
-  ${attachmentsPanel}
-  ${showWorkflowPanels ? renderNotes(c.notes, c.id) : ''}
-  ${timelinePanel}
-  ${correspondencePanel}
+  const summaryBar = _summaryBar([
+    ['رقم البلاغ', `<strong>${c.id}</strong>`],
+    ['تاريخ التقديم', c.submitDate],
+    ['نوع البلاغ', c.type],
+    ['الأولوية', `<span class="badge ${_priClass(c.priority)}">${c.priority}</span>`],
+    ['الحالة', statusBadge(c.status)],
+    ...(c.assignedTo && isInternal ? [['المختص', c.assignedTo]] : []),
+  ]);
 
-  <script>
-    // Initialize correspondence documentation
+  const initScript = `<script>
     (function() {
-      const correspondenceContainer = document.getElementById('correspondence-container');
-      if (correspondenceContainer && typeof renderCorrespondenceDocumentation === 'function') {
-        correspondenceContainer.innerHTML = renderCorrespondenceDocumentation('complaints', '${c.id}', '${role}');
-      }
+      const el = document.getElementById('correspondence-container');
+      if (el && typeof renderCorrespondenceDocumentation === 'function')
+        el.innerHTML = renderCorrespondenceDocumentation('complaints', '${c.id}', '${role}');
     })();
   </script>`;
+
+  const tid = 'cdt-' + c.id.replace(/[^a-z0-9]/gi, '-');
+
+  if (isExternal) {
+    const actionRequired = isDraft || isReturned;
+    const actionContent = returnedActionPanel + draftActionsPanel;
+    const tabs = [
+      { label: 'البيانات الأساسية', content: requestPanel + submitterPanel + employerPanel + workerPanel },
+      { label: 'المستندات', content: (docsPanel || '') + attachmentsPanel },
+      { label: 'السجل الزمني', content: timelinePanel },
+    ];
+    if (actionRequired) tabs.splice(2, 0, { label: 'الإجراءات المطلوبة', content: actionContent, badge: '1' });
+    const defaultTab = actionRequired ? 2 : 0;
+    return pgHead + summaryBar + _tabView(tid, tabs, defaultTab);
+  }
+
+  const notesPanel = showWorkflowPanels ? renderNotes(c.notes, c.id) : '';
+  const historyContent = timelinePanel + correspondencePanel + initScript;
+  const verifyContent = (dataComparePanel || '') + (verPanel || '') + (docsPanel || '');
+  const actionContent = (rolePanels || '') + (actionPanel || '');
+  const hasAction = (actionPanel || '').length > 0;
+
+  const tabs = [
+    { label: 'البيانات الأساسية', content: requestPanel + submitterPanel + employerPanel + workerPanel },
+    { label: 'التحقق والبيانات', content: verifyContent || '<p class="tx3 fs11" style="padding:16px">لا توجد بيانات تحقق لهذا البلاغ</p>' },
+    { label: 'الإجراءات', content: actionContent || '<p class="tx3 fs11" style="padding:16px">لا توجد إجراءات متاحة في الوضع الحالي</p>', badge: hasAction ? '!' : '' },
+    { label: 'المرفقات والملاحظات', content: attachmentsPanel + notesPanel },
+    { label: 'السجل والمراسلات', content: historyContent },
+  ];
+  return pgHead + summaryBar + _tabView(tid, tabs, 0);
 }
 
 function _renderComplaintTimeline(timeline) {
@@ -1477,44 +1523,65 @@ function renderAppealDetails(role) {
       <div class="fgrp"><label class="flbl">تاريخ التقديم</label><div class="fro">${a.submitDate}</div></div>
     </div></div></div>`;
 
-  return `<div class="pg-head"><div><h1>${a.id}</h1><p>${a.type} — ${a.employerName}</p></div>
-    <div class="pg-acts">${statusBadge(a.status)}<button class="btn btn-secondary btn-sm" onclick="navigateTo('appeals-list')">${ICONS.arrow_right}رجوع</button></div></div>
+  const pgHead = `<div class="pg-head"><div><h1>${a.id}</h1><p>${a.type} — ${a.employerName}</p></div>
+    <div class="pg-acts">${statusBadge(a.status)}<button class="btn btn-secondary btn-sm" onclick="navigateTo('appeals-list')">${ICONS.arrow_right}رجوع</button></div></div>`;
 
-  <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>بيانات طلب التظلم</h3></div>
+  const summaryBar = _summaryBar([
+    ['رقم التظلم', `<strong>${a.id}</strong>`],
+    ['النوع', a.type],
+    ['المنشأة', a.employerName],
+    ['تاريخ التقديم', a.submitDate],
+    ['البند المرتبط', `${a.relatedId} (${a.relatedType})`],
+    ['الحالة', statusBadge(a.status)],
+  ]);
+
+  const appealDataCard = `<div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>بيانات طلب التظلم</h3></div>
   <div class="pb"><div class="fg fg-2">
     <div class="fgrp"><label class="flbl">رقم التظلم</label><div class="fro fw7">${a.id}</div></div>
     <div class="fgrp"><label class="flbl">نوع التظلم</label><div class="fro">${a.type}</div></div>
     <div class="fgrp"><label class="flbl">البند المرتبط</label><div class="fro txp fw7">${a.relatedId} (${a.relatedType})</div></div>
     <div class="fgrp"><label class="flbl">الحالة</label><div class="fro">${statusBadge(a.status)}</div></div>
     <div class="fgrp span-full"><label class="flbl">أسباب التظلم</label><div class="fro" style="min-height:70px;white-space:pre-wrap">${a.reasons}</div></div>
-  </div></div></div>
+  </div></div></div>`;
 
-  ${submitterPanel}
-  ${relatedPanel}
-  ${decisionHtml}
-  ${actionPanel}
+  const attachmentsCard = `<div class="card"><div class="ph"><h3><span class="pico or">${ICONS.upload}</span>المرفقات (${(a.attachments||[]).length})</h3></div>
+  <div class="pb">${(a.attachments||[]).length ? a.attachments.map(f => attRow(f)).join('') : '<div class="tx3 fs11">لا توجد مرفقات</div>'}</div></div>`;
 
-  <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.upload}</span>المرفقات (${(a.attachments||[]).length})</h3></div>
-  <div class="pb">${(a.attachments||[]).length ? a.attachments.map(f => attRow(f)).join('') : '<div class="tx3 fs11">لا توجد مرفقات</div>'}</div></div>
+  const timelineCard = `<div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>السجل الزمني</h3></div>
+  <div class="pb">${renderTimeline(a.timeline)}</div></div>`;
 
-  ${!isExternal ? renderNotes(a.notes, a.id) : ''}
+  const hasAction = (actionPanel || '').length > 0;
+  const tid = 'adt-' + a.id.replace(/[^a-z0-9]/gi, '-');
 
-  <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>السجل الزمني</h3></div>
-  <div class="pb">${renderTimeline(a.timeline)}</div></div>
+  if (isExternal) {
+    const tabs = [
+      { label: 'بيانات التظلم', content: appealDataCard + submitterPanel },
+      { label: 'البيانات المرتبطة', content: relatedPanel || '<p class="tx3 fs11" style="padding:16px">لا توجد بيانات مرتبطة</p>' },
+      { label: 'القرار', content: decisionHtml || '<p class="tx3 fs11" style="padding:16px">لم يصدر قرار بعد</p>' },
+      { label: 'المرفقات والسجل', content: attachmentsCard + timelineCard },
+    ];
+    return pgHead + summaryBar + _tabView(tid, tabs, 0);
+  }
 
-  ${!isExternal ? `
-  <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.mail}</span>المراسلات</h3></div>
-  <div class="pb" id="correspondence-container"></div></div>
-
-  <script>
-    // Initialize correspondence documentation
+  const initScript = `<script>
     (function() {
-      const correspondenceContainer = document.getElementById('correspondence-container');
-      if (correspondenceContainer && typeof renderCorrespondenceDocumentation === 'function') {
-        correspondenceContainer.innerHTML = renderCorrespondenceDocumentation('appeals', '${a.id}', '${role}');
-      }
+      const el = document.getElementById('correspondence-container');
+      if (el && typeof renderCorrespondenceDocumentation === 'function')
+        el.innerHTML = renderCorrespondenceDocumentation('appeals', '${a.id}', '${role}');
     })();
-  </script>` : ''}`;
+  </script>`;
+
+  const correspondenceCard = `<div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.mail}</span>المراسلات</h3></div>
+  <div class="pb" id="correspondence-container"></div></div>`;
+
+  const tabs = [
+    { label: 'بيانات التظلم', content: appealDataCard + submitterPanel },
+    { label: 'البيانات المرتبطة', content: relatedPanel || '<p class="tx3 fs11" style="padding:16px">لا توجد بيانات مرتبطة</p>' },
+    { label: 'القرار والإجراءات', content: (decisionHtml || '') + (actionPanel || '<p class="tx3 fs11" style="padding:16px">لا توجد إجراءات متاحة في الوضع الحالي</p>'), badge: hasAction ? '!' : '' },
+    { label: 'المرفقات والملاحظات', content: attachmentsCard + renderNotes(a.notes, a.id) },
+    { label: 'السجل والمراسلات', content: timelineCard + correspondenceCard },
+  ];
+  return pgHead + summaryBar + _tabView(tid, tabs, hasAction ? 2 : 0) + initScript;
 }
 
 /* ── قائمة الزيارات ── */
@@ -1636,10 +1703,20 @@ function renderVisitDetails(role, type) {
       `<div class="fgrp"><label class="flbl">ملاحظات المراجعة</label><textarea class="fc" rows="3" placeholder="أدخل ملاحظاتك على المحضر..."></textarea></div>`);
   }
 
-  return `<div class="pg-head"><div><h1>${v.id}</h1><p>${typeLabel} — ${v.employerName}</p></div>
-    <div class="pg-acts">${statusBadge(v.status)}<button class="btn btn-secondary btn-sm" onclick="navigateTo('${listPage}')">${ICONS.arrow_right}رجوع</button></div></div>
+  const pgHead = `<div class="pg-head"><div><h1>${v.id}</h1><p>${typeLabel} — ${v.employerName}</p></div>
+    <div class="pg-acts">${statusBadge(v.status)}<button class="btn btn-secondary btn-sm" onclick="navigateTo('${listPage}')">${ICONS.arrow_right}رجوع</button></div></div>`;
 
-  <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.clipboard}</span>معلومات الزيارة</h3></div>
+  const summaryBar = _summaryBar([
+    ['رقم الزيارة', `<strong>${v.id}</strong>`],
+    ['النوع', typeLabel],
+    ['المنشأة', v.employerName],
+    ['المفتش', v.inspectorName],
+    ['التاريخ المجدول', v.scheduledDate],
+    ['التنفيذ', v.actualDate || 'لم ينفذ'],
+    ['الحالة', statusBadge(v.status)],
+  ]);
+
+  const visitInfoCard = `<div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.clipboard}</span>معلومات الزيارة</h3></div>
   <div class="pb"><div class="fg fg-2">
     <div class="fgrp"><label class="flbl">رقم الزيارة</label><div class="fro fw7">${v.id}</div></div>
     <div class="fgrp"><label class="flbl">نوع الزيارة</label><div class="fro">${typeLabel}</div></div>
@@ -1651,43 +1728,44 @@ function renderVisitDetails(role, type) {
     ${v.purpose ? `<div class="fgrp span-full"><label class="flbl">الغرض</label><div class="fro">${v.purpose}</div></div>` : ''}
     ${v.reason ? `<div class="fgrp span-full"><label class="flbl">سبب الزيارة</label><div class="fro">${v.reason}</div></div>` : ''}
   </div></div></div>
-
   ${v.report && v.report.approved ? `<div class="card"><div class="ph"><h3><span class="pico gr">${ICONS.check}</span>المحضر المعتمد</h3></div>
     <div class="pb"><div class="alert alert-s">${ICONS.check} تم اعتماد المحضر بواسطة ${v.report.approvedBy} بتاريخ ${v.report.approvalDate}</div>
-    <button class="btn btn-secondary btn-sm">${ICONS.download}تنزيل المحضر</button></div></div>` : ''}
+    <button class="btn btn-secondary btn-sm">${ICONS.download}تنزيل المحضر</button></div></div>` : ''}`;
 
-  <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.check}</span>قائمة التحقق</h3></div>
-  <div class="pb">${checklistHtml}</div></div>
+  const checklistCard = `<div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.check}</span>قائمة التحقق</h3></div>
+  <div class="pb">${checklistHtml}</div></div>`;
 
-  ${findingsHtml}
-  ${actionPanel}
-
+  const historyContent = `
   <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>سجل الأحداث</h3></div>
   <div class="pb">${renderTimeline(v.timeline)}</div></div>
-
   <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.video}</span>تسجيلات المكالمات المرئية</h3></div>
   <div class="pb" id="video-call-container"></div></div>
-
   <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.mail}</span>المراسلات</h3></div>
-  <div class="pb" id="correspondence-container"></div></div>
+  <div class="pb" id="correspondence-container"></div></div>`;
 
-  <script>
-    // Initialize correspondence documentation
+  const initScript = `<script>
     (function() {
-      const correspondenceContainer = document.getElementById('correspondence-container');
-      if (correspondenceContainer && typeof renderCorrespondenceDocumentation === 'function') {
-        correspondenceContainer.innerHTML = renderCorrespondenceDocumentation('visits', '${v.id}', '${role}');
-      }
+      const el = document.getElementById('correspondence-container');
+      if (el && typeof renderCorrespondenceDocumentation === 'function')
+        el.innerHTML = renderCorrespondenceDocumentation('visits', '${v.id}', '${role}');
     })();
-
-    // Initialize video call recording
     (function() {
-      const videoCallContainer = document.getElementById('video-call-container');
-      if (videoCallContainer && typeof renderVideoCallRecording === 'function') {
-        videoCallContainer.innerHTML = renderVideoCallRecording('${v.id}', '${role}');
-      }
+      const el = document.getElementById('video-call-container');
+      if (el && typeof renderVideoCallRecording === 'function')
+        el.innerHTML = renderVideoCallRecording('${v.id}', '${role}');
     })();
   </script>`;
+
+  const hasAction = (actionPanel || '').length > 0;
+  const tid = 'vdt-' + v.id.replace(/[^a-z0-9]/gi, '-');
+  const tabs = [
+    { label: 'معلومات الزيارة', content: visitInfoCard },
+    { label: 'قائمة التحقق', content: checklistCard },
+    { label: 'النتائج', content: findingsHtml || '<p class="tx3 fs11" style="padding:16px">لا توجد نتائج مرصودة بعد</p>' },
+    { label: 'الإجراءات', content: actionPanel || '<p class="tx3 fs11" style="padding:16px">لا توجد إجراءات متاحة في الوضع الحالي</p>', badge: hasAction ? '!' : '' },
+    { label: 'السجل والمراسلات', content: historyContent },
+  ];
+  return pgHead + summaryBar + _tabView(tid, tabs, hasAction ? 3 : 0) + initScript;
 }
 
 /* ── جدولة زيارة جديدة ── */
@@ -2619,11 +2697,21 @@ function renderBanCaseDetails(role) {
   const id = getParam('id') || '2025-06-000001';
   const b = INSP_DATA.banCases.find(x => x.id === id) || INSP_DATA.banCases[0];
 
-  return `<div class="pg-head"><div><h1>${b.id}</h1><p>حالة حظر — ${b.employerName}</p></div>
+  const pgHead = `<div class="pg-head"><div><h1>${b.id}</h1><p>حالة حظر — ${b.employerName}</p></div>
     <div class="pg-acts">${statusBadge(b.status)}<button class="btn btn-secondary btn-sm" onclick="navigateTo('ban-cases-list')">${ICONS.arrow_right}رجوع</button>
       ${b.status.includes('سارٍ') ? `<button class="btn btn-accent btn-sm" onclick="showToast('تم رفع الحظر','s')">${ICONS.unlock}رفع الحظر</button>` : ''}
-    </div></div>
-  <div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.lock}</span>تفاصيل الحظر</h3></div>
+    </div></div>`;
+
+  const summaryBar = _summaryBar([
+    ['رقم الحظر', `<strong>${b.id}</strong>`],
+    ['المنشأة', b.employerName],
+    ['تاريخ الإصدار', b.issuedDate],
+    ['أصدره', b.issuedBy],
+    ['الحالة', statusBadge(b.status)],
+    ...(b.liftedDate ? [['تاريخ الرفع', b.liftedDate]] : []),
+  ]);
+
+  const banDetailsCard = `<div class="card"><div class="ph"><h3><span class="pico rd">${ICONS.lock}</span>تفاصيل الحظر</h3></div>
     <div class="pb"><div class="fg fg-2">
       <div class="fgrp"><label class="flbl">رقم الحظر</label><div class="fro fw7">${b.id}</div></div>
       <div class="fgrp"><label class="flbl">المنشأة</label><div class="fro txp fw7">${b.employerName}</div></div>
@@ -2632,11 +2720,22 @@ function renderBanCaseDetails(role) {
       <div class="fgrp span-full"><label class="flbl">سبب الحظر</label><div class="fro" style="min-height:50px">${b.reason}</div></div>
       ${b.liftedDate ? `<div class="fgrp"><label class="flbl">تاريخ رفع الحظر</label><div class="fro txp">${b.liftedDate}</div></div>` : ''}
       ${b.liftedBy ? `<div class="fgrp"><label class="flbl">رُفع بواسطة</label><div class="fro">${b.liftedBy}</div></div>` : ''}
-    </div></div></div>
-  ${b.status.includes('سارٍ') ? _dpanel('رفع الحظر أو تعديله', ['رفع الحظر','تعديل شروط الحظر'],
-    `<div class="fgrp"><label class="flbl">سبب رفع الحظر أو تعديله</label><textarea class="fc" rows="3" placeholder="اكتب المبرر..."></textarea></div>`) : ''}
-  <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>سجل الأحداث</h3></div>
+    </div></div></div>`;
+
+  const banActionPanel = b.status.includes('سارٍ') ? _dpanel('رفع الحظر أو تعديله', ['رفع الحظر','تعديل شروط الحظر'],
+    `<div class="fgrp"><label class="flbl">سبب رفع الحظر أو تعديله</label><textarea class="fc" rows="3" placeholder="اكتب المبرر..."></textarea></div>`) : '';
+
+  const timelineCard = `<div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>سجل الأحداث</h3></div>
     <div class="pb">${renderTimeline(b.timeline || [])}</div></div>`;
+
+  const hasAction = banActionPanel.length > 0;
+  const tid = 'bdt-' + b.id.replace(/[^a-z0-9]/gi, '-');
+  const tabs = [
+    { label: 'تفاصيل الحظر', content: banDetailsCard },
+    { label: 'الإجراءات', content: banActionPanel || '<p class="tx3 fs11" style="padding:16px">لا توجد إجراءات متاحة — الحظر مرفوع أو منتهي</p>', badge: hasAction ? '!' : '' },
+    { label: 'سجل الأحداث', content: timelineCard },
+  ];
+  return pgHead + summaryBar + _tabView(tid, tabs, hasAction ? 1 : 0);
 }
 
 /* ── تحليل المخاطر (ops-analyst) ── */

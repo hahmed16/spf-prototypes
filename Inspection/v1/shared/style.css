@@ -976,3 +976,20 @@ select.fc { cursor: pointer }
   .violation-item-footer { flex-direction: column; align-items: flex-start; gap: 12px }
   .violations-penalties-stats { flex-direction: column; gap: 12px }
 }
+
+/* ── Detail Summary Bar ── */
+.dsb { display: flex; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--border); border-radius: var(--rlg); overflow: hidden; margin-bottom: 12px; box-shadow: var(--sh) }
+.dsb-item { flex: 1 1 110px; padding: 9px 14px; border-left: 1px solid var(--border); display: flex; flex-direction: column; gap: 3px }
+.dsb-item:last-child { border-left: none }
+.dsb-label { font-size: 10px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em }
+.dsb-val { font-size: 12.5px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 4px }
+
+/* ── Tabbed Detail Pages ── */
+.dtabs-nav { display: flex; flex-wrap: wrap; gap: 3px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--rlg); padding: 5px; margin-bottom: 14px; box-shadow: var(--sh) }
+.dtab-btn { display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 7px; font-size: 12.5px; font-weight: 600; color: var(--text3); cursor: pointer; border: none; background: none; white-space: nowrap; transition: var(--tr); font-family: inherit; line-height: 1 }
+.dtab-btn:hover { color: var(--text); background: var(--g50) }
+.dtab-btn.active { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(10,92,54,.22) }
+.dtab-btn .tab-badge { display: inline-flex; align-items: center; justify-content: center; background: var(--danger); color: #fff; font-size: 9px; font-weight: 800; border-radius: 999px; padding: 1px 5px; min-width: 16px; line-height: 1.5 }
+.dtab-btn.active .tab-badge { background: rgba(255,255,255,.3) }
+.dtab-pane { display: none }
+.dtab-pane.active { display: block }
