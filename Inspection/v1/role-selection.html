@@ -2,93 +2,545 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>اختيار الدور — نظام إدارة التفتيش</title>
+<title>اختيار الدور - نظام إدارة التفتيش</title>
 <link rel="stylesheet" href="shared/style.css">
 <style>
-  body { overflow: auto; height: auto }
-  #role-pg { min-height: 100vh }
-  .rp-header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-h) 100%); padding: 14px 28px; display: flex; align-items: center; gap: 12px; color: #fff }
-  .rp-header span { font-size: 14px; font-weight: 700 }
-  .rp-header small { font-size: 11px; color: rgba(255,255,255,.8); margin-right: auto }
-  .rp-back { font-size: 12px; color: rgba(255,255,255,.8); cursor: pointer }
-  .rp-back:hover { color: #fff }
-  .rcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px }
-  .rcard { padding: 16px; cursor: pointer; transition: all 0.2s }
-  .rcard:hover { transform: translateY(-2px) }
+  body {
+    height: auto;
+    overflow: auto;
+    background:
+      linear-gradient(180deg, rgba(10, 92, 54, .08) 0, rgba(244, 246, 249, 0) 310px),
+      var(--bg);
+  }
+
+  .rp-page {
+    min-height: 100vh;
+    color: var(--text);
+  }
+
+  .rp-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    min-height: 68px;
+    padding: 12px 28px;
+    background: rgba(255, 255, 255, .94);
+    border-bottom: 1px solid rgba(221, 230, 225, .9);
+    box-shadow: 0 10px 28px rgba(10, 92, 54, .08);
+    backdrop-filter: blur(14px);
+  }
+
+  .rp-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .rp-logo {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    color: #fff;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-h) 100%);
+    border-radius: 8px;
+    box-shadow: 0 10px 24px rgba(10, 92, 54, .18);
+  }
+
+  .rp-logo svg { width: 24px; height: 24px }
+  .rp-org { font-size: 15px; font-weight: 800; color: var(--primary); line-height: 1.25 }
+  .rp-system { font-size: 12px; color: var(--text3); line-height: 1.4 }
+
+  .rp-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text2);
+    background: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    transition: var(--tr);
+    white-space: nowrap;
+  }
+
+  .rp-back:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+    background: var(--primary-l);
+  }
+
+  .rp-back svg { width: 16px; height: 16px }
+
+  #role-pg {
+    max-width: 1180px;
+    min-height: calc(100vh - 68px);
+    margin: 0 auto;
+    padding: 28px 28px 42px;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .rp-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px;
+    align-items: center;
+    margin-bottom: 26px;
+    padding: 26px 30px;
+    overflow: hidden;
+    color: #fff;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, .12) 0 1px, transparent 1px 20px),
+      linear-gradient(135deg, #063e27 0%, #0a5c36 58%, #11724a 100%);
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 10px;
+    box-shadow: 0 22px 50px rgba(10, 92, 54, .22);
+  }
+
+  .rp-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 10px;
+    color: #f4df9d;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .rp-kicker::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .rp-hd { margin: 0; text-align: right }
+  .rp-hd h1 { margin: 0 0 8px; color: #fff; font-size: 26px; font-weight: 900; line-height: 1.25 }
+  .rp-hd p { max-width: 620px; color: rgba(255, 255, 255, .82); font-size: 14px; line-height: 1.8 }
+
+  .rp-summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .rp-stat {
+    min-width: 98px;
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .1);
+  }
+
+  .rp-stat strong { display: block; font-size: 22px; line-height: 1; color: #fff }
+  .rp-stat span { display: block; margin-top: 5px; color: rgba(255, 255, 255, .76); font-size: 11px; white-space: nowrap }
+
+  .rcat {
+    margin-bottom: 26px;
+  }
+
+  .rcat-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rcat-t {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0;
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 1.35;
+  }
+
+  .rcat-t::before {
+    content: '';
+    width: 4px;
+    height: 18px;
+    border-radius: 8px;
+    background: var(--primary);
+  }
+
+  .rcat-count {
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text3);
+    background: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .rcards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .rcards-two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rcard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 156px;
+    padding: 18px;
+    overflow: hidden;
+    color: inherit;
+    background: linear-gradient(180deg, #fff 0%, #fbfdfc 100%);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(10, 92, 54, .06);
+    transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease, background .22s ease;
+  }
+
+  .rcard::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 3px;
+    background: var(--primary);
+  }
+
+  .rcard.external::after { background: var(--accent) }
+  .rcard.field::after { background: var(--info) }
+  .rcard.management::after { background: #5867a6 }
+
+  .rcard:hover {
+    transform: translateY(-4px);
+    border-color: rgba(10, 92, 54, .34);
+    background: #fff;
+    box-shadow: 0 18px 40px rgba(10, 92, 54, .14);
+  }
+
+  .rcard-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .rc-ico {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    color: var(--primary);
+    background: var(--primary-l);
+    border-radius: 8px;
+  }
+
+  .rcard.external .rc-ico { color: var(--accent); background: var(--accent-l) }
+  .rcard.field .rc-ico { color: var(--info); background: var(--info-l) }
+  .rcard.management .rc-ico { color: #5867a6; background: #eef1ff }
+  .rc-ico svg { width: 23px; height: 23px }
+
+  .rc-type {
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 800;
+    line-height: 1.7;
+  }
+
+  .rc-type.ext { color: #8b681e; background: var(--accent-l) }
+  .rc-type.int { color: var(--primary); background: var(--primary-l) }
+
+  .rc-name {
+    margin-bottom: 6px;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 900;
+    line-height: 1.45;
+  }
+
+  .rc-desc {
+    color: var(--text3);
+    font-size: 12.5px;
+    line-height: 1.65;
+    margin-top: 10px;
+  }
+
+  .rc-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 16px;
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .rcard.external .rc-foot { color: #8b681e }
+  .rcard.field .rc-foot { color: var(--info) }
+  .rcard.management .rc-foot { color: #5867a6 }
+
+  .rc-arrow {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: var(--g50);
+    color: inherit;
+    transition: transform .22s ease, background .22s ease;
+  }
+
+  .rcard:hover .rc-arrow {
+    transform: translateX(-3px);
+    background: currentColor;
+    color: #fff;
+  }
+
+  .rc-arrow svg { width: 15px; height: 15px }
+
+  @media (max-width: 980px) {
+    .rp-hero { grid-template-columns: 1fr }
+    .rp-summary { justify-content: flex-start }
+    .rcards,
+    .rcards-two { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  }
+
+  @media (max-width: 640px) {
+    .rp-header {
+      position: static;
+      align-items: flex-start;
+      flex-direction: column;
+      padding: 14px 18px;
+    }
+
+    .rp-back { width: 100%; justify-content: center }
+    #role-pg { padding: 18px 16px 30px }
+    .rp-hero { padding: 22px 18px }
+    .rp-hd h1 { font-size: 22px }
+    .rp-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100% }
+    .rp-stat { min-width: 0 }
+    .rcards,
+    .rcards-two { grid-template-columns: 1fr }
+    .rcat-head { align-items: flex-start }
+  }
 </style>
 </head>
 <body>
-<div class="rp-header">
-  <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4l5 2.18V11c0 3.5-2.33 6.79-5 7.93C9.33 17.79 7 14.5 7 11V7.18L12 5z"/></svg>
-  <span>صندوق الحماية الاجتماعية — نظام إدارة التفتيش</small>
-  <small>اختر دورك للمتابعة</small>
-  <span class="rp-back" onclick="location.href='index.html'">← رجوع</span>
-</div>
-<div id="role-pg">
-  <div class="rp-hd">
-    <h1>اختيار الدور الوظيفي</h1>
-    <p>حدد دورك لعرض الصلاحيات والصفحات المناسبة لك</p>
-  </div>
-
-  <div class="rcat">
-    <div class="rcat-t">مستخدمون خارجيون</div>
-    <div class="rcards">
-      <div class="rcard" onclick="location.href='employer/dashboard.html'">
-        <div class="rc-type ext">خارجي</div>
-        <div class="rc-name">المستخدم الخارجي (جهة العمل)</div>
+<div class="rp-page">
+  <header class="rp-header">
+    <div class="rp-brand">
+      <div class="rp-logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4l5 2.18V11c0 3.5-2.33 6.79-5 7.93C9.33 17.79 7 14.5 7 11V7.18L12 5z"/></svg>
       </div>
-      <div class="rcard" onclick="location.href='insured/dashboard.html'">
-        <div class="rc-type ext">خارجي</div>
-        <div class="rc-name">المستخدم الخارجي (المؤمن عليه)</div>
+      <div>
+        <div class="rp-org">صندوق الحماية الاجتماعية</div>
+        <div class="rp-system">نظام إدارة التفتيش</div>
       </div>
     </div>
-  </div>
+    <a class="rp-back" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+      <span>رجوع</span>
+    </a>
+  </header>
 
-  <div class="rcat">
-    <div class="rcat-t">قسم المتابعة والبلاغات</div>
-    <div class="rcards">
-      <div class="rcard" onclick="location.href='fund-staff/complaints-list.html'">
-        <div class="rc-type int">داخلي</div>
-        <div class="rc-name">مستخدم داخلي للصندوق</div>
+  <main id="role-pg">
+    <section class="rp-hero" aria-labelledby="role-title">
+      <div class="rp-hd">
+        <div class="rp-kicker">بوابة الأدوار الوظيفية</div>
+        <h1 id="role-title">اختيار الدور الوظيفي</h1>
+        <p>انتقل إلى الواجهة المناسبة حسب الصلاحية ونوع المستخدم داخل منظومة التفتيش.</p>
       </div>
-      <div class="rcard" onclick="location.href='monitoring-employee/dashboard.html'">
-        <div class="rc-type int">داخلي</div>
-        <div class="rc-name">موظف قسم المتابعة والبلاغات</div>
+      <div class="rp-summary" aria-label="ملخص الأدوار">
+        <div class="rp-stat"><strong>9</strong><span>أدوار</span></div>
+        <div class="rp-stat"><strong>4</strong><span>مسارات</span></div>
       </div>
-      <div class="rcard" onclick="location.href='monitoring-head/dashboard.html'">
-        <div class="rc-type int">داخلي</div>
-        <div class="rc-name">رئيس قسم المتابعة والبلاغات</div>
-        </div>
-    </div>
-  </div>
+    </section>
 
-  <div class="rcat">
-    <div class="rcat-t">قسم التفتيش الميداني</div>
-    <div class="rcards">
-      <div class="rcard" onclick="location.href='field-inspector/dashboard.html'">
-        <div class="rc-type int">داخلي</div>
-        <div class="rc-name">المفتش الميداني</div>
-        </div>
-      <div class="rcard" onclick="location.href='field-head/dashboard.html'">
-        <div class="rc-type int">داخلي</div>
-        <div class="rc-name">رئيس قسم التفتيش الميداني</div>
-        </div>
-    </div>
-  </div>
+    <section class="rcat" aria-labelledby="external-users">
+      <div class="rcat-head">
+        <h2 class="rcat-t" id="external-users">مستخدمون خارجيون</h2>
+        <span class="rcat-count">دوران</span>
+      </div>
+      <div class="rcards rcards-two">
+        <a class="rcard external" href="employer/dashboard.html">
+          <div class="rcard-top">
+            <div class="rc-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9h.01"/><path d="M9 13h.01"/><path d="M9 17h.01"/></svg>
+            </div>
+            <span class="rc-type ext">خارجي</span>
+          </div>
+          <div class="rc-name">المستخدم الخارجي (جهة العمل)</div>
+          <div class="rc-desc">تقديم البلاغات ومتابعة الزيارات والتظلمات والتقارير الخاصة بالمنشأة.</div>
+          <div class="rc-foot">
+            <span>تصفح النظام</span>
+            <span class="rc-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></span>
+          </div>
+        </a>
+        <a class="rcard external" href="insured/dashboard.html">
+          <div class="rcard-top">
+            <div class="rc-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <span class="rc-type ext">خارجي</span>
+          </div>
+          <div class="rc-name">المستخدم الخارجي (المؤمن عليه)</div>
+          <div class="rc-desc">متابعة البلاغات والتظلمات والتقارير المرتبطة بالمؤمن عليه.</div>
+          <div class="rc-foot">
+            <span>تصفح النظام</span>
+            <span class="rc-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></span>
+          </div>
+        </a>
+      </div>
+    </section>
 
-  <div class="rcat">
-    <div class="rcat-t">إدارة الدائرة والتحليل</div>
-    <div class="rcards">
-      <div class="rcard" onclick="location.href='inspection-director/dashboard.html'">
-        <div class="rc-type int">داخلي</div>
-        <div class="rc-name">مدير دائرة التفتيش</div>
-        </div>
-      <div class="rcard" onclick="location.href='ops-analyst/dashboard.html'">
-        <div class="rc-type int">داخلي</div>
-        <div class="rc-name">محلل العمليات</div>
-        </div>
-    </div>
-  </div>
+    <section class="rcat" aria-labelledby="monitoring-users">
+      <div class="rcat-head">
+        <h2 class="rcat-t" id="monitoring-users">قسم المتابعة والبلاغات</h2>
+        <span class="rcat-count">3 أدوار</span>
+      </div>
+      <div class="rcards">
+        <a class="rcard" href="fund-staff/complaints-list.html">
+          <div class="rcard-top">
+            <div class="rc-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+            </div>
+            <span class="rc-type int">داخلي</span>
+          </div>
+          <div class="rc-name">مستخدم داخلي للصندوق</div>
+          <div class="rc-desc">تسجيل البلاغات الواردة من القنوات الداخلية ومتابعة بياناتها الأساسية.</div>
+          <div class="rc-foot">
+            <span>تصفح النظام</span>
+            <span class="rc-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></span>
+          </div>
+        </a>
+        <a class="rcard" href="monitoring-employee/dashboard.html">
+          <div class="rcard-top">
+            <div class="rc-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h3"/></svg>
+            </div>
+            <span class="rc-type int">داخلي</span>
+          </div>
+          <div class="rc-name">موظف قسم المتابعة والبلاغات</div>
+          <div class="rc-desc">استلام البلاغات والتحقق الأولي ومتابعة الطلبات والخدمات المرتبطة بها.</div>
+          <div class="rc-foot">
+            <span>تصفح النظام</span>
+            <span class="rc-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></span>
+          </div>
+        </a>
+        <a class="rcard" href="monitoring-head/dashboard.html">
+          <div class="rcard-top">
+            <div class="rc-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-8 0v2"/><circle cx="12" cy="7" r="4"/><path d="M19 8l2 2-4 4-2-2z"/></svg>
+            </div>
+            <span class="rc-type int">داخلي</span>
+          </div>
+          <div class="rc-name">رئيس قسم المتابعة والبلاغات</div>
+          <div class="rc-desc">اعتماد الإحالات ومتابعة توزيع الأعمال والملفات المتأخرة.</div>
+          <div class="rc-foot">
+            <span>تصفح النظام</span>
+            <span class="rc-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="rcat" aria-labelledby="field-users">
+      <div class="rcat-head">
+        <h2 class="rcat-t" id="field-users">قسم التفتيش الميداني</h2>
+        <span class="rcat-count">دوران</span>
+      </div>
+      <div class="rcards rcards-two">
+        <a class="rcard field" href="field-inspector/dashboard.html">
+          <div class="rcard-top">
+            <div class="rc-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <span class="rc-type int">داخلي</span>
+          </div>
+          <div class="rc-name">المفتش الميداني</div>
+          <div class="rc-desc">إدارة الزيارات التفتيشية وتوثيق النتائج والملاحظات من موقع الزيارة.</div>
+          <div class="rc-foot">
+            <span>تصفح النظام</span>
+            <span class="rc-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></span>
+          </div>
+        </a>
+        <a class="rcard field" href="field-head/dashboard.html">
+          <div class="rcard-top">
+            <div class="rc-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10"/><path d="M7 12h7"/><path d="M7 16h5"/></svg>
+            </div>
+            <span class="rc-type int">داخلي</span>
+          </div>
+          <div class="rc-name">رئيس قسم التفتيش الميداني</div>
+          <div class="rc-desc">مراجعة المحاضر وتوزيع المفتشين ومتابعة الإجراءات التصحيحية.</div>
+          <div class="rc-foot">
+            <span>تصفح النظام</span>
+            <span class="rc-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="rcat" aria-labelledby="management-users">
+      <div class="rcat-head">
+        <h2 class="rcat-t" id="management-users">إدارة الدائرة والتحليل</h2>
+        <span class="rcat-count">دوران</span>
+      </div>
+      <div class="rcards rcards-two">
+        <a class="rcard management" href="inspection-director/dashboard.html">
+          <div class="rcard-top">
+            <div class="rc-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.4 8.7-8 9-4.6-.3-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <span class="rc-type int">داخلي</span>
+          </div>
+          <div class="rc-name">مدير دائرة التفتيش</div>
+          <div class="rc-desc">الإشراف على الخطط والقرارات والتقارير ومؤشرات الأداء العامة.</div>
+          <div class="rc-foot">
+            <span>تصفح النظام</span>
+            <span class="rc-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></span>
+          </div>
+        </a>
+        <a class="rcard management" href="ops-analyst/dashboard.html">
+          <div class="rcard-top">
+            <div class="rc-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-7"/><path d="M18 7h1v1"/></svg>
+            </div>
+            <span class="rc-type int">داخلي</span>
+          </div>
+          <div class="rc-name">محلل العمليات</div>
+          <div class="rc-desc">تحليل المخاطر والأنماط وإعداد خطط التفتيش الدورية المبنية على البيانات.</div>
+          <div class="rc-foot">
+            <span>تصفح النظام</span>
+            <span class="rc-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></span>
+          </div>
+        </a>
+      </div>
+    </section>
+  </main>
 </div>
 </body>
 </html>
