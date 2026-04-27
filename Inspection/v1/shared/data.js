@@ -503,7 +503,7 @@ const INSP_DATA = {
         { date: '2024-11-19 09:30', step: 'اعتماد رئيس الشكاوى', action: 'اعتمد رئيس القسم توجيه الزيارة الميدانية',  actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' },
         { date: '2024-11-25 10:00', step: 'الزيارة الميدانية', action: 'تمت الزيارة الميدانية ورُفع المحضر',           actor: 'حاتم سالم الزدجالي',    actorRole: 'field-inspector' },
         { date: '2024-11-28 11:00', step: 'اعتماد رئيس التفتيش', action: 'تم اعتماد المحضر ورفع الملف للمدير',        actor: 'ريما يوسف النبهانية',   actorRole: 'field-head' },
-        { date: '2024-12-01 10:00', step: 'قرار المدير',     action: 'تم إصدار قرار بإلزام المنشأة وتغريمها 500 ريال', actor: 'عبدالعزيز هلال الراشدي', actorRole: 'inspection-director' }
+        { date: '2024-12-01 10:00', step: 'قرار المدير',     action: 'تم إصدار قرار بإلزام المنشأة وتغريمها 500 ريال عُماني', actor: 'عبدالعزيز هلال الراشدي', actorRole: 'inspection-director' }
       ],
       notes: [
         { text: 'تم التحقق من الشكاوى وتأكدت صحتها خلال الزيارة الميدانية.', author: 'حاتم سالم الزدجالي', date: '2024-11-25', role: 'field-inspector' }
@@ -1317,6 +1317,82 @@ const INSP_DATA = {
         { date: '2025-01-18', action: 'تقديم طلب الأمان الوظيفي', actor: 'خالد بن سالم المعمري', actorRole: 'insured' },
         { date: '2025-01-19', action: 'بدء عملية التحقق', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' }
       ]
+    },
+    {
+      id: 'JSR-2025-0003',
+      status: 'معتمد',
+      requestDate: '2025-01-08',
+      workerName: 'يوسف بن ناصر الفارسي',
+      workerCivil: '28475916',
+      employerName: 'شركة الخليج للمقاولات',
+      employerCRN: '1012345682',
+      terminationDate: '2024-12-31',
+      terminationReason: 'إنهاء العقد من قبل صاحب العمل',
+      salary: 520,
+      employmentDuration: '5 سنوات',
+      notes: 'تم اعتماد الطلب وصرف المستحقات',
+      timeline: [
+        { date: '2025-01-08', action: 'تقديم طلب الأمان الوظيفي', actor: 'يوسف بن ناصر الفارسي', actorRole: 'insured' },
+        { date: '2025-01-09', action: 'استلام الطلب للمراجعة', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' },
+        { date: '2025-01-14', action: 'اعتماد الطلب وإحالته للصرف', actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
+      ]
+    },
+    {
+      id: 'JSR-2025-0004',
+      status: 'مرفوض',
+      requestDate: '2025-01-10',
+      workerName: 'عبدالله بن سعيد الشحي',
+      workerCivil: '28475917',
+      employerName: 'مؤسسة النور التجارية',
+      employerCRN: '1012345683',
+      terminationDate: '2025-01-05',
+      terminationReason: 'استقالة طوعية',
+      salary: 310,
+      employmentDuration: '8 أشهر',
+      notes: 'مرفوض لعدم استيفاء شرط مدة الخدمة',
+      timeline: [
+        { date: '2025-01-10', action: 'تقديم طلب الأمان الوظيفي', actor: 'عبدالله بن سعيد الشحي', actorRole: 'insured' },
+        { date: '2025-01-11', action: 'مراجعة الطلب', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' },
+        { date: '2025-01-16', action: 'رفض الطلب — مدة الخدمة أقل من سنة', actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
+      ]
+    },
+    {
+      id: 'JSR-2025-0005',
+      status: 'محال للتفتيش',
+      requestDate: '2025-01-20',
+      workerName: 'سعيد بن محمد الزدجالي',
+      workerCivil: '28475918',
+      employerName: 'شركة التقنية الوطنية',
+      employerCRN: '1234567890',
+      terminationDate: '2025-01-15',
+      terminationReason: 'إنهاء مفاجئ بدون سبب واضح',
+      salary: 680,
+      employmentDuration: '4 سنوات',
+      notes: 'يحتاج تحقق ميداني من ظروف الإنهاء',
+      timeline: [
+        { date: '2025-01-20', action: 'تقديم طلب الأمان الوظيفي', actor: 'سعيد بن محمد الزدجالي', actorRole: 'insured' },
+        { date: '2025-01-21', action: 'استلام الطلب للمراجعة', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' },
+        { date: '2025-01-23', action: 'إحالة الطلب للتفتيش الميداني', actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
+      ]
+    },
+    {
+      id: 'JSR-2024-0098',
+      status: 'معتمد',
+      requestDate: '2024-12-20',
+      workerName: 'حمود بن علي البلوشي',
+      workerCivil: '28475919',
+      employerName: 'شركة الأفق للمقاولات',
+      employerCRN: '1012345684',
+      terminationDate: '2024-12-15',
+      terminationReason: 'إفلاس المنشأة',
+      salary: 440,
+      employmentDuration: '6 سنوات',
+      notes: 'تم الصرف — إفلاس موثق',
+      timeline: [
+        { date: '2024-12-20', action: 'تقديم طلب الأمان الوظيفي', actor: 'حمود بن علي البلوشي', actorRole: 'insured' },
+        { date: '2024-12-22', action: 'التحقق من وثائق الإفلاس', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' },
+        { date: '2024-12-28', action: 'اعتماد الطلب وصرف المستحقات', actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
+      ]
     }
   ],
 
@@ -1355,6 +1431,81 @@ const INSP_DATA = {
       timeline: [
         { date: '2025-01-22', action: 'تقديم طلب منافع دخل الأسرة', actor: 'محمد بن علي الهنائي', actorRole: 'insured' },
         { date: '2025-01-23', action: 'بدء عملية التحقق', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' }
+      ]
+    },
+    {
+      id: 'FBR-2025-0003',
+      status: 'معتمد',
+      requestDate: '2025-01-05',
+      workerName: 'راشد بن سليم الكندي',
+      workerCivil: '28475920',
+      employerName: 'شركة البناء والتعمير',
+      employerCRN: '1012345685',
+      benefitType: 'منافع دخل الأسرة',
+      familyMembers: 7,
+      monthlyIncome: 280,
+      employmentDuration: '8 سنوات',
+      notes: 'تم اعتماد الطلب وصرف المستحقات',
+      timeline: [
+        { date: '2025-01-05', action: 'تقديم طلب منافع دخل الأسرة', actor: 'راشد بن سليم الكندي', actorRole: 'insured' },
+        { date: '2025-01-06', action: 'استلام الطلب للمراجعة', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' },
+        { date: '2025-01-12', action: 'اعتماد الطلب', actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
+      ]
+    },
+    {
+      id: 'FBR-2025-0004',
+      status: 'مرفوض',
+      requestDate: '2025-01-14',
+      workerName: 'علي بن حمد الوهيبي',
+      workerCivil: '28475921',
+      employerName: 'مصنع النور الصناعي',
+      employerCRN: '1012345686',
+      benefitType: 'منافع دخل الأسرة',
+      familyMembers: 3,
+      monthlyIncome: 550,
+      employmentDuration: '1 سنة',
+      notes: 'مرفوض — الدخل يتجاوز الحد الأقصى',
+      timeline: [
+        { date: '2025-01-14', action: 'تقديم طلب منافع دخل الأسرة', actor: 'علي بن حمد الوهيبي', actorRole: 'insured' },
+        { date: '2025-01-15', action: 'مراجعة الطلب', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' },
+        { date: '2025-01-18', action: 'رفض الطلب — الدخل يتجاوز الحد', actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
+      ]
+    },
+    {
+      id: 'FBR-2025-0005',
+      status: 'بانتظار وثائق',
+      requestDate: '2025-01-28',
+      workerName: 'ناصر بن عبدالله الحارثي',
+      workerCivil: '28475922',
+      employerName: 'شركة الخليج للمقاولات',
+      employerCRN: '1012345682',
+      benefitType: 'منافع دخل الأسرة',
+      familyMembers: 6,
+      monthlyIncome: 320,
+      employmentDuration: '3 سنوات',
+      notes: 'بانتظار شهادات ميلاد الأطفال',
+      timeline: [
+        { date: '2025-01-28', action: 'تقديم طلب منافع دخل الأسرة', actor: 'ناصر بن عبدالله الحارثي', actorRole: 'insured' },
+        { date: '2025-01-29', action: 'طلب استيفاء الوثائق', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' }
+      ]
+    },
+    {
+      id: 'FBR-2024-0091',
+      status: 'معتمد',
+      requestDate: '2024-12-15',
+      workerName: 'سلطان بن سعيد الغافري',
+      workerCivil: '28475923',
+      employerName: 'شركة الأفق للتجارة',
+      employerCRN: '1012345684',
+      benefitType: 'منافع دخل الأسرة',
+      familyMembers: 8,
+      monthlyIncome: 260,
+      employmentDuration: '11 سنة',
+      notes: 'تم الصرف — حالة طويلة الأمد',
+      timeline: [
+        { date: '2024-12-15', action: 'تقديم طلب منافع دخل الأسرة', actor: 'سلطان بن سعيد الغافري', actorRole: 'insured' },
+        { date: '2024-12-16', action: 'استلام الطلب للمراجعة', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' },
+        { date: '2024-12-22', action: 'اعتماد الطلب وصرف المستحقات', actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
       ]
     }
   ],
@@ -1396,6 +1547,85 @@ const INSP_DATA = {
       timeline: [
         { date: '2025-01-27', action: 'تقديم طلب إجازة الأمومة', actor: 'مريم بنت خالد البلوشية', actorRole: 'insured' },
         { date: '2025-01-28', action: 'بدء عملية التحقق', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' }
+      ]
+    },
+    {
+      id: 'MLR-2025-0003',
+      status: 'معتمد',
+      requestDate: '2025-01-10',
+      workerName: 'أسماء بنت راشد الرواحي',
+      workerCivil: '28475924',
+      employerName: 'شركة المقاولات العمانية',
+      employerCRN: '1012345679',
+      leaveType: 'إجازة أمومة',
+      expectedDeliveryDate: '2025-02-28',
+      leaveStartDate: '2025-02-15',
+      leaveDuration: '98 يوم',
+      monthlySalary: 480,
+      notes: 'تم اعتماد الطلب وبدء صرف الإجازة',
+      timeline: [
+        { date: '2025-01-10', action: 'تقديم طلب إجازة الأمومة', actor: 'أسماء بنت راشد الرواحي', actorRole: 'insured' },
+        { date: '2025-01-11', action: 'استلام الطلب للمراجعة', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' },
+        { date: '2025-01-16', action: 'اعتماد الطلب', actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
+      ]
+    },
+    {
+      id: 'MLR-2025-0004',
+      status: 'مرفوض',
+      requestDate: '2025-01-18',
+      workerName: 'خلود بنت سالم الشيدي',
+      workerCivil: '28475925',
+      employerName: 'شركة النور للتقنية',
+      employerCRN: '1012345687',
+      leaveType: 'إجازة أمومة',
+      expectedDeliveryDate: '2025-06-10',
+      leaveStartDate: '2025-05-26',
+      leaveDuration: '98 يوم',
+      monthlySalary: 390,
+      notes: 'مرفوض — المدة الزمنية غير مستوفاة',
+      timeline: [
+        { date: '2025-01-18', action: 'تقديم طلب إجازة الأمومة', actor: 'خلود بنت سالم الشيدي', actorRole: 'insured' },
+        { date: '2025-01-19', action: 'مراجعة الطلب', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' },
+        { date: '2025-01-22', action: 'رفض الطلب — مدة التأمين أقل من المطلوب', actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
+      ]
+    },
+    {
+      id: 'MLR-2025-0005',
+      status: 'بانتظار وثائق',
+      requestDate: '2025-02-01',
+      workerName: 'نور بنت محمد النبهانية',
+      workerCivil: '28475926',
+      employerName: 'شركة الخدمات الطبية',
+      employerCRN: '1012345680',
+      leaveType: 'إجازة أمومة',
+      expectedDeliveryDate: '2025-05-01',
+      leaveStartDate: '2025-04-17',
+      leaveDuration: '98 يوم',
+      monthlySalary: 620,
+      notes: 'بانتظار تقرير الطبيب المعتمد',
+      timeline: [
+        { date: '2025-02-01', action: 'تقديم طلب إجازة الأمومة', actor: 'نور بنت محمد النبهانية', actorRole: 'insured' },
+        { date: '2025-02-02', action: 'طلب استيفاء الوثائق الطبية', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' }
+      ]
+    },
+    {
+      id: 'MLR-2024-0087',
+      status: 'معتمد',
+      requestDate: '2024-12-05',
+      workerName: 'ريما بنت عبدالله الحجرية',
+      workerCivil: '28475927',
+      employerName: 'شركة التقنية الوطنية',
+      employerCRN: '1234567890',
+      leaveType: 'إجازة أمومة',
+      expectedDeliveryDate: '2025-01-20',
+      leaveStartDate: '2025-01-06',
+      leaveDuration: '98 يوم',
+      monthlySalary: 510,
+      notes: 'تم الصرف — الإجازة جارية',
+      timeline: [
+        { date: '2024-12-05', action: 'تقديم طلب إجازة الأمومة', actor: 'ريما بنت عبدالله الحجرية', actorRole: 'insured' },
+        { date: '2024-12-06', action: 'استلام الطلب للمراجعة', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' },
+        { date: '2024-12-12', action: 'اعتماد الطلب وبدء الصرف', actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
       ]
     }
   ],
@@ -1543,6 +1773,52 @@ const INSP_DATA = {
       timeline: [
         { date: '2024-04-14', action: 'تقديم طلب التصفية', actor: 'النظام', actorRole: 'system' }
       ]
+    },
+    {
+      id: 'LB-2024-008',
+      status: 'قيد المراجعة',
+      establishmentName: 'مؤسسة الخليج للأعمال',
+      commercialNumber: '89012345',
+      caseType: 'إفلاس',
+      submissionDate: '2024-04-13',
+      insuredCount: 29,
+      totalAssets: 310000,
+      totalLiabilities: 580000,
+      notes: 'تجاوز الخصوم الأصول بشكل كبير',
+      timeline: [
+        { date: '2024-04-13', action: 'تقديم طلب الإفلاس', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'LB-2024-009',
+      status: 'تم الاعتماد',
+      establishmentName: 'شركة العمران والتطوير',
+      commercialNumber: '90123456',
+      caseType: 'تصفية',
+      submissionDate: '2024-04-12',
+      insuredCount: 61,
+      totalAssets: 740000,
+      totalLiabilities: 690000,
+      notes: 'تصفية طوعية — الأصول تغطي الخصوم',
+      timeline: [
+        { date: '2024-04-12', action: 'تقديم طلب التصفية', actor: 'النظام', actorRole: 'system' },
+        { date: '2024-04-20', action: 'اعتماد الحالة', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'LB-2024-010',
+      status: 'طلب معلومات إضافية',
+      establishmentName: 'شركة النقل والشحن الدولي',
+      commercialNumber: '01234567',
+      caseType: 'إفلاس',
+      submissionDate: '2024-04-11',
+      insuredCount: 42,
+      totalAssets: 220000,
+      totalLiabilities: 890000,
+      notes: 'بانتظار توضيح مصادر الديون',
+      timeline: [
+        { date: '2024-04-11', action: 'تقديم طلب الإفلاس', actor: 'النظام', actorRole: 'system' }
+      ]
     }
   ],
 
@@ -1652,7 +1928,54 @@ const INSP_DATA = {
       monthsDue: 7,
       notes: 'قيد التحليل',
       timeline: [
-        { date: '2024-04-14', action: 'توقف عن الدفع', actor: 'النظام', actorRole: 'system' }
+        { date: '2024-04-14', action: 'توقف عن السداد', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'CSP-2024-008',
+      establishmentName: 'شركة البترول والطاقة',
+      commercialNumber: '89012345',
+      insuredCount: 120,
+      stopDate: '2024-04-13',
+      status: 'قيد المراجعة',
+      riskLevel: 'عالي',
+      totalDue: 480000,
+      monthsDue: 14,
+      notes: 'متأخرات ضخمة تستوجب تدخلاً عاجلاً',
+      timeline: [
+        { date: '2024-04-13', action: 'توقف عن السداد', actor: 'النظام', actorRole: 'system' },
+        { date: '2024-04-14', action: 'إشعار المنشأة', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'CSP-2024-009',
+      establishmentName: 'مؤسسة الرياضة والترفيه',
+      commercialNumber: '90123456',
+      insuredCount: 19,
+      stopDate: '2024-04-12',
+      status: 'تم الاعتماد',
+      riskLevel: 'منخفض',
+      totalDue: 22000,
+      monthsDue: 3,
+      notes: 'تم الاتفاق على خطة سداد',
+      timeline: [
+        { date: '2024-04-12', action: 'توقف عن السداد', actor: 'النظام', actorRole: 'system' },
+        { date: '2024-04-22', action: 'اعتماد خطة السداد', actor: 'النظام', actorRole: 'system' }
+      ]
+    },
+    {
+      id: 'CSP-2024-010',
+      establishmentName: 'شركة الاستشارات المالية',
+      commercialNumber: '01234568',
+      insuredCount: 35,
+      stopDate: '2024-04-11',
+      status: 'قيد التحليل',
+      riskLevel: 'متوسط',
+      totalDue: 95000,
+      monthsDue: 8,
+      notes: 'جاري دراسة الوضع المالي',
+      timeline: [
+        { date: '2024-04-11', action: 'توقف عن السداد', actor: 'النظام', actorRole: 'system' }
       ]
     }
   ]

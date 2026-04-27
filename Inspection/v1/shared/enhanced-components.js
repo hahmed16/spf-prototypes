@@ -551,9 +551,9 @@ const sampleGeographicData = {
   regions: [
     {
       id: 1,
-      name: 'المنطقة الشمالية',
-      code: 'NORTH',
-      coordinates: { lat: 25.0, lng: 45.0 },
+      name: 'محافظة مسقط',
+      code: 'MUSCAT',
+      coordinates: { lat: 23.59, lng: 58.38 },
       establishments: 150,
       complaints: 45,
       visits: 120,
@@ -562,9 +562,9 @@ const sampleGeographicData = {
     },
     {
       id: 2,
-      name: 'المنطقة الجنوبية',
-      code: 'SOUTH',
-      coordinates: { lat: 20.0, lng: 42.0 },
+      name: 'محافظة ظفار',
+      code: 'DHOFAR',
+      coordinates: { lat: 17.02, lng: 54.09 },
       establishments: 200,
       complaints: 60,
       visits: 180,
@@ -573,9 +573,9 @@ const sampleGeographicData = {
     },
     {
       id: 3,
-      name: 'المنطقة الشرقية',
-      code: 'EAST',
-      coordinates: { lat: 22.0, lng: 50.0 },
+      name: 'محافظة شمال الباطنة',
+      code: 'N_BATINAH',
+      coordinates: { lat: 24.56, lng: 56.78 },
       establishments: 180,
       complaints: 55,
       visits: 160,
@@ -584,9 +584,9 @@ const sampleGeographicData = {
     },
     {
       id: 4,
-      name: 'المنطقة الغربية',
-      code: 'WEST',
-      coordinates: { lat: 24.0, lng: 40.0 },
+      name: 'محافظة الداخلية',
+      code: 'DAKHILIYAH',
+      coordinates: { lat: 22.89, lng: 57.45 },
       establishments: 120,
       complaints: 35,
       visits: 100,
@@ -599,8 +599,8 @@ const sampleGeographicData = {
       id: 1,
       name: 'شركة الأفق للتجارة',
       regionId: 1,
-      coordinates: { lat: 25.5, lng: 45.5 },
-      address: 'الرياض، حي الملز',
+      coordinates: { lat: 23.61, lng: 58.59 },
+      address: 'مسقط، منطقة الرحاب',
       sector: 'تجارة',
       employees: 50,
       complaints: 5,
@@ -612,9 +612,9 @@ const sampleGeographicData = {
     {
       id: 2,
       name: 'مصنع النور الصناعي',
-      regionId: 2,
-      coordinates: { lat: 20.5, lng: 42.5 },
-      address: 'جدة، حي الصناعية',
+      regionId: 3,
+      coordinates: { lat: 24.35, lng: 56.71 },
+      address: 'صحار، المنطقة الصناعية',
       sector: 'صناعة',
       employees: 200,
       complaints: 12,
@@ -626,9 +626,9 @@ const sampleGeographicData = {
     {
       id: 3,
       name: 'مؤسسة الرؤية للخدمات',
-      regionId: 3,
-      coordinates: { lat: 22.5, lng: 50.5 },
-      address: 'الدمام، حي الشاطئ',
+      regionId: 2,
+      coordinates: { lat: 17.01, lng: 54.12 },
+      address: 'صلالة، المنطقة التجارية',
       sector: 'خدمات',
       employees: 30,
       complaints: 3,
@@ -1586,7 +1586,7 @@ const sampleViolationsData = {
       penalty: {
         type: 'fine',
         amount: 5000,
-        currency: 'ريال',
+        currency: 'ر.ع',
         dueDate: '2025-02-15',
         status: 'pending'
       },
@@ -1612,7 +1612,7 @@ const sampleViolationsData = {
       penalty: {
         type: 'fine',
         amount: 15000,
-        currency: 'ريال',
+        currency: 'ر.ع',
         dueDate: '2025-02-18',
         status: 'pending'
       },
@@ -1638,7 +1638,7 @@ const sampleViolationsData = {
       penalty: {
         type: 'warning',
         amount: 0,
-        currency: 'ريال',
+        currency: 'ر.ع',
         dueDate: null,
         status: 'resolved'
       },
@@ -1759,7 +1759,7 @@ function renderViolationsPenalties(entityType, entityId, userRole) {
         </div>
         <div class="stat-item">
           <span class="stat-label">إجمالي الغرامات:</span>
-          <span class="stat-value" id="violation-stat-penalties-${entityType}-${entityId}">${calculateTotalPenalties(violations)} ريال</span>
+          <span class="stat-value" id="violation-stat-penalties-${entityType}-${entityId}">${calculateTotalPenalties(violations)} ر.ع</span>
         </div>
       </div>
     </div>
@@ -2076,7 +2076,7 @@ function saveViolation(event, entityType, entityId) {
     penalty: {
       type: formData.get('penaltyType'),
       amount: parseInt(formData.get('penaltyAmount')) || 0,
-      currency: 'ريال',
+      currency: 'ر.ع',
       dueDate: formData.get('penaltyDueDate') || null,
       status: 'pending'
     },
@@ -2212,7 +2212,7 @@ function refreshViolationsList(entityType, entityId) {
   document.getElementById(`violation-stat-total-${entityType}-${entityId}`).textContent = violations.length;
   document.getElementById(`violation-stat-active-${entityType}-${entityId}`).textContent = violations.filter(v => v.status === 'active').length;
   document.getElementById(`violation-stat-resolved-${entityType}-${entityId}`).textContent = violations.filter(v => v.status === 'resolved').length;
-  document.getElementById(`violation-stat-penalties-${entityType}-${entityId}`).textContent = `${calculateTotalPenalties(violations)} ريال`;
+  document.getElementById(`violation-stat-penalties-${entityType}-${entityId}`).textContent = `${calculateTotalPenalties(violations)} ر.ع`;
 }
 
 /**

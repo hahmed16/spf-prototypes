@@ -2680,16 +2680,72 @@ function renderBanCasesList(role) {
     `<tr>
       <td><a href="#" onclick="navigateTo('ban-case-details','id=${b.id}')" class="txp fw7">${b.id}</a></td>
       <td class="fw7">${b.employerName}</td>
-      <td>${b.reason}</td>
+      <td>${b.type}</td>
       <td>${statusBadge(b.status)}</td>
       <td>${b.issuedDate}</td>
       <td>${b.liftedDate || '—'}</td>
       <td><button class="btn btn-primary btn-xs" onclick="navigateTo('ban-case-details','id=${b.id}')">${ICONS.eye}عرض</button></td>
     </tr>`).join('');
 
+  const mid = 'ban-issue-modal';
+  const modal = `
+  <div id="${mid}" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center">
+    <div class="modal-box card" style="width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;margin:auto">
+      <div class="ph" style="position:sticky;top:0;background:var(--surface);z-index:1">
+        <h3><span class="pico rd">${ICONS.lock}</span>إصدار أمر حظر جديد</h3>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('${mid}').style.display='none'">✕</button>
+      </div>
+      <form class="pb" onsubmit="saveBanOrder(event,'${mid}')">
+        <div class="fg fg-2">
+          <div class="fgrp span-full"><label class="flbl">المنشأة <span style="color:var(--danger)">*</span></label>
+            <select class="fc" name="employer" required>
+              <option value="">— اختر المنشأة —</option>
+              ${(INSP_DATA.employers||[]).map(e=>`<option value="${e.id}">${e.name}</option>`).join('')}
+            </select></div>
+          <div class="fgrp"><label class="flbl">نوع الحظر <span style="color:var(--danger)">*</span></label>
+            <select class="fc" name="banType" required>
+              <option value="">— اختر —</option>
+              <option>حظر توظيف جديد</option>
+              <option>حظر استقدام عمالة</option>
+              <option>حظر التعاقد</option>
+              <option>حظر شامل</option>
+            </select></div>
+          <div class="fgrp"><label class="flbl">المدة</label>
+            <select class="fc" name="duration">
+              <option>30 يوماً</option>
+              <option>60 يوماً</option>
+              <option selected>90 يوماً</option>
+              <option>180 يوماً</option>
+              <option>غير محددة</option>
+            </select></div>
+          <div class="fgrp"><label class="flbl">تاريخ الإصدار <span style="color:var(--danger)">*</span></label>
+            <input class="fc" type="date" name="issuedDate" required value="${new Date().toISOString().slice(0,10)}"></div>
+          <div class="fgrp"><label class="flbl">تاريخ رفع الحظر (اختياري)</label>
+            <input class="fc" type="date" name="liftDate" placeholder="اتركه فارغاً إن لم يُحدَّد"></div>
+          <div class="fgrp span-full"><label class="flbl">سبب الحظر <span style="color:var(--danger)">*</span></label>
+            <textarea class="fc" name="reason" rows="3" required placeholder="وصف موجز للمخالفات أو الأسباب الموجبة للحظر..."></textarea></div>
+          <div class="fgrp span-full"><label class="flbl">شروط رفع الحظر</label>
+            <textarea class="fc" name="conditions" rows="2" placeholder="أدخل كل شرط في سطر منفصل..."></textarea></div>
+        </div>
+        <div class="df ac g8" style="margin-top:16px;justify-content:flex-end">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('${mid}').style.display='none'">إلغاء</button>
+          <button type="submit" class="btn btn-danger btn-sm">${ICONS.lock}إصدار الأمر</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+  function saveBanOrder(e,mid){
+    e.preventDefault();
+    document.getElementById(mid).style.display='none';
+    showToast('تم إصدار أمر الحظر بنجاح','s');
+  }
+  </script>`;
+
   return `<div class="pg-head"><div><h1>قائمة حالات الحظر</h1><p>إدارة أوامر الحظر عن التعامل مع المنشآت المخالفة</p></div>
-    <div class="pg-acts"><button class="btn btn-danger" onclick="showToast('فتح نموذج إصدار الحظر','i')">${ICONS.lock}إصدار أمر حظر</button></div></div>
-    ${_tblWrap(['رقم الحظر','المنشأة','سبب الحظر','الحالة','تاريخ الإصدار','تاريخ الرفع','إجراء'], rows)}`;
+    <div class="pg-acts"><button class="btn btn-danger" onclick="document.getElementById('${mid}').style.display='flex'">${ICONS.lock}إصدار أمر حظر</button></div></div>
+    ${_tblWrap(['رقم الحظر','المنشأة','نوع الحظر','الحالة','تاريخ الإصدار','تاريخ الرفع','إجراء'], rows)}
+    ${modal}`;
 }
 
 /* ── تفاصيل حالة الحظر (inspection-director) ── */
@@ -3949,7 +4005,7 @@ function renderJobSecurityRequestDetails(role) {
     employerCRN: '1012345678',
     terminationDate: '2025-01-10',
     terminationReason: 'إنهاء العقد',
-    salary: 4500,
+    salary: 450,
     employmentDuration: '3 سنوات',
   };
 
@@ -3961,7 +4017,7 @@ function renderJobSecurityRequestDetails(role) {
       description: 'مقارنة قيمة الأجر الأخير بتسلسل الأجر في نفس العقد بحيث لا تتجاوز الزيادة أكثر من 25%',
       status: 'failed',
       severity: 'critical',
-      details: 'الأجر الأخير 4,500 ريال يزيد بنسبة 35% عن متوسط الأجر في العقد (3,333 ريال)'
+      details: 'الأجر الأخير 450 ر.ع يزيد بنسبة 35% عن متوسط الأجر في العقد (333 ر.ع)'
     },
     {
       id: 'JSR-002',
@@ -4896,7 +4952,7 @@ function renderCompaniesStoppedPaymentList() {
       </div></td>
     </tr>`).join('');
 
-  return `<div class="pg-head"><div><h1>المنشآت المتوقفة عن الدفع</h1><p>متابعة وإدارة المنشآت المتوقفة عن دفع المساهمات — ${companies.length} منشأة</p></div>
+  return `<div class="pg-head"><div><h1>المنشآت المتوقفة عن السداد</h1><p>متابعة وإدارة المنشآت المتوقفة عن سداد المساهمات — ${companies.length} منشأة</p></div>
     <div class="pg-acts">
       <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير البيانات...','i')">${ICONS.download}تصدير</button>
     </div></div>
@@ -4950,7 +5006,7 @@ function renderLiquidationBankruptcyCasesList() {
       </div></td>
     </tr>`).join('');
 
-  return `<div class="pg-head"><div><h1>قضايا التصفية والإفلاس</h1><p>متابعة وإدارة قضايا التصفية والإفلاس — ${cases.length} قضية</p></div>
+  return `<div class="pg-head"><div><h1>حالات التصفية والإفلاس</h1><p>متابعة وإدارة حالات التصفية والإفلاس — ${cases.length} قضية</p></div>
     <div class="pg-acts">
       <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير البيانات...','i')">${ICONS.download}تصدير</button>
     </div></div>
