@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إعادة تخصيص الطلبات — رئيس قسم الإجازات المرضية</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'sickleave-head', activePage: 'reassignment' });
+setBreadcrumb([{ label: 'إعادة تخصيص الطلبات' }]);
+
+const employees = [
+  { id: 'SLE-001', name: 'حمد بن سعيد الشريقي', load: 5, available: true },
+  { id: 'SLE-002', name: 'زينب بنت أحمد العامري', load: 3, available: true },
+  { id: 'SLE-003', name: 'يوسف بن ناصر اللواتي', load: 8, available: false },
+  { id: 'SLE-004', name: 'منى بنت سالم الغافري', load: 2, available: true },
+];
+
+const pendingRequests = WI_DATA.allowances.filter(r =>
+  r.status.includes('الإجازات المرضية') || r.status.includes('بانتظار')
+);
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>إعادة تخصيص الطلبات</h1>
+        <p>إدارة توزيع الطلبات على موظفي قسم الإجازات المرضية</p>
+      </div>
+    </div>
+
+    <div class="alert alert-i">
+      ${ICONS.info}
+      <span>يمكنك من هذه الشاشة إعادة تعيين الطلبات المعلقة إلى موظفين آخرين أو تغيير الموظف المسؤول عن طلب محدد.</span>
+    </div>
+
+    <!-- أحمال العمل الحالية -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>أحمال العمل الحالية — موظفو قسم الإجازات المرضية</h3></div>
+      <div class="pb">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">
+          ${employees.map(emp => `
+          <div style="padding:14px;border:1px solid var(--border);border-radius:var(--r);background:${emp.available ? 'var(--g50)' : '#fff5f5'}">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+              <div style="font-weight:700;font-size:13px">${emp.name}</div>
+              <span class="badge ${emp.available ? 'b-approved' : 'b-returned'}">${emp.available ? 'متاح' : 'غير متاح'}</span>
+            </div>
+            <div style="font-size:12px;color:var(--text3)">${emp.id}</div>
+            <div style="margin-top:8px;font-size:13px">
+              الطلبات النشطة: <strong style="color:${emp.load > 6 ? 'var(--danger)' : emp.load > 4 ? 'var(--warning)' : 'var(--success)'}">${emp.load}</strong>
+            </div>
+            <div style="margin-top:6px;background:var(--border);border-radius:4px;height:6px;overflow:hidden">
+              <div style="height:100%;background:${emp.load > 6 ? 'var(--danger)' : emp.load > 4 ? 'var(--warning)' : 'var(--success)'};width:${Math.min(100, emp.load * 12)}%;border-radius:4px"></div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- الطلبات القابلة للإعادة -->
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico or">${ICONS.inbox}</div>الطلبات القابلة لإعادة التخصيص</h3>
+        <span style="font-size:12px;color:var(--text3)">${pendingRequests.length} طلب</span>
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"></th>
+                <th>رقم الطلب</th>
+                <th>المؤمن عليه</th>
+                <th>النوع</th>
+                <th>الحالة</th>
+                <th>الموظف الحالي</th>
+                <th>تاريخ التقديم</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${pendingRequests.length === 0
+                ? `<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text3)">لا توجد طلبات قابلة لإعادة التخصيص</td></tr>`
+                : pendingRequests.map(r => `
+              <tr>
+                <td><input type="checkbox" class="req-check" value="${r.id}"></td>
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">
+                  <a href="allowances-details.html?id=${r.id}" style="color:inherit;text-decoration:none">${r.id}</a>
+                </td>
+                <td>${r.insured.name}</td>
+                <td>${r.type}</td>
+                <td>${statusBadge(r.status)}</td>
+                <td>${r.checkedOutBy || '<span style="color:var(--text3)">غير مُعيَّن</span>'}</td>
+                <td>${formatDate(r.submitDate)}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- إعادة التخصيص -->
+    <div class="dp">
+      <div class="ph"><h3><div class="pico pu">${ICONS.switch}</div>إعادة التخصيص</h3></div>
+      <div class="dp-body">
+        <div class="fg fg-3">
+          <div class="fgrp">
+            <label class="flbl">الموظف الجديد <span class="req">*</span></label>
+            <select class="fc" id="new-employee">
+              <option value="">— اختر الموظف —</option>
+              ${employees.filter(e => e.available).map(e => `<option value="${e.id}">${e.name} (${e.load} طلبات نشطة)</option>`).join('')}
+            </select>
+          </div>
+          <div class="fgrp span-2">
+            <label class="flbl">سبب إعادة التخصيص <span class="req">*</span></label>
+            <select class="fc" id="reassign-reason">
+              <option value="">— اختر السبب —</option>
+              <option>تعادل أحمال العمل</option>
+              <option>غياب الموظف الأصلي</option>
+              <option>تخصص الموظف الجديد أنسب</option>
+              <option>طلب الموظف</option>
+              <option>سبب آخر</option>
+            </select>
+          </div>
+          <div class="fgrp span-full">
+            <label class="flbl">ملاحظات</label>
+            <textarea class="fc" id="reassign-notes" rows="2" placeholder="أي ملاحظات إضافية..."></textarea>
+          </div>
+        </div>
+        <div class="dp-acts">
+          <button class="btn btn-primary" onclick="doReassign()">${ICONS.check} تنفيذ إعادة التخصيص</button>
+          <button class="btn btn-secondary" onclick="window.location.reload()">إلغاء</button>
+        </div>
+      </div>
+    </div>`;
+});
+
+function toggleSelectAll(cb) {
+  document.querySelectorAll('.req-check').forEach(c => c.checked = cb.checked);
+}
+
+function doReassign() {
+  const selected = [...document.querySelectorAll('.req-check:checked')].map(c => c.value);
+  const emp = document.getElementById('new-employee').value;
+  const reason = document.getElementById('reassign-reason').value;
+  if (!selected.length) { showToast('يرجى اختيار طلب واحد على الأقل', 'w'); return; }
+  if (!emp) { showToast('يرجى اختيار الموظف الجديد', 'w'); return; }
+  if (!reason) { showToast('يرجى تحديد سبب إعادة التخصيص', 'w'); return; }
+  const empName = document.getElementById('new-employee').selectedOptions[0].text;
+  showToast(`تمت إعادة تخصيص ${selected.length} طلب إلى ${empName.split('(')[0].trim()}`, 's', 4000);
+  setTimeout(() => window.location.reload(), 1800);
+}
+</script>
+</body>
+</html>

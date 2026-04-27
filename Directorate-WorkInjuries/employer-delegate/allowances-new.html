@@ -37,8 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="fg fg-3">
           <div class="fgrp"><label class="flbl">اسم جهة العمل</label><div class="fro">${u.company}</div></div>
           <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro" style="font-family:monospace">${u.cr}</div></div>
+          <div class="fgrp"><label class="flbl">القطاع</label><div class="fro">${u.sector || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">نوع جهة العمل</label><div class="fro">${u.employerType || '—'}</div></div>
           <div class="fgrp"><label class="flbl">اسم المفوض</label><div class="fro">${u.name}</div></div>
           <div class="fgrp"><label class="flbl">الرقم المدني للمفوض</label><div class="fro" style="font-family:monospace">${u.civil}</div></div>
+          <div class="fgrp">
+            <label class="flbl">فرع المنشأة <span class="req">*</span></label>
+            <select class="fc" id="branch-select">
+              <option value="">— اختر الفرع —</option>
+              ${(u.branches || []).map(b => `<option value="${b.id}">${b.id} — ${b.name} — ${b.state} — ${b.governorate}</option>`).join('')}
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -97,10 +106,10 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="fgrp" id="subtype-group" style="display:none">
               <label class="flbl">نوع الحالة <span class="req">*</span></label>
-              <select class="fc" id="req-subtype"></select>
+              <select class="fc" id="req-subtype" onchange="onSubtypeChange()"></select>
             </div>
             <div class="fgrp">
-              <label class="flbl">تاريخ الواقعة أو الاشتباه بالمرض <span class="req">*</span></label>
+              <label class="flbl">تاريخ الإصابة <span class="req">*</span></label>
               <input type="date" class="fc" id="incident-date">
             </div>
             <div class="fgrp">
@@ -111,9 +120,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 <option value="مضاعفة">مضاعفة</option>
               </select>
             </div>
+            <div class="alert alert-i span-full" style="margin-top:4px">
+              ${ICONS.info}
+              <div style="font-size:12px;line-height:1.8">
+                <strong>الانتكاسة:</strong> تفاقم أو تصاعد الأعراض المرتبطة بمرض مهني أو إصابة عمل كانت قد استقرت أوضاعهما.<br>
+                <strong>المضاعفة:</strong> حالة طبية تنشأ نتيجة لمرض مهني أو إصابة عمل موجودة مسبقاً، يمكن أن تحدث نتيجة تأثير المرض الأساسي على أعضاء أخرى أو ظهور عدوى أو تأثير سلبي للعلاج.<br>
+                <strong>إصابة العمل:</strong> كل إصابة تحدث للمؤمن عليه بسبب العمل أو بمناسبته.<br>
+                <strong>المرض المهني:</strong> المرض الذي ينشأ بسبب العمل في مهنة أو صناعة تسبب هذا المرض ولا يرجع إلى عوامل خارجة عن عمل المؤمن عليه.
+              </div>
+            </div>
             <div class="fgrp" id="orig-req-group" style="display:none">
-              <label class="flbl">رقم الطلب الأصلي <span class="req">*</span></label>
-              <input type="text" class="fc" id="orig-req" placeholder="WI-YYYY-XXXXXX">
+              <label class="flbl">الحالة الأصلية (انتكست أو تضاعفت) <span class="req">*</span></label>
+              <div class="tbl-wrap" style="margin-bottom:8px">
+                <table class="dtbl">
+                  <thead><tr><th>رقم الطلب</th><th>نوع الإصابة</th><th>تاريخ الطلب</th><th>الحالة</th><th></th></tr></thead>
+                  <tbody>
+                    <tr><td style="font-family:monospace">WI-2025-001234</td><td>حادث طريق</td><td>10 يناير 2025</td><td><span class="badge b-approved">معتمد</span></td><td><button class="btn btn-primary btn-xs" onclick="selectOrigCase('WI-2025-001234')">اختيار</button></td></tr>
+                    <tr><td style="font-family:monospace">WI-2024-000876</td><td>إصابة في موقع العمل</td><td>5 مارس 2024</td><td><span class="badge b-approved">معتمد</span></td><td><button class="btn btn-primary btn-xs" onclick="selectOrigCase('WI-2024-000876')">اختيار</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div id="selected-case-display" style="display:none" class="alert alert-i"></div>
+            </div>
+            <div class="fgrp" id="relapse-date-group" style="display:none">
+              <label class="flbl">تاريخ الانتكاسة / المضاعفة <span class="req">*</span></label>
+              <input type="date" class="fc" id="relapse-date">
+            </div>
+            <div class="fgrp">
+              <label class="flbl">هل العامل ملتزم بإجراءات السلامة؟ <span class="req">*</span></label>
+              <select class="fc" id="safety-compliance">
+                <option value="">— اختر —</option>
+                <option value="نعم">نعم</option>
+                <option value="لا">لا</option>
+              </select>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">حالة المؤمن عليه <span class="req">*</span></label>
+              <select class="fc" id="insured-status">
+                <option value="">— اختر —</option>
+                <option value="شفاء">شفاء</option>
+                <option value="تحت العلاج">تحت العلاج</option>
+                <option value="وفاة">وفاة</option>
+              </select>
             </div>
             <div class="fgrp span-full">
               <label class="flbl">ملاحظات أولية من جهة العمل</label>
@@ -129,10 +177,27 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="pb" id="injury-fields"></div>
       </div>
 
+      <!-- فترات الإجازة المرضية -->
+      <div class="card">
+        <div class="ph"><h3><div class="pico gr">${ICONS.calendar}</div>فترات الإجازة المرضية</h3>
+          <button class="btn btn-secondary btn-xs" onclick="addSickLeaveRow()">${ICONS.plus} إضافة فترة</button>
+        </div>
+        <div class="pb">
+          <div class="tbl-wrap">
+            <table class="dtbl">
+              <thead><tr><th>من تاريخ</th><th>إلى تاريخ</th><th>عدد الأيام</th><th>ملاحظات</th><th></th></tr></thead>
+              <tbody id="sl-tbody"></tbody>
+            </table>
+          </div>
+          <div class="fhint mt8">يمكن لصاحب العمل إدخال فترات الإجازة المرضية المبدئية — يخضع للمراجعة والتعديل من قسم الإجازات المرضية</div>
+        </div>
+      </div>
+
       <!-- المرفقات -->
       <div class="card">
         <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات</h3></div>
         <div class="pb">
+          <div class="alert alert-w" style="margin-bottom:12px">${ICONS.warn}<span>يُنصح بتجميع المستندات في ملف واحد PDF قدر الإمكان.</span></div>
           ${renderModernUploadComponent({ idPrefix: 'allowance-att' })}
           <div class="fhint mt8">الأنواع المقبولة: PDF, Word, صور, تسجيل صوتي, فيديو — الحجم الأقصى 20MB</div>
         </div>
@@ -169,9 +234,6 @@ function selectEmployee(civil) {
       <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${e.title}</div></div>
       <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">نشط</span></div></div>
     </div>`;
-  
-  // No need to init attachments manually anymore
-  
   document.getElementById('selected-emp-card').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -221,22 +283,45 @@ function onTypeChange() {
           </div>
           <button type="button" class="btn btn-secondary btn-xs mt8" onclick="addWitnessRow()">${ICONS.plus} إضافة شاهد</button>
         </div>
+        <div class="fgrp" id="accident-dir-group" style="display:none">
+          <label class="flbl">اتجاه الحادث <span class="req">*</span></label>
+          <select class="fc" id="accident-dir">
+            <option value="">— اختر —</option>
+            <option>مقر العمل إلى السكن الدائم</option>
+            <option>السكن الدائم إلى مقر العمل</option>
+            <option>خروج في مهمة عمل</option>
+            <option>السكن الدائم إلى السكن الثانوي</option>
+          </select>
+        </div>
       </div>`;
     instr.innerHTML = `
       <strong style="font-size:13px;display:block;margin-bottom:10px">المستندات المطلوبة (جهة العمل):</strong>
       <ul style="font-size:12.5px;color:var(--text2);padding-right:18px;line-height:2">
         <li>تقرير السلامة والصحة المهنية (إن وُجد)</li>
+        <li>تقرير الصحة والسلامة المهنية</li>
         <li>كشف الحضور والانصراف للموظف</li>
         <li>صور من موقع الحادثة</li>
         <li>إفادات الشهود المكتوبة</li>
+        <li>تقرير الشرطة (في حالة حوادث الطريق والحرائق)</li>
       </ul>`;
+    // Listen for subtype changes after rendering
+    setTimeout(() => {
+      const sub = document.getElementById('req-subtype');
+      if (sub) sub.addEventListener('change', onSubtypeChange);
+      onSubtypeChange();
+    }, 0);
   } else {
     subtypeEl.innerHTML = `<option>ربو مهني</option><option>تسمم بالرصاص</option><option>التهاب الجلد التماسي</option><option>فقدان السمع المهني</option><option>داء الغبار الرئوي</option><option>مرض مهني آخر</option>`;
     injuryFields.innerHTML = `
       <div class="fg fg-2">
-        <div class="fgrp span-full"><label class="flbl">المواد أو العوامل المسببة للمرض في بيئة العمل</label><textarea class="fc" rows="3" placeholder="المواد الكيميائية، الغبار، الضوضاء، إلخ..."></textarea></div>
+        <div class="fgrp span-full">
+          <label class="flbl">المواد أو العوامل المسببة للمرض في بيئة العمل <span class="req">*</span></label>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px;padding:12px;border:1px solid var(--border);border-radius:var(--rsm);background:var(--g50)">
+            ${['المواد الكيميائية','الغبار الصناعي','الأبخرة والغازات','الضوضاء الشديدة','الاهتزازات','الإشعاع','الحرارة الشديدة','البرودة الشديدة','الضغط العالي','المواد البيولوجية','الإرهاق الجسدي المتكرر','عوامل أخرى'].map(f=>`<label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer"><input type="checkbox" value="${f}"> ${f}</label>`).join('')}
+          </div>
+        </div>
         <div class="fgrp"><label class="flbl">مدة تعرض الموظف لهذه العوامل</label><input type="text" class="fc" placeholder="مثال: سنتان"></div>
-        <div class="fgrp"><label class="flbl">تاريخ علم جهة العمل بالحالة</label><input type="date" class="fc"></div>
+        <div class="fgrp"><label class="flbl">تاريخ تشخيص المرض</label><input type="date" class="fc"></div>
         <div class="fgrp span-full"><label class="flbl">إجراءات السلامة المتخذة للموظف</label><textarea class="fc" rows="3" placeholder="هل تم توفير أدوات الوقاية؟ هل تم تغيير موقع العمل؟..."></textarea></div>
       </div>`;
     instr.innerHTML = `
@@ -244,14 +329,27 @@ function onTypeChange() {
       <ul style="font-size:12.5px;color:var(--text2);padding-right:18px;line-height:2">
         <li>كشف الفحوصات الطبية الدورية للموظف</li>
         <li>نتائج قياسات بيئة العمل</li>
+        <li>تقرير الصحة والسلامة المهنية</li>
         <li>قائمة بالمواد المستخدمة في موقع العمل</li>
       </ul>`;
   }
 }
 
+function onSubtypeChange() {
+  const subtype = document.getElementById('req-subtype')?.value;
+  const dirGroup = document.getElementById('accident-dir-group');
+  if (dirGroup) dirGroup.style.display = subtype === 'حادث طريق' ? '' : 'none';
+}
+
 function onRelapseChange() {
   const v = document.getElementById('relapse').value;
   document.getElementById('orig-req-group').style.display = v !== 'لا' ? '' : 'none';
+  document.getElementById('relapse-date-group').style.display = v !== 'لا' ? '' : 'none';
+}
+
+function selectOrigCase(id) {
+  document.getElementById('selected-case-display').style.display = '';
+  document.getElementById('selected-case-display').innerHTML = `${ICONS.check} <span>تم اختيار الحالة: <strong>${id}</strong></span>`;
 }
 
 function addWitnessRow() {
@@ -266,6 +364,27 @@ function addWitnessRow() {
   tbody.appendChild(row);
 }
 
+function addSickLeaveRow() {
+  const tbody = document.getElementById('sl-tbody');
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td><input type="date" class="fc" onchange="calcDays(this)"></td>
+    <td><input type="date" class="fc" onchange="calcDays(this)"></td>
+    <td><input type="text" class="fc" placeholder="تلقائي" readonly style="background:var(--g50)"></td>
+    <td><input type="text" class="fc" placeholder="ملاحظات اختيارية"></td>
+    <td style="text-align:center"><button type="button" class="ibtn d" onclick="this.closest('tr').remove()" title="حذف">${ICONS.trash}</button></td>
+  `;
+  tbody.appendChild(row);
+}
+
+function calcDays(el) {
+  const row = el.closest('tr');
+  const [from, to] = row.querySelectorAll('input[type=date]');
+  if (from.value && to.value) {
+    const diff = Math.round((new Date(to.value) - new Date(from.value)) / 86400000);
+    row.querySelectorAll('input')[2].value = diff > 0 ? diff + ' يوم' : '—';
+  }
+}
 
 function saveDraft() {
   showToast('تم حفظ الطلب كمسودة', 'i');

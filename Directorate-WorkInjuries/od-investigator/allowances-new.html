@@ -99,20 +99,51 @@ document.addEventListener('DOMContentLoaded', () => {
               <select class="fc" id="req-subtype"></select>
             </div>
             <div class="fgrp">
-              <label class="flbl">تاريخ الواقعة أو الاشتباه بالمرض <span class="req">*</span></label>
+              <label class="flbl" id="incident-date-lbl">تاريخ الإصابة <span class="req">*</span></label>
               <input type="date" class="fc" id="incident-date">
             </div>
             <div class="fgrp">
-              <label class="flbl">هل الطلب انتكاسة أو مضاعفة؟ <span class="req">*</span></label>
-              <select class="fc" id="relapse" onchange="onRelapseChange()">
-                <option value="لا">لا</option>
-                <option value="انتكاسة">انتكاسة</option>
-                <option value="مضاعفة">مضاعفة</option>
+              <label class="flbl">حالة المؤمن عليه <span class="req">*</span></label>
+              <select class="fc" id="insured-status">
+                <option value="">— اختر —</option>
+                <option>شفاء</option>
+                <option>تحت العلاج</option>
+                <option>وفاة</option>
               </select>
             </div>
-            <div class="fgrp" id="orig-req-group" style="display:none">
-              <label class="flbl">رقم الطلب الأصلي <span class="req">*</span></label>
-              <input type="text" class="fc" id="orig-req" placeholder="WI-YYYY-XXXXXX">
+            <div class="fgrp">
+              <label class="flbl">هل الطلب انتكاسة أو مضاعفة؟ <span class="req">*</span></label>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <select class="fc" id="relapse" onchange="onRelapseChange()" style="flex:1">
+                  <option value="لا">لا</option>
+                  <option value="انتكاسة">انتكاسة</option>
+                  <option value="مضاعفة">مضاعفة</option>
+                </select>
+                <button type="button" class="btn btn-secondary btn-xs" onclick="showLegalDefinitions()" title="عرض التعريفات القانونية">${ICONS.info} تعريفات</button>
+              </div>
+            </div>
+            <div class="fgrp" id="relapse-date-group" style="display:none">
+              <label class="flbl">تاريخ الانتكاسة / المضاعفة <span class="req">*</span></label>
+              <input type="date" class="fc" id="relapse-date">
+            </div>
+            <div id="orig-req-group" style="display:none" class="fgrp span-full">
+              <label class="flbl">اختر الطلب الأصلي <span class="req">*</span></label>
+              <div class="tbl-wrap" style="margin-top:6px">
+                <table class="dtbl">
+                  <thead><tr><th></th><th>رقم الطلب</th><th>النوع</th><th>تاريخ التقديم</th><th>الحالة</th></tr></thead>
+                  <tbody>
+                    ${(WI_DATA.allowances || []).slice(0, 4).map(r => `
+                    <tr>
+                      <td><input type="radio" name="orig-case" value="${r.id}" onchange="document.getElementById('orig-req-selected').value='${r.id}'"></td>
+                      <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                      <td>${r.type}</td>
+                      <td>${formatDate(r.submitDate)}</td>
+                      <td>${statusBadge(r.status)}</td>
+                    </tr>`).join('')}
+                  </tbody>
+                </table>
+              </div>
+              <input type="hidden" id="orig-req-selected">
             </div>
           </div>
         </div>
@@ -190,6 +221,7 @@ function onTypeChange() {
   injuryCard.style.display = '';
 
   if (requestType === 'إصابة عمل') {
+    document.getElementById('incident-date-lbl').innerHTML = 'تاريخ الإصابة <span class="req">*</span>';
     subtypeEl.innerHTML = `<option>حادث طريق</option><option>إصابة في موقع العمل</option><option>إجهاد وإرهاق</option>`;
     injuryFields.innerHTML = `
       <div class="fg fg-2">
@@ -222,32 +254,72 @@ function onTypeChange() {
     instr.innerHTML = `
       <strong style="font-size:13px;display:block;margin-bottom:10px">المستندات المطلوبة (إصابة عمل):</strong>
       <ul style="font-size:12.5px;color:var(--text2);padding-right:18px;line-height:2">
-        <li>تقرير السلامة المهنية</li>
+        <li>التقرير الطبي الأولي من المستشفى أو المركز الصحي</li>
+        <li>تقرير الصحة والسلامة المهنية</li>
+        <li>تقرير الشرطة (في حالة حوادث الطريق والحرائق)</li>
         <li>كشف الحضور والانصراف</li>
-        <li>صور من موقع الحادثة</li>
-      </ul>`;
+        <li>صور من موقع الحادثة (إن وُجدت)</li>
+      </ul>
+      <div class="alert alert-w" style="margin-top:10px">${ICONS.warn}<span>يُنصح بتجميع المستندات في ملف PDF واحد قدر الإمكان.</span></div>`;
   } else {
+    document.getElementById('incident-date-lbl').innerHTML = 'تاريخ تشخيص المرض <span class="req">*</span>';
     subtypeEl.innerHTML = `<option>ربو مهني</option><option>تسمم بالرصاص</option><option>التهاب الجلد التماسي</option><option>فقدان السمع المهني</option><option>داء الغبار الرئوي</option><option>مرض مهني آخر</option>`;
     injuryFields.innerHTML = `
       <div class="fg fg-2">
-        <div class="fgrp span-full"><label class="flbl">العوامل المسببة للمرض في بيئة العمل</label><textarea class="fc" rows="3" placeholder="المواد الكيميائية، الغبار، الضوضاء، إلخ..."></textarea></div>
+        <div class="fgrp span-full">
+          <label class="flbl">المواد / العوامل المسببة <span class="req">*</span></label>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;padding:10px;border:1px solid var(--border);border-radius:var(--r);background:var(--g50)">
+            ${['الغبار والجسيمات الدقيقة','المواد الكيميائية السامة','الأشعة والإشعاعات','الضوضاء الشديدة','الاهتزازات الميكانيكية','الضغط الجوي العالي أو المنخفض','الحرارة الشديدة أو البرودة','المواد البيولوجية (بكتيريا / فيروسات)','المذيبات العضوية','المبيدات والمواد الزراعية','الفلزات الثقيلة (رصاص، زئبق، كروم)','عوامل إرغونومية (إجهاد هيكلي)'].map(m => `
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12.5px"><input type="checkbox" value="${m}"> ${m}</label>`).join('')}
+          </div>
+        </div>
         <div class="fgrp"><label class="flbl">مدة التعرض لهذه العوامل</label><input type="text" class="fc" placeholder="مثال: سنتان"></div>
-        <div class="fgrp"><label class="flbl">تاريخ الاشتباه بالحالة</label><input type="date" class="fc"></div>
         <div class="fgrp span-full"><label class="flbl">إجراءات السلامة المتوفرة</label><textarea class="fc" rows="3" placeholder="أدوات الوقاية، التهوية، التدريب..."></textarea></div>
       </div>`;
     instr.innerHTML = `
       <strong style="font-size:13px;display:block;margin-bottom:10px">المستندات المطلوبة (مرض مهني):</strong>
       <ul style="font-size:12.5px;color:var(--text2);padding-right:18px;line-height:2">
-        <li>كشف الفحوصات الدورية</li>
-        <li>نتائج قياسات بيئة العمل</li>
-        <li>قائمة بالمواد المستخدمة</li>
+        <li>التقرير الطبي المفصّل من الطبيب المعالج</li>
+        <li>نتائج الفحوصات الدورية وتقرير بيئة العمل</li>
+        <li>تقرير الصحة والسلامة المهنية</li>
+        <li>قائمة بالمواد والعوامل المسببة</li>
+        <li>كشف الحضور والانصراف</li>
       </ul>`;
   }
 }
 
 function onRelapseChange() {
   const v = document.getElementById('relapse').value;
-  document.getElementById('orig-req-group').style.display = v !== 'لا' ? '' : 'none';
+  const show = v !== 'لا';
+  document.getElementById('orig-req-group').style.display = show ? '' : 'none';
+  document.getElementById('relapse-date-group').style.display = show ? '' : 'none';
+}
+
+function showLegalDefinitions() {
+  openModal({
+    title: 'التعريفات القانونية',
+    size: 'md',
+    body: `
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="padding:12px;border-right:4px solid var(--primary);background:var(--g50);border-radius:var(--r)">
+          <div style="font-weight:700;font-size:13px;margin-bottom:4px;color:var(--primary)">إصابة العمل</div>
+          <div style="font-size:12.5px;color:var(--text2);line-height:1.7">كل إصابة يتعرض لها المؤمن عليه بسبب العمل أو بمناسبته، بما في ذلك حوادث الطريق أثناء التنقل من وإلى العمل.</div>
+        </div>
+        <div style="padding:12px;border-right:4px solid var(--warning);background:var(--g50);border-radius:var(--r)">
+          <div style="font-weight:700;font-size:13px;margin-bottom:4px;color:var(--warning)">المرض المهني</div>
+          <div style="font-size:12.5px;color:var(--text2);line-height:1.7">المرض الناتج عن تعرض المؤمن عليه لعوامل ضارة في بيئة عمله على مدى فترة من الزمن، وفقاً للقائمة المعتمدة من المختصين.</div>
+        </div>
+        <div style="padding:12px;border-right:4px solid var(--accent);background:var(--g50);border-radius:var(--r)">
+          <div style="font-weight:700;font-size:13px;margin-bottom:4px;color:var(--accent)">الانتكاسة</div>
+          <div style="font-size:12.5px;color:var(--text2);line-height:1.7">عودة ظهور الأعراض المرتبطة بإصابة عمل أو مرض مهني سابق بعد فترة من التحسن أو الشفاء الظاهري، وتُربط بنفس السبب الأصلي.</div>
+        </div>
+        <div style="padding:12px;border-right:4px solid var(--danger);background:var(--g50);border-radius:var(--r)">
+          <div style="font-weight:700;font-size:13px;margin-bottom:4px;color:var(--danger)">المضاعفة</div>
+          <div style="font-size:12.5px;color:var(--text2);line-height:1.7">حالة طبية أو إصابة جديدة تنشأ مباشرةً نتيجة إصابة العمل أو المرض المهني الأصلي، وتترتب عليها أعباء صحية إضافية.</div>
+        </div>
+      </div>`,
+    footer: `<button class="btn btn-secondary" onclick="document.querySelector('.modal-overlay').remove()">إغلاق</button>`
+  });
 }
 
 function addWitnessRow() {

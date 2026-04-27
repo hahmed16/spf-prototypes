@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>طلبات الأمراض المهنية — لجنة الأمراض المهنية</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'od-committee', activePage: 'requests-list' });
+setBreadcrumb([{ label: 'طلبات الأمراض المهنية الواردة' }]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const odRequests = WI_DATA.allowances.filter(r => r.type === 'مرض مهني');
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>طلبات الأمراض المهنية الواردة</h1>
+        <p>قائمة الطلبات المحالة إلى اللجنة لإبداء الرأي الفني الاستشاري</p>
+      </div>
+    </div>
+
+    <div class="alert alert-w">
+      ${ICONS.warn}
+      <div>
+        <strong>تنبيه:</strong> دور اللجنة استشاري فقط. الرأي المُبدى لا يُعدّ قراراً نهائياً ويُرفع إلى قسم الإجازات المرضية لاتخاذ القرار.
+      </div>
+    </div>
+
+    <!-- فلاتر -->
+    <div class="card" style="padding:14px">
+      <div class="fg fg-3">
+        <div class="fgrp">
+          <label class="flbl">البحث</label>
+          <input type="text" class="fc" id="search-input" placeholder="رقم الطلب أو اسم المؤمن عليه..." oninput="filterRequests()">
+        </div>
+        <div class="fgrp">
+          <label class="flbl">الحالة</label>
+          <select class="fc" id="status-filter" onchange="filterRequests()">
+            <option value="">الكل</option>
+            <option>قيد التحقيق — الأمراض المهنية</option>
+            <option>بانتظار رأي اللجنة</option>
+            <option>معتمد</option>
+            <option>مرفوض</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- الجدول -->
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico or">${ICONS.inbox}</div>قائمة الطلبات</h3>
+        <span style="font-size:12px;color:var(--text3)" id="count-lbl">${odRequests.length} طلب</span>
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>المؤمن عليه</th>
+                <th>جهة العمل</th>
+                <th>نوع المرض</th>
+                <th>الحالة</th>
+                <th>تاريخ التقديم</th>
+                <th>رأي اللجنة</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="requests-tbody">
+              ${odRequests.map(r => `
+              <tr data-id="${r.id}" data-status="${r.status}" data-search="${r.id.toLowerCase()} ${r.insured.name.toLowerCase()}">
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td>${r.insured.name}</td>
+                <td style="font-size:12px">${r.employer.name}</td>
+                <td>${r.subtype || r.type}</td>
+                <td>${statusBadge(r.status)}</td>
+                <td>${formatDate(r.submitDate)}</td>
+                <td id="opinion-${r.id}">
+                  ${r.committeeOpinion
+                    ? `<span class="badge ${r.committeeOpinion === 'موافقة' ? 'b-approved' : r.committeeOpinion === 'رفض' ? 'b-rejected' : 'b-phead'}">${r.committeeOpinion}</span>`
+                    : '<span style="color:var(--text3);font-size:11px">لم يُبدَ رأي</span>'}
+                </td>
+                <td>
+                  <button class="btn btn-primary btn-xs" onclick="openOpinionModal('${r.id}', '${r.insured.name}')">إبداء الرأي</button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+});
+
+function filterRequests() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const status = document.getElementById('status-filter').value;
+  const rows = document.querySelectorAll('#requests-tbody tr');
+  let visible = 0;
+  rows.forEach(row => {
+    const matchSearch = !search || row.dataset.search?.includes(search);
+    const matchStatus = !status || row.dataset.status === status;
+    row.style.display = matchSearch && matchStatus ? '' : 'none';
+    if (matchSearch && matchStatus) visible++;
+  });
+  document.getElementById('count-lbl').textContent = visible + ' طلب';
+}
+
+function openOpinionModal(reqId, insuredName) {
+  openModal({
+    title: `إبداء رأي اللجنة — ${reqId}`,
+    size: 'md',
+    body: `
+      <div style="padding:10px;background:var(--g50);border-radius:var(--r);margin-bottom:14px;font-size:12.5px;color:var(--text2)">
+        المؤمن عليه: <strong>${insuredName}</strong>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">رأي اللجنة الاستشاري <span class="req">*</span></label>
+        <select class="fc" id="committee-opinion">
+          <option value="">— اختر الرأي —</option>
+          <option value="موافقة">موافقة — يستوفي الطلب معايير المرض المهني</option>
+          <option value="رفض">رفض — لا يستوفي الطلب معايير المرض المهني</option>
+          <option value="طلب تحقيق إضافي">طلب تحقيق إضافي — يلزم مزيد من الدراسة</option>
+        </select>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">الملاحظات الفنية <span class="req">*</span></label>
+        <textarea class="fc" id="committee-notes" rows="5" placeholder="أكتب الرأي الفني التفصيلي للجنة — الأسباب والمستندات المراجعة والنتائج..."></textarea>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">المرفقات الداعمة <span style="color:var(--text3);font-weight:400">(اختياري)</span></label>
+        ${renderModernUploadComponent({ idPrefix: 'committee-att', subTitle: 'تقارير فنية، دراسات بيئية...' })}
+      </div>`,
+    footer: `<button class="btn btn-primary" onclick="submitOpinion('${reqId}')">إرسال الرأي</button>
+             <button class="btn btn-secondary" onclick="document.querySelector('.modal-overlay').remove()">إلغاء</button>`
+  });
+}
+
+function submitOpinion(reqId) {
+  const opinion = document.getElementById('committee-opinion').value;
+  const notes = document.getElementById('committee-notes').value.trim();
+  if (!opinion) { showToast('يرجى اختيار رأي اللجنة', 'w'); return; }
+  if (!notes) { showToast('يرجى كتابة الملاحظات الفنية', 'w'); return; }
+  document.querySelector('.modal-overlay')?.remove();
+  const cell = document.getElementById(`opinion-${reqId}`);
+  if (cell) {
+    const cls = opinion === 'موافقة' ? 'b-approved' : opinion === 'رفض' ? 'b-rejected' : 'b-phead';
+    cell.innerHTML = `<span class="badge ${cls}">${opinion}</span>`;
+  }
+  showToast('تم إرسال رأي اللجنة بنجاح', 's');
+}
+</script>
+</body>
+</html>

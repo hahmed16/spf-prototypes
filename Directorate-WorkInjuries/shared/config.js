@@ -39,11 +39,11 @@ const WI_CONFIG = {
       canCheckout: false,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'قائمة طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
-        { label: 'قائمة طلبات منفعة الإعاقة', page: 'disability-list', icon: 'list', badge: 'disability' },
+        { label: 'طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
+        { label: 'طلبات منفعة الإعاقة', page: 'disability-list', icon: 'list', badge: 'disability' },
         { label: 'التشخيصات الواردة (الأمراض المستديمة)', page: 'chronic-incoming', icon: 'inbox', badge: 'chronic-incoming' },
-        { label: 'قائمة طلبات الأمراض المستديمة', page: 'chronic-list', icon: 'list', badge: null },
-        { label: 'قائمة التظلمات', page: 'appeals-list', icon: 'list', badge: null },
+        { label: 'طلبات الأمراض المستديمة', page: 'chronic-list', icon: 'list', badge: null },
+        { label: 'التظلمات', page: 'appeals-list', icon: 'list', badge: null },
       ]
     },
 
@@ -56,8 +56,8 @@ const WI_CONFIG = {
       canCheckout: false,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'قائمة طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
-        { label: 'قائمة التظلمات', page: 'appeals-list', icon: 'list', badge: null },
+        { label: 'طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
+        { label: 'التظلمات', page: 'appeals-list', icon: 'list', badge: null },
       ]
     },
 
@@ -70,7 +70,8 @@ const WI_CONFIG = {
       canCheckout: true,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'قائمة طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
+        { label: 'طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
+        { label: 'الطلبات المعلّقة للنقاش', page: 'pending-discussion', icon: 'bell', badge: null },
         { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
       ]
     },
@@ -84,7 +85,9 @@ const WI_CONFIG = {
       canCheckout: false,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'قائمة طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
+        { label: 'طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
+        { label: 'الطلبات المعلّقة للنقاش', page: 'pending-discussion', icon: 'bell', badge: null },
+        { label: 'إعادة تخصيص الطلبات', page: 'reassignment', icon: 'switch', badge: null },
         { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
       ]
     },
@@ -98,7 +101,8 @@ const WI_CONFIG = {
       canCheckout: true,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'قائمة طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
+        { label: 'طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
+        { label: 'الطلبات المعلّقة للنقاش', page: 'pending-discussion', icon: 'bell', badge: null },
         { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
       ]
     },
@@ -112,7 +116,9 @@ const WI_CONFIG = {
       canCheckout: false,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'قائمة طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
+        { label: 'طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
+        { label: 'الطلبات المعلّقة للنقاش', page: 'pending-discussion', icon: 'bell', badge: null },
+        { label: 'إعادة تخصيص الطلبات', page: 'reassignment', icon: 'switch', badge: null },
         { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
       ]
     },
@@ -126,7 +132,8 @@ const WI_CONFIG = {
       canCheckout: true,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'قائمة طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
+        { label: 'طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
+        { label: 'الطلبات المعلّقة للنقاش', page: 'pending-discussion', icon: 'bell', badge: null },
         { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
       ]
     },
@@ -140,7 +147,9 @@ const WI_CONFIG = {
       canCheckout: false,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'قائمة طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
+        { label: 'طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
+        { label: 'الطلبات المعلّقة للنقاش', page: 'pending-discussion', icon: 'bell', badge: null },
+        { label: 'إعادة تخصيص الطلبات', page: 'reassignment', icon: 'switch', badge: null },
         { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
       ]
     },
@@ -154,10 +163,10 @@ const WI_CONFIG = {
       canCheckout: true,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'قائمة طلبات منفعة الإعاقة', page: 'disability-list', icon: 'list', badge: 'disability' },
+        { label: 'طلبات منفعة الإعاقة', page: 'disability-list', icon: 'list', badge: 'disability' },
         { label: 'استعلام بطاقة الإعاقة', page: 'disability-card-query', icon: 'search', badge: null },
         { label: 'الحالات الواردة (الأمراض المستديمة)', page: 'chronic-incoming', icon: 'inbox', badge: 'chronic-incoming' },
-        { label: 'قائمة طلبات الأمراض المستديمة', page: 'chronic-list', icon: 'list', badge: 'chronic' },
+        { label: 'طلبات الأمراض المستديمة', page: 'chronic-list', icon: 'list', badge: 'chronic' },
         { label: 'إعادة التقييم الدوري (الأمراض المستديمة)', page: 'chronic-reassessment', icon: 'refresh', badge: 'reassessment' },
         { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
       ]
@@ -172,11 +181,12 @@ const WI_CONFIG = {
       canCheckout: false,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'قائمة طلبات منفعة الإعاقة', page: 'disability-list', icon: 'list', badge: 'disability' },
+        { label: 'طلبات منفعة الإعاقة', page: 'disability-list', icon: 'list', badge: 'disability' },
         { label: 'استعلام بطاقة الإعاقة', page: 'disability-card-query', icon: 'search', badge: null },
         { label: 'الحالات الواردة (الأمراض المستديمة)', page: 'chronic-incoming', icon: 'inbox', badge: 'chronic-incoming' },
-        { label: 'قائمة طلبات الأمراض المستديمة', page: 'chronic-list', icon: 'list', badge: 'chronic' },
+        { label: 'طلبات الأمراض المستديمة', page: 'chronic-list', icon: 'list', badge: 'chronic' },
         { label: 'إعادة التقييم الدوري (الأمراض المستديمة)', page: 'chronic-reassessment', icon: 'refresh', badge: 'reassessment' },
+        { label: 'إعادة تخصيص الطلبات', page: 'reassignment', icon: 'switch', badge: null },
         { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
       ]
     },
@@ -193,7 +203,7 @@ const WI_CONFIG = {
         { label: 'طلبات عرض المؤسسات الصحية الواردة', page: 'referrals-list', icon: 'inbox', badge: 'referrals' },
         { label: 'الحالات المحالة للمؤسسات الصحية', page: 'referred-list', icon: 'list', badge: null },
         { label: 'جلسات اللجان الطبية', page: 'sessions-list', icon: 'calendar', badge: null },
-        { label: 'قائمة التظلمات', page: 'appeals-list', icon: 'list', badge: 'appeals' },
+        { label: 'التظلمات', page: 'appeals-list', icon: 'list', badge: 'appeals' },
         { label: 'جلسات لجنة التظلمات', page: 'appeals-sessions-list', icon: 'calendar', badge: null },
         { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
       ]
@@ -211,8 +221,9 @@ const WI_CONFIG = {
         { label: 'طلبات عرض المؤسسات الصحية الواردة', page: 'referrals-list', icon: 'inbox', badge: 'referrals' },
         { label: 'الحالات المحالة للمؤسسات الصحية', page: 'referred-list', icon: 'list', badge: null },
         { label: 'جلسات اللجان الطبية', page: 'sessions-list', icon: 'calendar', badge: null },
-        { label: 'قائمة التظلمات', page: 'appeals-list', icon: 'list', badge: 'appeals' },
+        { label: 'التظلمات', page: 'appeals-list', icon: 'list', badge: 'appeals' },
         { label: 'جلسات لجنة التظلمات', page: 'appeals-sessions-list', icon: 'calendar', badge: null },
+        { label: 'إعادة تخصيص الطلبات', page: 'reassignment', icon: 'switch', badge: null },
         { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
       ]
     },
@@ -226,7 +237,7 @@ const WI_CONFIG = {
       canCheckout: true,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'قائمة طلبات وتراخيص المؤسسات الصحية', page: 'licensing-list', icon: 'list', badge: 'licensing' },
+        { label: 'طلبات وتراخيص المؤسسات الصحية', page: 'licensing-list', icon: 'list', badge: 'licensing' },
         { label: 'الزيارات الرقابية للمؤسسات الصحية', page: 'inspections-list', icon: 'clipboard', badge: null },
         { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
       ]
@@ -241,8 +252,9 @@ const WI_CONFIG = {
       canCheckout: false,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'قائمة طلبات وتراخيص المؤسسات الصحية', page: 'licensing-list', icon: 'list', badge: 'licensing' },
+        { label: 'طلبات وتراخيص المؤسسات الصحية', page: 'licensing-list', icon: 'list', badge: 'licensing' },
         { label: 'الزيارات الرقابية للمؤسسات الصحية', page: 'inspections-list', icon: 'clipboard', badge: null },
+        { label: 'إعادة تخصيص الطلبات', page: 'reassignment', icon: 'switch', badge: null },
         { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
       ]
     },
@@ -269,7 +281,7 @@ const WI_CONFIG = {
       canCheckout: false,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'قائمة طلبات وتراخيص المؤسسات الصحية', page: 'licensing-list', icon: 'list', badge: 'licensing' },
+        { label: 'طلبات وتراخيص المؤسسات الصحية', page: 'licensing-list', icon: 'list', badge: 'licensing' },
       ]
     },
 
@@ -295,7 +307,7 @@ const WI_CONFIG = {
       canCheckout: false,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'قائمة الجلسات الطبية', page: 'sessions-list', icon: 'calendar', badge: 'sessions' },
+        { label: 'الجلسات الطبية', page: 'sessions-list', icon: 'calendar', badge: 'sessions' },
         { label: 'التوقيعات المعلّقة (القرارات الطبية)', page: 'signing', icon: 'pen', badge: 'signing' },
       ]
     },
@@ -310,7 +322,7 @@ const WI_CONFIG = {
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
         { label: 'التظلمات الواردة', page: 'incoming-requests', icon: 'inbox', badge: 'incoming' },
-        { label: 'قائمة جلسات التظلمات', page: 'sessions-list', icon: 'calendar', badge: 'sessions' },
+        { label: 'جلسات التظلمات', page: 'sessions-list', icon: 'calendar', badge: 'sessions' },
         { label: 'التوقيعات المعلّقة (قرارات التظلمات)', page: 'signing', icon: 'pen', badge: 'signing' },
       ]
     },
@@ -325,7 +337,7 @@ const WI_CONFIG = {
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
         { label: 'طلبات الترخيص الواردة', page: 'incoming-requests', icon: 'inbox', badge: 'incoming' },
-        { label: 'قائمة جلسات اللجنة الإشرافية', page: 'sessions-list', icon: 'calendar', badge: 'sessions' },
+        { label: 'جلسات اللجنة الإشرافية', page: 'sessions-list', icon: 'calendar', badge: 'sessions' },
         { label: 'التوقيعات المعلّقة (قرارات التراخيص)', page: 'signing', icon: 'pen', badge: 'signing' },
       ]
     },
@@ -339,10 +351,23 @@ const WI_CONFIG = {
       canCheckout: false,
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'قائمة طلبات ترخيص المؤسسة', page: 'licensing-list', icon: 'list', badge: null },
+        { label: 'طلبات ترخيص المؤسسة', page: 'licensing-list', icon: 'list', badge: null },
         { label: 'ملف المؤسسة الصحية', page: 'institution-file', icon: 'file', badge: null },
       ]
-    }
+    },
+
+    'od-committee': {
+      id: 22,
+      nameAr: 'لجنة الأمراض المهنية',
+      type: 'external',
+      folder: 'od-committee',
+      avatarInitials: 'لأ',
+      canCheckout: false,
+      sidebar: [
+        { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
+        { label: 'طلبات الأمراض المهنية الواردة', page: 'requests-list', icon: 'inbox', badge: null },
+      ]
+    },
 
   },
 

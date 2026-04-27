@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
       </div>
       <div class="pg-acts">
+        <button class="btn ${req.discussionFlagged ? 'btn-warning' : 'btn-secondary'}" id="disc-flag-btn" onclick="toggleDiscussionFlag()" title="${req.discussionFlagged ? 'إلغاء تعليم النقاش' : 'تعليم للنقاش في الاجتماع الأسبوعي'}">${ICONS.bell} ${req.discussionFlagged ? 'معلّم للنقاش' : 'تعليم للنقاش'}</button>
         <button class="btn btn-secondary" onclick="window.location.href='allowances-list.html'">${ICONS.arrow_left} رجوع</button>
       </div>
     </div>
@@ -91,6 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${req.employer.jobTitle || '—'}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ الالتحاق بالعمل</label><div class="fro">${formatDate(req.employer.joinDate)}</div></div>
           <div class="fgrp"><label class="flbl">موقع العمل / الفرع</label><div class="fro">${req.employer.location || '—'}</div></div>
+          ${req.employer.sector ? `<div class="fgrp"><label class="flbl">القطاع</label><div class="fro">${req.employer.sector}</div></div>` : ''}
+          ${req.employer.employerType ? `<div class="fgrp"><label class="flbl">نوع جهة العمل</label><div class="fro">${req.employer.employerType}</div></div>` : ''}
+          ${req.employer.branch ? `<div class="fgrp"><label class="flbl">الفرع</label><div class="fro">${req.employer.branch.name || req.employer.branch} ${req.employer.branch.governorate ? '— ' + req.employer.branch.governorate : ''}</div></div>` : ''}
         </div>
       </div>
     </div>
@@ -101,7 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb">
         <div class="fg fg-3">
           <div class="fgrp"><label class="flbl">نوع الحالة</label><div class="fro">${normalizeDisplay(injury.caseType || injury.diagnosis || 'مرض مهني')}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ أول اشتباه</label><div class="fro">${formatDate(injury.firstSuspicion || injury.incidentDate)}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ تشخيص المرض</label><div class="fro">${formatDate(injury.firstSuspicion || injury.incidentDate)}</div></div>
+          ${injury.insuredStatus ? `<div class="fgrp"><label class="flbl">حالة المؤمن عليه</label><div class="fro">${injury.insuredStatus}</div></div>` : ''}
           <div class="fgrp span-full"><label class="flbl">المواد / العوامل المسببة</label><div class="fro">${injury.chemicalAgents || '—'}</div></div>
           <div class="fgrp"><label class="flbl">مدة التعرض المهني</label><div class="fro">${injury.exposureDuration || '—'}</div></div>
           <div class="fgrp span-full"><label class="flbl">وصف بيئة العمل</label><div class="fro">${normalizeDisplay(injury.workEnvironment)}</div></div>
@@ -194,6 +199,30 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="badge ${req.investigation?.employeeRecommendation === 'موافقة' ? 'b-approved' : 'b-rejected'}" style="margin-right:8px">${req.investigation?.employeeRecommendation || '—'}</span>
           </div>
         </div>
+        <div class="fg fg-3" style="margin-bottom:8px">
+          <div class="fgrp">
+            <label class="flbl">هل المؤمن عليه مخالف؟</label>
+            <select class="fc" id="insured-violation" onchange="document.getElementById('violation-type-group').style.display=this.value==='نعم'?'':'none'">
+              <option value="لا">لا</option>
+              <option value="نعم">نعم</option>
+            </select>
+          </div>
+          <div class="fgrp" id="violation-type-group" style="display:none">
+            <label class="flbl">طبيعة المخالفة</label>
+            <select class="fc" id="violation-type">
+              <option>تعمّد إصابة النفس</option>
+              <option>تحت تأثير المؤثرات العقلية</option>
+              <option>عدم الالتزام بإجراءات السلامة</option>
+            </select>
+          </div>
+          <div class="fgrp">
+            <label class="flbl">هل ثبتت مخالفة صاحب العمل لإجراءات السلامة؟</label>
+            <select class="fc" id="employer-violation">
+              <option value="لا">لا</option>
+              <option value="نعم">نعم</option>
+            </select>
+          </div>
+        </div>
         <div class="fgrp">
           <label class="flbl">ملاحظاتك على تقرير التحقيق</label>
           <textarea class="fc" id="head-notes" rows="4" placeholder="أكتب ملاحظاتك على تقرير الموظف وأسباب قرارك..."></textarea>
@@ -230,6 +259,28 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>`;
 });
+
+function toggleDiscussionFlag() {
+  req.discussionFlagged = !req.discussionFlagged;
+  const btn = document.getElementById('disc-flag-btn');
+  if (req.discussionFlagged) {
+    btn.className = 'btn btn-warning';
+    btn.innerHTML = ICONS.bell + ' معلّم للنقاش';
+    showToast('تم تعليم الطلب للنقاش في الاجتماع الأسبوعي', 's');
+  } else {
+    btn.className = 'btn btn-secondary';
+    btn.innerHTML = ICONS.bell + ' تعليم للنقاش';
+    showToast('تم إلغاء تعليم النقاش', 'i');
+  }
+}
+
+function openAddAttachmentModal() { showToast('فتح نموذج إضافة مرفق', 'i'); }
+function quickAddNote() {
+  const v = document.getElementById('quick-note-input')?.value?.trim();
+  if (!v) return;
+  showToast('تمت إضافة الملاحظة', 's');
+  document.getElementById('quick-note-input').value = '';
+}
 
 function headDecision(type) {
   if (type === 'رفض') {

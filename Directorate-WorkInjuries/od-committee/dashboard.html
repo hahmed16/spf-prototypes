@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة البيانات — لجنة الأمراض المهنية</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'od-committee', activePage: 'dashboard' });
+setBreadcrumb([{ label: 'لوحة البيانات' }]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const odRequests = WI_DATA.allowances.filter(r => r.type === 'مرض مهني');
+  const pending = odRequests.filter(r => r.status.includes('بانتظار') || r.status.includes('التحقيق'));
+  const reviewed = odRequests.filter(r => r.status === 'معتمد' || r.status === 'مرفوض');
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>لوحة البيانات</h1>
+        <p>مرحباً، لجنة الأمراض المهنية — نظرة عامة على الطلبات الواردة</p>
+      </div>
+    </div>
+
+    <div class="alert alert-i">
+      ${ICONS.info}
+      <div>
+        <strong>دور لجنة الأمراض المهنية:</strong> تستقبل اللجنة طلبات الأمراض المهنية من رئيس قسم التحقيق، وتُقدّم رأيها الفني الاستشاري. قرار الاعتماد أو الرفض يبقى بيد قسم الإجازات المرضية.
+      </div>
+    </div>
+
+    <!-- الإحصاءات -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:20px">
+      <div class="card" style="cursor:pointer" onclick="window.location.href='requests-list.html'">
+        <div class="pb-c" style="text-align:center;padding:20px">
+          <div style="font-size:32px;font-weight:800;color:var(--warning)">${pending.length}</div>
+          <div style="font-size:13px;color:var(--text2);margin-top:4px">طلبات بانتظار الرأي</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="pb-c" style="text-align:center;padding:20px">
+          <div style="font-size:32px;font-weight:800;color:var(--success)">${reviewed.length}</div>
+          <div style="font-size:13px;color:var(--text2);margin-top:4px">طلبات أُبدي فيها رأي</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="pb-c" style="text-align:center;padding:20px">
+          <div style="font-size:32px;font-weight:800;color:var(--primary)">${odRequests.length}</div>
+          <div style="font-size:13px;color:var(--text2);margin-top:4px">إجمالي الطلبات</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- آخر الطلبات الواردة -->
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico or">${ICONS.inbox}</div>آخر الطلبات الواردة</h3>
+        <a href="requests-list.html" class="btn btn-secondary btn-xs">عرض الكل</a>
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>المؤمن عليه</th>
+                <th>نوع المرض</th>
+                <th>الحالة</th>
+                <th>تاريخ التقديم</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${odRequests.slice(0, 5).map(r => `
+              <tr>
+                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td>${r.insured.name}</td>
+                <td>${r.subtype || r.type}</td>
+                <td>${statusBadge(r.status)}</td>
+                <td>${formatDate(r.submitDate)}</td>
+                <td><a href="requests-list.html" class="btn btn-secondary btn-xs">عرض</a></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+});
+</script>
+</body>
+</html>

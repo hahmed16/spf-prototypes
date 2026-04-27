@@ -122,6 +122,9 @@ function buildHeader(roleConfig, userData) {
       <button class="hbtn" onclick="showMedicalQuery()" title="استعلام التقارير الطبية" ${roleConfig.type === 'external' ? 'style="display:none"' : ''}>
         ${ICONS.medical}
       </button>
+      <button class="hbtn" onclick="showProfile()" title="الملف الشخصي" ${roleConfig.type === 'internal' ? 'style="display:none"' : ''}>
+        ${ICONS.user}
+      </button>
       <button class="hbtn" onclick="showNotifications(event)">
         ${ICONS.bell}
         ${notifCount > 0 ? `<span class="nbadge">${notifCount}</span>` : ''}
@@ -233,6 +236,39 @@ function switchRole() {
 
 function showMedicalQuery() {
   window.location.href = '../shared/medical-query.html';
+}
+
+function showProfile() {
+  const userData = getUserData(CURRENT_ROLE);
+  const roleConfig = WI_CONFIG.roles[CURRENT_ROLE];
+  const isWorker = CURRENT_ROLE === 'worker';
+
+  openModal({
+    title: 'الملف الشخصي',
+    size: 'lg',
+    body: `
+      <div class="fg fg-2" style="gap:14px">
+        <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${userData.name}</div></div>
+        <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${userData.civil || '—'}</div></div>
+        <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${userData.phone || '—'}</div></div>
+        <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${userData.email || '—'}</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ التسجيل في النظام</label><div class="fro">1 مارس 2019</div></div>
+        ${isWorker ? `
+        <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">نشط</span></div></div>
+        <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">إلزامي</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ التسجيل في التأمين</label><div class="fro">1 مارس 2019</div></div>
+        ` : ''}
+        ${isWorker && WI_DATA.users.worker.employerHistory ? `
+        <div class="fgrp span-full">
+          <label class="flbl">سجل جهات العمل</label>
+          <div class="tbl-wrap"><table class="dtbl">
+            <thead><tr><th>السجل التجاري</th><th>اسم جهة العمل</th><th>تاريخ الالتحاق</th><th>تاريخ انتهاء الخدمة</th></tr></thead>
+            <tbody>${WI_DATA.users.worker.employerHistory.map(e => `<tr><td style="font-family:monospace">${e.cr}</td><td>${e.name}</td><td>${formatDate(e.joinDate)}</td><td>${e.endDate ? formatDate(e.endDate) : '<span class="badge b-approved">الجهة الحالية</span>'}</td></tr>`).join('')}</tbody>
+          </table></div>
+        </div>` : ''}
+      </div>`,
+    footer: `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`
+  });
 }
 
 function bindHeaderEvents() {

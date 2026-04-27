@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
       </div>
       <div class="pg-acts">
+        <button class="btn btn-secondary btn-sm" id="discussion-flag-btn" onclick="toggleDiscussionFlag()" title="تعليم للنقاش">${ICONS.bell} تعليم للنقاش</button>
         <button class="btn btn-secondary" onclick="window.location.href='allowances-list.html'">${ICONS.arrow_left} رجوع</button>
       </div>
     </div>
@@ -92,6 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${req.employer.jobTitle || '—'}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ الالتحاق بالعمل</label><div class="fro">${formatDate(req.employer.joinDate)}</div></div>
           <div class="fgrp"><label class="flbl">موقع العمل / الفرع</label><div class="fro">${req.employer.location || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">القطاع</label><div class="fro">${req.employer.sector || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">نوع جهة العمل</label><div class="fro">${req.employer.employerType || '—'}</div></div>
+          ${req.employer.branch ? `<div class="fgrp"><label class="flbl">الفرع</label><div class="fro">${req.employer.branch.id} — ${req.employer.branch.name} — ${req.employer.branch.state}</div></div>` : ''}
         </div>
       </div>
     </div>
@@ -102,16 +106,18 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb">
         <div class="fg fg-3">
           <div class="fgrp"><label class="flbl">نوع الحالة</label><div class="fro">${normalizeDisplay(isWork ? (injury.caseType || 'إصابة عمل') : (injury.caseType || injury.diagnosis || 'مرض مهني'))}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ الواقعة / الاشتباه</label><div class="fro">${formatDate(injury.incidentDate || injury.firstSuspicion)}</div></div>
+          <div class="fgrp"><label class="flbl">${isWork ? 'تاريخ الإصابة' : 'تاريخ تشخيص المرض'}</label><div class="fro">${formatDate(injury.incidentDate || injury.firstSuspicion)}</div></div>
           ${isWork ? `
           <div class="fgrp"><label class="flbl">الجزء المصاب</label><div class="fro">${injury.bodyPart || '—'}</div></div>
           <div class="fgrp span-full"><label class="flbl">مكان الواقعة</label><div class="fro">${injury.location || '—'}</div></div>
           <div class="fgrp span-full"><label class="flbl">وصف تفصيلي للواقعة</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${injury.description || '—'}</div></div>
+          ${injury.accidentDirection ? `<div class="fgrp"><label class="flbl">اتجاه الحادث</label><div class="fro">${injury.accidentDirection}</div></div>` : ''}
           ` : `
           <div class="fgrp span-full"><label class="flbl">المواد / العوامل المسببة</label><div class="fro">${injury.chemicalAgents || '—'}</div></div>
           <div class="fgrp"><label class="flbl">مدة التعرض المهني</label><div class="fro">${injury.exposureDuration || '—'}</div></div>
           <div class="fgrp span-full"><label class="flbl">وصف بيئة العمل</label><div class="fro">${normalizeDisplay(injury.workEnvironment)}</div></div>
           `}
+          ${injury.insuredStatus ? `<div class="fgrp"><label class="flbl">حالة المؤمن عليه</label><div class="fro">${injury.insuredStatus}</div></div>` : ''}
         </div>
       </div>
     </div>
@@ -201,6 +207,33 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="badge ${req.investigation?.employeeRecommendation === 'موافقة' ? 'b-approved' : 'b-rejected'}" style="margin-right:8px">${req.investigation?.employeeRecommendation || '—'}</span>
           </div>
         </div>
+        <div style="border-top:1px dashed var(--border);padding-top:14px;margin-bottom:14px">
+          <div class="flbl" style="margin-bottom:10px;font-size:11.5px;color:var(--primary);font-weight:700">— نتائج التحقيق —</div>
+          <div class="fg fg-2" style="gap:12px">
+            <div class="fgrp">
+              <label class="flbl">هل المؤمن عليه مخالف؟</label>
+              <select class="fc" id="insured-violation" onchange="document.getElementById('violation-type-group').style.display=this.value==='نعم'?'':'none'">
+                <option value="لا">لا</option>
+                <option value="نعم">نعم</option>
+              </select>
+            </div>
+            <div class="fgrp" id="violation-type-group" style="display:none">
+              <label class="flbl">طبيعة المخالفة</label>
+              <select class="fc" id="violation-type">
+                <option>تعمّد إصابة النفس</option>
+                <option>تحت تأثير المؤثرات العقلية</option>
+                <option>عدم الالتزام بإجراءات السلامة</option>
+              </select>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">هل ثبتت مخالفة صاحب العمل لإجراءات السلامة؟</label>
+              <select class="fc" id="employer-violation">
+                <option value="لا">لا</option>
+                <option value="نعم">نعم</option>
+              </select>
+            </div>
+          </div>
+        </div>
         <div class="fgrp">
           <label class="flbl">ملاحظاتك على تقرير التحقيق</label>
           <textarea class="fc" id="head-notes" rows="4" placeholder="أكتب ملاحظاتك على تقرير الموظف وأسباب قرارك..."></textarea>
@@ -237,6 +270,29 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>`;
 });
+
+let discussionFlagged = false;
+function toggleDiscussionFlag() {
+  discussionFlagged = !discussionFlagged;
+  const btn = document.getElementById('discussion-flag-btn');
+  if (discussionFlagged) {
+    btn.className = 'btn btn-warning btn-sm';
+    btn.innerHTML = `${ICONS.bell} معلّم للنقاش`;
+    showToast('تم تعليم الطلب للنقاش في الاجتماع الأسبوعي القادم — سيظل الطلب معلقاً لحين المناقشة', 'w', 5000);
+  } else {
+    btn.className = 'btn btn-secondary btn-sm';
+    btn.innerHTML = `${ICONS.bell} تعليم للنقاش`;
+    showToast('تم إلغاء علامة النقاش', 'i');
+  }
+}
+function openAddAttachmentModal() { showToast('إضافة مرفق', 'i'); }
+function quickAddNote() {
+  const v = document.getElementById('quick-note-input')?.value?.trim();
+  if (!v) { showToast('يرجى كتابة الملاحظة', 'w'); return; }
+  showToast('تم حفظ الملاحظة', 's');
+  document.getElementById('quick-note-input').value = '';
+}
+function toggleOperationalNotes(card) { card.classList.toggle('collapsed'); }
 
 function headDecision(type) {
   if (type === 'رفض') {

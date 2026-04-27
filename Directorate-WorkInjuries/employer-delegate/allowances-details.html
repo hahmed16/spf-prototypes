@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
       </div>
       <div class="pg-acts">
+        <button class="btn btn-secondary btn-sm" id="discussion-flag-btn" onclick="toggleDiscussionFlag()" title="تعليم للنقاش">${ICONS.bell} تعليم للنقاش</button>
         <button class="btn btn-secondary" onclick="window.location.href='allowances-list.html'">${ICONS.arrow_left} رجوع</button>
       </div>
     </div>
@@ -98,6 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">تاريخ الالتحاق بالعمل</label><div class="fro">${formatDate(req.employer.joinDate)}</div></div>
           <div class="fgrp"><label class="flbl">موقع العمل / الفرع</label><div class="fro">${req.employer.location || '—'}</div></div>
           ${req.employer.phone ? `<div class="fgrp"><label class="flbl">هاتف جهة العمل</label><div class="fro">${req.employer.phone}</div></div>` : ''}
+          <div class="fgrp"><label class="flbl">القطاع</label><div class="fro">${req.employer.sector || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">نوع جهة العمل</label><div class="fro">${req.employer.employerType || '—'}</div></div>
+          ${req.employer.branch ? `<div class="fgrp"><label class="flbl">الفرع</label><div class="fro">${req.employer.branch.id} — ${req.employer.branch.name} — ${req.employer.branch.state}</div></div>` : ''}
         </div>
       </div>
     </div>
@@ -108,18 +112,20 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb">
         <div class="fg fg-3">
           <div class="fgrp"><label class="flbl">نوع الحالة</label><div class="fro">${normalizeDisplay(isWork ? (injury.caseType || 'إصابة عمل') : (injury.caseType || injury.diagnosis || 'مرض مهني'))}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ الواقعة / الاشتباه</label><div class="fro">${formatDate(injury.incidentDate || injury.firstSuspicion)}</div></div>
+          <div class="fgrp"><label class="flbl">${isWork ? 'تاريخ الإصابة' : 'تاريخ تشخيص المرض'}</label><div class="fro">${formatDate(injury.incidentDate || injury.firstSuspicion)}</div></div>
           ${isWork ? `
           <div class="fgrp"><label class="flbl">الجزء المصاب</label><div class="fro">${injury.bodyPart || '—'}</div></div>
           <div class="fgrp span-full"><label class="flbl">مكان الواقعة</label><div class="fro">${injury.location || '—'}</div></div>
           <div class="fgrp span-full"><label class="flbl">وصف تفصيلي للواقعة</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${injury.description || '—'}</div></div>
           ${injury.witnesses === 'نعم' ? `<div class="fgrp"><label class="flbl">الشهود</label><div class="fro">${injury.witnessNames || '—'}</div></div>` : ''}
+          ${injury.accidentDirection ? `<div class="fgrp"><label class="flbl">اتجاه الحادث</label><div class="fro">${injury.accidentDirection}</div></div>` : ''}
           ` : `
           <div class="fgrp span-full"><label class="flbl">المواد / العوامل المسببة</label><div class="fro">${injury.chemicalAgents || '—'}</div></div>
           <div class="fgrp"><label class="flbl">مدة التعرض المهني</label><div class="fro">${injury.exposureDuration || '—'}</div></div>
           <div class="fgrp span-full"><label class="flbl">وصف بيئة العمل</label><div class="fro">${normalizeDisplay(injury.workEnvironment)}</div></div>
           ${injury.caseDescription ? `<div class="fgrp span-full"><label class="flbl">وصف الحالة</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${injury.caseDescription}</div></div>` : ''}
           `}
+          ${injury.insuredStatus ? `<div class="fgrp"><label class="flbl">حالة المؤمن عليه</label><div class="fro">${injury.insuredStatus}</div></div>` : ''}
         </div>
       </div>
     </div>
@@ -319,6 +325,16 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>` : ''}
 
+    ${req.status === 'معتمد' ? `
+    <!-- البدل اللاحق -->
+    <div class="card" style="border-right:4px solid var(--success)">
+      <div class="ph"><h3><div class="pico gr">${ICONS.plus}</div>البدل اللاحق</h3></div>
+      <div class="pb">
+        <div class="alert alert-i" style="margin-bottom:12px">${ICONS.info}<span>البدل اللاحق متاح فقط للطلبات التي تحمل حالة "تم الاعتماد".</span></div>
+        <button class="btn btn-secondary" onclick="openSubsequentAllowanceModal()">إضافة بدل لاحق</button>
+      </div>
+    </div>` : ''}
+
     <!-- السجل الزمني -->
     <div class="card">
       <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني الكامل للطلب</h3></div>
@@ -333,6 +349,54 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>`;
 });
+
+let discussionFlagged = false;
+function toggleDiscussionFlag() {
+  discussionFlagged = !discussionFlagged;
+  const btn = document.getElementById('discussion-flag-btn');
+  if (discussionFlagged) {
+    btn.className = 'btn btn-warning btn-sm';
+    btn.innerHTML = `${ICONS.bell} معلّم للنقاش`;
+    showToast('تم تعليم الطلب للنقاش في الاجتماع الأسبوعي القادم — سيظل الطلب معلقاً لحين المناقشة', 'w', 5000);
+  } else {
+    btn.className = 'btn btn-secondary btn-sm';
+    btn.innerHTML = `${ICONS.bell} تعليم للنقاش`;
+    showToast('تم إلغاء علامة النقاش', 'i');
+  }
+}
+
+function openSubsequentAllowanceModal() {
+  openModal({
+    title: 'إضافة بدل لاحق',
+    size: 'lg',
+    body: `
+      <div class="fg fg-2" style="gap:14px">
+        <div class="fgrp"><label class="flbl">فترة الإجازة من <span class="req">*</span></label><input type="date" class="fc" id="sub-from"></div>
+        <div class="fgrp"><label class="flbl">فترة الإجازة إلى <span class="req">*</span></label><input type="date" class="fc" id="sub-to"></div>
+        <div class="fgrp span-full"><label class="flbl">الملاحظات</label><textarea class="fc" id="sub-notes" rows="3" placeholder="أي ملاحظات إضافية..."></textarea></div>
+        <div class="fgrp span-full">
+          <label class="flbl">هل انتهى العلاج؟ <span class="req">*</span></label>
+          <select class="fc" id="sub-treatment-done" onchange="document.getElementById('sub-treatment-att').style.display=this.value==='نعم'?'':'none'">
+            <option value="">— اختر —</option>
+            <option>نعم</option>
+            <option>لا</option>
+          </select>
+        </div>
+        <div class="fgrp span-full" id="sub-treatment-att" style="display:none">
+          <label class="flbl">استمارة انتهاء العلاج <span class="req">*</span></label>
+          <input type="file" class="fc">
+        </div>
+        <div class="fgrp span-full"><label class="flbl">المرفقات</label><input type="file" class="fc" multiple></div>
+      </div>`,
+    footer: `
+      <button class="btn btn-primary" onclick="submitSubsequentAllowance()">${ICONS.check} إرسال البدل اللاحق</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+function submitSubsequentAllowance() {
+  closeModal();
+  showToast('تم تقديم البدل اللاحق بنجاح', 's');
+}
 </script>
 </body>
 </html>

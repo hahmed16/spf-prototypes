@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             : req.checkedOutBy
               ? `<span style="font-size:12px;color:var(--warning);padding:8px 14px;border:1px solid var(--warning-l);border-radius:var(--rsm);background:var(--warning-l)">${ICONS.lock} محجوز: ${req.checkedOutBy}</span>`
               : ''}
+        <button class="btn btn-secondary btn-sm" id="discussion-flag-btn" onclick="toggleDiscussionFlag()" title="تعليم للنقاش">${ICONS.bell} تعليم للنقاش</button>
         <button class="btn btn-secondary" onclick="window.location.href='allowances-list.html'">${ICONS.arrow_left} رجوع</button>
       </div>
     </div>
@@ -104,6 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${req.employer.jobTitle || '—'}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ الالتحاق بالعمل</label><div class="fro">${formatDate(req.employer.joinDate)}</div></div>
           <div class="fgrp"><label class="flbl">موقع العمل / الفرع</label><div class="fro">${req.employer.location || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">القطاع</label><div class="fro">${req.employer.sector || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">نوع جهة العمل</label><div class="fro">${req.employer.employerType || '—'}</div></div>
+          ${req.employer.branch ? `<div class="fgrp"><label class="flbl">الفرع</label><div class="fro">${req.employer.branch.id} — ${req.employer.branch.name} — ${req.employer.branch.state}</div></div>` : ''}
         </div>
       </div>
     </div>
@@ -114,15 +118,17 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb">
         <div class="fg fg-3">
           <div class="fgrp"><label class="flbl">نوع الحالة</label><div class="fro">${normalizeDisplay(isWork ? (injury.caseType || 'إصابة عمل') : (injury.caseType || injury.diagnosis || 'مرض مهني'))}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ الواقعة / الاشتباه</label><div class="fro">${formatDate(injury.incidentDate || injury.firstSuspicion)}</div></div>
+          <div class="fgrp"><label class="flbl">${isWork ? 'تاريخ الإصابة' : 'تاريخ تشخيص المرض'}</label><div class="fro">${formatDate(injury.incidentDate || injury.firstSuspicion)}</div></div>
           ${isWork ? `
           <div class="fgrp"><label class="flbl">الجزء المصاب</label><div class="fro">${injury.bodyPart || '—'}</div></div>
           <div class="fgrp span-full"><label class="flbl">مكان الواقعة</label><div class="fro">${injury.location || '—'}</div></div>
           <div class="fgrp span-full"><label class="flbl">وصف تفصيلي للواقعة</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${injury.description || '—'}</div></div>
+          ${injury.accidentDirection ? `<div class="fgrp"><label class="flbl">اتجاه الحادث</label><div class="fro">${injury.accidentDirection}</div></div>` : ''}
           ` : `
           <div class="fgrp span-full"><label class="flbl">المواد / العوامل المسببة</label><div class="fro">${injury.chemicalAgents || '—'}</div></div>
           <div class="fgrp"><label class="flbl">مدة التعرض المهني</label><div class="fro">${injury.exposureDuration || '—'}</div></div>
           `}
+          ${injury.insuredStatus ? `<div class="fgrp"><label class="flbl">حالة المؤمن عليه</label><div class="fro">${injury.insuredStatus}</div></div>` : ''}
         </div>
       </div>
     </div>
@@ -331,11 +337,18 @@ document.addEventListener('DOMContentLoaded', () => {
           <label class="flbl">إرفاق ملف داعم <span style="font-weight:400;color:var(--text3)">(اختياري)</span></label>
           ${renderModernUploadComponent({ idPrefix: 'decision-att', subTitle: 'يمكن رفع عدة ملفات دفعة واحدة' })}
         </div>
+        <div class="fgrp" id="close-reason-grp" style="display:none">
+          <label class="flbl">سبب الإغلاق <span class="req">*</span></label>
+          <select class="fc" id="close-reason">
+            <option>عدم وجود إجازات مرضية</option>
+            <option>وفاة المؤمن عليه</option>
+            <option>مخالفة المؤمن عليه</option>
+          </select>
+        </div>
         <div class="dp-acts">
-          <button class="btn btn-accent" onclick="sickLeaveDecision('موافقة')">${ICONS.check} توصية بالموافقة + ترشيح مؤسسة</button>
-          <button class="btn btn-danger" onclick="sickLeaveDecision('رفض')">${ICONS.x} توصية بالرفض</button>
-          <button class="btn btn-primary" onclick="sickLeaveDecision('توجيه')">توجيه لرئيس قسم الإجازات المرضية</button>
-          <button class="btn btn-ghost" onclick="sickLeaveDecision('إغلاق')">إغلاق مع تحديد السبب</button>
+          <button class="btn btn-accent btn-sm" onclick="sickLeaveDecision('موافقة')">${ICONS.check} توصية بالموافقة وتوجيه لرئيس القسم</button>
+          <button class="btn btn-warning btn-sm" onclick="sickLeaveDecision('استيفاء')">طلب استيفاء بيانات من مقدم الطلب</button>
+          <button class="btn btn-ghost btn-sm" onclick="sickLeaveDecision('إغلاق')">إغلاق الطلب مع تحديد السبب</button>
         </div>
       </div>
     </div>` : ''}
@@ -356,19 +369,89 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function sickLeaveDecision(type) {
-  if (type === 'موافقة') {
-    document.getElementById('institution-select').style.display = '';
-    showToast('يرجى اختيار المؤسسة الصحية المرخصة ثم تأكيد التوصية', 'i');
+  if (type === 'إغلاق') {
+    document.getElementById('close-reason-grp').style.display = '';
+    confirmAction({
+      title: 'تأكيد إغلاق الطلب',
+      msg: 'هل أنت متأكد من إغلاق هذا الطلب؟',
+      confirmLabel: 'نعم، إغلاق الطلب',
+      confirmClass: 'btn-danger',
+      onConfirm: () => {
+        showToast('تم إغلاق الطلب', 's');
+        setTimeout(() => window.location.href = 'allowances-list.html', 1500);
+      }
+    });
+    return;
+  }
+  if (type === 'استيفاء') {
+    openModal({
+      title: 'طلب استيفاء بيانات',
+      body: `
+        <div class="fgrp">
+          <label class="flbl">إعادة الطلب إلى <span class="req">*</span></label>
+          <select class="fc" id="return-to">
+            <option>المؤمن عليه</option>
+            <option>صاحب العمل</option>
+            <option>كلاهما</option>
+          </select>
+        </div>
+        <div class="fgrp" style="margin-top:10px">
+          <label class="flbl">البيانات المطلوبة <span class="req">*</span></label>
+          <textarea class="fc" id="return-reason" rows="3" placeholder="اذكر البيانات المطلوبة..."></textarea>
+        </div>`,
+      footer: `
+        <button class="btn btn-warning" onclick="(function(){const r=document.getElementById('return-reason')?.value?.trim();if(!r){showToast('يرجى كتابة سبب الإعادة','w');return;}closeModal();showToast('تم إعادة الطلب لاستيفاء البيانات','w');setTimeout(()=>window.location.href='allowances-list.html',1500);})()">${ICONS.check} إرسال</button>
+        <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+    });
     return;
   }
   const msgs = {
-    'رفض': 'تم إرسال توصية بالرفض لرئيس القسم',
-    'توجيه': 'تم توجيه الطلب لرئيس قسم الإجازات المرضية',
-    'إغلاق': 'تم إغلاق الطلب',
+    'موافقة': 'تم إرسال توصية بالموافقة لرئيس قسم الإجازات المرضية',
   };
   showToast(msgs[type] || 'تم تنفيذ الإجراء', 's');
   setTimeout(() => window.location.href = 'allowances-list.html', 1500);
 }
+
+let discussionFlagged = false;
+function toggleDiscussionFlag() {
+  discussionFlagged = !discussionFlagged;
+  const btn = document.getElementById('discussion-flag-btn');
+  if (discussionFlagged) {
+    btn.className = 'btn btn-warning btn-sm';
+    btn.innerHTML = `${ICONS.bell} معلّم للنقاش`;
+    showToast('تم تعليم الطلب للنقاش في الاجتماع الأسبوعي القادم — سيظل الطلب معلقاً لحين المناقشة', 'w', 5000);
+  } else {
+    btn.className = 'btn btn-secondary btn-sm';
+    btn.innerHTML = `${ICONS.bell} تعليم للنقاش`;
+    showToast('تم إلغاء علامة النقاش', 'i');
+  }
+}
+
+function openAddSickLeaveModal() {
+  openModal({
+    title: 'إضافة فترة إجازة مرضية',
+    body: `
+      <div class="fg fg-2" style="gap:14px">
+        <div class="fgrp"><label class="flbl">من تاريخ <span class="req">*</span></label><input type="date" class="fc" id="sl-from"></div>
+        <div class="fgrp"><label class="flbl">إلى تاريخ <span class="req">*</span></label><input type="date" class="fc" id="sl-to"></div>
+        <div class="fgrp span-full"><label class="flbl">ملاحظات</label><textarea class="fc" id="sl-notes" rows="2" placeholder="ملاحظات اختيارية..."></textarea></div>
+      </div>`,
+    footer: `
+      <button class="btn btn-primary" onclick="closeModal();showToast('تم إضافة فترة الإجازة المرضية','s')">${ICONS.check} إضافة</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+function doCheckout() { showToast('تم حجز الطلب بنجاح', 's'); }
+function doCheckin() { showToast('تم تحرير الطلب', 'i'); }
+function openAddAttachmentModal() { showToast('إضافة مرفق', 'i'); }
+function quickAddNote() {
+  const v = document.getElementById('quick-note-input')?.value?.trim();
+  if (!v) { showToast('يرجى كتابة الملاحظة', 'w'); return; }
+  showToast('تم حفظ الملاحظة', 's');
+  document.getElementById('quick-note-input').value = '';
+}
+function toggleOperationalNotes(card) { card.classList.toggle('collapsed'); }
+function runMedicalQuery(civil) { showToast('جارٍ الاستعلام عن التقارير الطبية...', 'i'); }
 </script>
 </body>
 </html>
