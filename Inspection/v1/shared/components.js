@@ -239,6 +239,43 @@ function renderComplaintsList(role) {
   const currentProfile = roleProfiles[role] || {};
   const byWorkerId = Object.fromEntries((INSP_DATA.workers || []).map(w => [w.id, w]));
 
+  /* ── Masking roles: internal staff who process requests ── */
+  const maskingRoles = ['monitoring-employee', 'monitoring-head', 'field-inspector', 'field-head', 'inspection-director', 'ops-analyst'];
+  const applyMasking = !isExt && maskingRoles.includes(role);
+
+  /* Determine masking level for a complaint from current role's perspective:
+     'none'    → fully visible (assigned to me / I own it)
+     'partial' → assigned to someone else (see type/status/date, no personal info)
+     'full'    → unassigned / pending checkout (all sensitive fields hidden)            */
+  function maskLevel(c) {
+    if (!applyMasking) return 'none';
+    const isUnassigned = !c.assignedTo && !c.assignedInspector && !c.checkedOutBy;
+    const isPendingAssign = c.status === 'بانتظار تعيين' || isUnassigned;
+    
+    /* check if assigned to me */
+    const myName = currentProfile.name || '';
+    const assignedToMe = (c.assignedTo && myName && c.assignedTo === myName)
+                      || (c.assignedInspector && myName && c.assignedInspector === myName)
+                      || (c.checkedOutBy && myName && c.checkedOutBy === myName);
+
+    if (assignedToMe) return 'none';
+    
+    /* supervisor/director roles see all fully if they are in their department */
+    if (role === 'monitoring-head' || role === 'field-head' || role === 'inspection-director') return 'none';
+    
+    if (isPendingAssign) return 'full';
+    return 'partial';
+  }
+
+  /* Masked text helper */
+  function maskedText(level, text, fullOnly) {
+    if (level === 'none') return text || '—';
+    if (level === 'full') return `<span class="masked-field">${ICONS.lock}<span class="masked-dots">••••••••</span></span>`;
+    /* partial */
+    if (fullOnly) return `<span class="masked-field masked-partial">${ICONS.lock}<span class="masked-dots">مخفي</span></span>`;
+    return text || '—';
+  }
+
   function isMonitoringStage(status) {
     return ['قيد المراجعة', 'بانتظار اعتماد رئيس قسم المتابعة والبلاغات', 'تم تقديم البلاغ', 'بانتظار تعيين', 'تم اعادة فتح البلاغ', 'تم تقديم الطلب مرة أخرى'].includes(status);
   }
@@ -264,17 +301,8 @@ function renderComplaintsList(role) {
       const isParty = !!currentProfile.employerId && (c.employerId === currentProfile.employerId || c.partyEmployerId === currentProfile.employerId);
       return isOwnSubmission || isParty;
     }
-    if (role === 'monitoring-employee') {
-      return (c.assignedToRole === 'monitoring-employee' && (!currentProfile.name || c.assignedTo === currentProfile.name))
-        || (c.checkedOutByRole === 'monitoring-employee' && (!currentProfile.name || c.checkedOutBy === currentProfile.name));
-    }
-    if (role === 'monitoring-head') return true;
-    if (role === 'field-inspector') {
-      return (c.assignedInspectorRole === 'field-inspector' && (!currentProfile.name || c.assignedInspector === currentProfile.name))
-        || (c.checkedOutByRole === 'field-inspector' && (!currentProfile.name || c.checkedOutBy === currentProfile.name));
-    }
-    if (role === 'field-head') return true;
-    if (role === 'inspection-director') return true;
+    
+    /* Internal roles see all, but masking applies in the row generation */
     return true;
   }
 
@@ -308,19 +336,36 @@ function renderComplaintsList(role) {
   }
 
   const rows = data.map(c => {
-    const extraCols = isExt ? '' : `<td>${c.assignedTo || '<span class="tx3">غير معين</span>'}</td>`;
-    return `<tr>
+    const ml = maskLevel(c);
+    const isMasked = ml !== 'none';
+    const isFullMask = ml === 'full';
+
+    /* Checkout button for unassigned requests in masking roles */
+    const checkoutBtn = applyMasking && isFullMask
+      ? `<button class="btn btn-accent btn-xs masked-checkout-btn" onclick="showToast('تم استلام البلاغ بنجاح — تم فك تشفير البيانات لهذا الطلب','s'); this.parentElement.innerHTML='<span class=\'badge b-approved\'>تم الاستلام</span>'">${ICONS.unlock}استلام</button>`
+      : (role === 'monitoring-employee' && c.status === 'تم تقديم البلاغ' && !c.checkedOutBy
+          ? `<button class="btn btn-accent btn-xs" onclick="showToast('تم عمل checkout على البلاغ','s')">${ICONS.unlock}Checkout</button>`
+          : '');
+
+    /* Row class */
+    const rowClass = isFullMask ? 'masked-row' : (ml === 'partial' ? 'masked-row-partial' : '');
+
+    const extraCols = isExt ? '' : `<td>${ml === 'none' ? (c.assignedTo || '<span class="tx3">غير معين</span>') : maskedText(ml, c.assignedTo, true)}</td>`;
+
+    return `<tr class="${rowClass}">
       <td><a href="#" onclick="navigateTo('complaint-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
       <td>${c.type}</td>
-      ${isExt ? '' : `<td>${c.submittedByName || '—'}</td>`}
-      <td>${c.employerName || '—'}</td>
+      ${isExt ? '' : `<td>${maskedText(ml, c.submittedByName, true)}</td>`}
+      <td>${maskedText(ml, c.employerName, false)}</td>
       <td>${statusBadge(c.status)}</td>
       <td><span class="badge ${_priClass(c.priority)}">${c.priority}</span></td>
       ${extraCols}
       <td>${c.submitDate || '—'}</td>
       <td><div class="df ac g8">
-        <button class="btn btn-primary btn-xs" onclick="navigateTo('complaint-details','id=${c.id}')">${ICONS.eye}عرض</button>
-        ${role === 'monitoring-employee' && c.status === 'تم تقديم البلاغ' ? `<button class="btn btn-accent btn-xs" onclick="showToast('تم عمل checkout على البلاغ','s')">Checkout</button>` : ''}
+        ${isMasked && isFullMask
+          ? checkoutBtn
+          : `<button class="btn btn-primary btn-xs" onclick="navigateTo('complaint-details','id=${c.id}')">${ICONS.eye}عرض</button>${checkoutBtn}`
+        }
       </div></td>
     </tr>`;
   }).join('');
@@ -329,8 +374,23 @@ function renderComplaintsList(role) {
     ? ['رقم البلاغ','النوع','المنشأة','الحالة','الأولوية','تاريخ تقديم الطلب','إجراء']
     : ['رقم البلاغ','النوع','مقدم البلاغ','المنشأة','الحالة','الأولوية','الموظف المختص','تاريخ تقديم الطلب','إجراء'];
 
+  /* Masking legend banner for internal roles */
+  const maskBanner = applyMasking ? `
+    <div class="mask-legend-banner">
+      <div class="mask-legend-icon">${ICONS.shield}</div>
+      <div class="mask-legend-body">
+        <div class="mask-legend-title">حماية البيانات وشفافية التوزيع</div>
+        <div class="mask-legend-desc">لضمان عدالة توزيع العمل ومنع الانتقائية، يتم إخفاء بيانات الطلبات غير المستلمة. اضغط على <strong>"استلام"</strong> للاطلاع على كامل البيانات والبدء في المعالجة.</div>
+      </div>
+      <div class="mask-legend-items">
+        <div class="mask-leg-item"><span class="mask-dot full"></span>بيانات مخفية (بانتظار الاستلام)</div>
+        <div class="mask-leg-item"><span class="mask-dot mine"></span>بيانات مرئية (معينة لك)</div>
+      </div>
+    </div>` : '';
+
   return `<div class="pg-head"><div><h1>قائمة البلاغات</h1><p>${data.length} بلاغ إجمالاً</p></div>
     <div class="pg-acts">${createBtn}<button class="btn btn-secondary btn-sm">${ICONS.download}تصدير</button></div></div>
+    ${maskBanner}
     ${filters}
     ${_tblWrap(headers, rows || _noData())}`;
 }
@@ -1590,6 +1650,31 @@ function renderVisitsList(role, type) {
   const typeLabel = { periodic: 'الزيارات الدورية', surprise: 'الزيارات المفاجئة', scheduled: 'الزيارات المجدولة' }[type];
   const canCreate = (role === 'field-head' || role === 'inspection-director') && type === 'surprise';
 
+  const roleProfiles = {
+    'monitoring-employee': { name: 'سيف خلفان الأمري' },
+    'field-inspector': { name: 'حاتم سالم الزدجالي' }
+  };
+  const currentProfile = roleProfiles[role] || {};
+  const isExt = role === 'employer' || role === 'insured';
+  const maskingRoles = ['field-inspector', 'field-head', 'inspection-director', 'ops-analyst'];
+  const applyMasking = !isExt && maskingRoles.includes(role);
+
+  function maskLevel(v) {
+    if (!applyMasking) return 'none';
+    const myName = currentProfile.name || '';
+    const assignedToMe = v.inspectorName === myName;
+    if (assignedToMe) return 'none';
+    if (role === 'field-head' || role === 'inspection-director') return 'none';
+    if (v.status === 'مجدولة' && (!v.inspectorName || v.inspectorName.includes('غير معين'))) return 'full';
+    return 'partial';
+  }
+
+  function maskedText(level, text) {
+    if (level === 'none') return text || '—';
+    if (level === 'full') return `<span class="masked-field">${ICONS.lock}<span class="masked-dots">••••••••</span></span>`;
+    return `<span class="masked-field masked-partial">${ICONS.lock}<span class="masked-dots">مخفي</span></span>`;
+  }
+
   const filters = _filterBar([
     { label: 'بحث برقم الزيارة أو المنشأة', ph: 'YYYY-03-...' },
     { label: 'الحالة', type: 'select', opts: ['مجدولة','جارية','بانتظار مراجعة المحضر','تم اعتماد المحضر','مغلقة'] },
@@ -1600,25 +1685,44 @@ function renderVisitsList(role, type) {
   const data = INSP_DATA.visits[type] || [];
   const detailPage = { periodic: 'visit-periodic-details', surprise: 'visit-surprise-details', scheduled: 'visit-scheduled-details' }[type] || 'visit-periodic-details';
 
-  const rows = data.map(v =>
-    `<tr>
+  const rows = data.map(v => {
+    const ml = maskLevel(v);
+    const isMasked = ml !== 'none';
+    const isFullMask = ml === 'full';
+    const rowClass = isFullMask ? 'masked-row' : (ml === 'partial' ? 'masked-row-partial' : '');
+
+    const checkoutBtn = applyMasking && isFullMask
+      ? `<button class="btn btn-accent btn-xs masked-checkout-btn" onclick="showToast('تم استلام الزيارة بنجاح','s'); this.parentElement.innerHTML='<span class=\'badge b-approved\'>تم الاستلام</span>'">${ICONS.unlock}استلام</button>`
+      : '';
+
+    return `<tr class="${rowClass}">
       <td><a href="#" onclick="navigateTo('${detailPage}','id=${v.id}')" class="txp fw7">${v.id}</a></td>
-      <td class="fw7">${v.employerName}</td>
-      <td>${v.inspectorName}</td>
+      <td class="fw7">${maskedText(ml, v.employerName)}</td>
+      <td>${ml === 'none' ? v.inspectorName : (isFullMask ? maskedText(ml, '') : v.inspectorName)}</td>
       <td>${statusBadge(v.status)}</td>
       <td>${v.scheduledDate}</td>
       <td>${v.actualDate || '<span class="tx3">—</span>'}</td>
       <td><div class="df ac g8">
-        <button class="btn btn-primary btn-xs" onclick="navigateTo('${detailPage}','id=${v.id}')">${ICONS.eye}عرض</button>
-        ${role === 'field-inspector' && v.status === 'مجدولة' ? `<button class="btn btn-accent btn-xs" onclick="showToast('تم بدء الزيارة','s')">بدء</button>` : ''}
+        ${isFullMask ? checkoutBtn : `<button class="btn btn-primary btn-xs" onclick="navigateTo('${detailPage}','id=${v.id}')">${ICONS.eye}عرض</button>`}
+        ${role === 'field-inspector' && v.status === 'مجدولة' && ml === 'none' ? `<button class="btn btn-accent btn-xs" onclick="showToast('تم بدء الزيارة','s')">بدء</button>` : ''}
         ${role === 'field-head' && v.status === 'بانتظار مراجعة المحضر' ? `<button class="btn btn-warning btn-xs" onclick="navigateTo('${detailPage}','id=${v.id}')">مراجعة</button>` : ''}
         ${role === 'field-head' && (v.status === 'مجدولة' || v.status === 'قيد التنفيذ') ? `<button class="btn btn-secondary btn-xs" onclick="navigateTo('inspector-redistribution','visit=${v.id}')">${ICONS.switch}إعادة توزيع</button>` : ''}
       </div></td>
-    </tr>`).join('');
+    </tr>`}).join('');
+
+  const maskBanner = applyMasking ? `
+    <div class="mask-legend-banner">
+      <div class="mask-legend-icon">${ICONS.shield}</div>
+      <div class="mask-legend-body">
+        <div class="mask-legend-title">شفافية توزيع الزيارات الميدانية</div>
+        <div class="mask-legend-desc">لحماية بيانات المنشآت وضمان الحيادية، يتم إخفاء بيانات الزيارات غير المستلمة. استلم الزيارة لتتمكن من الاطلاع على كامل البيانات.</div>
+      </div>
+    </div>` : '';
 
   return `<div class="pg-head"><div><h1>${typeLabel}</h1><p>${data.length} زيارة إجمالاً</p></div>
     <div class="pg-acts">${canCreate ? `<button class="btn btn-primary" onclick="navigateTo('visit-new')">${ICONS.plus}إضافة زيارة</button>` : ''}
       <button class="btn btn-secondary btn-sm">${ICONS.download}تصدير</button></div></div>
+    ${maskBanner}
     ${filters}
     ${_tblWrap(['رقم الزيارة','المنشأة','المفتش','الحالة','التاريخ المجدول','تاريخ التنفيذ','إجراء'], rows || _noData())}`;
 }

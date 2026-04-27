@@ -1081,3 +1081,131 @@ select.fc { cursor: pointer }
   .rule-item { flex-direction: column }
   .rule-status { margin-top: 0 }
 }
+
+/* ── Data Masking & Transparency ── */
+.masked-row {
+  position: relative;
+  background-color: #fcfcfc;
+}
+
+.masked-row-partial {
+  background-color: #f9f9f9;
+}
+
+.masked-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text3);
+  background: var(--g100);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  user-select: none;
+  filter: blur(1px);
+  transition: var(--tr);
+}
+
+.masked-field svg {
+  width: 10px;
+  height: 10px;
+  opacity: .5;
+}
+
+.masked-dots {
+  letter-spacing: 2px;
+}
+
+.masked-row:hover .masked-field {
+  filter: blur(0.5px);
+}
+
+.masked-partial {
+  filter: blur(0.5px);
+  background: var(--g50);
+}
+
+.masked-checkout-btn {
+  box-shadow: 0 0 10px rgba(199, 169, 78, 0.3);
+  animation: pulse-accent 2s infinite;
+}
+
+@keyframes pulse-accent {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* ── Masking Legend Banner ── */
+.mask-legend-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #f0f7f4 0%, #e8f5ee 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--rlg);
+  margin-bottom: 16px;
+  box-shadow: var(--sh);
+}
+
+.mask-legend-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mask-legend-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.mask-legend-body {
+  flex: 1;
+}
+
+.mask-legend-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 2px;
+}
+
+.mask-legend-desc {
+  font-size: 11.5px;
+  color: var(--text3);
+  line-height: 1.4;
+}
+
+.mask-legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 16px;
+  border-right: 1px solid var(--border);
+}
+
+.mask-leg-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2);
+}
+
+.mask-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.mask-dot.full { background: var(--g300); }
+.mask-dot.mine { background: var(--primary); }
