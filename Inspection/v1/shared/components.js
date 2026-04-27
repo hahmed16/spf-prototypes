@@ -5043,3 +5043,513 @@ function renderLiquidationBankruptcyCasesList() {
     </div>
     ${_tblWrap(['رقم القضية','اسم المنشأة','الرقم التجاري','نوع القضية','تاريخ التقديم','الحالة','عدد المؤمن عليهم','الإجراءات'], rows || _noData())}`;
 }
+
+/* ── Overrides: service requests routed through validation engine ── */
+const SERVICE_CONFIGS = {
+  job: {
+    key: 'job',
+    title: 'طلبات الأمان الوظيفي',
+    detailTitle: 'تفاصيل طلب الأمان الوظيفي',
+    dataKey: 'jobSecurityRequests',
+    detailPage: 'job-security-request-details',
+    listPage: '../services/job-security-requests-list',
+    source: 'نظام منافع الأمان الوظيفي'
+  },
+  family: {
+    key: 'family',
+    title: 'طلبات منافع دخل الأسرة',
+    detailTitle: 'تفاصيل طلب منافع دخل الأسرة',
+    dataKey: 'familyBenefitRequests',
+    detailPage: 'family-benefits-request-details',
+    listPage: '../services/family-benefits-requests-list',
+    source: 'نظام منافع دخل الأسرة'
+  },
+  maternity: {
+    key: 'maternity',
+    title: 'طلبات إجازة الأمومة',
+    detailTitle: 'تفاصيل طلب إجازة الأمومة',
+    dataKey: 'maternityLeaveRequests',
+    detailPage: 'maternity-leave-request-details',
+    listPage: '../services/maternity-leave-requests-list',
+    source: 'نظام إجازة الأمومة'
+  }
+};
+
+function _svcRule(id, title, description, severity = 'info') {
+  return { id, title, description, severity, status: 'passed' };
+}
+
+function _svcRulesTemplate(serviceKey) {
+  if (serviceKey === 'job') return [
+    _svcRule('JSR-001', 'التحقق من قيمة الأجر الأخير', 'مقارنة الأجر الأخير بتسلسل الأجر في نفس العقد وعدم تجاوز الزيادة النسب المسموح بها.', 'critical'),
+    _svcRule('JSR-002', 'مقارنة الأجر بآخر عقد مسجل', 'التحقق من عدم وجود فرق غير مبرر بين أجر آخر عقد والأجر المصرح به في الطلب.'),
+    _svcRule('JSR-003', 'مقارنة أجور العاملين في المنشأة', 'مقارنة أجر مقدم الطلب بمتوسط أجور العاملين في المنشأة.', 'warning'),
+    _svcRule('JSR-004', 'التحقق من مدة آخر عقد', 'التأكد من أن مدة آخر عقد لا تقل عن المدة النظامية المطلوبة.'),
+    _svcRule('JSR-005', 'التحقق من صلة القرابة', 'التحقق من عدم وجود قرابة مؤثرة بين العامل وأصحاب المنشأة.', 'warning'),
+    _svcRule('JSR-006', 'التحقق من الحالات السابقة', 'مراجعة وجود حالات سابقة للعامل أو المنشأة في نظام التفتيش.', 'critical'),
+    _svcRule('JSR-007', 'التحقق من التسجيل الوهمي', 'البحث عن مؤشرات تسجيل وهمي أو بطلان تأمين سابق.', 'critical'),
+    _svcRule('JSR-008', 'التحقق من سداد الاشتراكات', 'التحقق من انتظام سداد اشتراكات العامل والمنشأة.'),
+    _svcRule('JSR-009', 'مطابقة حماية الأجور', 'مطابقة الأجور المسجلة في نظام حماية الأجور مع بيانات الصندوق.', 'critical'),
+    _svcRule('JSR-010', 'التحقق من المشاريع المسندة', 'التحقق من ارتباط العامل بالمشروع وتاريخ انتهاء المشروع.'),
+    _svcRule('JSR-011', 'التحقق من الموقع الجغرافي', 'مراجعة موقع المنشأة وفروعها ونشاطها الفعلي.'),
+    _svcRule('JSR-012', 'التحقق من النزاعات العمالية', 'التحقق من وجود نزاع عمالي أو قضية منظورة.', 'warning')
+  ];
+  if (serviceKey === 'family') return [
+    _svcRule('FBR-001', 'شرط الإقامة للمنتفعين', 'التحقق من إقامة أفراد الأسرة داخل السلطنة.'),
+    _svcRule('FBR-002', 'الحالة الاجتماعية لأفراد الأسرة', 'مطابقة الحالة الاجتماعية وتغييرات الزواج أو الطلاق.', 'warning'),
+    _svcRule('FBR-003', 'ممتلكات الأسرة', 'التحقق من العقارات والمركبات والسجلات المؤثرة على الاستحقاق.', 'critical'),
+    _svcRule('FBR-004', 'العروض الوظيفية', 'التحقق من عروض العمل المسجلة لأفراد الأسرة.'),
+    _svcRule('FBR-005', 'أعمار أفراد الأسرة', 'مطابقة أعمار أفراد الأسرة مع شروط الاستحقاق.'),
+    _svcRule('FBR-006', 'عقود العمل المسجلة وغير المسجلة', 'التحقق من عقود العمل في الصندوق ووزارة العمل.', 'critical'),
+    _svcRule('FBR-007', 'الدراسة والتفرغ', 'التحقق من التحاق أفراد الأسرة بمقاعد الدراسة.'),
+    _svcRule('FBR-008', 'السجلات التجارية', 'التحقق من السجلات التجارية المسجلة باسم أفراد الأسرة.', 'warning'),
+    _svcRule('FBR-009', 'التقارير الطبية', 'مراجعة التقارير الطبية المؤثرة على الاستحقاق.'),
+    _svcRule('FBR-010', 'بيانات وزارة التنمية', 'مطابقة بيانات وزارة التنمية والجمعيات ذات الصلة.'),
+    _svcRule('FBR-011', 'مكان إقامة أفراد الأسرة', 'التحقق من مكان إقامة أفراد الأسرة الفعلي.'),
+    _svcRule('FBR-012', 'بيانات الأجور', 'التحقق من الأجور والدخل الإضافي لأفراد الأسرة.', 'critical')
+  ];
+  return [
+    _svcRule('MLR-001', 'الشهادة الطبية المعتمدة', 'التحقق من أن الشهادة صادرة من جهة صحية معتمدة.'),
+    _svcRule('MLR-002', 'ارتفاع الأجر قبل الإجازة', 'فحص ارتفاع الأجر خلال السنة السابقة للإجازة.', 'critical'),
+    _svcRule('MLR-003', 'تشابه الأسماء والقرابة', 'التحقق من أي تشابه مؤثر بين العاملة وصاحب المنشأة.', 'warning'),
+    _svcRule('MLR-004', 'مدة العقد قبل الإجازة', 'التحقق من أن مدة العقد تستوفي الحد الأدنى قبل بداية الإجازة.'),
+    _svcRule('MLR-005', 'درجة السجل التجاري', 'التحقق من درجة السجل التجاري ونشاط المنشأة.'),
+    _svcRule('MLR-006', 'عدد العمال النشطين', 'ضبط الطلب إذا كان عدد العمال النشطين أقل من الحد المطلوب.', 'critical'),
+    _svcRule('MLR-007', 'صحة صرف الأجر', 'مطابقة صرف الأجر في حماية الأجور وبيانات الصندوق.'),
+    _svcRule('MLR-008', 'الكيان القانوني للمنشأة', 'التحقق من عدم وجود تصفية أو إفلاس أو توقف مؤثر.', 'warning'),
+    _svcRule('MLR-009', 'المبالغ غير المسددة', 'التحقق من وجود مبالغ غير مسددة لمدة تتجاوز ثلاثة أشهر.', 'critical')
+  ];
+}
+
+function _svcRuleFlags(serviceKey, request) {
+  const failed = {
+    job: {
+      'JSR-2025-0001': ['JSR-001', 'JSR-006', 'JSR-009'],
+      'JSR-2025-0002': ['JSR-008'],
+      'JSR-2025-0004': ['JSR-004', 'JSR-005'],
+      'JSR-2025-0005': ['JSR-006', 'JSR-009']
+    },
+    family: {
+      'FBR-2025-0001': ['FBR-003', 'FBR-006'],
+      'FBR-2025-0002': ['FBR-012'],
+      'FBR-2025-0004': ['FBR-003', 'FBR-006', 'FBR-012'],
+      'FBR-2025-0005': ['FBR-005']
+    },
+    maternity: {
+      'MLR-2025-0001': ['MLR-002', 'MLR-006'],
+      'MLR-2025-0002': ['MLR-001'],
+      'MLR-2025-0004': ['MLR-004', 'MLR-009'],
+      'MLR-2025-0005': ['MLR-001']
+    }
+  };
+  const pending = {
+    family: { 'FBR-2025-0005': ['FBR-009'] },
+    maternity: { 'MLR-2025-0005': ['MLR-007'] }
+  };
+  return {
+    failed: failed[serviceKey]?.[request.id] || [],
+    pending: pending[serviceKey]?.[request.id] || []
+  };
+}
+
+function _svcRules(serviceKey, request) {
+  const flags = _svcRuleFlags(serviceKey, request);
+  return _svcRulesTemplate(serviceKey).map(rule => {
+    const copy = { ...rule };
+    if (flags.failed.includes(copy.id)) {
+      copy.status = 'failed';
+      copy.details = _svcFailureDetails(copy.id, serviceKey);
+    } else if (flags.pending.includes(copy.id)) {
+      copy.status = 'pending';
+      copy.details = 'توجد بيانات إضافية مطلوبة قبل اعتماد نتيجة هذا الشرط.';
+    }
+    return copy;
+  });
+}
+
+function _svcFailureDetails(ruleId, serviceKey) {
+  const map = {
+    'JSR-001': 'توجد زيادة غير مبررة في الأجر الأخير مقارنة بتسلسل الأجور السابق.',
+    'JSR-006': 'توجد حالات تفتيش سابقة للمنشأة خلال آخر عامين مرتبطة بالأجور والتسجيل.',
+    'JSR-009': 'توجد فروقات بين أجر حماية الأجور والأجر المسجل في الصندوق.',
+    'JSR-008': 'توجد متأخرات اشتراكات تتطلب التحقق قبل تمرير الطلب.',
+    'JSR-004': 'مدة الخدمة المسجلة أقل من الحد النظامي المطلوب للاستحقاق.',
+    'JSR-005': 'توجد قرابة محتملة بين مقدم الطلب ومالك المنشأة تتطلب تحققاً إضافياً.',
+    'FBR-003': 'توجد ممتلكات مسجلة باسم أحد أفراد الأسرة قد تؤثر على الاستحقاق.',
+    'FBR-006': 'تم رصد عقد عمل غير مسجل لأحد أفراد الأسرة في بيانات وزارة العمل.',
+    'FBR-012': 'الدخل الإضافي المصرح به لا يطابق بيانات مصادر الدخل الخارجية.',
+    'FBR-005': 'بيانات العمر لأحد المعالين تحتاج إثباتاً إضافياً.',
+    'MLR-001': 'الشهادة الطبية تحتاج تحققاً من الجهة الصحية المصدرة.',
+    'MLR-002': 'ارتفع الأجر بنسبة ملحوظة خلال السنة السابقة للإجازة.',
+    'MLR-004': 'مدة العقد قبل الإجازة أقل من الحد الأدنى المطلوب.',
+    'MLR-006': 'عدد العمال النشطين في المنشأة أقل من الحد المطلوب.',
+    'MLR-009': 'توجد مبالغ غير مسددة على المنشأة لمدة تتجاوز ثلاثة أشهر.'
+  };
+  return map[ruleId] || 'لم يتحقق الشرط ويتطلب مراجعة إضافية من قسم المتابعة والبلاغات.';
+}
+
+function _svcSummary(serviceKey, request) {
+  const rules = _svcRules(serviceKey, request);
+  const failed = rules.filter(r => r.status === 'failed').length;
+  const pending = rules.filter(r => r.status === 'pending').length;
+  const passed = rules.length - failed - pending;
+  return { total: rules.length, passed, failed, pending, rules };
+}
+
+function _validationIndicator(summary) {
+  const cls = summary.failed === 0 && summary.pending === 0 ? 'ok' : summary.failed <= 1 ? 'warn' : 'bad';
+  const text = summary.failed ? `${summary.failed} غير مستوفاة` : summary.pending ? `${summary.pending} قيد التحقق` : 'مستوفاة بالكامل';
+  return `<div class="validation-score"><span class="validation-dot ${cls}"></span><div><strong>${summary.passed}/${summary.total} شرط</strong><span>${text}</span></div></div>`;
+}
+
+function _serviceListRows(cfg, requests) {
+  return requests.map(r => {
+    const summary = _svcSummary(cfg.key, r);
+    return `<tr>
+      <td><a href="#" onclick="navigateTo('../services/${cfg.detailPage}','id=${r.id}')" class="txp fw7">${r.id}</a></td>
+      <td>${r.workerName}</td>
+      <td>${r.workerCivil}</td>
+      <td>${r.employerName}</td>
+      <td>${r.requestDate}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td>${_validationIndicator(summary)}</td>
+      <td><button class="btn btn-primary btn-xs" onclick="navigateTo('../services/${cfg.detailPage}','id=${r.id}')">${ICONS.eye}عرض</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function _renderServiceRequestsList(serviceKey) {
+  const cfg = SERVICE_CONFIGS[serviceKey];
+  const requests = INSP_DATA[cfg.dataKey] || [];
+  const routed = requests.filter(r => _svcSummary(serviceKey, r).failed > 0 || _svcSummary(serviceKey, r).pending > 0);
+  const fulfilled = requests.filter(r => _svcSummary(serviceKey, r).failed === 0 && _svcSummary(serviceKey, r).pending === 0);
+  const headers = ['رقم الطلب','اسم مقدم الطلب','الرقم المدني','المنشأة','تاريخ الطلب','الحالة','الالتزام بالشروط','إجراء'];
+  const routedTable = _tblWrap(headers, _serviceListRows(cfg, routed) || _noData());
+  const fulfilledTable = `<div class="service-table-note">هذه الطلبات اجتازت التحقق الأولي في Validation engine ولا تتطلب تدخلاً من التفتيش، وتظهر هنا للاطلاع على التفاصيل فقط.</div>${_tblWrap(headers, _serviceListRows(cfg, fulfilled) || _noData())}`;
+
+  return `<div class="pg-head"><div><h1>${cfg.title}</h1><p>طلبات واردة من ${cfg.source} بعد مرورها على محرك التحقق — ${requests.length} طلب</p></div>
+    <div class="pg-acts"><button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير القائمة...','i')">${ICONS.download}تصدير</button></div></div>
+    <div class="service-context"><strong>آلية العمل:</strong> الطلبات يتم تقديمها في نظام خارجي ثم تمر عبر Validation engine. الطلبات التي لا تستوفي شرطاً أو أكثر تُحال لقسم المتابعة والبلاغات، أما الطلبات المستوفية فتظهر للاطلاع فقط دون إجراءات تفتيشية.</div>
+    ${_filterBar([
+      { label: 'رقم الطلب', type: 'text', ph: 'مثال: 2025-0001' },
+      { label: 'الرقم المدني', type: 'text', ph: 'رقم مقدم الطلب' },
+      { label: 'الحالة', type: 'select', opts: ['قيد المراجعة','قيد المعالجة','بانتظار وثائق','معتمد','مرفوض'] },
+      { label: 'من تاريخ', type: 'date' },
+      { label: 'إلى تاريخ', type: 'date' }
+    ])}
+    ${_tabView(`${cfg.key}-requests`, [
+      { label: 'تتطلب مراجعة المتابعة', badge: routed.length, content: routedTable },
+      { label: 'مستوفية للاطلاع فقط', badge: fulfilled.length, content: fulfilledTable }
+    ], 0)}`;
+}
+
+function renderJobSecurityRequestsList(role) { return _renderServiceRequestsList('job'); }
+function renderFamilyBenefitRequestsList(role) { return _renderServiceRequestsList('family'); }
+function renderMaternityLeaveRequestsList(role) { return _renderServiceRequestsList('maternity'); }
+
+function _svcField(label, value) {
+  return `<p><strong>${label}:</strong> ${value || '—'}</p>`;
+}
+
+function _svcOverview(cfg, request) {
+  const serviceFields = cfg.key === 'job'
+    ? [_svcField('تاريخ الإنهاء', request.terminationDate), _svcField('سبب الإنهاء', request.terminationReason), _svcField('مدة الخدمة', request.employmentDuration), _svcField('الأجر الأساسي', `${request.salary || 0} ر.ع`)]
+    : cfg.key === 'family'
+      ? [_svcField('نوع المنفعة', request.benefitType), _svcField('عدد أفراد الأسرة', `${request.familyMembers || 0} أفراد`), _svcField('الدخل الشهري', `${request.monthlyIncome || 0} ر.ع`), _svcField('مدة التوظيف', request.employmentDuration)]
+      : [_svcField('نوع الإجازة', request.leaveType), _svcField('تاريخ الولادة المتوقع', request.expectedDeliveryDate), _svcField('بداية الإجازة', request.leaveStartDate), _svcField('مدة الإجازة', request.leaveDuration)];
+
+  return `<div class="svc-info-grid">
+    <div class="svc-info-card"><h4>بيانات الطلب</h4>
+      ${_svcField('رقم الطلب', request.id)}
+      ${_svcField('تاريخ التقديم', request.requestDate)}
+      ${_svcField('الحالة', statusBadge(request.status))}
+      ${_svcField('مصدر الطلب', cfg.source)}
+    </div>
+    <div class="svc-info-card"><h4>مقدم الطلب</h4>
+      ${_svcField('الاسم', request.workerName)}
+      ${_svcField('الرقم المدني', request.workerCivil)}
+      ${_svcField('الجنسية', cfg.key === 'maternity' ? 'عمانية' : 'عماني')}
+      ${_svcField('رقم التواصل', '9924 6810')}
+    </div>
+    <div class="svc-info-card"><h4>بيانات المنشأة</h4>
+      ${_svcField('اسم المنشأة', request.employerName)}
+      ${_svcField('السجل التجاري', request.employerCRN)}
+      ${_svcField('الولاية', 'السيب')}
+      ${_svcField('حالة الاشتراك', 'نشط')}
+    </div>
+    <div class="svc-info-card"><h4>بيانات الخدمة</h4>${serviceFields.join('')}</div>
+  </div>`;
+}
+
+function _svcDocuments(cfg) {
+  const docs = {
+    job: [
+      ['صورة البطاقة الشخصية', 'PDF · 1.2MB · مرفوع من مقدم الطلب'],
+      ['عقد العمل الأخير', 'PDF · 2.4MB · نسخة مصدقة'],
+      ['إشعار إنهاء الخدمة', 'PDF · 860KB · صادر من المنشأة'],
+      ['كشف حماية الأجور', 'XLSX · 420KB · مستورد آلياً']
+    ],
+    family: [
+      ['صورة البطاقة الشخصية', 'PDF · 1.1MB · مرفوع من مقدم الطلب'],
+      ['إثبات الدخل الشهري', 'PDF · 780KB · مستند قابل للاستعراض'],
+      ['بيانات أفراد الأسرة', 'PDF · 1.7MB · مستند داعم'],
+      ['إثبات السكن والإقامة', 'PDF · 940KB · مرفق من النظام الخارجي']
+    ],
+    maternity: [
+      ['الشهادة الطبية للحمل', 'PDF · 1.5MB · صادرة من جهة صحية'],
+      ['تقرير الحمل التفصيلي', 'PDF · 1.9MB · قابل للاستعراض'],
+      ['صورة البطاقة الشخصية', 'PDF · 860KB · مرفوع من مقدمة الطلب'],
+      ['طلب الإجازة الرسمي', 'PDF · 690KB · صادر من جهة العمل']
+    ]
+  }[cfg.key] || [];
+
+  return `<div class="documents-list">${docs.map(d => `
+    <div class="document-item" onclick="showToast('فتح ملف: ${d[0]}','i')">
+      <div class="document-icon">${ICONS.file}</div>
+      <div class="document-info">
+        <h4>${d[0]}</h4>
+        <p>${d[1]}</p>
+        <span class="document-action">${ICONS.eye}استعراض الملف</span>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function _svcFinancial(cfg, request) {
+  if (cfg.key === 'job') {
+    const salary = request.salary || 0;
+    return `<div class="svc-info-grid">
+      <div class="svc-info-card"><h4>احتساب الاستحقاق</h4>
+        ${_svcField('الأجر الأساسي المسجل', `${salary} ر.ع`)}
+        ${_svcField('مدة الصرف المقترحة', '3 أشهر')}
+        ${_svcField('المبلغ التقديري', `${(salary * 3).toLocaleString()} ر.ع`)}
+        ${_svcField('أساس الاحتساب', 'آخر أجر مؤمن عليه بعد التحقق')}
+      </div>
+      <div class="svc-info-card"><h4>مطابقة الأجور</h4>
+        ${_svcField('حماية الأجور', 'توجد فروقات تحتاج مراجعة عند عدم استيفاء الشروط')}
+        ${_svcField('متوسط أجر آخر 12 شهر', `${Math.max(salary - 40, 0)} ر.ع`)}
+        ${_svcField('آخر تحديث للبيانات', '31/12/2024')}
+      </div>
+    </div>`;
+  }
+  if (cfg.key === 'family') {
+    const income = request.monthlyIncome || 0;
+    const members = request.familyMembers || 1;
+    return `<div class="svc-info-grid">
+      <div class="svc-info-card"><h4>تحليل دخل الأسرة</h4>
+        ${_svcField('إجمالي الدخل الشهري', `${income} ر.ع`)}
+        ${_svcField('عدد أفراد الأسرة', `${members} أفراد`)}
+        ${_svcField('الدخل للفرد', `${Math.round(income / members)} ر.ع`)}
+        ${_svcField('الدخل الإضافي المصرح', '35 ر.ع')}
+      </div>
+      <div class="svc-info-card"><h4>مؤشرات الأهلية المالية</h4>
+        ${_svcField('حد الاستحقاق الداخلي', 'يحتسب حسب حجم الأسرة')}
+        ${_svcField('مصادر الدخل المطابقة', 'الصندوق، وزارة العمل، وزارة التنمية')}
+        ${_svcField('نتيجة الملف المالي', 'تحتاج مراجعة عند وجود شروط غير مستوفاة')}
+      </div>
+    </div>`;
+  }
+  const salary = request.monthlySalary || 0;
+  return `<div class="svc-info-grid">
+    <div class="svc-info-card"><h4>تعويض إجازة الأمومة</h4>
+      ${_svcField('الأجر الشهري المؤمن عليه', `${salary} ر.ع`)}
+      ${_svcField('نسبة التعويض', '100% حسب الشروط')}
+      ${_svcField('مدة الإجازة', request.leaveDuration)}
+      ${_svcField('المبلغ التقديري', `${Math.round(salary * 3.25).toLocaleString()} ر.ع`)}
+    </div>
+    <div class="svc-info-card"><h4>مطابقة ملف الأجور</h4>
+      ${_svcField('آخر صرف في حماية الأجور', '31/01/2025')}
+      ${_svcField('متوسط آخر 12 شهر', `${Math.max(salary - 35, 0)} ر.ع`)}
+      ${_svcField('نتيجة التحقق', 'مطابقة ما لم تظهر زيادة غير مبررة')}
+    </div>
+  </div>`;
+}
+
+function _svcFamilyMembers(request) {
+  const rows = [
+    ['سالم بن حمد البوسعيدي', 'مقدم الطلب', 42, 'متزوج', 'يعمل', '300 ر.ع', '50 ر.ع'],
+    ['موزة بنت راشد الكندية', 'زوجة', 38, 'متزوجة', 'لا تعمل', '0 ر.ع', '0 ر.ع'],
+    ['حمد بن سالم البوسعيدي', 'ابن', 15, 'أعزب', 'لا يعمل', '0 ر.ع', '0 ر.ع'],
+    ['ريم بنت سالم البوسعيدية', 'ابنة', 11, 'أعزب', 'لا تعمل', '0 ر.ع', '0 ر.ع'],
+    ['خالد بن سالم البوسعيدي', 'ابن', 7, 'أعزب', 'لا يعمل', '0 ر.ع', '0 ر.ع']
+  ].slice(0, request.familyMembers || 5);
+  return `<div class="tbl-wrap"><table class="dtbl"><thead><tr>
+    <th>اسم الفرد</th><th>صلة القرابة</th><th>العمر</th><th>الحالة الاجتماعية</th><th>حالة العمل</th><th>الأجر الأساسي</th><th>الدخل الإضافي</th>
+  </tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+
+function _svcRulesPanel(rules) {
+  const ordered = [...rules].sort((a, b) => {
+    const rank = { failed: 0, pending: 1, passed: 2 };
+    return rank[a.status] - rank[b.status];
+  });
+  const passed = rules.filter(r => r.status === 'passed').length;
+  const failed = rules.filter(r => r.status === 'failed').length;
+  const pending = rules.filter(r => r.status === 'pending').length;
+  const rows = ordered.map(rule => `<div class="rule-item">
+    <div class="rule-status ${rule.status}">${rule.status === 'passed' ? ICONS.check : rule.status === 'failed' ? ICONS.x : ICONS.clock}</div>
+    <div class="rule-content">
+      <div class="rule-title">${rule.title}</div>
+      <div class="rule-description">${rule.description}</div>
+      <div class="rule-meta">
+        <span class="rule-badge ${rule.severity}">${rule.id}</span>
+        <span class="rule-badge ${rule.severity}">${rule.severity === 'critical' ? 'حرج' : rule.severity === 'warning' ? 'تحذير' : 'معلومات'}</span>
+      </div>
+      ${rule.details ? `<div class="violation-details"><h5>تفاصيل نتيجة التحقق</h5><p>${rule.details}</p></div>` : ''}
+    </div>
+  </div>`).join('');
+  return `<div class="rules-section">
+    <div class="rules-header"><h3>${ICONS.list}قواعد التحقق من Validation engine</h3>
+      <div class="rules-stats">
+        <div class="rule-stat failed">${ICONS.x} ${failed} غير مستوفاة</div>
+        <div class="rule-stat pending">${ICONS.clock} ${pending} قيد التحقق</div>
+        <div class="rule-stat passed">${ICONS.check} ${passed} مستوفاة</div>
+      </div>
+    </div>
+    <div class="rules-list">${rows}</div>
+  </div>`;
+}
+
+function _svcDecisionPanel(summary) {
+  if (summary.failed === 0 && summary.pending === 0) {
+    return `<div class="decision-panel read-only-panel">
+      <h3>للاطلاع فقط</h3>
+      <p>جميع شروط التحقق مستوفاة، لذلك لا توجد إجراءات متاحة لقسم المتابعة والبلاغات على هذا الطلب.</p>
+    </div>`;
+  }
+  return `<div class="decision-panel">
+    <h3>قرار قسم المتابعة والبلاغات</h3>
+    <p>الموظف المسؤول: سيف خلفان السيابي. يرجى اختيار الإجراء بعد مراجعة الشروط غير المستوفاة والمستندات الداعمة.</p>
+    <div class="decision-actions">
+      <button class="btn btn-primary btn-sm" onclick="showToast('تمت الموافقة على تمرير الطلب','s')">${ICONS.check}الموافقة على تمرير الطلب</button>
+      <button class="btn btn-warning btn-sm" onclick="showToast('تم تعليق الطلب لحين استيفاء البيانات','w')">${ICONS.clock}تعليق لحين استيفاء بيانات</button>
+      <button class="btn btn-secondary btn-sm" onclick="showToast('تم طلب زيارة أو تحقق إضافي','i')">${ICONS.search}طلب تحقق إضافي</button>
+    </div>
+  </div>`;
+}
+
+function _renderServiceRequestDetails(serviceKey) {
+  const cfg = SERVICE_CONFIGS[serviceKey];
+  const requestId = getParam('id');
+  const requests = INSP_DATA[cfg.dataKey] || [];
+  const request = requests.find(r => r.id === requestId) || requests[0];
+  const summary = _svcSummary(serviceKey, request);
+  const alert = summary.failed || summary.pending
+    ? `<div class="svc-alert warn">${ICONS.alert}<div><h3>تم توجيه الطلب للمتابعة والبلاغات</h3><p>لم يستوف الطلب ${summary.failed} شرط، وهناك ${summary.pending} شرط قيد التحقق. يلزم بحث إضافي قبل تمرير الطلب أو تعليقه.</p></div></div>`
+    : `<div class="svc-alert ok">${ICONS.check}<div><h3>الطلب مستوفٍ للتحقق الأولي</h3><p>اجتاز الطلب جميع شروط Validation engine ويظهر في التفتيش للاطلاع فقط دون إمكانية اتخاذ إجراءات.</p></div></div>`;
+  const tabs = [
+    { label: 'قواعد التحقق', badge: summary.failed || '', content: _svcRulesPanel(summary.rules) },
+    { label: 'بيانات الطلب', content: _svcOverview(cfg, request) },
+    { label: 'المستندات', content: _svcDocuments(cfg) },
+    { label: 'الملف المالي', content: _svcFinancial(cfg, request) }
+  ];
+  if (serviceKey === 'family') tabs.splice(3, 0, { label: 'أفراد الأسرة', content: _svcFamilyMembers(request) });
+  tabs.push({ label: summary.failed || summary.pending ? 'القرار' : 'نتيجة الاطلاع', content: _svcDecisionPanel(summary) });
+
+  return `<div class="svc-detail">
+    <div class="pg-head"><div><h1>${request.id}</h1><p>${cfg.detailTitle}</p></div>
+      <div class="pg-acts">${statusBadge(request.status)}
+        <button class="btn btn-secondary btn-sm" onclick="navigateTo('${cfg.listPage}')">${ICONS.arrow_right}رجوع</button>
+        <button class="btn btn-primary btn-sm" onclick="showToast('جارٍ طباعة الطلب...','i')">${ICONS.download}طباعة</button>
+      </div></div>
+    ${_summaryBar([
+      ['مصدر الطلب', cfg.source],
+      ['الالتزام بالشروط', _validationIndicator(summary)],
+      ['الموظف المسؤول', 'سيف خلفان السيابي'],
+      ['تاريخ التقديم', request.requestDate]
+    ])}
+    ${alert}
+    ${_tabView(`${cfg.key}-detail`, tabs, 0)}
+    ${renderNotes(request.notes, request.id)}
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>السجل الزمني</h3></div><div class="pb">${renderTimeline(request.timeline)}</div></div>
+  </div>`;
+}
+
+function renderJobSecurityRequestDetails(role) { return _renderServiceRequestDetails('job'); }
+function renderFamilyBenefitRequestDetails(role) { return _renderServiceRequestDetails('family'); }
+function renderMaternityLeaveRequestDetails(role) { return _renderServiceRequestDetails('maternity'); }
+
+function renderCompaniesStoppedPaymentList() {
+  const companies = INSP_DATA.companiesStoppedPayment || [];
+  const rows = companies.map(c => `
+    <tr>
+      <td><a href="#" onclick="navigateTo('../services/companies-stopped-payment-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
+      <td>${c.establishmentName}</td>
+      <td>${c.commercialNumber}</td>
+      <td>${c.insuredCount} مؤمن</td>
+      <td>${formatDate(c.stopDate)}</td>
+      <td>${statusBadge(c.status)}</td>
+      <td>${riskBadge(c.riskLevel)}</td>
+      <td><button class="btn btn-primary btn-xs" onclick="navigateTo('../services/companies-stopped-payment-details','id=${c.id}')">${ICONS.eye}عرض</button></td>
+    </tr>`).join('');
+  return `<div class="pg-head"><div><h1>المنشآت المتوقفة عن السداد</h1><p>متابعة وإدارة المنشآت المتوقفة عن سداد المساهمات — ${companies.length} منشأة</p></div>
+    <div class="pg-acts"><button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير البيانات...','i')">${ICONS.download}تصدير</button></div></div>
+    ${_filterBar([{label:'بحث',type:'text',ph:'رقم المنشأة، اسم المنشأة، الرقم التجاري...'},{label:'الحالة',type:'select',opts:['قيد المراجعة','قيد التحليل','بانتظار القرار','تم الاعتماد','تم الرفض','طلب معلومات إضافية']},{label:'مستوى المخاطرة',type:'select',opts:['عالي','متوسط','منخفض']},{label:'من تاريخ',type:'date'}])}
+    <div class="stats-cards">
+      <div class="stat-card"><div class="stat-icon">${ICONS.building}</div><div class="stat-info"><div class="stat-value">${companies.length}</div><div class="stat-label">إجمالي المنشآت</div></div></div>
+      <div class="stat-card warning"><div class="stat-icon">${ICONS.clock}</div><div class="stat-info"><div class="stat-value">${companies.filter(c => c.status === 'قيد المراجعة').length}</div><div class="stat-label">قيد المراجعة</div></div></div>
+      <div class="stat-card danger"><div class="stat-icon">${ICONS.alert}</div><div class="stat-info"><div class="stat-value">${companies.filter(c => c.riskLevel === 'عالي').length}</div><div class="stat-label">خطر عالي</div></div></div>
+      <div class="stat-card success"><div class="stat-icon">${ICONS.check}</div><div class="stat-info"><div class="stat-value">${companies.filter(c => c.status === 'تم الاعتماد').length}</div><div class="stat-label">تم الاعتماد</div></div></div>
+    </div>
+    ${_tblWrap(['رقم المنشأة','اسم المنشأة','الرقم التجاري','عدد المؤمن عليهم','تاريخ التوقف','الحالة','مستوى المخاطرة','الإجراءات'], rows || _noData())}`;
+}
+
+function renderLiquidationBankruptcyCasesList() {
+  const cases = INSP_DATA.liquidationBankruptcy || [];
+  const rows = cases.map(c => `
+    <tr>
+      <td><a href="#" onclick="navigateTo('../services/liquidation-bankruptcy-case-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
+      <td>${c.establishmentName}</td>
+      <td>${c.commercialNumber}</td>
+      <td><span class="badge ${c.caseType === 'إفلاس' ? 'b-rejected' : 'b-phead'}">${c.caseType}</span></td>
+      <td>${formatDate(c.submissionDate)}</td>
+      <td>${statusBadge(c.status)}</td>
+      <td>${c.insuredCount} مؤمن</td>
+      <td><button class="btn btn-primary btn-xs" onclick="navigateTo('../services/liquidation-bankruptcy-case-details','id=${c.id}')">${ICONS.eye}عرض</button></td>
+    </tr>`).join('');
+  return `<div class="pg-head"><div><h1>حالات التصفية والإفلاس</h1><p>متابعة وإدارة حالات التصفية والإفلاس — ${cases.length} قضية</p></div>
+    <div class="pg-acts"><button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير البيانات...','i')">${ICONS.download}تصدير</button></div></div>
+    ${_filterBar([{label:'بحث',type:'text',ph:'رقم القضية، اسم المنشأة، الرقم التجاري...'},{label:'الحالة',type:'select',opts:['قيد المراجعة','قيد التحليل','بانتظار القرار','تم الاعتماد','تم الرفض','طلب معلومات إضافية']},{label:'نوع القضية',type:'select',opts:['تصفية','إفلاس']},{label:'من تاريخ',type:'date'}])}
+    <div class="stats-cards">
+      <div class="stat-card"><div class="stat-icon">${ICONS.file}</div><div class="stat-info"><div class="stat-value">${cases.length}</div><div class="stat-label">إجمالي القضايا</div></div></div>
+      <div class="stat-card warning"><div class="stat-icon">${ICONS.clock}</div><div class="stat-info"><div class="stat-value">${cases.filter(c => c.status === 'قيد المراجعة').length}</div><div class="stat-label">قيد المراجعة</div></div></div>
+      <div class="stat-card danger"><div class="stat-icon">${ICONS.alert}</div><div class="stat-info"><div class="stat-value">${cases.filter(c => c.caseType === 'إفلاس').length}</div><div class="stat-label">إفلاس</div></div></div>
+      <div class="stat-card success"><div class="stat-icon">${ICONS.check}</div><div class="stat-info"><div class="stat-value">${cases.filter(c => c.status === 'تم الاعتماد').length}</div><div class="stat-label">تم الاعتماد</div></div></div>
+    </div>
+    ${_tblWrap(['رقم القضية','اسم المنشأة','الرقم التجاري','نوع القضية','تاريخ التقديم','الحالة','عدد المؤمن عليهم','الإجراءات'], rows || _noData())}`;
+}
+
+function renderNonPaymentCompanyDetails(role) {
+  const companyId = getParam('id');
+  const company = (INSP_DATA.companiesStoppedPayment || []).find(c => c.id === companyId) || (INSP_DATA.companiesStoppedPayment || [])[0];
+  const docs = [['إشعار التوقف عن السداد','PDF · صادر من النظام'], ['كشف المساهمات المتأخرة','XLSX · قابل للاستعراض'], ['مراسلات المنشأة','PDF · آخر تحديث'], ['خطة السداد المقترحة','PDF · قيد الدراسة']];
+  return `<div class="svc-detail">
+    <div class="pg-head"><div><h1>${company.id}</h1><p>تفاصيل المنشأة المتوقفة عن السداد</p></div>
+      <div class="pg-acts">${statusBadge(company.status)}<button class="btn btn-secondary btn-sm" onclick="navigateTo('../services/companies-stopped-payment-list')">${ICONS.arrow_right}رجوع</button></div></div>
+    ${_summaryBar([['المنشأة', company.establishmentName], ['الرقم التجاري', company.commercialNumber], ['مستوى المخاطرة', riskBadge(company.riskLevel)], ['الموظف المسؤول', 'مها سالم الهنائية']])}
+    ${_tabView('non-payment-detail', [
+      { label: 'نظرة عامة', content: `<div class="svc-info-grid"><div class="svc-info-card"><h4>بيانات المنشأة</h4>${_svcField('اسم المنشأة', company.establishmentName)}${_svcField('الرقم التجاري', company.commercialNumber)}${_svcField('عدد المؤمن عليهم', `${company.insuredCount} مؤمن`)}${_svcField('تاريخ التوقف', formatDate(company.stopDate))}</div><div class="svc-info-card"><h4>بيانات المتأخرات</h4>${_svcField('إجمالي المستحقات', `${(company.totalDue || 0).toLocaleString()} ر.ع`)}${_svcField('مدة التأخر', `${company.monthsDue || 0} أشهر`)}${_svcField('سبب المتابعة', company.notes)}${_svcField('الحالة', statusBadge(company.status))}</div></div>` },
+      { label: 'الملف المالي', content: `<div class="svc-info-grid"><div class="svc-info-card"><h4>تحليل السداد</h4>${_svcField('إجمالي المساهمات المتأخرة', `${(company.totalDue || 0).toLocaleString()} ر.ع`)}${_svcField('آخر شهر مسدد', 'مارس 2024')}${_svcField('متوسط الالتزام السابق', '83%')}${_svcField('المسار المقترح', company.riskLevel === 'عالي' ? 'تصعيد ومتابعة عاجلة' : 'خطة سداد ومراقبة')}</div><div class="svc-info-card"><h4>مؤشرات الاستمرارية</h4>${_svcField('عدد العاملين المتأثرين', `${company.insuredCount} مؤمن`)}${_svcField('المخاطر على المنافع', company.riskLevel)}${_svcField('قابلية خطة السداد', company.riskLevel === 'منخفض' ? 'مرتفعة' : 'تحتاج تحقق')}</div></div>` },
+      { label: 'المستندات', content: `<div class="documents-list">${docs.map(d => `<div class="document-item" onclick="showToast('فتح ملف: ${d[0]}','i')"><div class="document-icon">${ICONS.file}</div><div class="document-info"><h4>${d[0]}</h4><p>${d[1]}</p><span class="document-action">${ICONS.eye}استعراض الملف</span></div></div>`).join('')}</div>` },
+      { label: 'الإجراءات', content: `<div class="decision-panel"><h3>إجراءات المتابعة</h3><p>الموظف المسؤول: مها سالم الهنائية. يتم اختيار الإجراء بناء على مستوى المخاطرة وقدرة المنشأة على السداد.</p><div class="decision-actions"><button class="btn btn-primary btn-sm" onclick="showToast('تم اعتماد خطة السداد','s')">${ICONS.check}اعتماد خطة سداد</button><button class="btn btn-warning btn-sm" onclick="showToast('تم طلب معلومات إضافية','w')">${ICONS.clock}طلب معلومات إضافية</button><button class="btn btn-danger btn-sm" onclick="showToast('تم تصعيد الحالة','d')">${ICONS.alert}تصعيد الحالة</button></div></div>` }
+    ], 0)}
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>السجل الزمني</h3></div><div class="pb">${renderTimeline(company.timeline)}</div></div>
+  </div>`;
+}
+
+function renderLiquidationBankruptcyDetails(role) {
+  const caseId = getParam('id');
+  const item = (INSP_DATA.liquidationBankruptcy || []).find(c => c.id === caseId) || (INSP_DATA.liquidationBankruptcy || [])[0];
+  const docs = [['قرار المحكمة', 'PDF · قابل للاستعراض'], ['تقرير المصفي القضائي', 'PDF · آخر إصدار'], ['قائمة الأصول', 'XLSX · محدثة'], ['قائمة الدائنين', 'XLSX · معتمدة']];
+  return `<div class="svc-detail">
+    <div class="pg-head"><div><h1>${item.id}</h1><p>تفاصيل حالة التصفية والإفلاس</p></div>
+      <div class="pg-acts">${statusBadge(item.status)}<button class="btn btn-secondary btn-sm" onclick="navigateTo('../services/liquidation-bankruptcy-cases-list')">${ICONS.arrow_right}رجوع</button></div></div>
+    ${_summaryBar([['المنشأة', item.establishmentName], ['النوع', item.caseType], ['تاريخ التقديم', formatDate(item.submissionDate)], ['الموظف المسؤول', 'عبدالعزيز هلال الراشدي']])}
+    ${_tabView('liquidation-detail', [
+      { label: 'نظرة عامة', content: `<div class="svc-info-grid"><div class="svc-info-card"><h4>بيانات القضية</h4>${_svcField('رقم القضية', item.id)}${_svcField('نوع القضية', item.caseType)}${_svcField('الحالة', statusBadge(item.status))}${_svcField('عدد المؤمن عليهم', `${item.insuredCount} مؤمن`)}</div><div class="svc-info-card"><h4>بيانات المنشأة</h4>${_svcField('اسم المنشأة', item.establishmentName)}${_svcField('الرقم التجاري', item.commercialNumber)}${_svcField('تاريخ تقديم الحالة', formatDate(item.submissionDate))}${_svcField('الملاحظات', item.notes)}</div></div>` },
+      { label: 'الملف المالي', content: `<div class="svc-info-grid"><div class="svc-info-card"><h4>الأصول والالتزامات</h4>${_svcField('إجمالي الأصول', `${(item.totalAssets || 0).toLocaleString()} ر.ع`)}${_svcField('إجمالي الالتزامات', `${(item.totalLiabilities || 0).toLocaleString()} ر.ع`)}${_svcField('صافي المركز', `${((item.totalAssets || 0) - (item.totalLiabilities || 0)).toLocaleString()} ر.ع`)}</div><div class="svc-info-card"><h4>حقوق المؤمن عليهم</h4>${_svcField('عدد المؤمن عليهم', `${item.insuredCount} مؤمن`)}${_svcField('أولوية المتابعة', item.caseType === 'إفلاس' ? 'عالية' : 'متوسطة')}${_svcField('الإجراء المالي', 'حصر المستحقات قبل اعتماد القرار')}</div></div>` },
+      { label: 'المستندات', content: `<div class="documents-list">${docs.map(d => `<div class="document-item" onclick="showToast('فتح ملف: ${d[0]}','i')"><div class="document-icon">${ICONS.file}</div><div class="document-info"><h4>${d[0]}</h4><p>${d[1]}</p><span class="document-action">${ICONS.eye}استعراض الملف</span></div></div>`).join('')}</div>` },
+      { label: 'الإجراءات', content: `<div class="decision-panel"><h3>إجراءات الحالة</h3><p>الموظف المسؤول: عبدالعزيز هلال الراشدي. تتم مراجعة حقوق المؤمن عليهم قبل اعتماد أي مسار نهائي.</p><div class="decision-actions"><button class="btn btn-primary btn-sm" onclick="showToast('تمت متابعة الإجراءات','s')">${ICONS.check}متابعة الإجراءات</button><button class="btn btn-warning btn-sm" onclick="showToast('تم طلب تقرير إضافي','w')">${ICONS.clock}طلب تقرير إضافي</button><button class="btn btn-secondary btn-sm" onclick="showToast('تم حفظ الملاحظة','i')">${ICONS.file}حفظ ملاحظة</button></div></div>` }
+    ], 0)}
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>السجل الزمني</h3></div><div class="pb">${renderTimeline(item.timeline)}</div></div>
+  </div>`;
+}
