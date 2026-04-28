@@ -57,11 +57,15 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب</h3></div>
       <div class="pb">
         <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant.role || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.applicant.name || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.applicant.civil || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.phone || req?.insured?.phone)) || (typeof appeal !== 'undefined' && appeal?.applicant?.phone) || (typeof app !== 'undefined' && app?.phone) || (typeof dlg !== 'undefined' && dlg?.phone) || (typeof u !== 'undefined' && u?.phone)), '96890000000')}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.email || req?.insured?.email)) || (typeof appeal !== 'undefined' && appeal?.applicant?.email) || (typeof app !== 'undefined' && app?.email) || (typeof dlg !== 'undefined' && dlg?.email) || (typeof u !== 'undefined' && u?.email)), 'noreply@spf-proto.om')}</div></div>
+          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.applicant.name}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.applicant.civil}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف الأساسي</label><div class="fro">${req.applicant.phone}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف 1</label><div class="fro">${req.applicant.phoneAlt1}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف 2</label><div class="fro">${req.applicant.phoneAlt2}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${req.applicant.email}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ انتهاء البطاقة الشخصية</label><div class="fro">${formatDate(req.applicant.civilExpiry)}</div></div>
+          <div class="fgrp"><label class="flbl">المحافظة / الولاية</label><div class="fro">${req.applicant.region} — ${req.applicant.wilayat}</div></div>
+          <div class="fgrp"><label class="flbl">الدولة</label><div class="fro">${req.applicant.country}</div></div>
         </div>
       </div>
     </div>
@@ -94,8 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${normalizeDisplay(req.insurance?.subType)}</div></div>
           <div class="fgrp"><label class="flbl">فئة النظام</label><div class="fro">داخل السلطنة - القطاع الخاص</div></div>
           <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(req.insurance?.regDate)}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.phone || req?.insured?.phone)) || (typeof appeal !== 'undefined' && appeal?.applicant?.phone) || (typeof app !== 'undefined' && app?.phone) || (typeof dlg !== 'undefined' && dlg?.phone) || (typeof u !== 'undefined' && u?.phone)), '96890000000')}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.email || req?.insured?.email)) || (typeof appeal !== 'undefined' && appeal?.applicant?.email) || (typeof app !== 'undefined' && app?.email) || (typeof dlg !== 'undefined' && dlg?.email) || (typeof u !== 'undefined' && u?.email)), 'noreply@spf-proto.om')}</div></div>
           <div class="fgrp"><label class="flbl">منافع أخرى نشطة</label><div class="fro">${req.insurance?.otherBenefits || '—'}</div></div>
         </div>
       </div>

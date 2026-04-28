@@ -392,9 +392,27 @@ function showUserMenu() {
 }
 
 /* ── Status Badge Helper ── */
+function getStatusDisplayText(status) {
+  const fullText = normalizeDisplay(status, '—');
+  if (fullText === '—') return fullText;
+
+  // Keep internal status value unchanged for workflow logic,
+  // but shorten long presentation texts like:
+  // "تم تقديم ... — بانتظار ..."
+  const separator = '—';
+  if (!fullText.includes(separator)) return fullText;
+
+  const tail = fullText.split(separator).map(s => s.trim()).filter(Boolean).pop() || fullText;
+  if (tail.startsWith('بانتظار') || tail.startsWith('قيد')) return tail;
+
+  return fullText;
+}
+
 function statusBadge(status) {
   const cls = WI_CONFIG.statusBadges[status] || 'b-draft';
-  return `<span class="badge ${cls}" title="${status}">${status}</span>`;
+  const fullText = normalizeDisplay(status, '—');
+  const shortText = getStatusDisplayText(status);
+  return `<span class="badge ${cls}" title="${fullText}">${shortText}</span>`;
 }
 
 /* ── Format Date ── */

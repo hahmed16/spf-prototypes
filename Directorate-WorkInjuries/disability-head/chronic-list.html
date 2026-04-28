@@ -10,8 +10,9 @@
 initLayout({ role: 'disability-head', activePage: 'chronic-list' });
 setBreadcrumb([{ label: 'منفعة الأمراض المستديمة' }, { label: 'قائمة الطلبات' }]);
 const me = WI_DATA.users.disability_head.name;
+
 document.addEventListener('DOMContentLoaded', () => {
-  const reqs = WI_DATA.chronicIncoming.filter(d=>d.hasRequest);
+  const reqs = WI_DATA.chronicIncoming.filter(d => d.hasRequest);
   getContent().innerHTML = `
     <div class="pg-head">
       <div><h1>قائمة طلبات منفعة الأمراض المستديمة</h1><p>${reqs.length} طلب مقدم</p></div>
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc"></div>
         <div class="fgrp"><label class="flbl">الرقم المدني</label><input type="text" class="fc"></div>
         <div class="fgrp"><label class="flbl">التشخيص</label><input type="text" class="fc"></div>
-        <div class="fgrp"><label class="flbl">الحالة</label><select class="fc"><option>جميع الحالات</option><option>تم تقديم الطلب — بانتظار مراجعة رئيس قسم الإعاقة والأمراض المستديمة</option><option>تم إعادة الطلب لاستيفاء البيانات</option><option>بانتظار اعتماد رئيس قسم الإعاقة والأمراض المستديمة</option></select></div>
+        <div class="fgrp"><label class="flbl">الحالة</label><select class="fc"><option>جميع الحالات</option></select></div>
       </div>
       <div class="facts"><button class="btn btn-primary btn-sm">${ICONS.search} بحث</button><button class="btn btn-secondary btn-sm">مسح</button></div>
     </div>
@@ -32,16 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
             <thead><tr><th>رقم الطلب</th><th>المستفيد</th><th>التشخيص</th><th>الحالة</th><th>تاريخ التقديم</th><th>الحجز</th><th></th></tr></thead>
             <tbody>
               ${reqs.map(d=>`
-              <tr>
+              <tr style="${d.checkedOutBy===me?'background:#f0fdf4':''}">
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${d.requestId}</td>
                 <td>${d.applicantName}</td>
                 <td>${d.diagnosis}</td>
-                <td><span class="badge b-submitted">قيد المراجعة</span></td>
-                <td>${d.provenDate}</td>
-                <td><span class="badge b-avail">متاح</span></td>
+                <td>${statusBadge(d.requestStatus || '—')}</td>
+                <td>${formatDate(d.requestSubmitDate || d.provenDate)}</td>
+                <td>${!d.checkedOutBy?`<span class="badge b-avail">متاح</span>`:d.checkedOutBy===me?`<span class="badge b-checkout">محجوز بواسطتي</span>`:`<span class="badge b-checkout" title="${d.checkedOutBy}">محجوز</span>`}</td>
                 <td>
                   <button class="ibtn" onclick="window.location.href='chronic-details.html?id=${d.requestId}'">${ICONS.eye}</button>
-                  <button class="ibtn" onclick="showToast('تم حجز الطلب','s')">${ICONS.lock}</button>
                   <button class="ibtn" onclick="openAddNoteModal('${d.requestId}')">${ICONS.note}</button>
                 </td>
               </tr>`).join('')}
@@ -52,4 +52,3 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>`;
 });
 </script></body></html>
-
