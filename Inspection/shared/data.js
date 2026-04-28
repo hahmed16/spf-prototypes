@@ -919,6 +919,96 @@ const INSP_DATA = {
       notes: [
         { text: 'طُلب الكشف البنكي ومراسلة صاحب العمل لإثبات الأجر الفعلي بعد المراجعة السنوية.', author: 'سيف خلفان الأمري', date: '2025-01-18', role: 'monitoring-employee' }
       ]
+    },
+
+    /* ── بلاغ 12: شكوى عدم التسجيل ─ قيد المراجعة (مرحلة موظف المتابعة) ── */
+    {
+      id: '2025-01-000012',
+      type: 'شكوى عدم التسجيل',
+      channel: 'منصة إلكترونية — صاحب عمل',
+      status: 'قيد المراجعة',
+      submittedBy: 'employer',
+      submittedByName: 'طارق سعيد الكلباني',
+      submittedByCivil: null,
+      submittedByPhone: '96891023456',
+      employerContact: 'طارق سعيد الكلباني',
+      employerPhone: '96891023456',
+      submitDate: '2025-01-22',
+      employerId: 'EMP-001',
+      employerName: 'شركة التقنية الوطنية',
+      employerCRN: '1234567890',
+      workerId: 'WRK-003',
+      workerName: 'خالد ناصر البلوشي',
+      workerCivil: '05789012',
+      description: 'يفيد صاحب العمل بأن العامل خالد ناصر البلوشي انضم للعمل بتاريخ 2025-01-01 إلا أن التسجيل في نظام التأمين الاجتماعي لم يتم بعد بسبب خطأ تقني في المنظومة. يُطلب تصحيح الوضع بأثر رجعي.',
+      assignedTo: 'سيف خلفان الأمري',
+      assignedToCivil: '06456789',
+      assignedToRole: 'monitoring-employee',
+      assignedInspector: null,
+      assignedInspectorCivil: null,
+      assignedInspectorRole: null,
+      priority: 'متوسط',
+      dueDate: '2025-02-10',
+      returnCount: 0,
+      registeredData: {
+        joinDate: null,
+        contractReceiveDate: null,
+        salary: null,
+        allowances: null,
+        fullSalary: null,
+        resignDate: null,
+        resignReceiveDate: null
+      },
+      requestedData: {
+        changeType: 'تسجيل جديد',
+        actualJoinDate: '2025-01-01',
+        effectiveFrom: '2025-01-01',
+        notes: 'خطأ تقني حال دون التسجيل في الموعد المحدد — المستندات متوفرة'
+      },
+      requiredDocuments: [
+        { name: 'عقد العمل الموقع', status: 'مرفق' },
+        { name: 'صورة الهوية الوطنية للعامل', status: 'مرفق' },
+        { name: 'إثبات تاريخ الالتحاق الفعلي', status: 'مطلوب' }
+      ],
+      verificationResults: [
+        {
+          source: 'سجلات الصندوق',
+          status: 'مخالف',
+          checks: [
+            { rule: 'وجود تسجيل للعامل في نظام التأمين', result: 'مخالف', value: 'العامل غير مسجل حتى تاريخ التحقق' },
+            { rule: 'عدم وجود طلبات سابقة لنفس الموضوع', result: 'موافق', value: 'لا توجد طلبات سابقة' }
+          ]
+        },
+        {
+          source: 'وزارة العمل',
+          status: 'موافق',
+          checks: [
+            { rule: 'وجود عقد عمل مسجل', result: 'موافق', value: 'عقد مسجل — رقم WM-2025-00891' },
+            { rule: 'عدم وجود شكوى عمالية جارية', result: 'موافق', value: 'لا توجد شكاوى' }
+          ]
+        },
+        {
+          source: 'الأحوال المدنية',
+          status: 'موافق',
+          checks: [
+            { rule: 'الجنسية (عُماني)', result: 'موافق', value: 'عُماني' },
+            { rule: 'العمر عند تقديم الطلب (15–60)', result: 'موافق', value: '32 سنة' },
+            { rule: 'سريان البطاقة الشخصية', result: 'موافق', value: 'سارية حتى 2029-05-14' }
+          ]
+        }
+      ],
+      attachments: [
+        { name: 'عقد عمل خالد ناصر البلوشي.pdf', size: '540 KB', date: '2025-01-22', type: 'pdf' },
+        { name: 'صورة الهوية الوطنية.pdf',         size: '180 KB', date: '2025-01-22', type: 'pdf' }
+      ],
+      timeline: [
+        { date: '2025-01-22 09:15', step: 'تقديم البلاغ',   action: 'تم تقديم البلاغ إلكترونياً',            actor: 'طارق سعيد الكلباني', actorRole: 'employer' },
+        { date: '2025-01-22 10:30', step: 'تعيين المختص',   action: 'تم تعيين الموظف المختص تلقائياً',       actor: 'النظام',               actorRole: 'system' },
+        { date: '2025-01-23 08:00', step: 'فحص الطلب',      action: 'بدأ الموظف دراسة البلاغ والتحقق منه',  actor: 'سيف خلفان الأمري',    actorRole: 'monitoring-employee' }
+      ],
+      notes: [
+        { text: 'تم التحقق من سجلات الصندوق — العامل غير مسجل. العقد ووثائق الهوية مرفقة ومكتملة. بانتظار استيفاء إثبات تاريخ الالتحاق.', author: 'سيف خلفان الأمري', date: '2025-01-23', role: 'monitoring-employee' }
+      ]
     }
   ],
 

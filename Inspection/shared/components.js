@@ -658,8 +658,8 @@ function renderComplaintNew(role) {
 }
 
 /* ── تفاصيل البلاغ ── */
-function renderComplaintDetails(role) {
-  const id = getParam('id') || '2025-01-000001';
+function renderComplaintDetails(role, defaultId) {
+  const id = getParam('id') || defaultId || '2025-01-000001';
   const c = INSP_DATA.complaints.find(x => x.id === id) || INSP_DATA.complaints[0];
   if (!c) return `<div class="empty-st">${ICONS.inbox}<h4>البلاغ غير موجود</h4></div>`;
 
@@ -965,7 +965,7 @@ function renderComplaintDetails(role) {
     { label: 'المرفقات والملاحظات', content: attachmentsPanel + notesPanel },
     { label: 'السجل والمراسلات', content: historyContent },
   ];
-  return pgHead + summaryBar + _tabView(tid, tabs, 0);
+  return pgHead + summaryBar + _tabView(tid, tabs, hasAction ? 2 : 0);
 }
 
 function _renderComplaintTimeline(timeline) {
