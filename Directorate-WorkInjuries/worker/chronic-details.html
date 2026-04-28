@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -15,16 +15,58 @@
 initLayout({ role: 'worker', activePage: 'chronic-list' });
 setBreadcrumb([{ label: 'الأمراض المستديمة', page: 'chronic-list' }, { label: 'تفاصيل الطلب' }]);
 
+const params = new URLSearchParams(window.location.search);
+const requestId = params.get('id') || 'CHR-2025-000156';
+const incomingRecord = WI_DATA.chronicIncoming.find(d => d.requestId === requestId) || WI_DATA.chronicIncoming.find(d => d.hasRequest) || WI_DATA.chronicIncoming[0];
+const currentWorker = WI_DATA.users.worker;
+const currentEmployer = (currentWorker.employerHistory || []).find(e => e.current) || (currentWorker.employerHistory || [])[0];
+
 const req = {
-  id: 'CHR-2025-000156',
+  id: requestId,
   status: 'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة',
-  path: 'مسار اللجان الطبية',
-  submitDate: '2025-01-05',
+  submitDate: incomingRecord?.requestSubmitDate || '2025-01-05',
   lastUpdate: '2025-01-05 14:00',
-  applicant: { name: WI_DATA.users.worker.name, civil: WI_DATA.users.worker.civil, role: 'العامل / المؤمن عليه / المواطن', phone: WI_DATA.users.worker.phone, email: '' },
-  insured: { name: WI_DATA.users.worker.name, civil: WI_DATA.users.worker.civil, insurance: 'IN-20190045678', dob: '1985-06-15', gender: 'ذكر', nationality: 'عُماني', insuranceStatus: 'نشط', regDate: '2019-03-01', subType: 'إلزامي' },
-  insurance: { status: 'نشط', subType: 'إلزامي', otherBenefits: 'لا يوجد' },
-  medical: { hospital: 'مستشفى ابن سينا — نزوى', doctor: 'د. فاطمة بنت خلفان الخروصية', diagnosis: 'الفشل الكلوي المزمن', provenDate: '2024-11-20', expectedPath: 'مسار اللجان الطبية' },
+  insured: {
+    name: currentWorker.name,
+    civil: currentWorker.civil,
+    insurance: 'IN-20190045678',
+    dob: '1985-06-15',
+    gender: 'ذكر',
+    nationality: 'عُماني',
+    insuranceStatus: 'نشط',
+    regDate: '2019-03-01',
+    subType: 'إلزامي',
+    phone: currentWorker.phone,
+    email: currentWorker.email,
+    region: currentWorker.region || 'مسقط',
+    wilayat: currentWorker.wilayat || 'بوشر',
+    country: currentWorker.country || 'سلطنة عُمان',
+    civilExpiry: currentWorker.civilExpiry || ''
+  },
+  insurance: {
+    status: 'نشط',
+    subType: 'إلزامي',
+    otherBenefits: 'لا يوجد',
+    insuranceType: 'تأمين العاملين في القطاع الخاص',
+    schemeCategory: 'داخل السلطنة - القطاع الخاص'
+  },
+  medical: {
+    hospital: incomingRecord?.hospital || '—',
+    doctor: incomingRecord?.doctor || '—',
+    diagnosis: incomingRecord?.diagnosis || '—',
+    detailedDiagnosis: incomingRecord?.detailedDiagnosis || incomingRecord?.diagnosis || '—',
+    permanentDiseaseReport: incomingRecord?.permanentDiseaseReport || '',
+    provenDate: incomingRecord?.provenDate || '',
+    expectedPath: incomingRecord?.expectedPath || '—',
+    severityDate: incomingRecord?.severityDate || '',
+    uniqueRequestId: incomingRecord?.uniqueRequestId || incomingRecord?.refId || '',
+    chronicDisease: incomingRecord?.chronicDisease || '',
+    affectedSystem: incomingRecord?.affectedSystem || '',
+    severityIndex: incomingRecord?.severityIndex || '',
+    visitDateTime: incomingRecord?.visitDateTime || '',
+    firstRequestRef: incomingRecord?.firstRequestRef || '',
+    overallCondition: incomingRecord?.overallCondition || ''
+  },
   attachments: [],
   notes: [],
   timeline: [
@@ -50,25 +92,10 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- ملخص الطلب -->
     <div class="card" style="border-right:4px solid var(--primary)">
       <div class="pb-c">
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+        <div class="req-summary-grid">
           <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">المسار</div><span class="badge ${req.path === 'مسار مباشر' ? 'b-direct' : 'b-commpath'}">${req.path}</span></div>
           <div><div class="flbl" style="margin-bottom:4px">الحالة الحالية</div>${statusBadge(req.status)}</div>
           <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div style="font-size:12.5px">${req.submitDate}</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- بيانات مقدم الطلب -->
-    <div class="card">
-      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب</h3></div>
-      <div class="pb">
-        <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant.role || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.applicant.name || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.applicant.civil || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(req.applicant.phone, 'غير متوفر')}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(req.applicant.email, 'غير متوفر')}</div></div>
         </div>
       </div>
     </div>
@@ -84,8 +111,14 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">الجنس</label><div class="fro">${req.insured.gender || '—'}</div></div>
           <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${req.insured.nationality || '—'}</div></div>
           <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${req.insured.insuranceStatus === 'نشط' ? 'b-approved' : 'b-rejected'}">${req.insured.insuranceStatus || '—'}</span></div></div>
-          <div class="fgrp"><label class="flbl">تاريخ التسجيل في التأمين</label><div class="fro">${formatDate(req.insured.regDate)}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(req.insured.regDate)}</div></div>
           ${req.insured.subType ? `<div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${req.insured.subType}</div></div>` : ''}
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(req.insured.phone, '96890000000')}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(req.insured.email, 'noreply@spf-proto.om')}</div></div>
+          <div class="fgrp"><label class="flbl">انتهاء البطاقة الشخصية</label><div class="fro">${formatDate(req.insured.civilExpiry)}</div></div>
+          <div class="fgrp"><label class="flbl">المنطقة</label><div class="fro">${normalizeDisplay(req.insured.region, 'محافظة مسقط')}</div></div>
+          <div class="fgrp"><label class="flbl">الولاية</label><div class="fro">${normalizeDisplay(req.insured.wilayat, 'بوشر')}</div></div>
+          <div class="fgrp"><label class="flbl">الدولة</label><div class="fro">${normalizeDisplay(req.insured.country, 'سلطنة عُمان')}</div></div>
         </div>
       </div>
     </div>
@@ -96,13 +129,18 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb">
         <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info}<span>هذه البيانات مستلمة تلقائياً من منظومة وزارة الصحة ولا يمكنك تعديلها.</span></div>
         <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">رقم الطلب الفريد (وزارة الصحة)</label><div class="fro" style="font-family:monospace">${normalizeDisplay(req.medical.uniqueRequestId)}</div></div>
           <div class="fgrp"><label class="flbl">المؤسسة الصحية المعالجة</label><div class="fro" style="font-weight:600">${normalizeDisplay(req.medical.hospital)}</div></div>
           <div class="fgrp"><label class="flbl">الطبيب المعالج</label><div class="fro">${normalizeDisplay(req.medical.doctor)}</div></div>
-          <div class="fgrp"><label class="flbl">التشخيص الطبي</label><div class="fro" style="font-weight:700">${normalizeDisplay(req.medical.detailedDiagnosis || req.medical.diagnosis)}</div></div>
+          <div class="fgrp span-full"><label class="flbl">التشخيص الطبي (تقرير وصفي مثبت)</label><div class="fro medical-report">${normalizeDisplay(req.medical.permanentDiseaseReport || incomingRecord?.permanentDiseaseReport || buildPermanentDiseaseReport(req.medical))}</div></div>
+          <div class="fgrp"><label class="flbl">المرض المزمن</label><div class="fro">${normalizeDisplay(req.medical.chronicDisease)}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ ثبوت المرض</label><div class="fro">${formatDate(req.medical.provenDate)}</div></div>
-          ${req.medical.severityDate ? `<div class="fgrp"><label class="flbl">تاريخ شدة المرض</label><div class="fro">${formatDate(req.medical.severityDate)}</div></div>` : ''}
-          ${req.medical.affectedSystem ? `<div class="fgrp"><label class="flbl">الجهاز المتأثر</label><div class="fro">${normalizeDisplay(req.medical.affectedSystem)}</div></div>` : ''}
-          <div class="fgrp"><label class="flbl">المسار المتوقع <span style="font-size:9.5px;font-weight:400;color:var(--text3)">(معلومة فقط)</span></label><div class="fro"><span class="badge ${req.medical.expectedPath === 'مسار مباشر' ? 'b-direct' : 'b-commpath'}">${req.medical.expectedPath || '—'}</span></div></div>
+          <div class="fgrp"><label class="flbl">تاريخ شدة المرض</label><div class="fro">${formatDate(req.medical.severityDate)}</div></div>
+          <div class="fgrp"><label class="flbl">الجهاز المتأثر</label><div class="fro">${normalizeDisplay(req.medical.affectedSystem)}</div></div>
+          <div class="fgrp"><label class="flbl">مؤشر الشدة الطبي</label><div class="fro">${normalizeDisplay(req.medical.severityIndex)}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ ووقت الزيارة</label><div class="fro">${normalizeDisplay(req.medical.visitDateTime)}</div></div>
+          ${req.medical.firstRequestRef ? `<div class="fgrp"><label class="flbl">رقم أول طلب مرتبط</label><div class="fro" style="font-family:monospace">${req.medical.firstRequestRef}</div></div>` : ''}
+          ${req.medical.overallCondition ? `<div class="fgrp span-full"><label class="flbl">الحالة العامة</label><div class="fro">${req.medical.overallCondition}</div></div>` : ''}
         </div>
       </div>
     </div>
@@ -113,7 +151,14 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb">
         <div class="fg fg-3">
           <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">${req.insurance.status}</span></div></div>
+          <div class="fgrp"><label class="flbl">رقم التأمين</label><div class="fro" style="font-family:monospace">${normalizeDisplay(req.insured.insurance)}</div></div>
           ${req.insurance.subType ? `<div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${req.insurance.subType}</div></div>` : ''}
+          <div class="fgrp"><label class="flbl">نوع التأمين</label><div class="fro">${normalizeDisplay(req.insurance.insuranceType)}</div></div>
+          <div class="fgrp"><label class="flbl">فئة النظام</label><div class="fro">${normalizeDisplay(req.insurance.schemeCategory)}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(req.insured.regDate)}</div></div>
+          <div class="fgrp"><label class="flbl">بداية الخدمة لدى جهة العمل الحالية</label><div class="fro">${formatDate(currentEmployer?.joinDate)}</div></div>
+          <div class="fgrp"><label class="flbl">جهة العمل الحالية</label><div class="fro">${normalizeDisplay(currentEmployer?.name)}</div></div>
+          <div class="fgrp"><label class="flbl">السجل التجاري لجهة العمل الحالية</label><div class="fro" style="font-family:monospace">${normalizeDisplay(currentEmployer?.cr)}</div></div>
           <div class="fgrp"><label class="flbl">منافع أخرى</label><div class="fro">${req.insurance.otherBenefits}</div></div>
         </div>
       </div>
@@ -163,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ${tl.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد أحداث</div>' : tl.map(e => {
             const dc = e.type === 'success' ? 's' : e.type === 'danger' ? 'd' : e.type === 'warning' ? 'w' : '';
             const ic = e.type === 'success' ? ICONS.check : e.type === 'danger' ? ICONS.x : e.type === 'warning' ? ICONS.warn : ICONS.clock;
-            return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus ? `<div class="tl-states">${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus.substring(0, 300)}</span><span>${ICONS.arrow_right}</span>` : ''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus.substring(0, 300)}</span></div>` : ''}${e.note ? `<div class="tl-note">${e.note}</div>` : ''}</div></div>`;
+            return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus ? `<div class="tl-states">${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus}</span><span>${ICONS.arrow_right}</span>` : ''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus}</span></div>` : ''}${e.note ? `<div class="tl-note">${e.note}</div>` : ''}</div></div>`;
           }).join('')}
         </div>
       </div>
@@ -172,3 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
+
+
+

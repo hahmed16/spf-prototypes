@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
     :tl.map(e=>{
         const dc=e.type==='success'?'s':e.type==='danger'?'d':e.type==='warning'?'w':'';
         const ic=e.type==='success'?ICONS.check:e.type==='danger'?ICONS.x:e.type==='warning'?ICONS.warn:ICONS.clock;
-        return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus?`<div class="tl-states">${e.fromStatus?`<span class="badge b-draft" style="font-size:10px">${e.fromStatus.substring(0,300)}</span><span>${ICONS.arrow_right}</span>`:''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus]||'b-draft'}" style="font-size:10px">${e.toStatus.substring(0,300)}</span></div>`:''} ${e.note?`<div class="tl-note">${e.note}</div>`:''}</div></div>`;
+        return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus?`<div class="tl-states">${e.fromStatus?`<span class="badge b-draft" style="font-size:10px">${e.fromStatus}</span><span>${ICONS.arrow_right}</span>`:''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus]||'b-draft'}" style="font-size:10px">${e.toStatus}</span></div>`:''} ${e.note?`<div class="tl-note">${e.note}</div>`:''}</div></div>`;
       }).join('');
 
   getContent().innerHTML = `
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- ملخص الطلب -->
     <div class="card" style="border-right:4px solid var(--primary)">
       <div class="pb-c">
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+        <div class="req-summary-grid">
           <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">نوع الطلب</div><span class="badge b-direct">${req.requestType}</span></div>
           <div><div class="flbl" style="margin-bottom:4px">الحالة</div>${statusBadge(req.status)}</div>
@@ -150,8 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${dlg.role||'—'}</div></div>
           <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${dlg.name||'—'}</div></div>
           <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${dlg.civil||'—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(dlg.phone,'غير متوفر')}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(dlg.email,'غير متوفر')}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.phone || req?.insured?.phone)) || (typeof appeal !== 'undefined' && appeal?.applicant?.phone) || (typeof app !== 'undefined' && app?.phone) || (typeof dlg !== 'undefined' && dlg?.phone) || (typeof u !== 'undefined' && u?.phone)), '96890000000')}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.email || req?.insured?.email)) || (typeof appeal !== 'undefined' && appeal?.applicant?.email) || (typeof app !== 'undefined' && app?.email) || (typeof dlg !== 'undefined' && dlg?.email) || (typeof u !== 'undefined' && u?.email)), 'noreply@spf-proto.om')}</div></div>
         </div>
       </div>
     </div>
@@ -287,3 +287,8 @@ function issueLic(){
 </script>
 </body>
 </html>
+
+
+
+
+

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -31,25 +31,40 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="card card-ro">
       <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>ملخص التشخيص الوارد من وزارة الصحة</h3></div>
       <div class="pb">
+        <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info}<span>هذه البيانات مستلمة تلقائياً من وزارة الصحة للعرض فقط ولا يمكن تعديلها.</span></div>
         <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">رقم الطلب الفريد (وزارة الصحة)</label><div class="fro" style="font-family:monospace">${normalizeDisplay(incoming?.uniqueRequestId || incoming?.refId)}</div></div>
           <div class="fgrp"><label class="flbl">المؤسسة الصحية المعالجة</label><div class="fro">${incoming?.hospital || '—'}</div></div>
           <div class="fgrp"><label class="flbl">الطبيب المعالج</label><div class="fro">${incoming?.doctor || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">التشخيص</label><div class="fro" style="font-weight:700">${incoming?.diagnosis || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ ثبوت المرض</label><div class="fro">${incoming?.provenDate || '—'}</div></div>
-         
+          <div class="fgrp span-full"><label class="flbl">التشخيص الطبي (تقرير وصفي مثبت)</label><div class="fro medical-report">${normalizeDisplay(incoming?.permanentDiseaseReport || buildPermanentDiseaseReport(incoming))}</div></div>
+          <div class="fgrp"><label class="flbl">المرض المزمن</label><div class="fro">${normalizeDisplay(incoming?.chronicDisease)}</div></div>
+          <div class="fgrp"><label class="flbl">الجهاز المتأثر</label><div class="fro">${normalizeDisplay(incoming?.affectedSystem)}</div></div>
+          <div class="fgrp"><label class="flbl">مؤشر الشدة الطبي</label><div class="fro">${normalizeDisplay(incoming?.severityIndex)}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ ثبوت المرض</label><div class="fro">${formatDate(incoming?.provenDate)}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ شدة المرض</label><div class="fro">${formatDate(incoming?.severityDate)}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ ووقت الزيارة</label><div class="fro">${normalizeDisplay(incoming?.visitDateTime)}</div></div>
+          ${incoming?.firstRequestRef ? `<div class="fgrp"><label class="flbl">رقم أول طلب مرتبط</label><div class="fro" style="font-family:monospace">${incoming.firstRequestRef}</div></div>` : ''}
+          ${incoming?.overallCondition ? `<div class="fgrp span-full"><label class="flbl">الحالة العامة</label><div class="fro">${incoming.overallCondition}</div></div>` : ''}
         </div>
       </div>
     </div>
 
     <!-- بيانات المستفيد -->
     <div class="card">
-      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بياناتك الشخصية</h3></div>
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب</h3></div>
       <div class="pb">
         <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">العامل / المؤمن عليه / المواطن</div></div>
           <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${u.name}</div></div>
           <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${u.civil}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف <span class="req">*</span></label><input type="tel" class="fc" value="${u.phone}"></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><input type="email" class="fc" value="${u.email}"></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف (من النظام)</label><div class="fro">${u.phone}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني (من النظام)</label><div class="fro">${u.email}</div></div>
+          <div class="fgrp"><label class="flbl">رقم هاتف إضافي 1</label><input type="tel" class="fc" placeholder="أدخل رقم هاتف إضافي"></div>
+          <div class="fgrp"><label class="flbl">رقم هاتف إضافي 2</label><input type="tel" class="fc" placeholder="أدخل رقم هاتف إضافي آخر"></div>
+          <div class="fgrp"><label class="flbl">بريد إلكتروني إضافي</label><input type="email" class="fc" placeholder="example@domain.com"></div>
+          <div class="fgrp"><label class="flbl">المنطقة</label><div class="fro">${normalizeDisplay(u.region, 'محافظة مسقط')}</div></div>
+          <div class="fgrp"><label class="flbl">الولاية</label><div class="fro">${normalizeDisplay(u.wilayat, 'بوشر')}</div></div>
+          <div class="fgrp"><label class="flbl">الدولة</label><div class="fro">${normalizeDisplay(u.country, 'سلطنة عُمان')}</div></div>
         </div>
       </div>
     </div>
@@ -104,3 +119,5 @@ function confirmDecline() {
 </script>
 </body>
 </html>
+
+

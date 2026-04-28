@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -57,8 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant.role || '—'}</div></div>
           <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.applicant.name || '—'}</div></div>
           <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.applicant.civil || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(req.applicant.phone, 'غير متوفر')}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(req.applicant.email, 'غير متوفر')}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.phone || req?.insured?.phone)) || (typeof appeal !== 'undefined' && appeal?.applicant?.phone) || (typeof app !== 'undefined' && app?.phone) || (typeof dlg !== 'undefined' && dlg?.phone) || (typeof u !== 'undefined' && u?.phone)), '96890000000')}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.email || req?.insured?.email)) || (typeof appeal !== 'undefined' && appeal?.applicant?.email) || (typeof app !== 'undefined' && app?.email) || (typeof dlg !== 'undefined' && dlg?.email) || (typeof u !== 'undefined' && u?.email)), 'noreply@spf-proto.om')}</div></div>
         </div>
       </div>
     </div>
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">رقم الطلب الفريد (وزارة الصحة)</label><div class="fro" style="font-family:monospace">${normalizeDisplay(med.uniqueRequestId || med.refId || med.mohRef)}</div></div>
           <div class="fgrp"><label class="flbl">المؤسسة الصحية المعالجة</label><div class="fro">${normalizeDisplay(med.hospital)}</div></div>
           <div class="fgrp"><label class="flbl">الطبيب المعالج</label><div class="fro">${normalizeDisplay(med.doctor)}</div></div>
-          <div class="fgrp"><label class="flbl">التشخيص الطبي</label><div class="fro" style="font-weight:700">${normalizeDisplay(med.detailedDiagnosis || med.diagnosis)}</div></div>
+          <div class="fgrp span-full"><label class="flbl">التشخيص الطبي (تقرير وصفي مثبت)</label><div class="fro medical-report">${normalizeDisplay(med.permanentDiseaseReport || buildPermanentDiseaseReport(med))}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ ثبوت المرض</label><div class="fro">${formatDate(med.provenDate)}</div></div>
           <div class="fgrp"><label class="flbl">المرض المستديم</label><div class="fro">${normalizeDisplay(med.chronicDisease || med.diagnosis)}</div></div>
           <div class="fgrp"><label class="flbl">الجهاز المتأثر</label><div class="fro">${normalizeDisplay(med.affectedSystem)}</div></div>
@@ -122,8 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
           ${renderModernUploadComponent({ idPrefix: 'decision-att', subTitle: 'PDF, Word, صور — الحجم الأقصى 20 ميغابايت' })}
         </div>
         <div class="dp-acts">
-          <button class="btn btn-primary" onclick="takeDecision('head')">${ICONS.arrow_left} توجيه لرئيس القسم (المسار المباشر)</button>
-          <button class="btn btn-secondary" onclick="takeDecision('comm')">توجيه لقسم اللجان الطبية (مسار اللجان)</button>
+          <button class="btn btn-primary" onclick="takeDecision('head')">${ICONS.arrow_left} توجيه لرئيس القسم</button>
+          <button class="btn btn-secondary" onclick="takeDecision('comm')">توجيه لقسم اللجان الطبية</button>
           <button class="btn btn-warning" onclick="takeDecision('complete')">طلب استيفاء بيانات من المواطن</button>
           <button class="btn btn-danger" onclick="takeDecision('reject')">رفض</button>
         </div>
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ${tl.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد أحداث</div>' : tl.map(e => {
             const dc = e.type === 'success' ? 's' : e.type === 'danger' ? 'd' : e.type === 'warning' ? 'w' : '';
             const ic = e.type === 'success' ? ICONS.check : e.type === 'danger' ? ICONS.x : e.type === 'warning' ? ICONS.warn : ICONS.clock;
-            return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus ? `<div class="tl-states">${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus.substring(0, 300)}</span><span>${ICONS.arrow_right}</span>` : ''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus.substring(0, 300)}</span></div>` : ''}${e.note ? `<div class="tl-note">${e.note}</div>` : ''}</div></div>`;
+            return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus ? `<div class="tl-states">${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus}</span><span>${ICONS.arrow_right}</span>` : ''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus}</span></div>` : ''}${e.note ? `<div class="tl-note">${e.note}</div>` : ''}</div></div>`;
           }).join('')}
         </div>
       </div>
@@ -146,10 +146,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function takeDecision(mode) {
-  const msg = { head: 'تم توجيه الحالة إلى رئيس القسم (المسار المباشر)', comm: 'تم توجيه الحالة إلى قسم اللجان الطبية', complete: 'تم طلب استيفاء بيانات من المواطن', reject: 'تم رفض الطلب' }[mode];
+  const msg = { head: 'تم توجيه الحالة إلى رئيس القسم', comm: 'تم توجيه الحالة إلى قسم اللجان الطبية', complete: 'تم طلب استيفاء بيانات من المواطن', reject: 'تم رفض الطلب' }[mode];
   showToast(msg, mode === 'reject' ? 'd' : 's');
   setTimeout(() => window.location.href = 'chronic-reassessment.html', 1200);
 }
 </script>
 </body>
 </html>
+
+
+
+

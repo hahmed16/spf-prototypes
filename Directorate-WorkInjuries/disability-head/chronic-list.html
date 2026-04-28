@@ -21,8 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc"></div>
         <div class="fgrp"><label class="flbl">الرقم المدني</label><input type="text" class="fc"></div>
         <div class="fgrp"><label class="flbl">التشخيص</label><input type="text" class="fc"></div>
-        <div class="fgrp"><label class="flbl">المسار</label><select class="fc"><option>الكل</option><option>مسار مباشر</option><option>مسار اللجان الطبية</option></select></div>
-        <div class="fgrp"><label class="flbl">الحالة</label><select class="fc"><option>جميع الحالات</option><option>تم تقديم الطلب — بانتظار مراجعة رئيس قسم الإعاقة والأمراض المستديمة</option><option>تم إعادة الطلب لاستيفاء البيانات</option><option>بانتظار اعتماد رئيس قسم الإعاقة والأمراض المستديمة — المسار المباشر</option></select></div>
+        <div class="fgrp"><label class="flbl">الحالة</label><select class="fc"><option>جميع الحالات</option><option>تم تقديم الطلب — بانتظار مراجعة رئيس قسم الإعاقة والأمراض المستديمة</option><option>تم إعادة الطلب لاستيفاء البيانات</option><option>بانتظار اعتماد رئيس قسم الإعاقة والأمراض المستديمة</option></select></div>
       </div>
       <div class="facts"><button class="btn btn-primary btn-sm">${ICONS.search} بحث</button><button class="btn btn-secondary btn-sm">مسح</button></div>
     </div>
@@ -30,14 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم الطلب</th><th>المستفيد</th><th>التشخيص</th><th>المسار</th><th>الحالة</th><th>تاريخ التقديم</th><th>الحجز</th><th></th></tr></thead>
+            <thead><tr><th>رقم الطلب</th><th>المستفيد</th><th>التشخيص</th><th>الحالة</th><th>تاريخ التقديم</th><th>الحجز</th><th></th></tr></thead>
             <tbody>
               ${reqs.map(d=>`
               <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${d.requestId}</td>
                 <td>${d.applicantName}</td>
                 <td>${d.diagnosis}</td>
-                <td><span class="badge ${d.expectedPath==='مسار مباشر'?'b-direct':'b-commpath'}">${d.expectedPath}</span></td>
                 <td><span class="badge b-submitted">قيد المراجعة</span></td>
                 <td>${d.provenDate}</td>
                 <td><span class="badge b-avail">متاح</span></td>

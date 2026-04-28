@@ -68,12 +68,11 @@
             </div>
             <div class="pb-0">
               <table class="dtbl">
-                <thead><tr><th>المستفيد</th><th>المسار</th><th></th></tr></thead>
+                <thead><tr><th>المستفيد</th><th></th></tr></thead>
                 <tbody>
                   ${WI_DATA.chronicIncoming.slice(0, 5).map(d => `
                   <tr>
                     <td>${d.applicantName}</td>
-                    <td><span class="badge ${d.expectedPath === 'مسار مباشر' ? 'b-direct' : 'b-commpath'}" style="font-size:10px">${d.expectedPath}</span></td>
                     <td>
                       <button class="ibtn" onclick="window.location.href='chronic-incoming.html'">${ICONS.eye}</button>
                     </td>

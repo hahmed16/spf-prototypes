@@ -1,4 +1,4 @@
-/* ================================================================
+﻿/* ================================================================
    layout.js — Header + Sidebar + Navigation
    ================================================================ */
 
@@ -68,6 +68,7 @@ function initLayout({ role, activePage, breadcrumb = [] }) {
   `;
 
   bindHeaderEvents();
+  initRequestSummaryEnhancer();
 }
 
 function getUserData(role) {
@@ -256,7 +257,7 @@ function showProfile() {
         ${isWorker ? `
         <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">نشط</span></div></div>
         <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">إلزامي</div></div>
-        <div class="fgrp"><label class="flbl">تاريخ التسجيل في التأمين</label><div class="fro">1 مارس 2019</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">1 مارس 2019</div></div>
         ` : ''}
         ${isWorker && WI_DATA.users.worker.employerHistory ? `
         <div class="fgrp span-full">
@@ -393,8 +394,7 @@ function showUserMenu() {
 /* ── Status Badge Helper ── */
 function statusBadge(status) {
   const cls = WI_CONFIG.statusBadges[status] || 'b-draft';
-  const shortStatus = status.length > 45 ? status.substring(0, 42) + '...' : status;
-  return `<span class="badge ${cls}" title="${status}">${shortStatus}</span>`;
+  return `<span class="badge ${cls}" title="${status}">${status}</span>`;
 }
 
 /* ── Format Date ── */
@@ -420,6 +420,180 @@ function normalizeDisplay(value, fallback = '—') {
   return text;
 }
 
+/* ── Parse date safely (supports YYYY-MM-DD and YYYY-MM-DD HH:mm) ── */
+function parseDateSafe(value) {
+  if (!value) return null;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
+  const text = String(value).trim();
+  if (!text) return null;
+
+  const dateTimeMatch = text.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (dateTimeMatch) {
+    const year = Number(dateTimeMatch[1]);
+    const month = Number(dateTimeMatch[2]) - 1;
+    const day = Number(dateTimeMatch[3]);
+    const hour = Number(dateTimeMatch[4] || 0);
+    const minute = Number(dateTimeMatch[5] || 0);
+    const second = Number(dateTimeMatch[6] || 0);
+    return new Date(year, month, day, hour, minute, second);
+  }
+
+  const parsed = new Date(text);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed;
+}
+
+/* ── SLA summary metadata for top request card ── */
+function resolveCurrentRequestRecord() {
+  const picks = [];
+  try { if (typeof req !== 'undefined' && req) picks.push(req); } catch (_) {}
+  try { if (typeof appeal !== 'undefined' && appeal) picks.push(appeal); } catch (_) {}
+  try { if (typeof app !== 'undefined' && app) picks.push(app); } catch (_) {}
+  try { if (typeof incomingRecord !== 'undefined' && incomingRecord) picks.push(incomingRecord); } catch (_) {}
+
+  return picks.find(item => item && typeof item === 'object') || null;
+}
+
+function deriveRequestSummaryMeta(record) {
+  if (!record || typeof record !== 'object') return null;
+
+  const timeline = Array.isArray(record.timeline) ? record.timeline : [];
+  const latestTimelineItem = timeline.length ? timeline[timeline.length - 1] : null;
+  const submitDateRaw = record.submitDate || record.requestDate || record.createdAt || record.createdDate || null;
+  const lastUpdatedAtRaw = record.lastUpdate || record.updatedAt || latestTimelineItem?.time || null;
+  const lastUpdatedByRaw = record.lastUpdatedBy || record.updatedBy || record.lastUpdateBy || latestTimelineItem?.actor || record.checkedOutBy || record.assignedTo || null;
+
+  const submitDate = parseDateSafe(submitDateRaw);
+  const lastUpdatedAt = parseDateSafe(lastUpdatedAtRaw);
+  const slaDays = Number(record.slaDays) > 0 ? Number(record.slaDays) : 10;
+
+  let expectedClosureDateRaw = record.expectedClosureDate || record.expectedCloseDate || record.targetClosureDate || record.closureDate || null;
+  if (!expectedClosureDateRaw && submitDate) {
+    const dueDate = new Date(submitDate.getTime());
+    dueDate.setDate(dueDate.getDate() + slaDays);
+    expectedClosureDateRaw = dueDate;
+  }
+  const expectedClosureDate = parseDateSafe(expectedClosureDateRaw);
+
+  let remainingDays = null;
+  if (expectedClosureDate) {
+    const now = new Date();
+    const referenceDate = now;
+    const msPerDay = 24 * 60 * 60 * 1000;
+    remainingDays = Math.ceil((expectedClosureDate.getTime() - referenceDate.getTime()) / msPerDay);
+
+    // Keep prototype values realistic even when sample data dates are from older years.
+    if (Math.abs(remainingDays) > 60) {
+      const fallbackReference = lastUpdatedAt || submitDate;
+      if (fallbackReference) {
+        remainingDays = Math.ceil((expectedClosureDate.getTime() - fallbackReference.getTime()) / msPerDay);
+      }
+    }
+    if (Math.abs(remainingDays) > 60) {
+      remainingDays = remainingDays > 0 ? 60 : -60;
+    }
+  }
+
+  return {
+    lastUpdatedAtText: lastUpdatedAt ? formatDateTime(`${lastUpdatedAt.getFullYear()}-${String(lastUpdatedAt.getMonth() + 1).padStart(2, '0')}-${String(lastUpdatedAt.getDate()).padStart(2, '0')} ${String(lastUpdatedAt.getHours()).padStart(2, '0')}:${String(lastUpdatedAt.getMinutes()).padStart(2, '0')}`) : normalizeDisplay(lastUpdatedAtRaw),
+    lastUpdatedByText: normalizeDisplay(lastUpdatedByRaw, 'غير محدد'),
+    expectedClosureDateText: expectedClosureDate ? formatDate(expectedClosureDate) : '—',
+    remainingDays,
+  };
+}
+
+function getRemainingDaysLabel(remainingDays) {
+  if (remainingDays === null || remainingDays === undefined || Number.isNaN(remainingDays)) return '—';
+  if (remainingDays < 0) return `متجاوز بـ ${Math.abs(remainingDays)} يوم`;
+  if (remainingDays === 0) return 'اليوم';
+  return `متبقي ${remainingDays} يوم`;
+}
+
+function getRemainingDaysClass(remainingDays) {
+  if (remainingDays === null || remainingDays === undefined || Number.isNaN(remainingDays)) return '';
+  if (remainingDays < 0) return 'sla-overdue';
+  if (remainingDays <= 3) return 'sla-near-due';
+  return 'sla-on-track';
+}
+
+function createSummaryCell(label, valueHtml, extraClass = '') {
+  return `<div class="${extraClass}"><div class="flbl" style="margin-bottom:4px">${label}</div><div style="font-size:12px;color:var(--text2)">${valueHtml}</div></div>`;
+}
+
+function enhanceRequestSummaryPanels() {
+  const record = resolveCurrentRequestRecord();
+  const meta = deriveRequestSummaryMeta(record);
+  if (!meta) return;
+
+  const grids = document.querySelectorAll('.req-summary-grid');
+  grids.forEach((grid) => {
+    if (grid.dataset.slaEnhanced === '1') return;
+
+    const cells = Array.from(grid.children || []);
+    let lastUpdateCell = null;
+    cells.forEach((cell) => {
+      const label = cell.querySelector('.flbl');
+      if (!label) return;
+      const labelText = (label.textContent || '').trim();
+      if (labelText === 'آخر تحديث' || labelText === 'آخر تحديث في') {
+        label.textContent = 'آخر تحديث في';
+        const valueNode = label.nextElementSibling;
+        if (valueNode) valueNode.textContent = meta.lastUpdatedAtText;
+        lastUpdateCell = cell;
+      }
+    });
+
+    if (!lastUpdateCell) {
+      grid.insertAdjacentHTML('beforeend', createSummaryCell('آخر تحديث في', meta.lastUpdatedAtText));
+    }
+
+    const remainingDaysClass = getRemainingDaysClass(meta.remainingDays);
+    const remainingDaysLabel = getRemainingDaysLabel(meta.remainingDays);
+    const remainingHtml = `<span class="sla-days ${remainingDaysClass}">${remainingDaysLabel}</span>`;
+
+    grid.insertAdjacentHTML('beforeend', createSummaryCell('آخر تحديث بواسطة', meta.lastUpdatedByText));
+    grid.insertAdjacentHTML('beforeend', createSummaryCell('تاريخ الإغلاق المتوقع للطلب', meta.expectedClosureDateText));
+    grid.insertAdjacentHTML('beforeend', createSummaryCell('الأيام المتبقية حتى إغلاق الطلب', remainingHtml, 'sla-cell'));
+
+    grid.dataset.slaEnhanced = '1';
+  });
+}
+
+let requestSummaryObserver = null;
+function initRequestSummaryEnhancer() {
+  if (requestSummaryObserver) return;
+
+  const observeTarget = () => document.getElementById('app-content') || document.body;
+  enhanceRequestSummaryPanels();
+
+  requestSummaryObserver = new MutationObserver(() => {
+    enhanceRequestSummaryPanels();
+  });
+
+  const target = observeTarget();
+  if (target) {
+    requestSummaryObserver.observe(target, { childList: true, subtree: true });
+  }
+}
+
+/* ── Build a descriptive chronic-disease medical report text ── */
+function buildPermanentDiseaseReport(med = {}) {
+  const diagnosis = normalizeDisplay(med.detailedDiagnosis || med.diagnosis, 'غير محدد');
+  const disease = normalizeDisplay(med.chronicDisease || med.diagnosis, 'غير محدد');
+  const affectedSystem = normalizeDisplay(med.affectedSystem, 'غير محدد');
+  const severityIndex = normalizeDisplay(med.severityIndex, 'غير محدد');
+  const provenDate = med.provenDate ? formatDate(med.provenDate) : 'غير محدد';
+  const severityDate = med.severityDate ? formatDate(med.severityDate) : 'غير محدد';
+
+  return [
+    'تفيد الوثائق الطبية الواردة من وزارة الصحة بثبوت حالة مرضية مستديمة تستلزم متابعة علاجية مستمرة.',
+    `التشخيص الطبي التفصيلي: ${diagnosis}.`,
+    `المرض المستديم المثبت: ${disease} — الجهاز المتأثر: ${affectedSystem}.`,
+    `تاريخ ثبوت المرض: ${provenDate}، وتاريخ شدة المرض: ${severityDate}.`,
+    `مؤشر الشدة الطبي وتحمّل العلاج: ${severityIndex}.`,
+  ].join('\n');
+}
+
 /* ── Content Getter ── */
 function getContent() {
   return document.getElementById('app-content');
@@ -429,3 +603,4 @@ function renderContent(html) {
   const ct = getContent();
   if (ct) ct.innerHTML = html;
 }
+

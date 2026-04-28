@@ -825,6 +825,7 @@ const WI_DATA = {
       hospital: 'مستشفى السلطاني — مسقط',
       diagnosis: 'داء السكري من النوع الأول',
       detailedDiagnosis: 'داء السكري من النوع الأول مع تذبذب مرتفع في HbA1c ومضاعفات وعائية دقيقة',
+      permanentDiseaseReport: 'تم تشخيص الحالة بداء السكري من النوع الأول مع حاجة مستمرة للعلاج والمتابعة الدورية.\nأظهرت الفحوصات المخبرية تذبذباً مرتفعاً في HbA1c مع مؤشرات لمضاعفات وعائية دقيقة.\nالحالة ذات طبيعة مزمنة غير عابرة وتتطلب خطة علاج طويلة الأمد مع تقييم دوري منتظم.\nوبناءً على ذلك تُعد الحالة ضمن الأمراض المستديمة المثبتة طبياً وفق التقارير المعتمدة.',
       provenDate: '2024-12-01',
       visitDateTime: '2024-12-01 10:30',
       doctor: 'د. محمد بن حسين المنذري',
@@ -846,6 +847,7 @@ const WI_DATA = {
       hospital: 'مستشفى ابن سينا — نزوى',
       diagnosis: 'الفشل الكلوي المزمن',
       detailedDiagnosis: 'فشل كلوي مزمن متقدم (المرحلة الرابعة) مع حاجة لمتابعة غسيل دوري',
+      permanentDiseaseReport: 'تشير التقارير الطبية إلى فشل كلوي مزمن متقدم (المرحلة الرابعة) مع انخفاض مستمر في كفاءة وظائف الكلى.\nالحالة تستلزم متابعة تخصصية مستمرة مع احتمال الحاجة لغسيل كلوي دوري حسب الخطة العلاجية.\nالفحوصات السريرية والمخبرية تؤكد الطابع المزمن التراكمي للحالة وعدم كونها حالة حادة مؤقتة.\nوبناءً على المعطيات الطبية المعتمدة، تصنف الحالة كمرض مستديم يحتاج متابعة علاجية طويلة المدى.',
       provenDate: '2024-11-20',
       visitDateTime: '2024-11-20 08:45',
       doctor: 'د. فاطمة بنت خلفان الخروصية',
@@ -1268,13 +1270,40 @@ const WI_DATA = {
 (function normalizePrototypeData() {
   const applicantFallbackPhone = '96890000000';
   const applicantFallbackEmail = 'noreply@spf-proto.om';
+  const applicantFallbackRegion = 'محافظة مسقط';
+  const applicantFallbackWilayat = 'بوشر';
+  const applicantFallbackCountry = 'سلطنة عُمان';
+  const civilExpiryFallback = '2030-12-31';
   const collections = [WI_DATA.allowances, WI_DATA.disability, WI_DATA.appeals, WI_DATA.licensing];
+  const deriveSecondaryPhone = (phone, fallbackSuffix) => {
+    const digits = String(phone || '').replace(/\D/g, '');
+    if (digits.length < 8) return applicantFallbackPhone;
+    const last = Number(digits.slice(-1));
+    if (Number.isNaN(last)) return applicantFallbackPhone;
+    return `${digits.slice(0, -1)}${(last + fallbackSuffix) % 10}`;
+  };
 
   collections.forEach((list) => {
     (list || []).forEach((item) => {
       if (!item || !item.applicant) return;
       if (!item.applicant.phone) item.applicant.phone = applicantFallbackPhone;
+      if (!item.applicant.phoneAlt1) item.applicant.phoneAlt1 = item.applicant.phone;
+      if (!item.applicant.phoneAlt2) item.applicant.phoneAlt2 = deriveSecondaryPhone(item.applicant.phone, 3);
       if (!item.applicant.email) item.applicant.email = applicantFallbackEmail;
+      if (!item.applicant.region) item.applicant.region = applicantFallbackRegion;
+      if (!item.applicant.wilayat) item.applicant.wilayat = applicantFallbackWilayat;
+      if (!item.applicant.country) item.applicant.country = applicantFallbackCountry;
+      if (!item.applicant.civilExpiry) item.applicant.civilExpiry = civilExpiryFallback;
+
+      if (item.insured) {
+        if (!item.insured.phone) item.insured.phone = item.applicant.phone;
+        if (!item.insured.email) item.insured.email = item.applicant.email;
+        if (!item.insured.civilExpiry) item.insured.civilExpiry = civilExpiryFallback;
+      }
+
+      if (item.employer) {
+        if (!item.employer.establishment) item.employer.establishment = 'EST-0000000';
+      }
 
       if (item.investigation) {
         if (!item.investigation.employeeNotes && item.notes?.length) {
@@ -1290,5 +1319,16 @@ const WI_DATA = {
   (WI_DATA.dashboardStats?.['injury-investigator'] || []).forEach((stat) => {
     if (typeof stat.label !== 'string') return;
     stat.label = stat.label.replace('من الرئيس', 'من رئيس القسم');
+  });
+
+  // Ensure base user profiles always carry contact/address fields used by readonly request forms.
+  Object.values(WI_DATA.users || {}).forEach((user) => {
+    if (!user || typeof user !== 'object') return;
+    if (!user.phone) user.phone = applicantFallbackPhone;
+    if (!user.email) user.email = applicantFallbackEmail;
+    if (!user.region) user.region = applicantFallbackRegion;
+    if (!user.wilayat) user.wilayat = applicantFallbackWilayat;
+    if (!user.country) user.country = applicantFallbackCountry;
+    if (!user.civilExpiry) user.civilExpiry = civilExpiryFallback;
   });
 })();

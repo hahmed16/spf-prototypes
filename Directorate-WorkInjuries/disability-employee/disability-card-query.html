@@ -46,7 +46,6 @@ function queryCard() {
         </div>
         <div class="pb">
           <div class="fg fg-3">
-            <div class="fgrp"><label class="flbl">رقم البطاقة</label><div class="fro" style="font-family:monospace">${card.number}</div></div>
             <div class="fgrp"><label class="flbl">حالة البطاقة</label><div class="fro"><span class="badge ${card.status==='سارية'?'b-card-valid':'b-card-expired'}">${card.status}</span></div></div>
             <div class="fgrp"><label class="flbl">تاريخ الانتهاء</label><div class="fro">${card.expiryDate}</div></div>
             <div class="fgrp"><label class="flbl">طبيعة الإعاقة (وزارة التنمية)</label><div class="fro">${card.typeSD}</div></div>

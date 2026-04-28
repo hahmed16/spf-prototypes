@@ -53,13 +53,19 @@ function renderForm() {
           <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">العامل / المؤمن عليه / المواطن</div></div>
           <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${u.name}</div></div>
           <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${u.civil}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف (من النظام)</label><div class="fro">${u.phone}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني (من النظام)</label><div class="fro">${u.email}</div></div>
           <div class="fgrp">
-            <label class="flbl">رقم الهاتف <span class="req">*</span></label>
-            <input type="tel" class="fc" id="phone" value="${u.phone}">
+            <label class="flbl">رقم هاتف إضافي 1</label>
+            <input type="tel" class="fc" id="phone-alt-1" placeholder="أدخل رقم هاتف إضافي">
           </div>
           <div class="fgrp">
-            <label class="flbl">البريد الإلكتروني</label>
-            <input type="email" class="fc" id="email" value="${u.email}">
+            <label class="flbl">رقم هاتف إضافي 2</label>
+            <input type="tel" class="fc" id="phone-alt-2" placeholder="أدخل رقم هاتف إضافي آخر">
+          </div>
+          <div class="fgrp">
+            <label class="flbl">بريد إلكتروني إضافي</label>
+            <input type="email" class="fc" id="email-alt" placeholder="example@domain.com">
           </div>
         </div>
       </div>

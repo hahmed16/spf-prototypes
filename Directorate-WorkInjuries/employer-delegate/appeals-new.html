@@ -31,6 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">صفة مقدم التظلم</label><div class="fro">الشخص المفوض من جهة العمل</div></div>
           <div class="fgrp"><label class="flbl">اسم المفوض</label><div class="fro">${u.name}</div></div>
           <div class="fgrp"><label class="flbl">جهة العمل</label><div class="fro">${u.company}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف (من النظام)</label><div class="fro">${u.phone}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني (من النظام)</label><div class="fro">${u.email}</div></div>
+          <div class="fgrp"><label class="flbl">رقم هاتف إضافي 1</label><input type="tel" class="fc" placeholder="أدخل رقم هاتف إضافي"></div>
+          <div class="fgrp"><label class="flbl">رقم هاتف إضافي 2</label><input type="tel" class="fc" placeholder="أدخل رقم هاتف إضافي آخر"></div>
+          <div class="fgrp"><label class="flbl">بريد إلكتروني إضافي</label><input type="email" class="fc" placeholder="example@domain.com"></div>
         </div>
         <div class="alert alert-i mt12">
           ${ICONS.info}<span>يُقدَّم هذا التظلم نيابةً عن أحد موظفي الجهة — يرجى تحديد الطلب والموظف المعني.</span>

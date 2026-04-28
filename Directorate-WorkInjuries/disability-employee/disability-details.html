@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -29,6 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const atts    = req.attachments || [];
   const notes   = req.notes || [];
   const tl      = req.timeline || [];
+  const applicantPhonePrimary = normalizeDisplay(req?.applicant?.phone || req?.insured?.phone, '96890000000');
+  const applicantPhone1 = normalizeDisplay(req?.applicant?.phoneAlt1 || req?.applicant?.additionalPhone1 || req?.applicant?.phone1, applicantPhonePrimary);
+  const applicantPhone2 = normalizeDisplay(req?.applicant?.phoneAlt2 || req?.applicant?.additionalPhone2 || req?.applicant?.phone2, '96891111222');
+  const applicantEmail = normalizeDisplay(req?.applicant?.email || req?.insured?.email, 'noreply@spf-proto.om');
 
   getContent().innerHTML = `
     <div class="pg-head">
@@ -51,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- ملخص الطلب -->
     <div class="card" style="border-right:4px solid var(--primary)">
       <div class="pb-c">
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+        <div class="req-summary-grid">
           <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">الحالة الحالية</div>${statusBadge(req.status)}</div>
           <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div style="font-size:12.5px">${formatDate(req.submitDate)}</div></div>
@@ -68,8 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant.role || '—'}</div></div>
           <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.applicant.name || '—'}</div></div>
           <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.applicant.civil || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(req.applicant.phone, 'غير متوفر')}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(req.applicant.email, 'غير متوفر')}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف الأساسي</label><div class="fro">${applicantPhonePrimary}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف 1</label><div class="fro">${applicantPhone1}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف 2</label><div class="fro">${applicantPhone2}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${applicantEmail}</div></div>
         </div>
       </div>
     </div>
@@ -81,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb">
         ${isExpired ? `<div class="alert alert-d" style="margin-bottom:12px">${ICONS.warn}<span>بطاقة الإعاقة منتهية الصلاحية — لا يمكن الصرف حتى يتم تجديدها</span></div>` : ''}
         <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">رقم البطاقة</label><div class="fro" style="font-family:monospace">${card.number || '—'}</div></div>
           <div class="fgrp"><label class="flbl">حالة البطاقة</label><div class="fro"><span class="badge ${card.status === 'سارية' ? 'b-card-valid' : card.status === 'منتهية' ? 'b-card-expired' : 'b-card-cancelled'}">${card.status || '—'}</span></div></div>
           <div class="fgrp"><label class="flbl">تاريخ التفعيل</label><div class="fro">${formatDate(card.activationDate)}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ الانتهاء</label><div class="fro" style="${isExpired ? 'color:var(--danger);font-weight:700' : ''}">${formatDate(card.expiryDate)}</div></div>
@@ -99,9 +104,13 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb">
         <div class="fg fg-3">
           <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${req.insurance?.status === 'نشط' ? 'b-approved' : 'b-rejected'}">${req.insurance?.status || '—'}</span></div></div>
-          <div class="fgrp"><label class="flbl">رقم وثيقة التأمين</label><div class="fro" style="font-family:monospace">${req.insurance?.policyNumber || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">نوع التأمين</label><div class="fro">تأمين العاملين في القطاع الخاص</div></div>
+          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${normalizeDisplay(req.insurance?.subType)}</div></div>
+          <div class="fgrp"><label class="flbl">فئة النظام</label><div class="fro">داخل السلطنة - القطاع الخاص</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(req.insurance?.regDate)}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${applicantPhonePrimary}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${applicantEmail}</div></div>
           <div class="fgrp"><label class="flbl">منافع أخرى نشطة</label><div class="fro">${req.insurance?.otherBenefits || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ التسجيل</label><div class="fro">${formatDate(req.insurance?.regDate)}</div></div>
         </div>
       </div>
     </div>
@@ -185,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ${tl.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد أحداث</div>' : tl.map(e => {
             const dc = e.type === 'success' ? 's' : e.type === 'danger' ? 'd' : e.type === 'warning' ? 'w' : '';
             const ic = e.type === 'success' ? ICONS.check : e.type === 'danger' ? ICONS.x : e.type === 'warning' ? ICONS.warn : ICONS.clock;
-            return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus ? `<div class="tl-states">${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus.substring(0, 300)}</span><span>${ICONS.arrow_right}</span>` : ''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus.substring(0, 300)}</span></div>` : ''}${e.note ? `<div class="tl-note">${e.note}</div>` : ''}</div></div>`;
+            return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus ? `<div class="tl-states">${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus}</span><span>${ICONS.arrow_right}</span>` : ''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus}</span></div>` : ''}${e.note ? `<div class="tl-note">${e.note}</div>` : ''}</div></div>`;
           }).join('')}
         </div>
       </div>
@@ -204,3 +213,8 @@ function employeeDecision(type) {
 </script>
 </body>
 </html>
+
+
+
+
+

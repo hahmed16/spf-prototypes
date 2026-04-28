@@ -36,15 +36,25 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    <!-- بيانات المستفيد -->
+    <!-- بيانات مقدم الطلب + بيانات التأمين -->
     <div class="card">
-      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب</h3></div>
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب والتأمين</h3></div>
       <div class="pb">
         <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">العامل / المؤمن عليه / المواطن</div></div>
           <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${u.name}</div></div>
           <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${u.civil}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف <span class="req">*</span></label><input type="tel" class="fc" value="${u.phone}"></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><input type="email" class="fc" value="${u.email}"></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف (من النظام)</label><div class="fro">${u.phone}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني (من النظام)</label><div class="fro">${u.email}</div></div>
+          <div class="fgrp"><label class="flbl">رقم هاتف إضافي 1</label><input type="tel" class="fc" placeholder="أدخل رقم هاتف إضافي"></div>
+          <div class="fgrp"><label class="flbl">رقم هاتف إضافي 2</label><input type="tel" class="fc" placeholder="أدخل رقم هاتف إضافي آخر"></div>
+          <div class="fgrp"><label class="flbl">بريد إلكتروني إضافي</label><input type="email" class="fc" placeholder="example@domain.com"></div>
+          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">نشط</span></div></div>
+          <div class="fgrp"><label class="flbl">نوع التأمين</label><div class="fro">تأمين العاملين في القطاع الخاص</div></div>
+          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">إلزامي</div></div>
+          <div class="fgrp"><label class="flbl">فئة النظام</label><div class="fro">داخل السلطنة - القطاع الخاص</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">1 مارس 2019</div></div>
+          <div class="fgrp"><label class="flbl">منافع أخرى مستحقة</label><div class="fro">لا يوجد</div></div>
         </div>
       </div>
     </div>
@@ -55,24 +65,11 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb">
         ${isExpired ? `<div class="alert alert-d" style="margin-bottom:14px">${ICONS.warn}<span><strong>تنبيه:</strong> بطاقة الإعاقة منتهية الصلاحية. لا يمكن تقديم الطلب حتى يتم تجديد البطاقة.</span></div>` : ''}
         <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">رقم البطاقة</label><div class="fro" style="font-family:monospace">${card.number}</div></div>
           <div class="fgrp"><label class="flbl">حالة البطاقة</label><div class="fro"><span class="badge ${card.status==='سارية'?'b-card-valid':'b-card-expired'}">${card.status}</span></div></div>
           <div class="fgrp"><label class="flbl">تاريخ الانتهاء</label><div class="fro" style="${isExpired?'color:var(--danger);font-weight:700':''}">${card.expiryDate}</div></div>
           <div class="fgrp"><label class="flbl">طبيعة الإعاقة (وزارة التنمية)</label><div class="fro">${card.typeSD}</div></div>
           <div class="fgrp"><label class="flbl">طبيعة الإعاقة (وزارة الصحة)</label><div class="fro">${card.typeMOH}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ ثبوت الإعاقة</label><div class="fro">${card.provenDate}</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- بيانات التأمين -->
-    <div class="card card-ro">
-      <div class="ph"><h3><div class="pico gr">${ICONS.shield}</div>بيانات التأمين</h3></div>
-      <div class="pb">
-        <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">نشط</span></div></div>
-          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">إلزامي</div></div>
-          <div class="fgrp"><label class="flbl">منافع أخرى مستحقة</label><div class="fro">لا يوجد</div></div>
         </div>
       </div>
     </div>

@@ -795,6 +795,44 @@ textarea {
   gap: 16px
 }
 
+.req-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px
+}
+
+.sla-cell .flbl {
+  align-items: flex-start;
+}
+
+.sla-days {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.sla-days.sla-on-track {
+  color: var(--success);
+  background: var(--success-l);
+  border-color: #86efac;
+}
+
+.sla-days.sla-near-due {
+  color: var(--warning);
+  background: var(--warning-l);
+  border-color: #f7d188;
+}
+
+.sla-days.sla-overdue {
+  color: var(--danger);
+  background: var(--danger-l);
+  border-color: #f5b1aa;
+}
+
 .fg-2 {
   grid-template-columns: 1fr 1fr
 }
@@ -809,9 +847,16 @@ textarea {
 
 @media(max-width:900px) {
 
+  .req-summary-grid,
   .fg-3,
   .fg-4 {
     grid-template-columns: 1fr 1fr
+  }
+}
+
+@media(max-width:640px) {
+  .req-summary-grid {
+    grid-template-columns: 1fr
   }
 }
 
@@ -886,6 +931,13 @@ select.fc {
   min-height: 36px;
   display: flex;
   align-items: center
+}
+
+.medical-report {
+  white-space: pre-line;
+  line-height: 1.85;
+  min-height: 8.5em;
+  align-items: flex-start;
 }
 
 .inp-btn {

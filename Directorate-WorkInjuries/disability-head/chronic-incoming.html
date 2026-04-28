@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="fgrp"><label class="flbl">المؤسسة الصحية</label><input type="text" class="fc"></div>
         <div class="fgrp"><label class="flbl">التشخيص الطبي</label><input type="text" class="fc"></div>
         <div class="fgrp"><label class="flbl">هل تم تقديم طلب؟</label><select class="fc"><option>الكل</option><option>نعم</option><option>لا</option></select></div>
-        <div class="fgrp"><label class="flbl">المسار المتوقع</label><select class="fc"><option>الكل</option><option>مسار مباشر</option><option>مسار اللجان الطبية</option></select></div>
       </div>
       <div class="facts"><button class="btn btn-primary btn-sm">${ICONS.search} بحث</button><button class="btn btn-secondary btn-sm">مسح</button></div>
     </div>
@@ -33,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <div style="flex:1">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
               <span style="font-size:13px;font-weight:700">${d.diagnosis}</span>
-              <span class="badge ${d.expectedPath==='مسار مباشر'?'b-direct':'b-commpath'}">${d.expectedPath}</span>
               ${d.hasRequest?`<span class="badge b-approved">تم التقديم</span>`:`<span class="badge b-returned">لم يُقدَّم بعد</span>`}
             </div>
             <div style="font-size:12px;color:var(--text2);display:flex;flex-wrap:wrap;gap:16px">
