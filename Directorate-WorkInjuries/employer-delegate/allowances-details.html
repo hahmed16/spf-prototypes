@@ -19,6 +19,7 @@ currentRequestId = req.id;
 setBreadcrumb([{ label: 'بدلات الانقطاع', page: 'allowances-list' }, { label: `تفاصيل ${req.id}` }]);
 
 document.addEventListener('DOMContentLoaded', () => {
+  const isSamePerson = req.applicant?.civil && req.insured?.civil && req.applicant.civil === req.insured.civil;
   let actions = [];
   if (req.status === 'مسودة') actions = ['إرسال الطلب', 'حذف'];
   else if (req.status === 'تم إعادة الطلب لاستيفاء البيانات') actions = ['استيفاء البيانات المطلوبة وإعادة الإرسال'];
@@ -47,15 +48,38 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb-c">
         <div class="req-summary-grid">
           <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">نوع الطلب</div><div style="font-size:13px;font-weight:600">${req.type}${req.subtype ? ` — ${req.subtype}` : ''}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">الحالة الحالية</div>${statusBadge(req.status)}</div>
+          <div><div class="flbl" style="margin-bottom:4px">حالة الطلب</div>${statusBadge(req.status)}</div>
           <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div style="font-size:12.5px">${formatDate(req.submitDate)}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">مقدم الطلب</div><div style="font-size:12.5px;font-weight:600">${req.applicant.name}</div><div style="font-size:11px;color:var(--text3)">${req.applicant.role}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">مقدم الطلب</div><div style="font-size:12.5px;font-weight:600">${req.applicant?.name || req.applicant?.role || '—'}</div><div style="font-size:11px;color:var(--text3)">${req.applicant?.role || ''}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">آخر تحديث</div><div style="font-size:12px;color:var(--text2)">${req.lastUpdate || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر تحديث بواسطة</div><div style="font-size:12px;color:var(--text2)">${req.lastUpdatedBy || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ الإغلاق المتوقع</div><div style="font-size:12px">${formatDate(req.expectedClosureDate) || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الأيام المتبقية حتى الإغلاق</div><div style="font-size:12px;font-weight:600;color:${(req.remainingDays||0)<7?'var(--danger)':(req.remainingDays||0)<30?'var(--warning)':'var(--text2)'}">${req.remainingDays!=null?req.remainingDays+' يوم':'—'}</div></div>
         </div>
       </div>
     </div>
 
+    ${isSamePerson ? `
+    <!-- بيانات المؤمن عليه / المستفيد (مدمجة) -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات المؤمن عليه / المستفيد</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant.role || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.insured.name || req.applicant.name || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.insured.civil || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${formatDate(req.insured.dob)}</div></div>
+          <div class="fgrp"><label class="flbl">الجنس</label><div class="fro">${req.insured.gender || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${req.insured.nationality || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(req.applicant.phone || req.insured.phone, '96890000000')}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(req.applicant.email || req.insured.email, 'noreply@spf-proto.om')}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ انتهاء البطاقة الشخصية</label><div class="fro">${formatDate(req.insured.civilExpiry || req.applicant.civilExpiry)}</div></div>
+          <div class="fgrp"><label class="flbl">المحافظة / الولاية</label><div class="fro">${normalizeDisplay(req.applicant.region)}${req.applicant.wilayat ? ' — ' + req.applicant.wilayat : ''}</div></div>
+          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${req.insured.insuranceStatus === 'نشط' ? 'b-approved' : 'b-rejected'}">${req.insured.insuranceStatus || '—'}</span></div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(req.insured.regDate)}</div></div>
+        </div>
+      </div>
+    </div>` : `
     <!-- بيانات مقدم الطلب -->
     <div class="card">
       <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب</h3></div>
@@ -64,10 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant.role || '—'}</div></div>
           <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.applicant.name || '—'}</div></div>
           <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.applicant.civil || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.phone || req?.insured?.phone)) || (typeof appeal !== 'undefined' && appeal?.applicant?.phone) || (typeof app !== 'undefined' && app?.phone) || (typeof dlg !== 'undefined' && dlg?.phone) || (typeof u !== 'undefined' && u?.phone)), '96890000000')}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.email || req?.insured?.email)) || (typeof appeal !== 'undefined' && appeal?.applicant?.email) || (typeof app !== 'undefined' && app?.email) || (typeof dlg !== 'undefined' && dlg?.email) || (typeof u !== 'undefined' && u?.email)), 'noreply@spf-proto.om')}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(req.applicant.phone || req.insured.phone, '96890000000')}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(req.applicant.email || req.insured.email, 'noreply@spf-proto.om')}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ انتهاء البطاقة الشخصية</label><div class="fro">${formatDate(req.applicant.civilExpiry)}</div></div>
-          <div class="fgrp"><label class="flbl">المحافظة / الولاية</label><div class="fro">${normalizeDisplay(req.applicant.region)}${req.applicant.wilayat ? ` — ${req.applicant.wilayat}` : ''}</div></div>
+          <div class="fgrp"><label class="flbl">المحافظة / الولاية</label><div class="fro">${normalizeDisplay(req.applicant.region)}${req.applicant.wilayat ? ' — ' + req.applicant.wilayat : ''}</div></div>
           <div class="fgrp"><label class="flbl">الدولة</label><div class="fro">${normalizeDisplay(req.applicant.country)}</div></div>
           ${req.applicant.employeeId ? `<div class="fgrp"><label class="flbl">الرقم الوظيفي</label><div class="fro">${req.applicant.employeeId}</div></div>` : ''}
         </div>
@@ -84,15 +108,15 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${formatDate(req.insured.dob)}</div></div>
           <div class="fgrp"><label class="flbl">الجنس</label><div class="fro">${req.insured.gender || '—'}</div></div>
           <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${req.insured.nationality || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.phone || req?.insured?.phone)) || (typeof appeal !== 'undefined' && appeal?.applicant?.phone) || (typeof app !== 'undefined' && app?.phone) || (typeof dlg !== 'undefined' && dlg?.phone) || (typeof u !== 'undefined' && u?.phone)), '96890000000')}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.email || req?.insured?.email)) || (typeof appeal !== 'undefined' && appeal?.applicant?.email) || (typeof app !== 'undefined' && app?.email) || (typeof dlg !== 'undefined' && dlg?.email) || (typeof u !== 'undefined' && u?.email)), 'noreply@spf-proto.om')}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(req.applicant.phone || req.insured.phone, '96890000000')}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(req.applicant.email || req.insured.email, 'noreply@spf-proto.om')}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ انتهاء البطاقة الشخصية</label><div class="fro">${formatDate(req.insured.civilExpiry)}</div></div>
           <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${req.insured.insuranceStatus === 'نشط' ? 'b-approved' : 'b-rejected'}">${req.insured.insuranceStatus || '—'}</span></div></div>
           <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(req.insured.regDate)}</div></div>
           ${req.insured.subType ? `<div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${req.insured.subType}</div></div>` : ''}
         </div>
       </div>
-    </div>
+    </div>`}
 
     <!-- بيانات جهة العمل -->
     <div class="card card-ro">

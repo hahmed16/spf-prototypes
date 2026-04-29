@@ -49,8 +49,13 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb-c">
         <div class="req-summary-grid">
           <div><div class="flbl" style="margin-bottom:4px">رقم التظلم</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${appeal.id}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">الحالة الحالية</div>${statusBadge(appeal.status)}</div>
-          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div style="font-size:12.5px">${appeal.submitDate || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">حالة الطلب</div>${statusBadge(appeal.status)}</div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div style="font-size:12.5px">${formatDate(appeal.submitDate)}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">مقدم الطلب</div><div style="font-size:12.5px;font-weight:600">${appeal.applicant?.name || appeal.applicant?.role || '—'}</div><div style="font-size:11px;color:var(--text3)">${appeal.applicant?.role || ''}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر تحديث</div><div style="font-size:12px;color:var(--text2)">${appeal.lastUpdate || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر تحديث بواسطة</div><div style="font-size:12px;color:var(--text2)">${appeal.lastUpdatedBy || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ الإغلاق المتوقع</div><div style="font-size:12px">${formatDate(appeal.expectedClosureDate) || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الأيام المتبقية حتى الإغلاق</div><div style="font-size:12px;font-weight:600;color:${(appeal.remainingDays||0)<7?'var(--danger)':(appeal.remainingDays||0)<30?'var(--warning)':'var(--text2)'}">${appeal.remainingDays!=null?appeal.remainingDays+' يوم':'—'}</div></div>
         </div>
       </div>
     </div>
