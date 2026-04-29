@@ -9,9 +9,16 @@
 <script>
 initLayout({ role: 'committees-head', activePage: 'appeals-list' });
 setBreadcrumb([{ label: 'التظلمات' }, { label: 'قائمة التظلمات' }]);
-const me = WI_DATA.users.committees_head.name;
-document.addEventListener('DOMContentLoaded', () => {
-  const appeals = WI_DATA.appeals;
+let searchQuery = '';
+let showAllStages = false;
+document.addEventListener('DOMContentLoaded', render);
+function render() {
+  const appeals = getFilteredData({
+    role: 'committees-head',
+    data: WI_DATA.appeals,
+    query: searchQuery,
+    showAll: showAllStages
+  });
   getContent().innerHTML = `
     <div class="pg-head">
       <div><h1>قائمة التظلمات من قرارات المؤسسات الصحية</h1>
@@ -23,7 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="alert alert-i">${ICONS.info}
       <span>رئيس قسم اللجان الطبية يمكنه تقديم التظلم <strong>بإسم الصندوق</strong> باعتباره طرفاً أصيلاً في قرارات المؤسسات الصحية المرخصة.</span>
     </div>
-    <div class="filters">
+    ${renderUnifiedFilterBar({ onSearch: 'updateSearch', onToggleAll: 'toggleAll', isAllVisible: showAllStages })}
+    <div class="filters" style="display:none">
       <div class="fgrid">
         <div class="fgrp"><label class="flbl">رقم التظلم</label><input type="text" class="fc"></div>
         <div class="fgrp"><label class="flbl">رقم الطلب الأصلي</label><input type="text" class="fc"></div>
@@ -35,21 +43,19 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم التظلم</th><th>الطلب الأصلي</th><th>مقدم التظلم</th><th>سبب التظلم</th><th>الحالة</th><th>التاريخ</th><th>الحجز</th><th></th></tr></thead>
+            <thead><tr><th>رقم التظلم</th><th>الطلب الأصلي</th><th>مقدم التظلم</th><th>سبب التظلم</th><th>الحالة</th><th>تاريخ التقديم</th><th></th></tr></thead>
             <tbody>
               ${appeals.map(a=>`
-              <tr style="${a.checkedOutBy===me?'background:#f0fdf4':''}">
+              <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${a.id}</td>
                 <td style="font-family:monospace">${a.originalRequestId}</td>
                 <td>${a.applicant.name}<br><span style="font-size:10.5px;color:var(--text3)">${a.applicant.role}</span></td>
                 <td>${a.appealReason}</td>
                 <td>${statusBadge(a.status)}</td>
                 <td style="font-size:12px">${a.submitDate}</td>
-                <td>${!a.checkedOutBy?`<span class="badge b-avail">متاح</span>`:a.checkedOutBy===me?`<span class="badge b-checkout">محجوز بواسطتي</span>`:`<span class="badge b-checkout">محجوز</span>`}</td>
                 <td>
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='appeals-details.html?id=${a.id}'">${ICONS.eye}</button>
-                    ${!a.checkedOutBy?`<button class="ibtn" onclick="doCheckout('${a.id}')">${ICONS.lock}</button>`:a.checkedOutBy===me?`<button class="ibtn" onclick="doCheckin('${a.id}')">${ICONS.unlock}</button>`:''}
                     <button class="ibtn" onclick="openAddNoteModal('${a.id}')">${ICONS.note}</button>
                   </div>
                 </td>
@@ -59,8 +65,11 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     </div>`;
-});
-function doCheckout(id){ const a=WI_DATA.appeals.find(x=>x.id===id); if(a)a.checkedOutBy=me; showToast(`تم حجز ${id}`,'s'); location.reload(); }
-function doCheckin(id){ const a=WI_DATA.appeals.find(x=>x.id===id); if(a)a.checkedOutBy=null; showToast(`تم تحرير ${id}`,'i'); location.reload(); }
+  if (searchQuery) {
+    const inp = document.getElementById('global-search-input');
+    if (inp) { inp.value = searchQuery; inp.focus(); inp.setSelectionRange(searchQuery.length, searchQuery.length); }
+  }
+}
+function updateSearch(val) { searchQuery = val; render(); }
+function toggleAll() { showAllStages = !showAllStages; render(); }
 </script></body></html>
-

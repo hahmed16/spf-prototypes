@@ -54,6 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     <!-- الجدول -->
+    ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+
     <div class="card">
       <div class="ph">
         <h3><div class="pico or">${ICONS.inbox}</div>قائمة الطلبات</h3>
@@ -65,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <thead>
               <tr>
                 <th>رقم الطلب</th>
+                <th>مقدم الطلب</th>
                 <th>المؤمن عليه</th>
                 <th>جهة العمل</th>
                 <th>نوع المرض</th>
@@ -78,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
               ${odRequests.map(r => `
               <tr data-id="${r.id}" data-status="${r.status}" data-search="${r.id.toLowerCase()} ${r.insured.name.toLowerCase()}">
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td>${getSubmittedByName(r)}</td>
                 <td>${r.insured.name}</td>
                 <td style="font-size:12px">${r.employer.name}</td>
                 <td>${r.subtype || r.type}</td>

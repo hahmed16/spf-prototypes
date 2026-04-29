@@ -63,7 +63,8 @@ function render() {
       </div>
     </div>
 
-    <div class="filters">
+    ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+    <div class="filters" style="display:none">
       <div class="fgrid">
         <div class="fgrp">
           <label class="flbl">اسم المؤسسة</label>

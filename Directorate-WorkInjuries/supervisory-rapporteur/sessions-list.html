@@ -44,6 +44,8 @@ function render() {
         <button class="btn btn-primary" onclick="openNewSessionModal()">${ICONS.plus} إنشاء جلسة جديدة</button>
       </div>
     </div>
+    ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+
     <div class="card">
       <div class="ttabs">
         ${[{key:'all',label:'الكل',count:allSessions.length},{key:'scheduled',label:'مجدولة',count:allSessions.filter(s=>s.status==='مجدولة').length},{key:'closed',label:'مغلقة',count:allSessions.filter(s=>s.status==='مغلقة').length}]

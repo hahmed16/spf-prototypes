@@ -41,6 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     <!-- أحمال العمل الحالية -->
+    ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+
     <div class="card">
       <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>أحمال العمل الحالية — موظفو قسم الإجازات المرضية</h3></div>
       <div class="pb">
@@ -95,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${r.insured.name}</td>
                 <td>${r.type}</td>
                 <td>${statusBadge(r.status)}</td>
-                <td>${r.checkedOutBy || '<span style="color:var(--text3)">غير مُعيَّن</span>'}</td>
+                <td>${r.assignedTo || r.checkedOutBy || '<span style="color:var(--text3)">غير مُعيَّن</span>'}</td>
                 <td>${formatDate(r.submitDate)}</td>
               </tr>`).join('')}
             </tbody>

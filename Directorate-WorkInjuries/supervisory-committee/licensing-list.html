@@ -36,7 +36,8 @@ function render() {
       </div>
     </div>
 
-    <div class="filters">
+    ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+    <div class="filters" style="display:none">
       <div class="fgrid">
         <div class="fgrp"><label class="flbl">اسم المؤسسة</label><input type="text" class="fc"></div>
         <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc"></div>
@@ -68,6 +69,7 @@ function render() {
             <thead>
               <tr>
                 <th>رقم الطلب</th>
+                <th>مقدم الطلب</th>
                 <th>المؤسسة الصحية</th>
                 <th>نوع الطلب</th>
                 <th>الأطباء المقدمون</th>
@@ -81,6 +83,7 @@ function render() {
               ${filtered.map(r => `
               <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td>${getSubmittedByName(r)}</td>
                 <td style="font-weight:600">${r.institution.name}</td>
                 <td><span class="badge b-direct">${r.requestType}</span></td>
                 <td>${r.verification.totalDoctors}</td>

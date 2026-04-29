@@ -46,7 +46,8 @@ function render() {
       </div>
     </div>
 
-    <div class="filters">
+    ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+    <div class="filters" style="display:none">
       <div class="fgrid">
         <div class="fgrp"><label class="flbl">رقم الجلسة</label><input type="text" class="fc" placeholder="SES-YYYY-XXXX"></div>
         <div class="fgrp"><label class="flbl">تاريخ الجلسة من</label><input type="date" class="fc"></div>

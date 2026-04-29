@@ -20,16 +20,19 @@ document.addEventListener('DOMContentLoaded', () => {
       <div><h1>قائمة التظلمات</h1><p>تظلمات جميع موظفي ${WI_DATA.users.employer_delegate.company}</p></div>
       <div class="pg-acts"><button class="btn btn-primary" onclick="window.location.href='appeals-new.html'">${ICONS.plus} تقديم تظلم جديد</button></div>
     </div>
+    ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+
     <div class="card">
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم التظلم</th><th>الطلب الأصلي</th><th>اسم الموظف</th><th>سبب التظلم</th><th>الحالة</th><th>تاريخ التقديم</th><th></th></tr></thead>
+            <thead><tr><th>رقم التظلم</th><th>الطلب الأصلي</th><th>مقدم التظلم</th><th>اسم الموظف</th><th>سبب التظلم</th><th>الحالة</th><th>تاريخ التقديم</th><th></th></tr></thead>
             <tbody>
               ${WI_DATA.appeals.map(a=>`
               <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${a.id}</td>
                 <td style="font-family:monospace">${a.originalRequestId}</td>
+                <td>${getSubmittedByName(a)}</td>
                 <td>${a.applicant.name}</td>
                 <td>${a.appealReason}</td>
                 <td>${statusBadge(a.status)}</td>

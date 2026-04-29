@@ -32,6 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
       <div>منفعة الأشخاص ذوي الإعاقة مشروطة بامتلاك بطاقة إعاقة سارية صادرة من وزارة التنمية الاجتماعية.</div>
     </div>
 
+    ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+
     <div class="card">
       <div class="pb-0">
         ${myReqs.length === 0 ? `
@@ -43,11 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>` : `
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم الطلب</th><th>رقم بطاقة الإعاقة</th><th>حالة البطاقة</th><th>حالة الطلب</th><th>تاريخ التقديم</th><th></th></tr></thead>
+            <thead><tr><th>رقم الطلب</th><th>مقدم الطلب</th><th>رقم بطاقة الإعاقة</th><th>حالة البطاقة</th><th>حالة الطلب</th><th>تاريخ التقديم</th><th></th></tr></thead>
             <tbody>
               ${myReqs.map(r=>`
               <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td>${getSubmittedByName(r)}</td>
                 <td style="font-family:monospace">${r.card.number}</td>
                 <td><span class="badge ${r.card.status==='سارية'?'b-card-valid':r.card.status==='منتهية'?'b-card-expired':'b-card-cancelled'}">${r.card.status}</span></td>
                 <td>${statusBadge(r.status)}</td>

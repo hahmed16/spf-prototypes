@@ -9,15 +9,22 @@
 <script>
 initLayout({ role: 'disability-head', activePage: 'chronic-list' });
 setBreadcrumb([{ label: 'منفعة الأمراض المستديمة' }, { label: 'قائمة الطلبات' }]);
-const me = WI_DATA.users.disability_head.name;
-
-document.addEventListener('DOMContentLoaded', () => {
-  const reqs = WI_DATA.chronicIncoming.filter(d => d.hasRequest);
+let searchQuery = '';
+let showAllStages = false;
+document.addEventListener('DOMContentLoaded', render);
+function render() {
+  const reqs = getFilteredData({
+    role: 'disability-head',
+    data: WI_DATA.chronicIncoming.filter(d => d.hasRequest),
+    query: searchQuery,
+    showAll: showAllStages
+  });
   getContent().innerHTML = `
     <div class="pg-head">
       <div><h1>قائمة طلبات منفعة الأمراض المستديمة</h1><p>${reqs.length} طلب مقدم</p></div>
     </div>
-    <div class="filters">
+    ${renderUnifiedFilterBar({ onSearch: 'updateSearch', onToggleAll: 'toggleAll', isAllVisible: showAllStages })}
+    <div class="filters" style="display:none">
       <div class="fgrid">
         <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc"></div>
         <div class="fgrp"><label class="flbl">الرقم المدني</label><input type="text" class="fc"></div>
@@ -30,16 +37,16 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم الطلب</th><th>المستفيد</th><th>التشخيص</th><th>الحالة</th><th>تاريخ التقديم</th><th>الحجز</th><th></th></tr></thead>
+            <thead><tr><th>رقم الطلب</th><th>مقدم الطلب</th><th>المستفيد</th><th>التشخيص</th><th>الحالة</th><th>تاريخ التقديم</th><th></th></tr></thead>
             <tbody>
               ${reqs.map(d=>`
-              <tr style="${d.checkedOutBy===me?'background:#f0fdf4':''}">
+              <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${d.requestId}</td>
+                <td>${getSubmittedByName(d)}</td>
                 <td>${d.applicantName}</td>
                 <td>${d.diagnosis}</td>
                 <td>${statusBadge(d.requestStatus || '—')}</td>
                 <td>${formatDate(d.requestSubmitDate || d.provenDate)}</td>
-                <td>${!d.checkedOutBy?`<span class="badge b-avail">متاح</span>`:d.checkedOutBy===me?`<span class="badge b-checkout">محجوز بواسطتي</span>`:`<span class="badge b-checkout" title="${d.checkedOutBy}">محجوز</span>`}</td>
                 <td>
                   <button class="ibtn" onclick="window.location.href='chronic-details.html?id=${d.requestId}'">${ICONS.eye}</button>
                   <button class="ibtn" onclick="openAddNoteModal('${d.requestId}')">${ICONS.note}</button>
@@ -50,5 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     </div>`;
-});
+}
+function updateSearch(val) { searchQuery = val; render(); }
+function toggleAll() { showAllStages = !showAllStages; render(); }
 </script></body></html>

@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
       <div><h1>جميع الطلبات الواردة إلى المؤسسة الصحية المرخصة</h1><p>${incoming.length} طلب مرتبة من الأقدم إلى الأحدث</p></div>
       <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='dashboard.html'">${ICONS.arrow_left} رجوع</button></div>
     </div>
+    ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+
     <div class="card">
       <div class="pb-0">
         <div class="tbl-wrap">

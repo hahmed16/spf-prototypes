@@ -32,6 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
       <div>يمكنك تقديم تظلم على قرارات المؤسسات الصحية المرخصة المتعلقة بطلباتك. يجب أن تقدم التظلم خلال 30 يوماً من تاريخ علمك بالقرار.</div>
     </div>
 
+    ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+
     <div class="card">
       <div class="pb-0">
         ${myAppeals.length === 0 ? `
@@ -42,12 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>` : `
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم التظلم</th><th>الطلب الأصلي</th><th>سبب التظلم</th><th>الحالة</th><th>تاريخ التقديم</th><th></th></tr></thead>
+            <thead><tr><th>رقم التظلم</th><th>الطلب الأصلي</th><th>مقدم التظلم</th><th>سبب التظلم</th><th>الحالة</th><th>تاريخ التقديم</th><th></th></tr></thead>
             <tbody>
               ${myAppeals.map(a=>`
               <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${a.id}</td>
                 <td style="font-family:monospace"><a href="allowances-details.html?id=${a.originalRequestId}" style="color:var(--primary)">${a.originalRequestId}</a></td>
+                <td>${getSubmittedByName(a)}</td>
                 <td>${a.appealReason}</td>
                 <td>${statusBadge(a.status)}</td>
                 <td>${a.submitDate}</td>

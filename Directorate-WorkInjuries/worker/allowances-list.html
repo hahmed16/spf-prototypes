@@ -50,6 +50,8 @@ function render() {
       </div>
     </div>` : ''}
 
+    ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+
     <div class="card">
       <div class="ttabs">
         ${[
@@ -75,6 +77,7 @@ function render() {
             <thead>
               <tr>
                 <th>رقم الطلب</th>
+                <th>مقدم الطلب</th>
                 <th>نوع الطلب</th>
                 <th>الحالة</th>
                 <th>تاريخ التقديم</th>
@@ -86,6 +89,7 @@ function render() {
               ${filtered.map(r=>`
               <tr style="${r.status==='تم إعادة الطلب لاستيفاء البيانات'?'background:var(--warning-l)':''}">
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td>${getSubmittedByName(r)}</td>
                 <td>${r.type} — ${r.subtype||''}</td>
                 <td>${statusBadge(r.status)}</td>
                 <td style="font-size:12px">${r.submitDate}</td>

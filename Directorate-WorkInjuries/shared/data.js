@@ -1598,6 +1598,155 @@ const WI_DATA = {
     });
   });
 
+  const clone = (obj) => JSON.parse(JSON.stringify(obj));
+  const pad = (n) => String(n).padStart(6, '0');
+  const names = [
+    'ماجد بن سعيد الرواحي',
+    'هدى بنت سالم البوسعيدية',
+    'يوسف بن خميس الهنائي',
+    'مريم بنت راشد العامرية',
+    'سالم بن علي المقبالي',
+    'أمل بنت ناصر الشيبانية',
+    'خالد بن حمد الحوسني',
+    'نورة بنت أحمد المعمرية',
+  ];
+
+  function ensureDisabilitySamples() {
+    const statuses = [
+      { status: 'تم تقديم طلب منفعة الأشخاص ذوي الإعاقة — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة', assignedTo: WI_DATA.users.disability_employee.name, checkedOutBy: WI_DATA.users.disability_employee.name },
+      { status: 'بانتظار اعتماد رئيس قسم الإعاقة والأمراض المستديمة', assignedTo: WI_DATA.users.disability_head.name, checkedOutBy: WI_DATA.users.disability_head.name },
+      { status: 'تم اعتماد الطلب — الصرف جارٍ', assignedTo: null, checkedOutBy: null },
+      { status: 'تم إعادة الطلب لاستيفاء البيانات', assignedTo: WI_DATA.users.disability_employee.name, checkedOutBy: null },
+      { status: 'تم رفض الطلب', assignedTo: null, checkedOutBy: null },
+    ];
+    while (WI_DATA.disability.length < 10) {
+      const index = WI_DATA.disability.length;
+      const base = clone(WI_DATA.disability[index % 3]);
+      const stage = statuses[index % statuses.length];
+      const seq = 240 + index;
+      base.id = `DIS-2025-${pad(seq)}`;
+      base.status = stage.status;
+      base.submitDate = `2025-02-${String(1 + index).padStart(2, '0')}`;
+      base.lastUpdate = `2025-02-${String(2 + index).padStart(2, '0')} 10:00`;
+      base.applicant.name = names[index % names.length];
+      base.applicant.civil = `90789${String(10000 + index).slice(-5)}`;
+      base.card.number = `DIS-CARD-${String(660000 + index)}`;
+      base.assignedTo = stage.assignedTo;
+      base.checkedOutBy = stage.checkedOutBy;
+      WI_DATA.disability.push(base);
+    }
+  }
+
+  function ensureChronicSamples() {
+    const statuses = [
+      { status: 'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة', assignedTo: WI_DATA.users.disability_employee.name, checkedOutBy: WI_DATA.users.disability_employee.name },
+      { status: 'بانتظار مراجعة رئيس قسم الإعاقة والأمراض المستديمة', assignedTo: WI_DATA.users.disability_head.name, checkedOutBy: WI_DATA.users.disability_head.name },
+      { status: 'تم اعتماد الطلب — الصرف جارٍ', assignedTo: null, checkedOutBy: null },
+      { status: 'تم إعادة الطلب لاستيفاء البيانات', assignedTo: WI_DATA.users.disability_employee.name, checkedOutBy: null },
+      { status: 'تم رفض الطلب', assignedTo: null, checkedOutBy: null },
+    ];
+    while (WI_DATA.chronicIncoming.length < 10 || WI_DATA.chronicIncoming.filter(d => d.hasRequest).length < 10) {
+      const index = WI_DATA.chronicIncoming.length;
+      const base = clone(WI_DATA.chronicIncoming[index % 3]);
+      const stage = statuses[index % statuses.length];
+      const seq = 100 + index;
+      base.refId = `CHR-IN-2025-${pad(seq)}`;
+      base.requestId = `CHR-2025-${pad(160 + index)}`;
+      base.hasRequest = true;
+      base.requestSubmitDate = `2025-02-${String(3 + index).padStart(2, '0')}`;
+      base.requestLastUpdate = `2025-02-${String(4 + index).padStart(2, '0')} 11:00`;
+      base.requestStatus = stage.status;
+      base.applicantName = names[index % names.length];
+      base.civil = `90901${String(20000 + index).slice(-5)}`;
+      base.applicantCivil = base.civil;
+      base.assignedTo = stage.assignedTo;
+      base.checkedOutBy = stage.checkedOutBy;
+      WI_DATA.chronicIncoming.push(base);
+    }
+  }
+
+  function ensureAppealSamples() {
+    const statuses = [
+      { status: 'تم تقديم طلب التظلم — بانتظار مراجعة موظف قسم اللجان الطبية', assignedTo: WI_DATA.users.committees_employee.name, checkedOutBy: WI_DATA.users.committees_employee.name },
+      { status: 'بانتظار اعتماد رئيس قسم اللجان الطبية', assignedTo: WI_DATA.users.committees_head.name, checkedOutBy: WI_DATA.users.committees_head.name },
+      { status: 'تم الإحالة للجنة التظلمات — بانتظار جدولة جلسة', assignedTo: WI_DATA.users.appeals_rapporteur.name, checkedOutBy: null },
+      { status: 'تم جدولة جلسة التظلم', assignedTo: WI_DATA.users.appeals_rapporteur.name, checkedOutBy: null },
+      { status: 'تم تنفيذ قرار التظلم', assignedTo: null, checkedOutBy: null },
+    ];
+    while (WI_DATA.appeals.length < 10) {
+      const index = WI_DATA.appeals.length;
+      const base = clone(WI_DATA.appeals[index % 2]);
+      const linked = WI_DATA.allowances[(index + 3) % WI_DATA.allowances.length];
+      const stage = statuses[index % statuses.length];
+      base.id = `APP-2025-${pad(70 + index)}`;
+      base.originalRequestId = linked.id;
+      base.status = stage.status;
+      base.submitDate = `2025-02-${String(5 + index).padStart(2, '0')}`;
+      base.lastUpdate = `2025-02-${String(6 + index).padStart(2, '0')} 12:00`;
+      base.applicant = clone(linked.applicant || linked.insured);
+      base.decision = { ...(base.decision || {}), details: 'قرار محل تظلم ضمن بيانات العينة لضمان تغطية مراحل لجنة التظلمات.' };
+      base.assignedTo = stage.assignedTo;
+      base.checkedOutBy = stage.checkedOutBy;
+      WI_DATA.appeals.push(base);
+    }
+  }
+
+  function ensureLicensingSamples() {
+    const statuses = [
+      { status: 'تم تقديم طلب الترخيص / التجديد — بانتظار مراجعة موظف قسم التراخيص والرقابة', assignedTo: WI_DATA.users.licensing_employee.name, checkedOutBy: WI_DATA.users.licensing_employee.name },
+      { status: 'بانتظار اعتماد رئيس قسم التراخيص والرقابة', assignedTo: WI_DATA.users.licensing_head.name, checkedOutBy: WI_DATA.users.licensing_head.name },
+      { status: 'تم اعتماد الترخيص — الترخيص نشط', assignedTo: null, checkedOutBy: null },
+      { status: 'تم إعادة الطلب لاستيفاء البيانات', assignedTo: WI_DATA.users.licensing_employee.name, checkedOutBy: null },
+      { status: 'مسودة', assignedTo: null, checkedOutBy: null },
+    ];
+    while (WI_DATA.licensing.length < 10) {
+      const index = WI_DATA.licensing.length;
+      const base = clone(WI_DATA.licensing[index % 5]);
+      const stage = statuses[index % statuses.length];
+      base.id = `LIC-2025-${pad(40 + index)}`;
+      base.requestType = index % 3 === 0 ? 'تجديد' : 'جديد';
+      base.status = stage.status;
+      base.submitDate = `2025-02-${String(7 + index).padStart(2, '0')}`;
+      base.lastUpdate = `2025-02-${String(8 + index).padStart(2, '0')} 13:00`;
+      base.delegate = base.delegate || {};
+      base.delegate.name = names[index % names.length];
+      base.delegate.civil = `90666${String(30000 + index).slice(-5)}`;
+      base.institution.name = `${index % 2 ? 'مركز' : 'مستشفى'} النموذج الصحي ${index + 1}`;
+      base.institution.cr = `${7800000 + index}`;
+      base.assignedTo = stage.assignedTo;
+      base.checkedOutBy = stage.checkedOutBy;
+      if (stage.status.includes('نشط') && !base.activeLicense) {
+        base.activeLicense = { number: `LIC-INST-2025-${String(100 + index)}`, issueDate: base.lastUpdate.slice(0, 10), expiryDate: '2028-02-28', months: 36 };
+      }
+      WI_DATA.licensing.push(base);
+    }
+  }
+
+  ensureDisabilitySamples();
+  ensureChronicSamples();
+  ensureAppealSamples();
+  ensureLicensingSamples();
+
+  ['WI-2025-001234', 'WI-2025-001156', 'WI-2025-001700'].forEach((id) => {
+    const req = WI_DATA.allowances.find(item => item.id === id);
+    if (req) req.discussionFlagged = true;
+  });
+
+  WI_DATA.allowances.forEach((item, index) => {
+    if (!Array.isArray(item.sickLeavePeriods) || item.sickLeavePeriods.length === 0) {
+      item.sickLeavePeriods = [{
+        id: `sl-auto-${index + 1}`,
+        from: item.submitDate || '2025-01-01',
+        to: item.submitDate || '2025-01-01',
+        days: 1,
+        status: 'بانتظار المراجعة',
+        addedBy: 'النظام',
+        addedDate: item.submitDate || '2025-01-01',
+        note: 'فترة عينة لضمان ظهور لوحة فترات الإجازات المرضية في النموذج.'
+      }];
+    }
+  });
+
   (WI_DATA.dashboardStats?.['injury-investigator'] || []).forEach((stat) => {
     if (typeof stat.label !== 'string') return;
     stat.label = stat.label.replace('من الرئيس', 'من رئيس القسم');

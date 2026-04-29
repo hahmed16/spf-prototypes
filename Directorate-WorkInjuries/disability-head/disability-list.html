@@ -9,12 +9,14 @@
 <script>
 initLayout({ role: 'disability-head', activePage: 'disability-list' });
 setBreadcrumb([{ label: 'منفعة الإعاقة' }, { label: 'قائمة الطلبات' }]);
-const me = WI_DATA.users.disability_head.name;
 const reqs = WI_DATA.disability;
 let activeTab = 'all';
+let searchQuery = '';
+let showAllStages = false;
 document.addEventListener('DOMContentLoaded', render);
 function render() {
-  const filtered = activeTab==='all' ? reqs : reqs.filter(r=>{
+  const scoped = getFilteredData({ role: 'disability-head', data: reqs, query: searchQuery, showAll: showAllStages });
+  const filtered = activeTab==='all' ? scoped : scoped.filter(r=>{
     if(activeTab==='pending') return r.status.includes('بانتظار مراجعة');
     if(activeTab==='head') return r.status.includes('بانتظار اعتماد رئيس');
     if(activeTab==='approved') return r.status.includes('اعتماد');
@@ -25,7 +27,8 @@ function render() {
       <div><h1>قائمة طلبات منفعة الأشخاص ذوي الإعاقة</h1><p>${reqs.length} طلب</p></div>
       <div class="pg-acts"><button class="btn btn-secondary btn-sm" onclick="window.location.href='disability-card-query.html'">${ICONS.search} استعلام بطاقة الإعاقة</button></div>
     </div>
-    <div class="filters">
+    ${renderUnifiedFilterBar({ onSearch: 'updateSearch', onToggleAll: 'toggleAll', isAllVisible: showAllStages })}
+    <div class="filters" style="display:none">
       <div class="fgrid">
         <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc" placeholder="DIS-YYYY-XXXXXX"></div>
         <div class="fgrp"><label class="flbl">الرقم المدني</label><input type="text" class="fc"></div>
@@ -46,22 +49,21 @@ function render() {
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم الطلب</th><th>المستفيد</th><th>الرقم المدني</th><th>رقم بطاقة الإعاقة</th><th>حالة البطاقة</th><th>حالة الطلب</th><th>التاريخ</th><th>الحجز</th><th></th></tr></thead>
+            <thead><tr><th>رقم الطلب</th><th>مقدم الطلب</th><th>المستفيد</th><th>الرقم المدني</th><th>رقم بطاقة الإعاقة</th><th>حالة البطاقة</th><th>حالة الطلب</th><th>تاريخ التقديم</th><th></th></tr></thead>
             <tbody>
               ${filtered.map(r=>`
-              <tr style="${r.checkedOutBy===me?'background:#f0fdf4':''}">
+              <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td>${getSubmittedByName(r)}</td>
                 <td>${r.applicant.name}</td>
                 <td style="font-family:monospace;font-size:11.5px">${r.applicant.civil}</td>
                 <td style="font-family:monospace;font-size:11.5px">${r.card.number}</td>
                 <td><span class="badge ${r.card.status==='سارية'?'b-card-valid':r.card.status==='منتهية'?'b-card-expired':'b-card-cancelled'}">${r.card.status}</span></td>
                 <td>${statusBadge(r.status)}</td>
                 <td style="font-size:12px">${r.submitDate}</td>
-                <td>${!r.checkedOutBy?`<span class="badge b-avail">متاح</span>`:r.checkedOutBy===me?`<span class="badge b-checkout">محجوز بواسطتي</span>`:`<span class="badge b-checkout">محجوز</span>`}</td>
                 <td>
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='disability-details.html?id=${r.id}'">${ICONS.eye}</button>
-                    ${!r.checkedOutBy?`<button class="ibtn" onclick="doCheckout('${r.id}')">${ICONS.lock}</button>`:r.checkedOutBy===me?`<button class="ibtn" onclick="doCheckin('${r.id}')">${ICONS.unlock}</button>`:''}
                     <button class="ibtn" onclick="openAddNoteModal('${r.id}')">${ICONS.note}</button>
                   </div>
                 </td>
@@ -73,7 +75,6 @@ function render() {
     </div>`;
 }
 function setTab(t){ activeTab=t; render(); }
-function doCheckout(id){ const r=reqs.find(x=>x.id===id); if(r)r.checkedOutBy=me; showToast(`تم حجز ${id}`,'s'); render(); }
-function doCheckin(id){ const r=reqs.find(x=>x.id===id); if(r)r.checkedOutBy=null; showToast(`تم تحرير ${id}`,'i'); render(); }
+function updateSearch(val) { searchQuery = val; render(); }
+function toggleAll() { showAllStages = !showAllStages; render(); }
 </script></body></html>
-

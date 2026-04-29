@@ -19,14 +19,24 @@ const referralReqs = WI_DATA.allowances.filter(r =>
   r.status === 'تم جدولة جلسة للعرض على المؤسسة الصحية المرخصة' ||
   r.status === 'تم اتخاذ القرار من المؤسسة الصحية المرخصة — بانتظار التنفيذ'
 );
+let searchQuery = '';
+let showAllStages = false;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', render);
+function render() {
+  const filtered = getFilteredData({
+    role: 'committees-employee',
+    data: referralReqs,
+    query: searchQuery,
+    showAll: showAllStages
+  });
   getContent().innerHTML = `
     <div class="pg-head">
       <div><h1>طلبات العرض على المؤسسات الصحية المرخصة</h1>
-        <p>${referralReqs.length} طلب — يشمل إصابات العمل والأمراض المهنية والإعاقة والأمراض المستديمة</p></div>
+        <p>${filtered.length} طلب — يشمل إصابات العمل والأمراض المهنية والإعاقة والأمراض المستديمة</p></div>
     </div>
-    <div class="filters">
+    ${renderUnifiedFilterBar({ onSearch: 'updateSearch', onToggleAll: 'toggleAll', isAllVisible: showAllStages })}
+    <div class="filters" style="display:none">
       <div class="fgrid">
         <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc" placeholder="WI-YYYY-XXXXXX"></div>
         <div class="fgrp"><label class="flbl">اسم المؤمن عليه</label><input type="text" class="fc"></div>
@@ -44,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <thead>
               <tr>
                 <th>رقم الطلب</th>
+                <th>مقدم الطلب</th>
                 <th>المؤمن عليه</th>
                 <th>نوع الطلب</th>
                 <th>الحالة</th>
@@ -53,9 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
               </tr>
             </thead>
             <tbody>
-              ${referralReqs.map(r => `
+              ${filtered.map(r => `
               <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td>${getSubmittedByName(r)}</td>
                 <td>${r.insured?.name || r.applicant?.name || '—'}</td>
                 <td><span style="font-size:12px;font-weight:600">${r.type}${r.subtype ? ` — ${r.subtype}` : ''}</span></td>
                 <td>${statusBadge(r.status)}</td>
@@ -73,5 +85,11 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     </div>`;
-});
+  if (searchQuery) {
+    const inp = document.getElementById('global-search-input');
+    if (inp) { inp.value = searchQuery; inp.focus(); inp.setSelectionRange(searchQuery.length, searchQuery.length); }
+  }
+}
+function updateSearch(val) { searchQuery = val; render(); }
+function toggleAll() { showAllStages = !showAllStages; render(); }
 </script></body></html>

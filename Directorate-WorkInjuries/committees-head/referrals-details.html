@@ -19,7 +19,8 @@ currentRequestId = req.id;
 setBreadcrumb([{ label: 'طلبات العرض', page: 'referrals-list' }, { label: `تفاصيل ${req.id}` }]);
 
 document.addEventListener('DOMContentLoaded', () => {
-  const canAct = req.status === 'تم الموافقة على العرض على المؤسسات الصحية المرخصة — بانتظار إحالة المقرر';
+  const canAct = req.status === 'تم الموافقة على العرض على المؤسسات الصحية المرخصة — بانتظار إحالة المقرر'
+    || req.status === 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة رئيس قسم اللجان الطبية';
 
   const injury  = req.injury || {};
   const isWork  = req.type === 'إصابة عمل';
@@ -276,7 +277,6 @@ function headReferralDecision(type) {
 </script>
 </body>
 </html>
-
 
 
 

@@ -53,11 +53,11 @@ function render() {
             <thead>
               <tr>
                 <th>رقم الطلب</th>
+                <th>مقدم الطلب</th>
                 <th>المؤمن عليه</th>
                 <th>جهة العمل</th>
                 <th>الحالة</th>
                 <th>تاريخ التقديم</th>
-                <th>الحجز</th>
                 <th>إجراءات</th>
               </tr>
             </thead>
@@ -67,17 +67,11 @@ function render() {
                 : filtered.map(r=>`
               <tr style="${r.checkedOutBy===me?'background:#f0fdf4':''}">
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td>${getSubmittedByName(r)}</td>
                 <td>${r.insured?.name || r.applicant?.name}</td>
                 <td style="font-size:11.5px">${r.employer?.name?.substring(0,25) || '—'}...</td>
                 <td>${statusBadge(r.status)}</td>
                 <td style="font-size:12px">${r.submitDate}</td>
-                <td>
-                  ${!r.checkedOutBy
-                    ? `<span class="badge b-avail">متاح</span>`
-                    : r.checkedOutBy === me
-                      ? `<span class="badge b-checkout">محجوز بواسطتي</span>`
-                      : `<span class="badge b-checkout" title="${r.checkedOutBy}">محجوز</span>`}
-                </td>
                 <td>
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='allowances-details.html?id=${r.id}'" title="عرض التفاصيل">${ICONS.eye}</button>

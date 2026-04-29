@@ -21,7 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="pg-head"><div><h1>الحالات المحالة للمؤسسات الصحية المرخصة</h1>
       <p>متابعة مسار الإحالة حتى صدور القرار</p></div>
     </div>
-    <div class="filters">
+    ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+    <div class="filters" style="display:none">
       <div class="fgrid">
         <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc" placeholder="WI-YYYY-XXXXXX"></div>
         <div class="fgrp"><label class="flbl">الرقم المدني</label><input type="text" class="fc"></div>

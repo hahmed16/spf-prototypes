@@ -335,31 +335,83 @@ function handleGlobalSearch(val, callback) {
 function noopUnifiedSearch() {}
 function noopUnifiedToggleAll() {}
 
-function getFilteredData({ role, data, query = '', showAll = false }) {
-  const stages = WI_CONFIG.roleStages[role] || [];
-  const q = query.toLowerCase().trim();
-  return data.filter(r => {
-    const matchesSearch = !q || (
-      r.id.toLowerCase().includes(q) ||
-      (r.insured   && r.insured.name?.toLowerCase().includes(q)) ||
-      (r.insured   && r.insured.civil?.includes(q)) ||
-      (r.applicant && r.applicant.name?.toLowerCase().includes(q)) ||
-      (r.employer  && r.employer.name?.toLowerCase().includes(q))
+function getItemRequestNumber(item) {
+  return item?.id || item?.requestId || item?.refId || item?.originalRequestId || '';
+}
+function getItemStatus(item) {
+  return item?.status || item?.requestStatus || '';
+}
+function getItemSubmitDate(item) {
+  return item?.submitDate || item?.requestSubmitDate || item?.date || item?.provenDate || item?.lastUpdate || '';
+}
+function getSubmittedByName(item) {
+  return item?.submittedBy || item?.applicant?.name || item?.delegate?.name || item?.applicantName || item?.insured?.name || item?.institution?.name || '—';
+}
+function getCurrentRoleUser(role) {
+  const key = String(role || '').replace(/-/g, '_');
+  return WI_DATA.users?.[key] || null;
+}
+function isVisibleForRole(role, item) {
+  const roleConfig = WI_CONFIG.roles?.[role] || {};
+  const roleUser = getCurrentRoleUser(role);
+  const status = getItemStatus(item);
+  const stages = WI_CONFIG.roleStages?.[role] || [];
+  const assignedToMe = !!roleUser?.name && (item?.assignedTo === roleUser.name || item?.checkedOutBy === roleUser.name);
+  const pendingForRole = stages.some(stage => status === stage || status.includes(stage) || stage.includes(status));
+
+  if (roleConfig.type === 'external') {
+    if (!roleUser) return true;
+    const civil = roleUser.civil;
+    const companyCr = roleUser.cr || roleUser.companyCr;
+    const companyName = roleUser.company;
+    const ownCivil = civil && (
+      item?.applicant?.civil === civil ||
+      item?.insured?.civil === civil ||
+      item?.delegate?.civil === civil ||
+      item?.civil === civil
     );
-    const isInStage = stages.includes(r.status);
-    if (q) return matchesSearch;
-    if (showAll) return matchesSearch;
-    return isInStage && matchesSearch;
+    const ownCompany = (companyCr && (item?.employer?.cr === companyCr || item?.institution?.cr === companyCr))
+      || (companyName && (item?.employer?.name || '').includes(companyName));
+    return ownCivil || ownCompany || pendingForRole || assignedToMe;
+  }
+
+  return pendingForRole || assignedToMe;
+}
+
+function getFilteredData({ role, data, query = '', showAll = false }) {
+  const q = String(query || '').toLowerCase().trim();
+  return (data || []).filter(r => {
+    const searchText = [
+      getItemRequestNumber(r),
+      getItemStatus(r),
+      getItemSubmitDate(r),
+      getSubmittedByName(r),
+      r?.insured?.name,
+      r?.insured?.civil,
+      r?.applicant?.civil,
+      r?.delegate?.civil,
+      r?.employer?.name,
+      r?.employer?.cr,
+      r?.institution?.name,
+      r?.institution?.cr,
+      r?.requestType,
+      r?.type,
+      r?.subtype,
+      r?.diagnosis,
+    ].filter(Boolean).join(' ').toLowerCase();
+    const matchesSearch = !q || searchText.includes(q);
+    if (!matchesSearch) return false;
+    return showAll || isVisibleForRole(role, r);
   });
 }
 
-function renderUnifiedFilterBar({ onSearch, onToggleAll, isAllVisible = false }) {
+function renderUnifiedFilterBar({ onSearch = 'noopUnifiedSearch', onToggleAll = 'noopUnifiedToggleAll', isAllVisible = false, includeToggle = true, requestPlaceholder = 'WI-2025-001234' } = {}) {
   return `
     <div class="filters unified-filter-panel" style="margin-bottom:20px;display:flex;flex-direction:column;gap:12px;padding:16px;background:var(--g50);border:1px solid var(--border);border-radius:14px">
       <div class="unified-filter-row" style="display:grid;grid-template-columns:1.15fr 1fr 1fr 0.9fr 0.9fr 1.2fr auto;gap:12px;align-items:end">
         <div class="fgrp" style="margin:0">
           <label class="flbl">رقم الطلب</label>
-          <input type="text" class="fc" id="global-search-input" placeholder="WI-2025-001234" oninput="handleGlobalSearch(this.value, ${onSearch})">
+          <input type="text" class="fc" id="global-search-input" placeholder="${requestPlaceholder}" oninput="handleGlobalSearch(this.value, ${onSearch})">
         </div>
         <div class="fgrp" style="margin:0">
           <label class="flbl">الرقم المدني</label>
@@ -381,6 +433,7 @@ function renderUnifiedFilterBar({ onSearch, onToggleAll, isAllVisible = false })
           <label class="flbl">الحالة</label>
           <select class="fc"><option>جميع الحالات</option></select>
         </div>
+        ${includeToggle ? `
         <div style="display:flex;align-items:center;gap:12px;justify-content:flex-end;padding-bottom:6px">
           <label class="switch-container" style="display:flex;align-items:center;gap:10px;cursor:pointer;white-space:nowrap" onclick="${onToggleAll}()">
             <span style="font-size:12.5px;font-weight:700;color:var(--text2)">عرض كافة الطلبات</span>
@@ -388,7 +441,7 @@ function renderUnifiedFilterBar({ onSearch, onToggleAll, isAllVisible = false })
               <div style="width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:3px;${isAllVisible ? 'right:23px' : 'right:3px'};transition:.3s;box-shadow:0 1px 3px rgba(0,0,0,0.1)"></div>
             </div>
           </label>
-        </div>
+        </div>` : '<div></div>'}
       </div>
     </div>`;
 }
@@ -601,7 +654,7 @@ function enhanceListContent() {
   const existingFilters = content.querySelector('.filters');
   if (!existingFilters) return;
   const wrapper = document.createElement('div');
-  wrapper.innerHTML = renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: true });
+  wrapper.innerHTML = renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false });
   const unified = wrapper.firstElementChild;
   if (!unified) return;
   existingFilters.replaceWith(unified);

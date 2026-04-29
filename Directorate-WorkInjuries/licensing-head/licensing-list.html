@@ -9,23 +9,26 @@
 <script>
 initLayout({ role: 'licensing-head', activePage: 'licensing-list' });
 setBreadcrumb([{ label: 'التراخيص والرقابة' }, { label: 'قائمة الطلبات والمؤسسات' }]);
-const me = WI_DATA.users.licensing_head.name;
 const reqs = WI_DATA.licensing;
 let activeTab = 'all';
+let searchQuery = '';
+let showAllStages = false;
 document.addEventListener('DOMContentLoaded', render);
 function render() {
-  const filtered = activeTab==='all' ? reqs : reqs.filter(r=>{
+  const scoped = getFilteredData({ role: 'licensing-head', data: reqs, query: searchQuery, showAll: showAllStages });
+  const filtered = activeTab==='all' ? scoped : scoped.filter(r=>{
     if(activeTab==='new') return r.requestType==='جديد' && !r.status.includes('اعتماد');
     if(activeTab==='renew') return r.requestType==='تجديد';
     if(activeTab==='active') return r.status.includes('اعتماد');
-    if(activeTab==='pending') return r.status.includes('بانتظار مراجعة موظف');
+    if(activeTab==='pending') return r.status.includes('بانتظار اعتماد رئيس');
     return true;
   });
   getContent().innerHTML = `
     <div class="pg-head">
       <div><h1>قائمة طلبات الترخيص والمؤسسات الصحية</h1><p>${reqs.length} طلب / مؤسسة</p></div>
     </div>
-    <div class="filters">
+    ${renderUnifiedFilterBar({ onSearch: 'updateSearch', onToggleAll: 'toggleAll', isAllVisible: showAllStages })}
+    <div class="filters" style="display:none">
       <div class="fgrid">
         <div class="fgrp"><label class="flbl">اسم المؤسسة</label><input type="text" class="fc"></div>
         <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc"></div>
@@ -40,7 +43,7 @@ function render() {
       <div class="ttabs">
         ${[
           {key:'all',label:'الكل',count:reqs.length},
-          {key:'pending',label:'بانتظار مراجعتي',count:reqs.filter(r=>r.status.includes('بانتظار مراجعة موظف')).length},
+          {key:'pending',label:'بانتظار اعتمادي',count:reqs.filter(r=>r.status.includes('بانتظار اعتماد رئيس')).length},
           {key:'new',label:'طلبات جديدة',count:reqs.filter(r=>r.requestType==='جديد').length},
           {key:'renew',label:'طلبات تجديد',count:reqs.filter(r=>r.requestType==='تجديد').length},
           {key:'active',label:'مؤسسات نشطة',count:reqs.filter(r=>r.status.includes('اعتماد')).length},
@@ -52,29 +55,27 @@ function render() {
             <thead>
               <tr>
                 <th>رقم الطلب</th>
+                <th>مقدم الطلب</th>
                 <th>اسم المؤسسة</th>
                 <th>نوع الطلب</th>
                 <th>حالة الطلب</th>
                 <th>حالة الترخيص</th>
                 <th>تاريخ الانتهاء</th>
                 <th>تاريخ التقديم</th>
-                <th>الحجز</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               ${filtered.map(r=>`
-              <tr style="${r.checkedOutBy===me?'background:#f0fdf4':''}">
+              <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                <td>${getSubmittedByName(r)}</td>
                 <td style="font-weight:600">${r.institution.name}</td>
                 <td><span class="badge b-direct">${r.requestType}</span></td>
                 <td>${statusBadge(r.status)}</td>
                 <td>${r.activeLicense?`<span class="badge b-active">نشط</span>`:r.status.includes('رفض')?`<span class="badge b-rejected">مرفوض</span>`:`<span class="badge b-phead">معلق</span>`}</td>
                 <td style="font-size:12px">${r.activeLicense?.expiryDate||'—'}</td>
                 <td style="font-size:12px">${r.submitDate}</td>
-                <td>
-                  ${!r.checkedOutBy?`<span class="badge b-avail">متاح</span>`:r.checkedOutBy===me?`<span class="badge b-checkout">محجوز بواسطتي</span>`:`<span class="badge b-checkout">محجوز</span>`}
-                </td>
                 <td>
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='licensing-details.html?id=${r.id}'">${ICONS.eye}</button>
@@ -89,6 +90,6 @@ function render() {
     </div>`;
 }
 function setTab(t){ activeTab=t; render(); }
-function doCheckout(id){ const r=WI_DATA.licensing.find(x=>x.id===id); if(r)r.checkedOutBy=me; showToast('تم الحجز','s'); render(); }
-function doCheckin(id){ const r=WI_DATA.licensing.find(x=>x.id===id); if(r)r.checkedOutBy=null; showToast('تم التحرير','i'); render(); }
+function updateSearch(val) { searchQuery = val; render(); }
+function toggleAll() { showAllStages = !showAllStages; render(); }
 </script></body></html>
