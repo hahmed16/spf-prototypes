@@ -1,53 +1,57 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>إدارة جلسة التظلمات — مقرر لجنة التظلمات</title>
-<link rel="stylesheet" href="../shared/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة جلسة التظلمات — مقرر لجنة التظلمات</title>
+  <link rel="stylesheet" href="../shared/style.css">
 </head>
+
 <body>
-<script src="../shared/config.js"></script>
-<script src="../shared/data.js"></script>
-<script src="../shared/layout.js"></script>
-<script src="../shared/utils.js"></script>
-<script>
-initLayout({ role: 'appeals-rapporteur', activePage: 'sessions-list' });
-const params = new URLSearchParams(window.location.search);
-const sessionId = params.get('id') || 'APP-SES-2025-0023';
-setBreadcrumb([{label:'إدارة الجلسات',page:'sessions-list'},{label:`جلسة ${sessionId}`}]);
+  <script src="../shared/config.js"></script>
+  <script src="../shared/data.js"></script>
+  <script src="../shared/layout.js"></script>
+  <script src="../shared/utils.js"></script>
+  <script>
+    initLayout({ role: 'appeals-rapporteur', activePage: 'sessions-list' });
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('id') || 'APP-SES-2025-0023';
+    setBreadcrumb([{ label: 'إدارة الجلسات', page: 'sessions-list' }, { label: `جلسة ${sessionId}` }]);
 
-const session = {
-  id: sessionId, date: '2025-02-05', time: '10:00', status: 'مجدولة',
-  members: [
-    { name: 'د. خالد بن سالم الهاشمي', role: 'رئيس', specialty: 'جراحة العظام' },
-    { name: 'د. ريم بنت أحمد المعولية', role: 'عضو', specialty: 'الطب الباطني' },
-    { name: 'د. حسن بن علي السيابي', role: 'عضو', specialty: 'طب الأمراض المهنية' },
-  ],
-  cases: WI_DATA.appeals.map(a=>({
-    appealId: a.id, name: a.applicant.name,
-    originalReqId: a.originalRequestId, reason: a.appealReason,
-    decisionStatus: 'بانتظار القرار', decision: null
-  }))
-};
+    const session = {
+      id: sessionId, date: '2025-02-05', time: '10:00', status: 'مجدولة',
+      members: [
+        { name: 'د. خالد بن سالم الهاشمي', role: 'رئيس', specialty: 'جراحة العظام' },
+        { name: 'د. ريم بنت أحمد المعولية', role: 'عضو', specialty: 'الطب الباطني' },
+        { name: 'د. حسن بن علي السيابي', role: 'عضو', specialty: 'طب الأمراض المهنية' },
+      ],
+      cases: WI_DATA.appeals.map(a => ({
+        appealId: a.id, name: a.applicant.name,
+        originalReqId: a.originalRequestId, reason: a.appealReason,
+        decisionStatus: 'بانتظار القرار', decision: null
+      }))
+    };
 
-const attendanceState = {};
-const signatureState = {};
-session.members.forEach(m=>{ attendanceState[m.name]='مجدول'; signatureState[m.name]='بانتظار'; });
-const caseDecisions = {};
-session.cases.forEach(c=>{ caseDecisions[c.appealId]='بانتظار القرار'; });
-let minutesText = '';
+    const attendanceState = {};
+    const signatureState = {};
+    session.members.forEach(m => { attendanceState[m.name] = 'مجدول'; signatureState[m.name] = 'بانتظار'; });
+    const caseDecisions = {};
+    session.cases.forEach(c => { caseDecisions[c.appealId] = 'بانتظار القرار'; });
+    let minutesText = '';
+    const notes = [];
+    currentRequestId = sessionId;
 
-document.addEventListener('DOMContentLoaded', renderPage);
+    document.addEventListener('DOMContentLoaded', renderPage);
 
-function renderPage() {
-  const confirmedCount = Object.values(attendanceState).filter(v=>v==='حاضر').length;
-  const quorum = confirmedCount >= Math.ceil(session.members.length/2);
-  const allDecisionsDone = session.cases.every(c=>caseDecisions[c.appealId]!=='بانتظار القرار');
-  const allSigned = Object.values(signatureState).every(v=>v==='تم التوقيع');
-  const signedCount = Object.values(signatureState).filter(v=>v==='تم التوقيع').length;
+    function renderPage() {
+      const confirmedCount = Object.values(attendanceState).filter(v => v === 'حاضر').length;
+      const quorum = confirmedCount >= Math.ceil(session.members.length / 2);
+      const allDecisionsDone = session.cases.every(c => caseDecisions[c.appealId] !== 'بانتظار القرار');
+      const allSigned = Object.values(signatureState).every(v => v === 'تم التوقيع');
+      const signedCount = Object.values(signatureState).filter(v => v === 'تم التوقيع').length;
 
-  getContent().innerHTML = `
+      getContent().innerHTML = `
     <div class="pg-head">
       <div><h1>إدارة جلسة لجنة التظلمات</h1>
         <p>رقم الجلسة: <strong style="font-family:monospace;color:var(--primary)">${session.id}</strong></p></div>
@@ -59,11 +63,15 @@ function renderPage() {
     <!-- ملخص الجلسة -->
     <div class="card" style="border-right:4px solid var(--primary)">
       <div class="pb-c">
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
+        <div class="req-summary-grid">
           <div><div class="flbl" style="margin-bottom:4px">رقم الجلسة</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${session.id}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">التاريخ والوقت</div><div>${session.date} — ${session.time}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">حالة الجلسة</div><span class="badge b-session">${session.status}</span></div>
-          <div><div class="flbl" style="margin-bottom:4px">الحد الادني للحضور</div><span class="badge ${quorum?'b-approved':'b-returned'}">${quorum?'مكتمل':'غير مكتمل'} (${confirmedCount}/${session.members.length})</span></div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ الجلسة</div><div>${session.date}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">وقت الجلسة</div><div>${session.time}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">أعضاء اللجنة</div><div style="font-weight:600">${session.members.length} أعضاء</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الحد الادني للحضور</div><span class="badge ${quorum ? 'b-approved' : 'b-returned'}">${quorum ? 'مكتمل' : 'غير مكتمل'} (${confirmedCount}/${session.members.length})</span></div>
+          <div><div class="flbl" style="margin-bottom:4px">التظلمات المدرجة</div><div style="font-weight:600">${session.cases.length} تظلم</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">القرارات المُدخَلة</div><div style="font-weight:600;color:${allDecisionsDone ? 'var(--accent)' : 'var(--warning)'}">${Object.values(caseDecisions).filter(v => v !== 'بانتظار القرار').length}/${session.cases.length}</div></div>
         </div>
       </div>
     </div>
@@ -75,19 +83,19 @@ function renderPage() {
         <table class="dtbl">
           <thead><tr><th>الاسم</th><th>التخصص</th><th>المنصب</th><th>حالة الحضور</th><th>تحديث</th></tr></thead>
           <tbody>
-            ${session.members.map(m=>`
+            ${session.members.map(m => `
             <tr>
               <td style="font-weight:600">${m.name}</td>
               <td>${m.specialty}</td>
               <td>${m.role}</td>
-              <td><span class="badge ${attendanceState[m.name]==='حاضر'?'b-approved':attendanceState[m.name]==='اعتذار'?'b-rejected':'b-phead'}">${attendanceState[m.name]}</span></td>
+              <td><span class="badge ${attendanceState[m.name] === 'حاضر' ? 'b-approved' : attendanceState[m.name] === 'اعتذار' ? 'b-rejected' : 'b-phead'}">${attendanceState[m.name]}</span></td>
               <td>
                 <select class="fc" style="padding:4px 8px;font-size:12px;width:130px"
                   onchange="updateAtt('${m.name}',this.value)">
-                  <option ${attendanceState[m.name]==='مجدول'?'selected':''}>مجدول</option>
-                  <option ${attendanceState[m.name]==='حاضر'?'selected':''}>حاضر</option>
-                  <option ${attendanceState[m.name]==='غائب'?'selected':''}>غائب</option>
-                  <option ${attendanceState[m.name]==='اعتذار'?'selected':''}>اعتذار</option>
+                  <option ${attendanceState[m.name] === 'مجدول' ? 'selected' : ''}>مجدول</option>
+                  <option ${attendanceState[m.name] === 'حاضر' ? 'selected' : ''}>حاضر</option>
+                  <option ${attendanceState[m.name] === 'غائب' ? 'selected' : ''}>غائب</option>
+                  <option ${attendanceState[m.name] === 'اعتذار' ? 'selected' : ''}>اعتذار</option>
                 </select>
               </td>
             </tr>`).join('')}
@@ -102,24 +110,24 @@ function renderPage() {
     <!-- ② التظلمات المدرجة -->
     <div class="card">
       <div class="ph"><h3><div class="pico pu">${ICONS.list}</div>② التظلمات المدرجة وإدخال القرارات</h3>
-        <span style="font-size:12px;color:var(--text3)">${Object.values(caseDecisions).filter(v=>v!=='بانتظار القرار').length}/${session.cases.length} قرارات مُدخَلة</span>
+        <span style="font-size:12px;color:var(--text3)">${Object.values(caseDecisions).filter(v => v !== 'بانتظار القرار').length}/${session.cases.length} قرارات مُدخَلة</span>
       </div>
       <div class="pb-0">
         <table class="dtbl">
           <thead><tr><th>#</th><th>رقم التظلم</th><th>مقدم التظلم</th><th>الطلب الأصلي</th><th>سبب التظلم</th><th>حالة القرار</th><th></th></tr></thead>
           <tbody>
-            ${session.cases.map((c,i)=>`
+            ${session.cases.map((c, i) => `
             <tr>
-              <td>${i+1}</td>
+              <td>${i + 1}</td>
               <td style="font-family:monospace;color:var(--primary);font-weight:700">${c.appealId}</td>
               <td>${c.name}</td>
               <td style="font-family:monospace;font-size:11.5px">${c.originalReqId}</td>
               <td style="font-size:12px">${c.reason}</td>
-              <td><span class="badge ${caseDecisions[c.appealId]==='بانتظار القرار'?'b-phead':caseDecisions[c.appealId]==='تم التوقيع'?'b-approved':'b-session'}">${caseDecisions[c.appealId]}</span></td>
+              <td><span class="badge ${caseDecisions[c.appealId] === 'بانتظار القرار' ? 'b-phead' : caseDecisions[c.appealId] === 'تم التوقيع' ? 'b-approved' : 'b-session'}">${caseDecisions[c.appealId]}</span></td>
               <td>
                 <button class="btn btn-primary btn-xs"
                   onclick="window.location.href='case-decision.html?appeal=${c.appealId}&session=${session.id}'">
-                  ${caseDecisions[c.appealId]==='بانتظار القرار'?'إدخال القرار النهائي':'عرض / تعديل'}
+                  ${caseDecisions[c.appealId] === 'بانتظار القرار' ? 'إدخال القرار النهائي' : 'عرض / تعديل'}
                 </button>
               </td>
             </tr>`).join('')}
@@ -150,22 +158,40 @@ function renderPage() {
         <table class="dtbl">
           <thead><tr><th>العضو</th><th>المنصب</th><th>حالة التوقيع</th><th>إجراء المقرر</th></tr></thead>
           <tbody>
-            ${session.members.map(m=>`
+            ${session.members.map(m => `
             <tr>
               <td style="font-weight:600">${m.name}</td>
               <td>${m.role}</td>
-              <td><span class="badge ${signatureState[m.name]==='تم التوقيع'?'b-approved':'b-phead'}">${signatureState[m.name]}</span></td>
+              <td><span class="badge ${signatureState[m.name] === 'تم التوقيع' ? 'b-approved' : 'b-phead'}">${signatureState[m.name]}</span></td>
               <td>
-                ${signatureState[m.name]==='بانتظار'&&allDecisionsDone?`
+                ${signatureState[m.name] === 'بانتظار' && allDecisionsDone ? `
                 <button class="btn btn-secondary btn-xs" onclick="showToast('تم إرسال طلب التوقيع إلى ${m.name}','i')">${ICONS.bell} إرسال طلب التوقيع</button>`
-                :signatureState[m.name]==='تم التوقيع'?`<span class="badge b-approved">مكتمل</span>`
-                :`<span style="font-size:11.5px;color:var(--text3)">يتطلب إدخال القرارات أولاً</span>`}
+          : signatureState[m.name] === 'تم التوقيع' ? `<span class="badge b-approved">مكتمل</span>`
+            : `<span style="font-size:11.5px;color:var(--text3)">يتطلب إدخال القرارات أولاً</span>`}
               </td>
             </tr>`).join('')}
           </tbody>
         </table>
       </div>
-      ${!allDecisionsDone?`<div class="pb-c"><div class="alert alert-i" style="margin-bottom:0">${ICONS.info}<span>أدخل جميع القرارات أولاً ليتاح التوقيع لأعضاء اللجنة.</span></div></div>`:''}
+      ${!allDecisionsDone ? `<div class="pb-c"><div class="alert alert-i" style="margin-bottom:0">${ICONS.info}<span>أدخل جميع القرارات أولاً ليتاح التوقيع لأعضاء اللجنة.</span></div></div>` : ''}
+    </div>
+
+    <!-- الملاحظات التشغيلية -->
+    <div class="card op-notes-card collapsed" data-notes-init="0">
+      <div class="ph op-notes-head" onclick="toggleOperationalNotes(this.closest('.op-notes-card'))">
+        <h3><div class="pico gy">${ICONS.note}</div>الملاحظات التشغيلية <span style="font-size:11px;font-weight:400;color:var(--text3)">(لا تغيّر حالة الطلب)</span></h3>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="op-notes-chevron">${ICONS.arrow_left}</span>
+          <button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();openAddNoteModal(currentRequestId)">${ICONS.plus} إضافة ملاحظة</button>
+        </div>
+      </div>
+      <div class="pb">
+        <div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">لا توجد ملاحظات تشغيلية</div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <textarea class="fc" id="quick-note-input" placeholder="أكتب ملاحظة سريعة..." rows="2" style="flex:1"></textarea>
+          <button class="btn btn-secondary btn-sm" style="align-self:flex-end" onclick="quickAddNote()">حفظ</button>
+        </div>
+      </div>
     </div>
 
     <!-- ⑤ إرسال القرارات النهائية -->
@@ -176,38 +202,46 @@ function renderPage() {
       <div class="pb">
         <div class="fg fg-4" style="margin-bottom:16px">
           ${[
-            { label:'الحد الادني للحضور', done:quorum },
-            { label:'القرارات', done:allDecisionsDone },
-            { label:'التوقيعات', done:allSigned },
-            { label:'المحضر', done:!!minutesText },
-          ].map(c=>`
+          { label: 'الحد الادني للحضور', done: quorum },
+          { label: 'القرارات', done: allDecisionsDone },
+          { label: 'التوقيعات', done: allSigned },
+          { label: 'المحضر', done: !!minutesText },
+        ].map(c => `
           <div style="padding:10px;border:1px solid var(--border);border-radius:var(--r);text-align:center">
-            <div style="font-size:20px;font-weight:800;color:${c.done?'var(--accent)':'var(--danger)'}">${c.done?'✓':'✗'}</div>
+            <div style="font-size:20px;font-weight:800;color:${c.done ? 'var(--accent)' : 'var(--danger)'}">${c.done ? '✓' : '✗'}</div>
             <div style="font-size:11.5px;margin-top:4px">${c.label}</div>
           </div>`).join('')}
         </div>
         <button class="btn btn-accent btn-lg"
-          ${!(quorum&&allDecisionsDone&&allSigned)?'disabled style="opacity:.5;cursor:not-allowed"':''}
+          ${!(quorum && allDecisionsDone && allSigned) ? 'disabled style="opacity:.5;cursor:not-allowed"' : ''}
           onclick="sendFinalDecisions()">
           ${ICONS.check} إرسال القرارات النهائية للجهات المعنية
         </button>
-        ${!(quorum&&allDecisionsDone&&allSigned)?`<p style="font-size:12px;color:var(--text3);margin-top:8px">يجب اكتمال: الحد الادني للحضور + القرارات + التوقيعات</p>`:''}
+        ${!(quorum && allDecisionsDone && allSigned) ? `<p style="font-size:12px;color:var(--text3);margin-top:8px">يجب اكتمال: الحد الادني للحضور + القرارات + التوقيعات</p>` : ''}
       </div>
     </div>`;
-}
+    }
 
-function updateAtt(name,val){ attendanceState[name]=val; showToast(`تم تحديث حضور ${name}`,'i'); renderPage(); }
-function saveMinutes(){ minutesText=document.getElementById('minutes-input')?.value||''; showToast('تم حفظ المحضر','s'); }
-function sendFinalDecisions(){
-  confirmAction({
-    title:'تأكيد إرسال القرارات النهائية',
-    msg:`هل أنت متأكد من إرسال القرارات النهائية للجلسة <strong>${session.id}</strong>؟<br>
+    function updateAtt(name, val) { attendanceState[name] = val; showToast(`تم تحديث حضور ${name}`, 'i'); renderPage(); }
+    function saveMinutes() { minutesText = document.getElementById('minutes-input')?.value || ''; showToast('تم حفظ المحضر', 's'); }
+    function quickAddNote() {
+      const v = document.getElementById('quick-note-input')?.value?.trim();
+      if (!v) { showToast('يرجى كتابة الملاحظة', 'w'); return; }
+      showToast('تم حفظ الملاحظة', 's');
+      document.getElementById('quick-note-input').value = '';
+    }
+    function toggleOperationalNotes(card) { card.classList.toggle('collapsed'); }
+    function sendFinalDecisions() {
+      confirmAction({
+        title: 'تأكيد إرسال القرارات النهائية',
+        msg: `هل أنت متأكد من إرسال القرارات النهائية للجلسة <strong>${session.id}</strong>؟<br>
          <span style="font-size:12px;color:var(--text3)">سيتم تحديث حالات التظلمات تلقائياً وإشعار مقدمي التظلمات.</span>`,
-    confirmLabel:'نعم، إرسال القرارات النهائية',
-    confirmClass:'btn-accent',
-    onConfirm:()=>{ showToast('تم إرسال القرارات النهائية بنجاح','s',5000); setTimeout(()=>window.location.href='sessions-list.html',2000); }
-  });
-}
-</script>
+        confirmLabel: 'نعم، إرسال القرارات النهائية',
+        confirmClass: 'btn-accent',
+        onConfirm: () => { showToast('تم إرسال القرارات النهائية بنجاح', 's', 5000); setTimeout(() => window.location.href = 'sessions-list.html', 2000); }
+      });
+    }
+  </script>
 </body>
+
 </html>

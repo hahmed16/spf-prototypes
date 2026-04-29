@@ -1,37 +1,44 @@
 ﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تفاصيل طلب الترخيص — موظف قسم التراخيص والرقابة</title>
-<link rel="stylesheet" href="../shared/style.css"></head>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تفاصيل طلب الترخيص — موظف قسم التراخيص والرقابة</title>
+  <link rel="stylesheet" href="../shared/style.css">
+</head>
+
 <body>
-<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
-<script src="../shared/layout.js"></script><script src="../shared/utils.js"></script>
-<script>
-initLayout({ role: 'licensing-employee', activePage: 'licensing-list' });
-const params = new URLSearchParams(window.location.search);
-const req = WI_DATA.licensing.find(r=>r.id===params.get('id')) || WI_DATA.licensing[0];
-currentRequestId = req.id;
-const me = WI_DATA.users.licensing_employee.name;
-const isCheckedOutByMe = req.checkedOutBy === me;
-setBreadcrumb([{label:'التراخيص والرقابة',page:'licensing-list'},{label:`تفاصيل ${req.id}`}]);
+  <script src="../shared/config.js"></script>
+  <script src="../shared/data.js"></script>
+  <script src="../shared/layout.js"></script>
+  <script src="../shared/utils.js"></script>
+  <script>
+    initLayout({ role: 'licensing-employee', activePage: 'licensing-list' });
+    const params = new URLSearchParams(window.location.search);
+    const req = WI_DATA.licensing.find(r => r.id === params.get('id')) || WI_DATA.licensing[0];
+    currentRequestId = req.id;
+    const me = WI_DATA.users.licensing_employee.name;
+    const isCheckedOutByMe = req.checkedOutBy === me;
+    setBreadcrumb([{ label: 'التراخيص والرقابة', page: 'licensing-list' }, { label: `تفاصيل ${req.id}` }]);
 
-document.addEventListener('DOMContentLoaded', () => {
-  const statusPending = 'تم تقديم طلب الترخيص / التجديد — بانتظار مراجعة موظف قسم التراخيص والرقابة';
-  const canAct = (req.status === statusPending || req.status === 'تم إعادة الطلب لاستيفاء البيانات') && isCheckedOutByMe;
+    document.addEventListener('DOMContentLoaded', () => {
+      const statusPending = 'تم تقديم طلب الترخيص / التجديد — بانتظار مراجعة موظف قسم التراخيص والرقابة';
+      const canAct = (req.status === statusPending || req.status === 'تم إعادة الطلب لاستيفاء البيانات') && isCheckedOutByMe;
 
-  const inst = req.institution || {};
-  const dlg = req.delegate || {};
-  const docs = req.doctors || [];
-  const confirmedCount = docs.filter(d => d.confirmStatus === 'تم التأكيد').length;
-  const lic = req.activeLicense;
-  const licExpiringSoon = lic && (new Date(lic.expiryDate) - new Date() < 90 * 24 * 60 * 60 * 1000);
-  const sess = req.session;
-  const cd = req.committeeDecision;
-  const atts = req.attachments || [];
-  const notes = req.notes || [];
-  const tl = req.timeline || [];
+      const inst = req.institution || {};
+      const dlg = req.delegate || {};
+      const docs = req.doctors || [];
+      const confirmedCount = docs.filter(d => d.confirmStatus === 'تم التأكيد').length;
+      const lic = req.activeLicense;
+      const licExpiringSoon = lic && (new Date(lic.expiryDate) - new Date() < 90 * 24 * 60 * 60 * 1000);
+      const sess = req.session;
+      const cd = req.committeeDecision;
+      const atts = req.attachments || [];
+      const notes = req.notes || [];
+      const tl = req.timeline || [];
 
-  const sessionHtml = sess ? `
+      const sessionHtml = sess ? `
   <div class="card card-cum">
     <div class="ph">
       <h3><div class="pico tl">${ICONS.calendar}</div>بيانات الجلسة</h3>
@@ -49,13 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="tbl-wrap">
         <table class="dtbl">
           <thead><tr><th>الاسم</th><th>التخصص</th><th>المنصب</th><th>حالة الحضور</th></tr></thead>
-          <tbody>${sess.members.map(m=>`<tr><td>${m.name}</td><td>${m.specialty}</td><td>${m.role}</td><td><span class="badge ${m.attendance==='حاضر'?'b-approved':m.attendance==='غائب'?'b-rejected':'b-phead'}">${m.attendance||'مجدول'}</span></td></tr>`).join('')}</tbody>
+          <tbody>${sess.members.map(m => `<tr><td>${m.name}</td><td>${m.specialty}</td><td>${m.role}</td><td><span class="badge ${m.attendance === 'حاضر' ? 'b-approved' : m.attendance === 'غائب' ? 'b-rejected' : 'b-phead'}">${m.attendance || 'مجدول'}</span></td></tr>`).join('')}</tbody>
         </table>
       </div>` : ''}
     </div>
   </div>` : '';
 
-  const committeeDecisionHtml = cd ? `
+      const committeeDecisionHtml = cd ? `
   <div class="card card-cum">
     <div class="ph">
       <h3><div class="pico gr">${ICONS.pen}</div>قرار اللجنة الطبية الإشرافية</h3>
@@ -63,55 +70,55 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
     <div class="pb">
       <div class="fg fg-3">
-        <div class="fgrp"><label class="flbl">نوع القرار</label><div class="fro"><span class="badge ${cd.type==='موافقة'||cd.type==='اعتماد الترخيص'?'b-approved':cd.type==='رفض'?'b-rejected':'b-phead'}">${cd.type||'—'}</span></div></div>
+        <div class="fgrp"><label class="flbl">نوع القرار</label><div class="fro"><span class="badge ${cd.type === 'موافقة' || cd.type === 'اعتماد الترخيص' ? 'b-approved' : cd.type === 'رفض' ? 'b-rejected' : 'b-phead'}">${cd.type || '—'}</span></div></div>
         <div class="fgrp"><label class="flbl">تاريخ القرار</label><div class="fro">${formatDate(cd.date)}</div></div>
         ${cd.disabilityPercent ? `<div class="fgrp"><label class="flbl">نسبة العجز</label><div class="fro"><strong>${cd.disabilityPercent}%</strong></div></div>` : ''}
         ${cd.sickLeavePeriod ? `<div class="fgrp"><label class="flbl">فترة الإجازة الموصى بها</label><div class="fro">${cd.sickLeavePeriod}</div></div>` : ''}
-        <div class="fgrp span-full"><label class="flbl">مضمون القرار التفصيلي</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${cd.content||'—'}</div></div>
+        <div class="fgrp span-full"><label class="flbl">مضمون القرار التفصيلي</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${cd.content || '—'}</div></div>
         ${cd.signatories?.length ? `<div class="fgrp span-full"><label class="flbl">الأعضاء الموقعون</label><div class="fro">${cd.signatories.join('، ')}</div></div>` : ''}
       </div>
     </div>
   </div>` : '';
 
-  const activeLicenseHtml = lic ? `
+      const activeLicenseHtml = lic ? `
   <div class="card card-cum">
     <div class="ph"><h3><div class="pico gr">${ICONS.shield}</div>بيانات الترخيص النشط</h3><span class="stg-lbl">ترخيص معتمد</span></div>
     <div class="pb">
       ${licExpiringSoon ? `<div class="alert alert-w" style="margin-bottom:12px">${ICONS.warn}<span>الترخيص ينتهي قريباً. يُنصح بتقديم طلب تجديد.</span></div>` : ''}
       <div class="fg fg-4">
-        <div class="fgrp"><label class="flbl">رقم الترخيص</label><div class="fro" style="font-family:monospace;font-weight:700;color:var(--primary)">${lic.number||'—'}</div></div>
+        <div class="fgrp"><label class="flbl">رقم الترخيص</label><div class="fro" style="font-family:monospace;font-weight:700;color:var(--primary)">${lic.number || '—'}</div></div>
         <div class="fgrp"><label class="flbl">تاريخ الإصدار</label><div class="fro">${formatDate(lic.issueDate)}</div></div>
-        <div class="fgrp"><label class="flbl">تاريخ الانتهاء</label><div class="fro" style="${licExpiringSoon?'color:var(--warning);font-weight:700':''}">${formatDate(lic.expiryDate)}</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ الانتهاء</label><div class="fro" style="${licExpiringSoon ? 'color:var(--warning);font-weight:700' : ''}">${formatDate(lic.expiryDate)}</div></div>
         <div class="fgrp"><label class="flbl">مدة الصلاحية</label><div class="fro">${lic.months} شهراً</div></div>
       </div>
     </div>
   </div>` : '';
 
-  const attHtml = atts.length === 0
-    ? `<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد مرفقات</div>`
-    : atts.map(att => {
-        const ext = att.name?.split('.').pop()?.toLowerCase() || 'oth';
-        const icoMap = { pdf:'pdf', doc:'doc', docx:'doc', jpg:'img', jpeg:'img', png:'img', mp3:'media', wav:'media', mp4:'media' };
-        const svgMap = { pdf:ICONS.file, doc:ICONS.file, img:ICONS.eye, media:ICONS.clock, oth:ICONS.file };
-        const ico = icoMap[ext] || 'oth';
-        return `<div class="att-row"><div class="att-ico ${ico}">${svgMap[ico]||ICONS.file}</div><div class="att-info"><div class="att-name">${att.name}</div><div class="att-meta">${att.type} · رفعه: ${att.uploadedBy} (${att.role}) · ${att.uploadDate}${att.size?` · ${att.size}`:''}</div></div><div class="att-acts"><button class="ibtn" title="تحميل / استعراض" onclick="showToast('جارٍ تحميل الملف...','i')">${ICONS.download}</button></div></div>`;
-      }).join('');
+      const attHtml = atts.length === 0
+        ? `<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد مرفقات</div>`
+        : atts.map(att => {
+          const ext = att.name?.split('.').pop()?.toLowerCase() || 'oth';
+          const icoMap = { pdf: 'pdf', doc: 'doc', docx: 'doc', jpg: 'img', jpeg: 'img', png: 'img', mp3: 'media', wav: 'media', mp4: 'media' };
+          const svgMap = { pdf: ICONS.file, doc: ICONS.file, img: ICONS.eye, media: ICONS.clock, oth: ICONS.file };
+          const ico = icoMap[ext] || 'oth';
+          return `<div class="att-row"><div class="att-ico ${ico}">${svgMap[ico] || ICONS.file}</div><div class="att-info"><div class="att-name">${att.name}</div><div class="att-meta">${att.type} · رفعه: ${att.uploadedBy} (${att.role}) · ${att.uploadDate}${att.size ? ` · ${att.size}` : ''}</div></div><div class="att-acts"><button class="ibtn" title="تحميل / استعراض" onclick="showToast('جارٍ تحميل الملف...','i')">${ICONS.download}</button></div></div>`;
+        }).join('');
 
-  const notesHtml = notes.length === 0
-    ? `<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">لا توجد ملاحظات تشغيلية</div>`
-    : notes.map(n=>`<div class="note-item"><div class="note-av">${n.author?.charAt(0)||'؟'}</div><div class="note-c"><div class="note-hd"><span class="note-auth">${n.author}</span><span class="note-role">${n.role}</span><span class="note-time">${n.time}</span></div><div class="note-txt">${n.text}</div></div></div>`).join('');
+      const notesHtml = notes.length === 0
+        ? `<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">لا توجد ملاحظات تشغيلية</div>`
+        : notes.map(n => `<div class="note-item"><div class="note-av">${n.author?.charAt(0) || '؟'}</div><div class="note-c"><div class="note-hd"><span class="note-auth">${n.author}</span><span class="note-role">${n.role}</span><span class="note-time">${n.time}</span></div><div class="note-txt">${n.text}</div></div></div>`).join('');
 
-  const tlHtml = tl.length === 0
-    ? `<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد أحداث</div>`
-    : tl.map(e => {
-        const dc = e.type==='success'?'s':e.type==='danger'?'d':e.type==='warning'?'w':'';
-        const ic = e.type==='success'?ICONS.check:e.type==='danger'?ICONS.x:e.type==='warning'?ICONS.warn:ICONS.clock;
-        return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus?`<div class="tl-states">${e.fromStatus?`<span class="badge b-draft" style="font-size:10px">${e.fromStatus}</span><span>${ICONS.arrow_right}</span>`:''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus]||'b-draft'}" style="font-size:10px">${e.toStatus}</span></div>`:''} ${e.note?`<div class="tl-note">${e.note}</div>`:''}</div></div>`;
-      }).join('');
+      const tlHtml = tl.length === 0
+        ? `<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد أحداث</div>`
+        : tl.map(e => {
+          const dc = e.type === 'success' ? 's' : e.type === 'danger' ? 'd' : e.type === 'warning' ? 'w' : '';
+          const ic = e.type === 'success' ? ICONS.check : e.type === 'danger' ? ICONS.x : e.type === 'warning' ? ICONS.warn : ICONS.clock;
+          return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus ? `<div class="tl-states">${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus}</span><span>${ICONS.arrow_right}</span>` : ''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus}</span></div>` : ''} ${e.note ? `<div class="tl-note">${e.note}</div>` : ''}</div></div>`;
+        }).join('');
 
-  getContent().innerHTML = `
+      getContent().innerHTML = `
     <div class="pg-head">
-      <div><h1>تفاصيل طلب ${req.requestType==='جديد'?'الترخيص':'التجديد'}</h1>
+      <div><h1>تفاصيل طلب ${req.requestType === 'جديد' ? 'الترخيص' : 'التجديد'}</h1>
         <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p></div>
       <div class="pg-acts">
         ${!req.checkedOutBy && (req.status === statusPending || req.status.includes('استيفاء البيانات')) ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out</button>` : isCheckedOutByMe ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in</button>` : ''}
@@ -127,6 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
           <div><div class="flbl" style="margin-bottom:4px">نوع الطلب</div><span class="badge b-direct">${req.requestType}</span></div>
           <div><div class="flbl" style="margin-bottom:4px">الحالة</div>${statusBadge(req.status)}</div>
           <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div>${req.submitDate}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">اسم المصحوب منه</div><div style="font-size:12px;font-weight:600">${req.checkedOutBy || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر تحديث</div><div style="font-size:12px;color:var(--text2)">${req.lastUpdate || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ الإغلاق المتوقع</div><div style="font-size:12px">${formatDate(req.expectedClosureDate) || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الأيام المتبقية حتى الإغلاق</div><div style="font-size:12px;font-weight:600;color:${(req.remainingDays || 0) < 7 ? 'var(--danger)' : (req.remainingDays || 0) < 30 ? 'var(--warning)' : 'var(--text2)'}">${req.remainingDays != null ? req.remainingDays + ' يوم' : '—'}</div></div>
         </div>
       </div>
     </div>
@@ -136,14 +147,14 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات المؤسسة الصحية</h3></div>
       <div class="pb">
         <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">اسم المؤسسة</label><div class="fro" style="font-weight:700">${inst.name||'—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro" style="font-family:monospace">${inst.cr||'—'}</div></div>
-          <div class="fgrp"><label class="flbl">حالة السجل التجاري</label><div class="fro"><span class="badge ${inst.crStatus==='سارٍ'?'b-approved':'b-expired'}">${inst.crStatus||'—'}</span> <span style="font-size:11px;color:var(--text3)">(ينتهي: ${formatDate(inst.crExpiry)})</span></div></div>
-          <div class="fgrp"><label class="flbl">نوع المؤسسة</label><div class="fro">${inst.type||'—'}</div></div>
-          <div class="fgrp"><label class="flbl">المحافظة / الولاية</label><div class="fro">${inst.governorate||'—'}</div></div>
-          <div class="fgrp"><label class="flbl">العنوان</label><div class="fro">${inst.address||'—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${inst.phone||'—'}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${inst.email||'—'}</div></div>
+          <div class="fgrp"><label class="flbl">اسم المؤسسة</label><div class="fro" style="font-weight:700">${inst.name || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro" style="font-family:monospace">${inst.cr || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">حالة السجل التجاري</label><div class="fro"><span class="badge ${inst.crStatus === 'سارٍ' ? 'b-approved' : 'b-expired'}">${inst.crStatus || '—'}</span> <span style="font-size:11px;color:var(--text3)">(ينتهي: ${formatDate(inst.crExpiry)})</span></div></div>
+          <div class="fgrp"><label class="flbl">نوع المؤسسة</label><div class="fro">${inst.type || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">المحافظة / الولاية</label><div class="fro">${inst.governorate || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">العنوان</label><div class="fro">${inst.address || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${inst.phone || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${inst.email || '—'}</div></div>
         </div>
       </div>
     </div>
@@ -153,14 +164,14 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مفوّض المؤسسة (مقدم الطلب)</h3></div>
       <div class="pb">
         <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${dlg.role||'—'}</div></div>
-          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${dlg.name||'—'}</div></div>
-          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${dlg.civil||'—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.phone || req?.insured?.phone)) || (typeof appeal !== 'undefined' && appeal?.applicant?.phone) || (typeof app !== 'undefined' && app?.phone) || (typeof dlg !== 'undefined' && dlg?.phone) || (typeof u !== 'undefined' && u?.phone)), '96890000000')}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.email || req?.insured?.email)) || (typeof appeal !== 'undefined' && appeal?.applicant?.email) || (typeof app !== 'undefined' && app?.email) || (typeof dlg !== 'undefined' && dlg?.email) || (typeof u !== 'undefined' && u?.email)), 'noreply@spf-proto.om')}</div></div>
+          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${dlg.role || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${dlg.name || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${dlg.civil || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(dlg.phone, '96890000000')}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(dlg.email, 'noreply@spf-proto.om')}</div></div>
           ${dlg.employeeId ? `<div class="fgrp"><label class="flbl">الرقم الوظيفي</label><div class="fro">${dlg.employeeId}</div></div>` : ''}
         </div>
-        ${req.status.includes('استيفاء') ? `<div class="alert alert-w mt12">${ICONS.warn}<div><strong>مطلوب استيفاء البيانات التالية:</strong><br><span style="white-space:pre-line">${req.returnReason||''}</span></div></div>` : ''}
+        ${req.status.includes('استيفاء') ? `<div class="alert alert-w mt12">${ICONS.warn}<div><strong>مطلوب استيفاء البيانات التالية:</strong><br><span style="white-space:pre-line">${req.returnReason || ''}</span></div></div>` : ''}
       </div>
     </div>
 
@@ -168,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="card card-ro">
       <div class="ph">
         <h3><div class="pico bl">${ICONS.user}</div>الأطباء المرشحون للجنة</h3>
-        <span style="font-size:12px;color:${confirmedCount===docs.length?'var(--accent)':'var(--warning)'}">
+        <span style="font-size:12px;color:${confirmedCount === docs.length ? 'var(--accent)' : 'var(--warning)'}">
           ${confirmedCount} / ${docs.length} مؤكد
         </span>
       </div>
@@ -177,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <table class="dtbl">
             <thead><tr><th>الاسم</th><th>الرقم المدني</th><th>التخصص</th><th>المنصب</th><th>التأكيد</th><th>الازدواجية</th></tr></thead>
             <tbody>
-              ${docs.map(d=>`<tr><td style="font-weight:600">${d.name}</td><td style="font-family:monospace;font-size:11.5px">${d.civil}</td><td>${d.specialty}</td><td>${d.role}</td><td><span class="badge ${d.confirmStatus==='تم التأكيد'?'b-approved':d.confirmStatus==='رفض'?'b-rejected':'b-phead'}">${d.confirmStatus}</span></td><td><span class="badge ${d.duplicateCheck==='لا يوجد تعارض'?'b-approved':'b-rejected'}">${d.duplicateCheck}</span></td></tr>`).join('')}
+              ${docs.map(d => `<tr><td style="font-weight:600">${d.name}</td><td style="font-family:monospace;font-size:11.5px">${d.civil}</td><td>${d.specialty}</td><td>${d.role}</td><td><span class="badge ${d.confirmStatus === 'تم التأكيد' ? 'b-approved' : d.confirmStatus === 'رفض' ? 'b-rejected' : 'b-phead'}">${d.confirmStatus}</span></td><td><span class="badge ${d.duplicateCheck === 'لا يوجد تعارض' ? 'b-approved' : 'b-rejected'}">${d.duplicateCheck}</span></td></tr>`).join('')}
             </tbody>
           </table>
         </div>
@@ -186,14 +197,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <!-- التحقق من اشتراطات الترخيص -->
     <div class="card card-ro">
-      <div class="ph"><h3><div class="pico ${req.verification?.minMet?'gr':'rd'}">${req.verification?.minMet?ICONS.check:ICONS.warn}</div>التحقق من اشتراطات الترخيص</h3></div>
+      <div class="ph"><h3><div class="pico ${req.verification?.minMet ? 'gr' : 'rd'}">${req.verification?.minMet ? ICONS.check : ICONS.warn}</div>التحقق من اشتراطات الترخيص</h3></div>
       <div class="pb">
         <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">إجمالي الأطباء المقدمين</label><div class="fro"><strong>${req.verification?.totalDoctors||0}</strong> طبيب</div></div>
-          <div class="fgrp"><label class="flbl">الأطباء المؤكدون</label><div class="fro"><strong style="color:${req.verification?.confirmedDoctors===req.verification?.totalDoctors?'var(--accent)':'var(--warning)'}">${req.verification?.confirmedDoctors||0}</strong> / ${req.verification?.totalDoctors||0}</div></div>
-          <div class="fgrp"><label class="flbl">استيفاء الحد الأدنى</label><div class="fro"><span class="badge ${req.verification?.minMet?'b-approved':'b-returned'}">${req.verification?.minMet?'مستوفى':'غير مستوفى'}</span></div></div>
+          <div class="fgrp"><label class="flbl">إجمالي الأطباء المقدمين</label><div class="fro"><strong>${req.verification?.totalDoctors || 0}</strong> طبيب</div></div>
+          <div class="fgrp"><label class="flbl">الأطباء المؤكدون</label><div class="fro"><strong style="color:${req.verification?.confirmedDoctors === req.verification?.totalDoctors ? 'var(--accent)' : 'var(--warning)'}">${req.verification?.confirmedDoctors || 0}</strong> / ${req.verification?.totalDoctors || 0}</div></div>
+          <div class="fgrp"><label class="flbl">استيفاء الحد الأدنى</label><div class="fro"><span class="badge ${req.verification?.minMet ? 'b-approved' : 'b-returned'}">${req.verification?.minMet ? 'مستوفى' : 'غير مستوفى'}</span></div></div>
         </div>
-        ${!req.verification?.minMet?`<div class="alert alert-w mt12">${ICONS.warn}<span>لم يتأكد جميع الأطباء المرشحين بعد. الطلب لا يمكن رفعه للرئيس حتى اكتمال التأكيد.</span></div>`:''}
+        ${!req.verification?.minMet ? `<div class="alert alert-w mt12">${ICONS.warn}<span>لم يتأكد جميع الأطباء المرشحين بعد. الطلب لا يمكن رفعه للرئيس حتى اكتمال التأكيد.</span></div>` : ''}
       </div>
     </div>
 
@@ -205,13 +216,9 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="card">
       <div class="ph">
         <h3><div class="pico or">${ICONS.upload}</div>المرفقات <span style="font-size:11px;font-weight:400;color:var(--text3)">(${atts.length} مرفق)</span></h3>
-        <button class="btn btn-secondary btn-xs" onclick="openAddAttachmentModal()">${ICONS.plus} إضافة مرفق</button>
       </div>
       <div class="pb">
         ${attHtml}
-        <div style="margin-top:10px">
-          ${renderModernUploadComponent({ idPrefix: 'gen-att', subTitle: 'PDF, Word, صور, MP3, WAV, MP4 — الحجم الأقصى 20 ميغابايت' })}
-        </div>
       </div>
     </div>
 
@@ -233,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    ${canAct?`
+    ${canAct ? `
     <div class="dp">
       <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>اتخاذ القرار — موظف قسم التراخيص والرقابة</h3></div>
       <div class="dp-body">
@@ -247,32 +254,30 @@ document.addEventListener('DOMContentLoaded', () => {
           <button class="btn btn-danger" onclick="licensingDecision('رفض')">رفض</button>
         </div>
       </div>
-    </div>`:''}
+    </div>`: ''}
 
     <!-- السجل الزمني -->
     <div class="card">
       <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني الكامل للطلب</h3></div>
       <div class="pb"><div class="tl">${tlHtml}</div></div>
     </div>`;
-});
+    });
 
-function doCheckout(){
-  req.checkedOutBy=WI_DATA.users.licensing_employee.name;
-  if(req.status.includes('بانتظار مراجعة موظف')) {
-    req.status = 'قيد المراجعة — قسم التراخيص والرقابة';
-  }
-  showToast('تم الحجز','s');
-  setTimeout(()=>location.reload(),800);
-}
-function doCheckin(){ req.checkedOutBy=null; showToast('تم التحرير','i'); setTimeout(()=>window.location.href='licensing-list.html',800); }
-function licensingDecision(type){
-  const msgs={رفع:'تم توجيه الطلب لرئيس القسم',استيفاء:'تم إعادة الطلب لاستيفاء البيانات',رفض:'تم رفض الطلب'};
-  showToast(msgs[type],type==='رفض'?'d':'s');
-  setTimeout(()=>window.location.href='licensing-list.html',1500);
-}
-</script></body></html>
+    function doCheckout() {
+      req.checkedOutBy = WI_DATA.users.licensing_employee.name;
+      if (req.status.includes('بانتظار مراجعة موظف')) {
+        req.status = 'قيد المراجعة — قسم التراخيص والرقابة';
+      }
+      showToast('تم الحجز', 's');
+      setTimeout(() => location.reload(), 800);
+    }
+    function doCheckin() { req.checkedOutBy = null; showToast('تم التحرير', 'i'); setTimeout(() => window.location.href = 'licensing-list.html', 800); }
+    function licensingDecision(type) {
+      const msgs = { رفع: 'تم توجيه الطلب لرئيس القسم', استيفاء: 'تم إعادة الطلب لاستيفاء البيانات', رفض: 'تم رفض الطلب' };
+      showToast(msgs[type], type === 'رفض' ? 'd' : 's');
+      setTimeout(() => window.location.href = 'licensing-list.html', 1500);
+    }
+  </script>
+</body>
 
-
-
-
-
+</html>

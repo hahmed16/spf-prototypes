@@ -23,6 +23,7 @@ setBreadcrumb([{ label: 'التظلمات', page: 'appeals-list' }, { label: `ت
 document.addEventListener('DOMContentLoaded', () => {
   const statusPending = 'بانتظار اعتماد رئيس قسم اللجان الطبية';
   const canAct = appeal.status === statusPending && isCheckedOutByMe;
+  const isSamePerson = appeal.applicant?.civil && appeal.insured?.civil && appeal.applicant.civil === appeal.insured.civil;
 
   const atts  = appeal.attachments || [];
   const notes = appeal.notes || [];
@@ -49,12 +50,38 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb-c">
         <div class="req-summary-grid">
           <div><div class="flbl" style="margin-bottom:4px">رقم التظلم</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${appeal.id}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">الحالة الحالية</div>${statusBadge(appeal.status)}</div>
-          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div style="font-size:12.5px">${appeal.submitDate || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">حالة الطلب</div>${statusBadge(appeal.status)}</div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div style="font-size:12.5px">${formatDate(appeal.submitDate)}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">مقدم الطلب</div><div style="font-size:12.5px;font-weight:600">${appeal.applicant?.name || appeal.applicant?.role || '—'}</div><div style="font-size:11px;color:var(--text3)">${appeal.applicant?.role || ''}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر تحديث</div><div style="font-size:12px;color:var(--text2)">${appeal.lastUpdate || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر تحديث بواسطة</div><div style="font-size:12px;color:var(--text2)">${appeal.lastUpdatedBy || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ الإغلاق المتوقع</div><div style="font-size:12px">${formatDate(appeal.expectedClosureDate) || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الأيام المتبقية حتى الإغلاق</div><div style="font-size:12px;font-weight:600;color:${(appeal.remainingDays||0)<7?'var(--danger)':(appeal.remainingDays||0)<30?'var(--warning)':'var(--text2)'}">${appeal.remainingDays!=null?appeal.remainingDays+' يوم':'—'}</div></div>
         </div>
       </div>
     </div>
 
+    ${isSamePerson ? `
+    <!-- بيانات المؤمن عليه / المستفيد (نفس الشخص) -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات المؤمن عليه / المستفيد</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${appeal.applicant?.role || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${appeal.insured?.name || appeal.applicant?.name || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${appeal.insured?.civil || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${formatDate(appeal.insured?.dob)}</div></div>
+          <div class="fgrp"><label class="flbl">الجنس</label><div class="fro">${appeal.insured?.gender || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${appeal.insured?.nationality || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(appeal.applicant?.phone || appeal.insured?.phone, '96890000000')}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(appeal.applicant?.email || appeal.insured?.email, 'noreply@spf-proto.om')}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ انتهاء البطاقة الشخصية</label><div class="fro">${formatDate(appeal.insured?.civilExpiry || appeal.applicant?.civilExpiry)}</div></div>
+          <div class="fgrp"><label class="flbl">المحافظة / الولاية</label><div class="fro">${normalizeDisplay(appeal.applicant?.region)}${appeal.applicant?.wilayat ? ' — ' + appeal.applicant?.wilayat : ''}</div></div>
+          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${appeal.insured?.insuranceStatus === 'نشط' ? 'b-approved' : 'b-rejected'}">${appeal.insured?.insuranceStatus || '—'}</span></div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(appeal.insured?.regDate)}</div></div>
+        </div>
+      </div>
+    </div>` : `
     <!-- بيانات مقدم التظلم -->
     <div class="card">
       <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم التظلم</h3></div>
@@ -63,8 +90,49 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${appeal.applicant?.role || '—'}</div></div>
           <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${appeal.applicant?.name || '—'}</div></div>
           <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${appeal.applicant?.civil || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.phone || req?.insured?.phone)) || (typeof appeal !== 'undefined' && appeal?.applicant?.phone) || (typeof app !== 'undefined' && app?.phone) || (typeof dlg !== 'undefined' && dlg?.phone) || (typeof u !== 'undefined' && u?.phone)), '96890000000')}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.email || req?.insured?.email)) || (typeof appeal !== 'undefined' && appeal?.applicant?.email) || (typeof app !== 'undefined' && app?.email) || (typeof dlg !== 'undefined' && dlg?.email) || (typeof u !== 'undefined' && u?.email)), 'noreply@spf-proto.om')}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(appeal.applicant?.phone || appeal.insured?.phone, '96890000000')}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(appeal.applicant?.email || appeal.insured?.email, 'noreply@spf-proto.om')}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ انتهاء البطاقة الشخصية</label><div class="fro">${formatDate(appeal.applicant?.civilExpiry)}</div></div>
+          <div class="fgrp"><label class="flbl">المحافظة / الولاية</label><div class="fro">${normalizeDisplay(appeal.applicant?.region)}${appeal.applicant?.wilayat ? ` — ${appeal.applicant?.wilayat}` : ''}</div></div>
+          <div class="fgrp"><label class="flbl">الدولة</label><div class="fro">${normalizeDisplay(appeal.applicant?.country)}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- بيانات المؤمن عليه -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات المؤمن عليه / المستفيد</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
+      <div class="pb">
+        <div class="fg fg-4">
+          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${appeal.insured?.name || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${appeal.insured?.civil || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${formatDate(appeal.insured?.dob)}</div></div>
+          <div class="fgrp"><label class="flbl">الجنس</label><div class="fro">${appeal.insured?.gender || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${appeal.insured?.nationality || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(appeal.applicant?.phone || appeal.insured?.phone, '96890000000')}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(appeal.applicant?.email || appeal.insured?.email, 'noreply@spf-proto.om')}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ انتهاء البطاقة الشخصية</label><div class="fro">${formatDate(appeal.insured?.civilExpiry)}</div></div>
+          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${appeal.insured?.insuranceStatus === 'نشط' ? 'b-approved' : 'b-rejected'}">${appeal.insured?.insuranceStatus || '—'}</span></div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(appeal.insured?.regDate)}</div></div>
+        </div>
+      </div>
+    </div>`}
+
+    <!-- بيانات جهة العمل -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات جهة العمل</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">اسم جهة العمل</label><div class="fro" style="font-weight:700">${appeal.employer?.name || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro" style="font-family:monospace">${appeal.employer?.cr || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم المنشأة</label><div class="fro" style="font-family:monospace">${normalizeDisplay(appeal.employer?.establishment)}</div></div>
+          <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${appeal.employer?.jobTitle || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الالتحاق بالعمل</label><div class="fro">${formatDate(appeal.employer?.joinDate)}</div></div>
+          <div class="fgrp"><label class="flbl">موقع العمل / الفرع</label><div class="fro">${appeal.employer?.location || '—'}</div></div>
+          ${appeal.employer?.phone ? `<div class="fgrp"><label class="flbl">هاتف جهة العمل</label><div class="fro">${appeal.employer.phone}</div></div>` : ''}
+          <div class="fgrp"><label class="flbl">القطاع</label><div class="fro">${appeal.employer?.sector || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">نوع جهة العمل</label><div class="fro">${appeal.employer?.employerType || '—'}</div></div>
+          ${appeal.employer?.branch ? `<div class="fgrp"><label class="flbl">الفرع</label><div class="fro">${appeal.employer.branch.id} — ${appeal.employer.branch.name} — ${appeal.employer.branch.state}</div></div>` : ''}
         </div>
       </div>
     </div>
@@ -139,7 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="card">
       <div class="ph">
         <h3><div class="pico or">${ICONS.upload}</div>المرفقات <span style="font-size:11px;font-weight:400;color:var(--text3)">(${atts.length} مرفق)</span></h3>
-        <button class="btn btn-secondary btn-xs" onclick="openAddAttachmentModal()">${ICONS.plus} إضافة مرفق</button>
       </div>
       <div class="pb">
         ${atts.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد مرفقات</div>' : atts.map(att => {
@@ -147,9 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
           const icoMap = { pdf: 'file', doc: 'file', docx: 'file', jpg: 'img', jpeg: 'img', png: 'img' };
           return `<div class="att-row"><div class="att-ico ${icoMap[ext] || 'oth'}">${ICONS.file}</div><div class="att-info"><div class="att-name">${att.name}</div><div class="att-meta">${att.type} · رفعه: ${att.uploadedBy} (${att.role}) · ${att.uploadDate} · ${att.size || ''}</div></div><div class="att-acts"><button class="ibtn" title="تحميل" onclick="showToast('جارٍ تحميل الملف...','i')">${ICONS.download}</button></div></div>`;
         }).join('')}
-        <div style="margin-top:10px">
-          ${renderModernUploadComponent({ idPrefix: 'gen-att', subTitle: 'PDF, Word, صور — الحجم الأقصى 20 ميغابايت' })}
-        </div>
       </div>
     </div>
 

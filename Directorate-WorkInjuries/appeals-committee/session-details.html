@@ -1,55 +1,58 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تفاصيل جلسة التظلمات — لجنة التظلمات</title>
-<link rel="stylesheet" href="../shared/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تفاصيل جلسة التظلمات — لجنة التظلمات</title>
+  <link rel="stylesheet" href="../shared/style.css">
 </head>
+
 <body>
-<script src="../shared/config.js"></script>
-<script src="../shared/data.js"></script>
-<script src="../shared/layout.js"></script>
-<script src="../shared/utils.js"></script>
-<script>
-initLayout({ role: 'appeals-committee', activePage: 'sessions-list' });
-setBreadcrumb([{ label: 'جلسات التظلمات', page: 'sessions-list' }, { label: 'تفاصيل الجلسة' }]);
+  <script src="../shared/config.js"></script>
+  <script src="../shared/data.js"></script>
+  <script src="../shared/layout.js"></script>
+  <script src="../shared/utils.js"></script>
+  <script>
+    initLayout({ role: 'appeals-committee', activePage: 'sessions-list' });
+    setBreadcrumb([{ label: 'جلسات التظلمات', page: 'sessions-list' }, { label: 'تفاصيل الجلسة' }]);
 
-const params = new URLSearchParams(window.location.search);
-const sessionId = params.get('id') || 'APP-SES-2025-0023';
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('id') || 'APP-SES-2025-0023';
+    currentRequestId = sessionId;
 
-const session = {
-  id: sessionId,
-  date: '2025-02-05', time: '10:00',
-  status: sessionId === 'APP-SES-2025-0023' ? 'مجدولة' : 'مغلقة',
-  members: [
-    { name: 'د. خالد بن سالم الهاشمي', role: 'رئيس', specialty: 'جراحة العظام', attendance: 'مجدول' },
-    { name: 'د. ريم بنت أحمد المعولية', role: 'عضو', specialty: 'الطب الباطني', attendance: 'مجدول' },
-    { name: 'د. حسن بن علي السيابي', role: 'عضو', specialty: 'طب الأمراض المهنية', attendance: 'مجدول' },
-  ],
-  cases: WI_DATA.appeals.map(a => ({
-    appealId: a.id, name: a.applicant.name,
-    originalReqId: a.originalRequestId, reason: a.appealReason,
-    decisionStatus: 'بانتظار القرار', decision: null
-  }))
-};
+    const session = {
+      id: sessionId,
+      date: '2025-02-05', time: '10:00',
+      status: sessionId === 'APP-SES-2025-0023' ? 'مجدولة' : 'مغلقة',
+      members: [
+        { name: 'د. خالد بن سالم الهاشمي', role: 'رئيس', specialty: 'جراحة العظام', attendance: 'مجدول' },
+        { name: 'د. ريم بنت أحمد المعولية', role: 'عضو', specialty: 'الطب الباطني', attendance: 'مجدول' },
+        { name: 'د. حسن بن علي السيابي', role: 'عضو', specialty: 'طب الأمراض المهنية', attendance: 'مجدول' },
+      ],
+      cases: WI_DATA.appeals.map(a => ({
+        appealId: a.id, name: a.applicant.name,
+        originalReqId: a.originalRequestId, reason: a.appealReason,
+        decisionStatus: 'بانتظار القرار', decision: null
+      }))
+    };
 
-const attendanceState = {};
-const signatureState = {};
-session.members.forEach(m => {
-  attendanceState[m.name] = m.attendance;
-  signatureState[m.name] = 'بانتظار';
-});
+    const attendanceState = {};
+    const signatureState = {};
+    session.members.forEach(m => {
+      attendanceState[m.name] = m.attendance;
+      signatureState[m.name] = 'بانتظار';
+    });
 
-document.addEventListener('DOMContentLoaded', renderPage);
+    document.addEventListener('DOMContentLoaded', renderPage);
 
-function renderPage() {
-  const confirmedCount = Object.values(attendanceState).filter(v => v === 'حاضر').length;
-  const quorum = confirmedCount >= Math.ceil(session.members.length / 2);
-  const allDecisionsDone = session.cases.every(c => c.decisionStatus !== 'بانتظار القرار');
-  const allSigned = Object.values(signatureState).every(v => v === 'تم التوقيع');
+    function renderPage() {
+      const confirmedCount = Object.values(attendanceState).filter(v => v === 'حاضر').length;
+      const quorum = confirmedCount >= Math.ceil(session.members.length / 2);
+      const allDecisionsDone = session.cases.every(c => c.decisionStatus !== 'بانتظار القرار');
+      const allSigned = Object.values(signatureState).every(v => v === 'تم التوقيع');
 
-  getContent().innerHTML = `
+      getContent().innerHTML = `
     <div class="pg-head">
       <div>
         <h1>تفاصيل جلسة لجنة التظلمات</h1>
@@ -63,13 +66,17 @@ function renderPage() {
     <!-- ملخص الجلسة -->
     <div class="card" style="border-right:4px solid var(--primary)">
       <div class="pb-c">
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
+        <div class="req-summary-grid">
           <div><div class="flbl" style="margin-bottom:4px">رقم الجلسة</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${session.id}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">التاريخ والوقت</div><div>${session.date} — ${session.time}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">حالة الجلسة</div><span class="badge ${session.status==='مجدولة'?'b-session':'b-approved'}">${session.status}</span></div>
+          <div><div class="flbl" style="margin-bottom:4px">حالة الجلسة</div><span class="badge ${session.status === 'مجدولة' ? 'b-session' : 'b-approved'}">${session.status}</span></div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ الجلسة</div><div>${session.date}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">وقت الجلسة</div><div>${session.time}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">أعضاء اللجنة</div><div style="font-weight:600">${session.members.length} أعضاء</div></div>
           <div><div class="flbl" style="margin-bottom:4px">الحد الادني للحضور</div>
-            <span class="badge ${quorum?'b-approved':'b-returned'}">${quorum?'الحد الادني مكتمل':'الحد الادني غير مكتمل'}</span>
+            <span class="badge ${quorum ? 'b-approved' : 'b-returned'}">${quorum ? 'الحد الادني مكتمل' : 'الحد الادني غير مكتمل'}</span>
           </div>
+          <div><div class="flbl" style="margin-bottom:4px">التظلمات المدرجة</div><div style="font-weight:600">${session.cases.length} تظلم</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">التوقيعات</div><div style="font-weight:600">${Object.values(signatureState).filter(v => v === 'تم التوقيع').length}/${session.members.length} وقّعوا</div></div>
         </div>
       </div>
     </div>
@@ -89,9 +96,9 @@ function renderPage() {
               <td style="font-weight:600">${m.name}</td>
               <td>${m.specialty}</td>
               <td>${m.role}</td>
-              <td><span class="badge ${attendanceState[m.name]==='حاضر'?'b-approved':attendanceState[m.name]==='اعتذار'?'b-rejected':'b-phead'}">${attendanceState[m.name]}</span></td>
+              <td><span class="badge ${attendanceState[m.name] === 'حاضر' ? 'b-approved' : attendanceState[m.name] === 'اعتذار' ? 'b-rejected' : 'b-phead'}">${attendanceState[m.name]}</span></td>
               <td>
-                ${attendanceState[m.name]==='مجدول' ? `
+                ${attendanceState[m.name] === 'مجدول' ? `
                 <div style="display:flex;gap:6px">
                   <button class="btn btn-accent btn-xs" onclick="confirmAtt('${m.name}','حاضر')">${ICONS.check} حاضر</button>
                   <button class="btn btn-danger btn-xs" onclick="confirmAtt('${m.name}','اعتذار')">${ICONS.x} اعتذار</button>
@@ -112,19 +119,19 @@ function renderPage() {
           <tbody>
             ${session.cases.map((c, i) => `
             <tr>
-              <td>${i+1}</td>
+              <td>${i + 1}</td>
               <td style="font-family:monospace;color:var(--primary);font-weight:700">${c.appealId}</td>
               <td>${c.name}</td>
               <td style="font-family:monospace;font-size:11.5px">${c.originalReqId}</td>
               <td style="font-size:12px">${c.reason}</td>
               <td>
-                <span class="badge ${c.decisionStatus==='بانتظار القرار'?'b-phead':c.decisionStatus==='تم التوقيع'?'b-approved':'b-session'}">
+                <span class="badge ${c.decisionStatus === 'بانتظار القرار' ? 'b-phead' : c.decisionStatus === 'تم التوقيع' ? 'b-approved' : 'b-session'}">
                   ${c.decisionStatus}
                 </span>
               </td>
               <td>
                 <button class="btn btn-primary btn-xs" onclick="openAppealDecision('${c.appealId}','${c.name}','${c.reason}')">
-                  ${c.decisionStatus==='بانتظار القرار'?'الاطلاع على التظلم':'عرض القرار'}
+                  ${c.decisionStatus === 'بانتظار القرار' ? 'الاطلاع على التظلم' : 'عرض القرار'}
                 </button>
               </td>
             </tr>`).join('')}
@@ -138,7 +145,7 @@ function renderPage() {
       <div class="ph">
         <h3><div class="pico gr">${ICONS.pen}</div>التوقيعات الإلكترونية</h3>
         <span style="font-size:12px;color:var(--text3)">
-          ${Object.values(signatureState).filter(v=>v==='تم التوقيع').length} / ${session.members.length} وقّعوا
+          ${Object.values(signatureState).filter(v => v === 'تم التوقيع').length} / ${session.members.length} وقّعوا
         </span>
       </div>
       <div class="pb-0">
@@ -149,12 +156,12 @@ function renderPage() {
             <tr>
               <td style="font-weight:600">${m.name}</td>
               <td>${m.role}</td>
-              <td><span class="badge ${signatureState[m.name]==='تم التوقيع'?'b-approved':'b-phead'}">${signatureState[m.name]}</span></td>
+              <td><span class="badge ${signatureState[m.name] === 'تم التوقيع' ? 'b-approved' : 'b-phead'}">${signatureState[m.name]}</span></td>
               <td>
-                ${signatureState[m.name]==='بانتظار' && allDecisionsDone ? `
+                ${signatureState[m.name] === 'بانتظار' && allDecisionsDone ? `
                 <button class="btn btn-accent btn-sm" onclick="doSign('${m.name}')">${ICONS.pen} توقيع إلكتروني</button>`
-                : signatureState[m.name]==='تم التوقيع' ? `<span class="badge b-approved">تم التوقيع</span>`
-                : `<span style="font-size:11.5px;color:var(--text3)">بانتظار إدخال القرارات أولاً</span>`}
+          : signatureState[m.name] === 'تم التوقيع' ? `<span class="badge b-approved">تم التوقيع</span>`
+            : `<span style="font-size:11.5px;color:var(--text3)">بانتظار إدخال القرارات أولاً</span>`}
               </td>
             </tr>`).join('')}
           </tbody>
@@ -168,36 +175,62 @@ function renderPage() {
       <div class="pb-c">
         <div class="alert alert-s" style="margin-bottom:0">${ICONS.check}<span>اكتملت جميع التوقيعات — سيقوم المقرر بإرسال القرارات النهائية.</span></div>
       </div>` : ''}
+    </div>
+
+    <!-- الملاحظات التشغيلية -->
+    <div class="card op-notes-card collapsed" data-notes-init="0">
+      <div class="ph op-notes-head" onclick="toggleOperationalNotes(this.closest('.op-notes-card'))">
+        <h3><div class="pico gy">${ICONS.note}</div>الملاحظات التشغيلية <span style="font-size:11px;font-weight:400;color:var(--text3)">(لا تغيّر حالة الطلب)</span></h3>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="op-notes-chevron">${ICONS.arrow_left}</span>
+          <button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();openAddNoteModal(currentRequestId)">${ICONS.plus} إضافة ملاحظة</button>
+        </div>
+      </div>
+      <div class="pb">
+        <div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">لا توجد ملاحظات تشغيلية</div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <textarea class="fc" id="quick-note-input" placeholder="أكتب ملاحظة سريعة..." rows="2" style="flex:1"></textarea>
+          <button class="btn btn-secondary btn-sm" style="align-self:flex-end" onclick="quickAddNote()">حفظ</button>
+        </div>
+      </div>
     </div>`;
-}
+    }
 
-function confirmAtt(name, status) {
-  attendanceState[name] = status;
-  showToast(`تم تسجيل ${status==='حاضر'?'حضورك':'اعتذارك'}`, status==='حاضر'?'s':'w');
-  renderPage();
-}
-
-function doSign(name) {
-  confirmAction({
-    title: 'تأكيد التوقيع الإلكتروني',
-    msg: `هل أنت متأكد من توقيعك الإلكتروني على قرارات جلسة التظلمات ${session.id}؟<br>
-          <span style="font-size:12px;color:var(--text3)">التوقيع نهائي ولا يمكن التراجع عنه.</span>`,
-    confirmLabel: 'نعم، توقيع إلكتروني',
-    confirmClass: 'btn-accent',
-    onConfirm: () => {
-      signatureState[name] = 'تم التوقيع';
-      showToast('تم تسجيل توقيعك الإلكتروني بنجاح', 's');
+    function confirmAtt(name, status) {
+      attendanceState[name] = status;
+      showToast(`تم تسجيل ${status === 'حاضر' ? 'حضورك' : 'اعتذارك'}`, status === 'حاضر' ? 's' : 'w');
       renderPage();
     }
-  });
-}
 
-function openAppealDecision(appealId, name, reason) {
-  const appeal = WI_DATA.appeals.find(a => a.id === appealId);
-  openModal({
-    title: `ملخص التظلم — ${appealId}`,
-    size: 'md-lg',
-    body: `
+    function doSign(name) {
+      confirmAction({
+        title: 'تأكيد التوقيع الإلكتروني',
+        msg: `هل أنت متأكد من توقيعك الإلكتروني على قرارات جلسة التظلمات ${session.id}?<br>
+          <span style="font-size:12px;color:var(--text3)">التوقيع نهائي ولا يمكن التراجع عنه.</span>`,
+        confirmLabel: 'نعم، توقيع إلكتروني',
+        confirmClass: 'btn-accent',
+        onConfirm: () => {
+          signatureState[name] = 'تم التوقيع';
+          showToast('تم تسجيل توقيعك الإلكتروني بنجاح', 's');
+          renderPage();
+        }
+      });
+    }
+
+    function quickAddNote() {
+      const v = document.getElementById('quick-note-input')?.value?.trim();
+      if (!v) { showToast('يرجى كتابة الملاحظة', 'w'); return; }
+      showToast('تم حفظ الملاحظة', 's');
+      document.getElementById('quick-note-input').value = '';
+    }
+    function toggleOperationalNotes(card) { card.classList.toggle('collapsed'); }
+
+    function openAppealDecision(appealId, name, reason) {
+      const appeal = WI_DATA.appeals.find(a => a.id === appealId);
+      openModal({
+        title: `ملخص التظلم — ${appealId}`,
+        size: 'md-lg',
+        body: `
       <div class="alert alert-i" style="margin-bottom:14px">
         ${ICONS.info}
         <span>القرار يُدخَل عبر مقرر لجنة التظلمات — هذه الشاشة للاطلاع فقط.</span>
@@ -213,9 +246,10 @@ function openAppealDecision(appealId, name, reason) {
         <div class="fgrp"><label class="flbl">القرار المتظلم منه</label><div class="fro"><span class="badge b-rejected">${appeal.decision.type}</span> — ${appeal.decision.issuer}</div></div>
         <div class="fgrp span-full"><label class="flbl">تفاصيل سبب التظلم</label><div class="fro" style="min-height:50px;align-items:flex-start;padding-top:8px">${appeal.appealDetails}</div></div>
       </div>` : `<p style="color:var(--text3)">لا توجد بيانات</p>`}`,
-    footer: `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`
-  });
-}
-</script>
+        footer: `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`
+      });
+    }
+  </script>
 </body>
+
 </html>

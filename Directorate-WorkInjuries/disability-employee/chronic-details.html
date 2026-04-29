@@ -1,105 +1,108 @@
 ﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تفاصيل طلب الأمراض المستديمة — موظف قسم الإعاقة</title>
-<link rel="stylesheet" href="../shared/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تفاصيل طلب الأمراض المستديمة — موظف قسم الإعاقة</title>
+  <link rel="stylesheet" href="../shared/style.css">
 </head>
+
 <body>
-<script src="../shared/config.js"></script>
-<script src="../shared/data.js"></script>
-<script src="../shared/layout.js"></script>
-<script src="../shared/utils.js"></script>
-<script>
-initLayout({ role: 'disability-employee', activePage: 'chronic-list' });
-const params = new URLSearchParams(window.location.search);
-const requestedId = params.get('id') || 'CHR-2025-000156';
-const me = WI_DATA.users.disability_employee.name;
+  <script src="../shared/config.js"></script>
+  <script src="../shared/data.js"></script>
+  <script src="../shared/layout.js"></script>
+  <script src="../shared/utils.js"></script>
+  <script>
+    initLayout({ role: 'disability-employee', activePage: 'chronic-list' });
+    const params = new URLSearchParams(window.location.search);
+    const requestedId = params.get('id') || 'CHR-2025-000156';
+    const me = WI_DATA.users.disability_employee.name;
 
-const refData = WI_DATA.chronicIncoming.find(d => d.requestId === requestedId)
-  || WI_DATA.chronicIncoming.find(d => d.hasRequest)
-  || WI_DATA.chronicIncoming[0];
+    const refData = WI_DATA.chronicIncoming.find(d => d.requestId === requestedId)
+      || WI_DATA.chronicIncoming.find(d => d.hasRequest)
+      || WI_DATA.chronicIncoming[0];
 
-currentRequestId = refData?.requestId || requestedId;
-setBreadcrumb([{ label: 'الأمراض المستديمة', page: 'chronic-list' }, { label: `تفاصيل ${currentRequestId}` }]);
+    currentRequestId = refData?.requestId || requestedId;
+    setBreadcrumb([{ label: 'الأمراض المستديمة', page: 'chronic-list' }, { label: `تفاصيل ${currentRequestId}` }]);
 
-const req = {
-  id: currentRequestId,
-  status: refData?.requestStatus || 'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة',
-  submitDate: refData?.requestSubmitDate || refData?.provenDate || '2025-01-05',
-  lastUpdate: refData?.requestLastUpdate || '2025-01-05 14:00',
-  assignedTo: refData?.assignedTo || 'نورة بنت سالم الزدجالية',
-  checkedOutBy: refData?.checkedOutBy || 'نورة بنت سالم الزدجالية',
-  applicant: {
-    role: refData?.applicantRole || 'العامل / المؤمن عليه / المواطن',
-    name: refData?.applicantName || '—',
-    civil: refData?.civil || '—',
-    phone: refData?.applicantPhone || '96890000000',
-    phone1: refData?.applicantPhone1 || refData?.applicantPhone || '96890000000',
-    phone2: refData?.applicantPhone2 || '96891111222',
-    email: refData?.applicantEmail || 'noreply@spf-proto.om',
-    region: refData?.applicantRegion || 'محافظة مسقط',
-    wilayat: refData?.applicantWilayat || 'بوشر',
-    country: refData?.applicantCountry || 'سلطنة عُمان',
-    civilExpiry: refData?.applicantCivilExpiry || '2030-12-31',
-  },
-  insured: {
-    name: refData?.applicantName || '—',
-    civil: refData?.civil || '—',
-    insurance: refData?.insuranceNo || 'IN-20180090123',
-    dob: refData?.insuredDob || '1975-03-10',
-    gender: refData?.insuredGender || 'ذكر',
-    nationality: refData?.insuredNationality || 'عُماني',
-    insuranceStatus: refData?.insuranceStatus || 'نشط',
-    regDate: refData?.insuranceRegDate || '2018-01-01',
-    subType: refData?.insuranceSubType || 'إلزامي',
-  },
-  insurance: {
-    status: refData?.insuranceStatus || 'نشط',
-    subType: refData?.insuranceSubType || 'إلزامي',
-    insuranceType: refData?.insuranceType || 'تأمين العاملين في القطاع الخاص',
-    schemeCategory: refData?.insuranceSchemeCategory || 'داخل السلطنة - القطاع الخاص',
-    otherBenefits: refData?.otherBenefits || 'لا يوجد',
-  },
-  employer: {
-    name: refData?.employerName || '—',
-    cr: refData?.employerCr || '—',
-    joinDate: refData?.employerJoinDate || null,
-  },
-  medical: {
-    uniqueRequestId: refData?.uniqueRequestId,
-    hospital: refData?.hospital || '—',
-    doctor: refData?.doctor || '—',
-    diagnosis: refData?.diagnosis || '—',
-    detailedDiagnosis: refData?.detailedDiagnosis,
-    permanentDiseaseReport: refData?.permanentDiseaseReport,
-    visitDateTime: refData?.visitDateTime,
-    provenDate: refData?.provenDate || '—',
-    severityDate: refData?.severityDate,
-    chronicDisease: refData?.chronicDisease,
-    affectedSystem: refData?.affectedSystem,
-    severityIndex: refData?.severityIndex,
-    firstRequestRef: refData?.firstRequestRef,
-    overallCondition: refData?.overallCondition,
-  },
-  attachments: [], notes: [],
-  timeline: [
-    { action: 'تم استلام التشخيص من وزارة الصحة', actor: 'وزارة الصحة', role: 'آلي', time: '2024-11-22 08:00', fromStatus: '', toStatus: 'تم استلام التشخيص من المؤسسة الصحية المعالجة', note: '', type: 'default' },
-    { action: 'تم تقديم الطلب من قِبل المؤمن عليه', actor: refData?.applicantName || '—', role: 'العامل', time: refData?.requestLastUpdate || '2025-01-05 14:00', fromStatus: 'تم استلام التشخيص', toStatus: refData?.requestStatus || 'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة', note: '', type: 'default' },
-  ]
-};
+    const req = {
+      id: currentRequestId,
+      status: refData?.requestStatus || 'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة',
+      submitDate: refData?.requestSubmitDate || refData?.provenDate || '2025-01-05',
+      lastUpdate: refData?.requestLastUpdate || '2025-01-05 14:00',
+      assignedTo: refData?.assignedTo || 'نورة بنت سالم الزدجالية',
+      checkedOutBy: refData?.checkedOutBy || 'نورة بنت سالم الزدجالية',
+      applicant: {
+        role: refData?.applicantRole || 'العامل / المؤمن عليه / المواطن',
+        name: refData?.applicantName || '—',
+        civil: refData?.civil || '—',
+        phone: refData?.applicantPhone || '96890000000',
+        phone1: refData?.applicantPhone1 || refData?.applicantPhone || '96890000000',
+        phone2: refData?.applicantPhone2 || '96891111222',
+        email: refData?.applicantEmail || 'noreply@spf-proto.om',
+        region: refData?.applicantRegion || 'محافظة مسقط',
+        wilayat: refData?.applicantWilayat || 'بوشر',
+        country: refData?.applicantCountry || 'سلطنة عُمان',
+        civilExpiry: refData?.applicantCivilExpiry || '2030-12-31',
+      },
+      insured: {
+        name: refData?.applicantName || '—',
+        civil: refData?.civil || '—',
+        insurance: refData?.insuranceNo || 'IN-20180090123',
+        dob: refData?.insuredDob || '1975-03-10',
+        gender: refData?.insuredGender || 'ذكر',
+        nationality: refData?.insuredNationality || 'عُماني',
+        insuranceStatus: refData?.insuranceStatus || 'نشط',
+        regDate: refData?.insuranceRegDate || '2018-01-01',
+        subType: refData?.insuranceSubType || 'إلزامي',
+      },
+      insurance: {
+        status: refData?.insuranceStatus || 'نشط',
+        subType: refData?.insuranceSubType || 'إلزامي',
+        insuranceType: refData?.insuranceType || 'تأمين العاملين في القطاع الخاص',
+        schemeCategory: refData?.insuranceSchemeCategory || 'داخل السلطنة - القطاع الخاص',
+        otherBenefits: refData?.otherBenefits || 'لا يوجد',
+      },
+      employer: {
+        name: refData?.employerName || '—',
+        cr: refData?.employerCr || '—',
+        joinDate: refData?.employerJoinDate || null,
+      },
+      medical: {
+        uniqueRequestId: refData?.uniqueRequestId,
+        hospital: refData?.hospital || '—',
+        doctor: refData?.doctor || '—',
+        diagnosis: refData?.diagnosis || '—',
+        detailedDiagnosis: refData?.detailedDiagnosis,
+        permanentDiseaseReport: refData?.permanentDiseaseReport,
+        visitDateTime: refData?.visitDateTime,
+        provenDate: refData?.provenDate || '—',
+        severityDate: refData?.severityDate,
+        chronicDisease: refData?.chronicDisease,
+        affectedSystem: refData?.affectedSystem,
+        severityIndex: refData?.severityIndex,
+        firstRequestRef: refData?.firstRequestRef,
+        overallCondition: refData?.overallCondition,
+      },
+      attachments: [], notes: [],
+      timeline: [
+        { action: 'تم استلام التشخيص من وزارة الصحة', actor: 'وزارة الصحة', role: 'آلي', time: '2024-11-22 08:00', fromStatus: '', toStatus: 'تم استلام التشخيص من المؤسسة الصحية المعالجة', note: '', type: 'default' },
+        { action: 'تم تقديم الطلب من قِبل المؤمن عليه', actor: refData?.applicantName || '—', role: 'العامل', time: refData?.requestLastUpdate || '2025-01-05 14:00', fromStatus: 'تم استلام التشخيص', toStatus: refData?.requestStatus || 'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة', note: '', type: 'default' },
+      ]
+    };
 
-document.addEventListener('DOMContentLoaded', () => {
-  const statusPending = 'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة';
-  const canAct = req.status === statusPending && (req.checkedOutBy === me || !req.checkedOutBy);
+    document.addEventListener('DOMContentLoaded', () => {
+      const statusPending = 'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة';
+      const canAct = req.status === statusPending && (req.checkedOutBy === me || !req.checkedOutBy);
+      const isSamePerson = req.applicant?.civil && req.insured?.civil && req.applicant.civil === req.insured.civil;
 
-  const med = req.medical;
-  const atts = req.attachments || [];
-  const notes = req.notes || [];
-  const tl = req.timeline || [];
+      const med = req.medical;
+      const atts = req.attachments || [];
+      const notes = req.notes || [];
+      const tl = req.timeline || [];
 
-  getContent().innerHTML = `
+      getContent().innerHTML = `
     <div class="pg-head">
       <div>
         <h1>تفاصيل طلب منفعة الأمراض المستديمة</h1>
@@ -115,14 +118,40 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb-c">
         <div class="req-summary-grid">
           <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">الحالة الحالية</div>${statusBadge(req.status)}</div>
+          <div><div class="flbl" style="margin-bottom:4px">حالة الطلب</div>${statusBadge(req.status)}</div>
           <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div style="font-size:12.5px">${formatDate(req.submitDate)}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">المسند إليه</div><div style="font-size:12.5px;font-weight:600">${normalizeDisplay(req.assignedTo)}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">الحجز الحالي</div><div style="font-size:12.5px;font-weight:600">${normalizeDisplay(req.checkedOutBy)}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">مقدم الطلب</div><div style="font-size:12.5px;font-weight:600">${req.applicant.name}</div><div style="font-size:11px;color:var(--text3)">${req.applicant.role}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر تحديث</div><div style="font-size:12px;color:var(--text2)">${req.lastUpdate || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">المسند إليه</div><div style="font-size:12px;color:var(--text2)">${normalizeDisplay(req.assignedTo)}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الحجز الحالي</div><div style="font-size:12px;font-weight:600">${normalizeDisplay(req.checkedOutBy)}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ الإغلاق المتوقع</div><div style="font-size:12px">${formatDate(req.expectedClosureDate) || '—'}</div></div>
         </div>
       </div>
     </div>
 
+    ${isSamePerson ? `
+    <!-- بيانات المؤمن عليه / المستفيد (نفس الشخص) -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات المؤمن عليه / المستفيد</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant.role}</div></div>
+          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.insured.name || req.applicant.name}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.insured.civil}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${formatDate(req.insured.dob)}</div></div>
+          <div class="fgrp"><label class="flbl">الجنس</label><div class="fro">${req.insured.gender}</div></div>
+          <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${req.insured.nationality}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${req.applicant.phone}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${req.applicant.email}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ انتهاء البطاقة الشخصية</label><div class="fro">${formatDate(req.applicant.civilExpiry)}</div></div>
+          <div class="fgrp"><label class="flbl">المحافظة / الولاية</label><div class="fro">${req.applicant.region} — ${req.applicant.wilayat}</div></div>
+          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${req.insured.insuranceStatus === 'نشط' ? 'b-approved' : 'b-rejected'}">${req.insured.insuranceStatus}</span></div></div>
+          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${req.insured.subType}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(req.insured.regDate)}</div></div>
+        </div>
+      </div>
+    </div>` : `
+    <!-- بيانات مقدم الطلب -->
     <div class="card">
       <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب</h3></div>
       <div class="pb">
@@ -130,9 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant.role}</div></div>
           <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.applicant.name}</div></div>
           <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.applicant.civil}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف الأساسي</label><div class="fro">${req.applicant.phone}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف 1</label><div class="fro">${req.applicant.phone1}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف 2</label><div class="fro">${req.applicant.phone2}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${req.applicant.phone}</div></div>
           <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${req.applicant.email}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ انتهاء البطاقة الشخصية</label><div class="fro">${formatDate(req.applicant.civilExpiry)}</div></div>
           <div class="fgrp"><label class="flbl">المحافظة / الولاية</label><div class="fro">${req.applicant.region} — ${req.applicant.wilayat}</div></div>
@@ -141,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
+    <!-- بيانات المؤمن عليه -->
     <div class="card card-ro">
       <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات المؤمن عليه / المستفيد</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
       <div class="pb">
@@ -150,9 +178,34 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${formatDate(req.insured.dob)}</div></div>
           <div class="fgrp"><label class="flbl">الجنس</label><div class="fro">${req.insured.gender}</div></div>
           <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${req.insured.nationality}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${req.applicant.phone}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${req.applicant.email}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ انتهاء البطاقة الشخصية</label><div class="fro">${formatDate(req.applicant.civilExpiry)}</div></div>
           <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${req.insured.insuranceStatus === 'نشط' ? 'b-approved' : 'b-rejected'}">${req.insured.insuranceStatus}</span></div></div>
           <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${req.insured.subType}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(req.insured.regDate)}</div></div>
+        </div>
+      </div>
+    </div>`}
+
+    <!-- بيانات جهة العمل -->
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات جهة العمل</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">اسم جهة العمل</label><div class="fro" style="font-weight:700">${req.employer?.name || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro" style="font-family:monospace">${req.employer?.cr || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم المنشأة</label><div class="fro" style="font-family:monospace">${normalizeDisplay(req.employer?.establishment)}</div></div>
+          <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${req.employer?.jobTitle || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الالتحاق بالعمل</label><div class="fro">${formatDate(req.employer?.joinDate)}</div></div>
+          <div class="fgrp"><label class="flbl">موقع العمل / الفرع</label><div class="fro">${req.employer?.location || '—'}</div></div>
+          ${req.employer?.phone ? `<div class="fgrp"><label class="flbl">هاتف جهة العمل</label><div class="fro">${req.employer.phone}</div></div>` : ''}
+          <div class="fgrp"><label class="flbl">القطاع</label><div class="fro">${req.employer?.sector || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">نوع جهة العمل</label><div class="fro">${req.employer?.employerType || '—'}</div></div>
+          ${req.employer?.branch ? `<div class="fgrp"><label class="flbl">الفرع</label><div class="fro">${req.employer.branch.id} — ${req.employer.branch.name} — ${req.employer.branch.state}</div></div>` : ''}
+        </div>
+      </div>
+    </div>
         </div>
       </div>
     </div>
@@ -198,17 +251,13 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="card">
       <div class="ph">
         <h3><div class="pico or">${ICONS.upload}</div>المرفقات <span style="font-size:11px;font-weight:400;color:var(--text3)">(${atts.length} مرفق)</span></h3>
-        <button class="btn btn-secondary btn-xs" onclick="openAddAttachmentModal()">${ICONS.plus} إضافة مرفق</button>
       </div>
       <div class="pb">
         ${atts.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد مرفقات</div>' : atts.map(att => {
-          const ext = att.name?.split('.').pop()?.toLowerCase() || 'oth';
-          const icoMap = { pdf: 'file', doc: 'file', docx: 'file', jpg: 'img', jpeg: 'img', png: 'img' };
-          return `<div class="att-row"><div class="att-ico ${icoMap[ext] || 'oth'}">${ICONS.file}</div><div class="att-info"><div class="att-name">${att.name}</div><div class="att-meta">${att.type} · رفعه: ${att.uploadedBy} (${att.role}) · ${att.uploadDate} · ${att.size || ''}</div></div><div class="att-acts"><button class="ibtn" title="تحميل" onclick="showToast('جارٍ تحميل الملف...','i')">${ICONS.download}</button></div></div>`;
-        }).join('')}
-        <div style="margin-top:10px">
-          ${renderModernUploadComponent({ idPrefix: 'gen-att', subTitle: 'PDF, Word, صور — الحجم الأقصى 20 ميغابايت' })}
-        </div>
+        const ext = att.name?.split('.').pop()?.toLowerCase() || 'oth';
+        const icoMap = { pdf: 'file', doc: 'file', docx: 'file', jpg: 'img', jpeg: 'img', png: 'img' };
+        return `<div class="att-row"><div class="att-ico ${icoMap[ext] || 'oth'}">${ICONS.file}</div><div class="att-info"><div class="att-name">${att.name}</div><div class="att-meta">${att.type} · رفعه: ${att.uploadedBy} (${att.role}) · ${att.uploadDate} · ${att.size || ''}</div></div><div class="att-acts"><button class="ibtn" title="تحميل" onclick="showToast('جارٍ تحميل الملف...','i')">${ICONS.download}</button></div></div>`;
+      }).join('')}
       </div>
     </div>
 
@@ -254,20 +303,21 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb">
         <div class="tl">
           ${tl.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد أحداث</div>' : tl.map(e => {
-            const dc = e.type === 'success' ? 's' : e.type === 'danger' ? 'd' : e.type === 'warning' ? 'w' : '';
-            const ic = e.type === 'success' ? ICONS.check : e.type === 'danger' ? ICONS.x : e.type === 'warning' ? ICONS.warn : ICONS.clock;
-            return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus ? `<div class="tl-states">${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus}</span><span>${ICONS.arrow_right}</span>` : ''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus}</span></div>` : ''}${e.note ? `<div class="tl-note">${e.note}</div>` : ''}</div></div>`;
-          }).join('')}
+        const dc = e.type === 'success' ? 's' : e.type === 'danger' ? 'd' : e.type === 'warning' ? 'w' : '';
+        const ic = e.type === 'success' ? ICONS.check : e.type === 'danger' ? ICONS.x : e.type === 'warning' ? ICONS.warn : ICONS.clock;
+        return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus ? `<div class="tl-states">${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus}</span><span>${ICONS.arrow_right}</span>` : ''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus}</span></div>` : ''}${e.note ? `<div class="tl-note">${e.note}</div>` : ''}</div></div>`;
+      }).join('')}
         </div>
       </div>
     </div>`;
-});
+    });
 
-function chronicDecision(type) {
-  const msgs = { رئيس: 'تم توجيه الطلب لرئيس القسم', استيفاء: 'تم إعادة الطلب للمواطن لاستيفاء البيانات', رفض: 'تم رفض الطلب' };
-  showToast(msgs[type], type === 'رفض' ? 'w' : 's');
-  setTimeout(() => window.location.href = 'chronic-list.html', 1500);
-}
-</script>
+    function chronicDecision(type) {
+      const msgs = { رئيس: 'تم توجيه الطلب لرئيس القسم', استيفاء: 'تم إعادة الطلب للمواطن لاستيفاء البيانات', رفض: 'تم رفض الطلب' };
+      showToast(msgs[type], type === 'رفض' ? 'w' : 's');
+      setTimeout(() => window.location.href = 'chronic-list.html', 1500);
+    }
+  </script>
 </body>
+
 </html>
