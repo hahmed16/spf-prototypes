@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>طلب عرض مباشر جديد — العامل</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data-referrals.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'worker', activePage: 'referrals-list' });
+setBreadcrumb([{ label: 'طلبات العرض المباشر', page: 'referrals-list' }, { label: 'طلب جديد' }]);
+const u = WI_DATA.users.worker;
+const emp = u.employerHistory?.find(e => e.current) || {};
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head"><div><h1>طلب عرض مباشر على مؤسسة صحية مرخصة</h1><p>يُستخدم هذا الطلب لطلب تقييم مباشر من مؤسسة صحية مرخصة</p></div></div>
+    <div class="card"><div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب والمؤمن عليه</h3></div>
+      <div class="pb"><div class="fg fg-2">
+        <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${u.name}</div></div>
+        <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro">${u.civil}</div></div>
+        <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${u.phone}</div></div>
+        <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${u.email}</div></div>
+      </div></div>
+    </div>
+    <div class="card"><div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات جهة العمل الحالية</h3></div>
+      <div class="pb"><div class="fg fg-2">
+        <div class="fgrp"><label class="flbl">اسم جهة العمل</label><div class="fro">${emp.name || '—'}</div></div>
+        <div class="fgrp"><label class="flbl">السجل التجاري</label><div class="fro">${emp.cr || '—'}</div></div>
+      </div></div>
+    </div>
+    <div class="card"><div class="ph"><h3><div class="pico or">${ICONS.note}</div>بيانات الطلب</h3></div>
+      <div class="pb">
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">نوع الحالة <span class="req">*</span></label><select class="fc" id="request-category"><option>إصابة عمل</option><option>مرض مهني</option><option>إعاقة</option><option>أمراض مستديمة</option></select></div>
+          <div class="fgrp"><label class="flbl">المؤسسة الصحية المفضلة</label><input class="fc" id="preferred-institution" placeholder="مثال: مستشفى النور التخصصي"></div>
+          <div class="fgrp span-full"><label class="flbl">سبب طلب العرض المباشر <span class="req">*</span></label><textarea class="fc" id="referral-reason" rows="3" placeholder="اذكر سبب طلب العرض المباشر..."></textarea></div>
+          <div class="fgrp span-full"><label class="flbl">ملاحظات إضافية</label><textarea class="fc" id="referral-notes" rows="3" placeholder="أي معلومات إضافية تدعم الطلب"></textarea></div>
+        </div>
+        ${renderModernUploadComponent({ idPrefix: 'referral-worker', title: 'المرفقات' })}
+      </div>
+    </div>
+    <div class="form-actions"><button class="btn btn-primary" onclick="submitReferral()">${ICONS.check} إرسال الطلب</button><button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.x} إلغاء</button></div>`;
+});
+
+function submitReferral() {
+  const reason = document.getElementById('referral-reason').value.trim();
+  if (!reason) { showToast('سبب طلب العرض المباشر مطلوب', 'w'); return; }
+  const id = `REF-2025-${String(WI_DATA.referrals.length + 121).padStart(6, '0')}`;
+  WI_DATA.referrals.unshift(createDirectReferralRequest({
+    id,
+    sourceChannel: 'بوابة المؤمن عليه',
+    createdByRole: 'worker',
+    status: 'تم تقديم طلب العرض المباشر — بانتظار مراجعة موظف طلبات العرض المباشر',
+    submitDate: new Date().toISOString().slice(0, 10),
+    lastUpdate: new Date().toISOString().slice(0, 16).replace('T', ' '),
+    lastUpdatedBy: u.name,
+    expectedClosureDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+    applicant: { name: u.name, civil: u.civil, role: 'العامل / المؤمن عليه / المواطن', phone: u.phone, email: u.email },
+    insured: { name: u.name, civil: u.civil, insurance: 'INS-NEW', insuranceStatus: 'نشط', subType: 'إلزامي', phone: u.phone, email: u.email },
+    employer: { name: emp.name || '', cr: emp.cr || '', jobTitle: '', employerType: 'خاص' },
+    referral: {
+      reason,
+      notes: document.getElementById('referral-notes').value.trim(),
+      preferredInstitution: document.getElementById('preferred-institution').value.trim(),
+      requestCategory: document.getElementById('request-category').value
+    },
+    attachments: [],
+    timeline: [
+      { action: 'تم تقديم الطلب', actor: u.name, role: 'العامل', time: new Date().toISOString().slice(0, 16).replace('T', ' '), fromStatus: '', toStatus: 'تم تقديم طلب العرض المباشر — بانتظار مراجعة موظف طلبات العرض المباشر', note: reason, type: 'default', phone: u.phone }
+    ],
+    assignedTo: WI_DATA.users.direct_referral_employee.name
+  }));
+  showToast('تم إرسال الطلب بنجاح', 's');
+  setTimeout(() => window.location.href = 'referrals-list.html', 1000);
+}
+</script>
+</body>
+</html>

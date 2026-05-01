@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استلام استعلام تقاعد جديد — موظف قسم الإعاقة والأمراض المستديمة</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'disability-employee', activePage: 'disability-retirement-new' });
+setBreadcrumb([{ label: 'منفعة الإعاقة والأمراض المستديمة' }, { label: 'استعلامات التقاعد' }, { label: 'استلام استعلام جديد' }]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>استلام استعلام تقاعد جديد</h1><p>استلام استعلام من نظام المستحقات حول تقاعد شخص ذوي إعاقة</p></div>
+    </div>
+
+    <div class="alert alert-i">
+      ${ICONS.info}
+      <div>
+        <strong>ملاحظة هامة:</strong> يتم استلام استعلامات التقاعد من نظام المستحقات تلقائياً.
+        يمكنك أيضاً إضافة استعلام يدوياً إذا لزم الأمر.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">
+        <h3>بيانات الاستعلام</h3>
+      </div>
+      <div class="card-b">
+        <form id="retirement-form" onsubmit="handleSubmit(event)">
+          <div class="fg fg-2">
+            <div class="fgrp">
+              <label class="flbl">رقم الاستعلام <span class="req">*</span></label>
+              <input type="text" class="fc" id="inquiry-id" placeholder="RET-2025-XXXXXX" required>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">تاريخ الاستلام <span class="req">*</span></label>
+              <input type="date" class="fc" id="received-date" required>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h4 style="margin-bottom:12px">بيانات المستفيد</h4>
+          <div class="fg fg-2">
+            <div class="fgrp">
+              <label class="flbl">الاسم الكامل <span class="req">*</span></label>
+              <input type="text" class="fc" id="applicant-name" required>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">الرقم المدني <span class="req">*</span></label>
+              <input type="text" class="fc" id="applicant-civil" placeholder="90XXXXXXXXX" required>
+            </div>
+          </div>
+
+          <div class="fg fg-2">
+            <div class="fgrp">
+              <label class="flbl">رقم الهاتف</label>
+              <input type="text" class="fc" id="applicant-phone" placeholder="968XXXXXXXXX">
+            </div>
+            <div class="fgrp">
+              <label class="flbl">البريد الإلكتروني</label>
+              <input type="email" class="fc" id="applicant-email">
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h4 style="margin-bottom:12px">بيانات الإعاقة</h4>
+          <div class="fg fg-2">
+            <div class="fgrp">
+              <label class="flbl">رقم بطاقة الإعاقة <span class="req">*</span></label>
+              <input type="text" class="fc" id="disability-card" placeholder="DIS-CARD-XXXXXXX" required>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">تاريخ إصدار البطاقة</label>
+              <input type="date" class="fc" id="card-issue-date">
+            </div>
+          </div>
+
+          <div class="fg fg-2">
+            <div class="fgrp">
+              <label class="flbl">نوع الإعاقة <span class="req">*</span></label>
+              <select class="fc" id="disability-type" required>
+                <option value="">اختر نوع الإعاقة</option>
+                <option value="إعاقة حركية">إعاقة حركية</option>
+                <option value="إعاقة بصرية">إعاقة بصرية</option>
+                <option value="إعاقة سمعية">إعاقة سمعية</option>
+                <option value="إعاقة عقلية">إعاقة عقلية</option>
+                <option value="إعاقة متعددة">إعاقة متعددة</option>
+                <option value="أخرى">أخرى</option>
+              </select>
+            </div>
+            <div class="fgrp">
+              <label class="flbl">درجة الإعاقة <span class="req">*</span></label>
+              <select class="fc" id="disability-level" required>
+                <option value="">اختر درجة الإعاقة</option>
+                <option value="درجة أولى">درجة أولى</option>
+                <option value="درجة ثانية">درجة ثانية</option>
+                <option value="درجة ثالثة">درجة ثالثة</option>
+                <option value="درجة رابعة">درجة رابعة</option>
+                <option value="درجة خامسة">درجة خامسة</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="fgrp">
+            <label class="flbl">تفاصيل الإعاقة</label>
+            <textarea class="fc" id="disability-details" rows="3" placeholder="وصف تفصيلي للإعاقة..."></textarea>
+          </div>
+
+          <div class="divider"></div>
+
+          <h4 style="margin-bottom:12px">معلومات إضافية</h4>
+          <div class="fg fg-2">
+            <div class="fgrp">
+              <label class="flbl">جهة العمل الحالية</label>
+              <input type="text" class="fc" id="current-employer">
+            </div>
+            <div class="fgrp">
+              <label class="flbl">تاريخ التقاعد المطلوب</label>
+              <input type="date" class="fc" id="retirement-date">
+            </div>
+          </div>
+
+          <div class="fgrp">
+            <label class="flbl">ملاحظات</label>
+            <textarea class="fc" id="notes" rows="2" placeholder="أي ملاحظات إضافية..."></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+              ${ICONS.check} استلام الاستعلام
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='disability-retirement-list.html'">
+              ${ICONS.x} إلغاء
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>`;
+
+  // Set default date to today
+  document.getElementById('received-date').valueAsDate = new Date();
+});
+
+function handleSubmit(event) {
+  event.preventDefault();
+
+  const formData = {
+    id: document.getElementById('inquiry-id').value,
+    receivedDate: document.getElementById('received-date').value,
+    applicant: {
+      name: document.getElementById('applicant-name').value,
+      civil: document.getElementById('applicant-civil').value,
+      phone: document.getElementById('applicant-phone').value,
+      email: document.getElementById('applicant-email').value,
+    },
+    disabilityCard: document.getElementById('disability-card').value,
+    cardIssueDate: document.getElementById('card-issue-date').value,
+    disabilityType: document.getElementById('disability-type').value,
+    disabilityLevel: document.getElementById('disability-level').value,
+    disabilityDetails: document.getElementById('disability-details').value,
+    currentEmployer: document.getElementById('current-employer').value,
+    retirementDate: document.getElementById('retirement-date').value,
+    notes: document.getElementById('notes').value,
+    status: 'تم استلام الاستعلام — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة',
+    checkedOutBy: null,
+    assignedTo: WI_DATA.users.disability_employee.name,
+    timeline: [
+      {
+        action: 'تم استلام الاستعلام',
+        actor: WI_DATA.users.disability_employee.name,
+        role: 'موظف قسم الإعاقة',
+        time: new Date().toISOString().slice(0, 16).replace('T', ' '),
+        fromStatus: '',
+        toStatus: 'تم استلام الاستعلام — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة',
+        note: 'تم استلام الاستعلام من نظام المستحقات',
+        type: 'default'
+      }
+    ],
+    attachments: [],
+    notes: []
+  };
+
+  // Add to data (in real implementation, this would be an API call)
+  if (!WI_DATA.disabilityRetirement) {
+    WI_DATA.disabilityRetirement = [];
+  }
+  WI_DATA.disabilityRetirement.push(formData);
+
+  showToast('تم استلام الاستعلام بنجاح', 's');
+
+  setTimeout(() => {
+    window.location.href = 'disability-retirement-list.html';
+  }, 1500);
+}
+</script>
+</body>
+</html>

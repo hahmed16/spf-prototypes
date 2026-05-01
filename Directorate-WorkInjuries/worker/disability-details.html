@@ -8,6 +8,14 @@
 </head>
 <body>
 <script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
 <script src="../shared/data.js"></script>
 <script src="../shared/layout.js"></script>
 <script src="../shared/utils.js"></script>
@@ -16,7 +24,7 @@ initLayout({ role: 'worker', activePage: 'disability-list' });
 
 const params = new URLSearchParams(window.location.search);
 const reqId = params.get('id') || 'DIS-2024-000198';
-const req = WI_DATA.disability.find(r => r.id === reqId) || WI_DATA.disability[0];
+const req = (WI_DATA.disability || []).find(r => r.id === reqId) || (WI_DATA.disability || [])[0];
 currentRequestId = req.id;
 
 setBreadcrumb([

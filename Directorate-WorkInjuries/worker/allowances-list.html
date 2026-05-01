@@ -8,6 +8,14 @@
 </head>
 <body>
 <script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
 <script src="../shared/data.js"></script>
 <script src="../shared/layout.js"></script>
 <script src="../shared/utils.js"></script>
@@ -82,11 +90,16 @@ function render() {
                 <th>الحالة</th>
                 <th>تاريخ التقديم</th>
                 <th>آخر تحديث</th>
+                <th>الأيام المتبقية</th>
                 <th>الإجراءات</th>
               </tr>
             </thead>
             <tbody>
-              ${filtered.map(r=>`
+              ${filtered.map(r=> {
+                const meta = deriveRequestSummaryMeta(r);
+                const remainingDaysClass = getRemainingDaysClass(meta.remainingDays);
+                const remainingDaysLabel = getRemainingDaysLabel(meta.remainingDays);
+                return `
               <tr style="${r.status==='تم إعادة الطلب لاستيفاء البيانات'?'background:var(--warning-l)':''}">
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
                 <td>${getSubmittedByName(r)}</td>
@@ -94,6 +107,7 @@ function render() {
                 <td>${statusBadge(r.status)}</td>
                 <td style="font-size:12px">${r.submitDate}</td>
                 <td style="font-size:12px;color:var(--text3)">${r.lastUpdate}</td>
+                <td><span class="sla-days ${remainingDaysClass}">${remainingDaysLabel}</span></td>
                 <td>
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='allowances-details.html?id=${r.id}'" title="عرض التفاصيل">${ICONS.eye}</button>
@@ -101,7 +115,8 @@ function render() {
                     ${r.status==='تم رفض الطلب'?`<button class="btn btn-warning btn-xs" onclick="window.location.href='../worker/appeals-new.html?ref=${r.id}'">تظلم</button>`:''}
                   </div>
                 </td>
-              </tr>`).join('')}
+              </tr>`;
+                }).join('')}
             </tbody>
           </table>
         </div>`}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>تفاصيل طلب العرض المباشر — موظف طلبات العرض المباشر</title><link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data-users.js"></script><script src="../shared/data-allowances.js"></script><script src="../shared/data-disability.js"></script><script src="../shared/data-chronic.js"></script><script src="../shared/data-appeals.js"></script><script src="../shared/data-licensing.js"></script><script src="../shared/data-sessions.js"></script><script src="../shared/data-disability-retirement.js"></script><script src="../shared/data-referrals.js"></script><script src="../shared/data.js"></script><script src="../shared/layout.js"></script><script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'direct-referral-employee', activePage: 'referrals-list' });
+const req = WI_DATA.referrals.find(r => r.id === new URLSearchParams(window.location.search).get('id'));
+const me = WI_DATA.users.direct_referral_employee.name;
+const myPhone = getCurrentUserPhone();
+setBreadcrumb([{ label: 'طلبات العرض المباشر', page: 'referrals-list' }, { label: req ? req.id : 'التفاصيل' }]);
+document.addEventListener('DOMContentLoaded', () => {
+  if (!req) { renderContent('<div class="card"><div class="pb"><div class="empty-st">الطلب غير موجود</div></div></div>'); return; }
+  getContent().innerHTML = `<div class="pg-head"><div><h1>تفاصيل طلب العرض المباشر</h1><p>${req.id}</p></div><div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.arrow_left} رجوع</button></div></div>
+  <div class="card"><div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب والمؤمن عليه</h3></div><div class="pb"><div class="fg fg-2">
+  <div class="fgrp"><label class="flbl">مقدم الطلب</label><div class="fro">${req.applicant.name}</div></div><div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant.role}</div></div>
+  <div class="fgrp"><label class="flbl">المؤمن عليه</label><div class="fro">${req.insured.name}</div></div><div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${req.applicant.phone || req.insured.phone || '—'}</div></div>
+  </div></div></div>
+  <div class="card"><div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات جهة العمل</h3></div><div class="pb"><div class="fg fg-2"><div class="fgrp"><label class="flbl">اسم الجهة</label><div class="fro">${req.employer.name || '—'}</div></div><div class="fgrp"><label class="flbl">السجل التجاري</label><div class="fro">${req.employer.cr || '—'}</div></div></div></div></div>
+  <div class="card"><div class="ph"><h3><div class="pico or">${ICONS.note}</div>سبب الطلب والمرفقات</h3></div><div class="pb"><div class="fgrp"><label class="flbl">سبب الطلب</label><div class="fro">${req.referral.reason}</div></div><div class="fgrp"><label class="flbl">الملاحظات</label><div class="fro">${req.referral.notes || '—'}</div></div></div></div>
+  <div class="card"><div class="ph"><h3><div class="pico bl">${ICONS.clock}</div>السجل الزمني</h3></div><div class="pb">${renderTimelineList(req.timeline)}</div></div>
+  <div class="card"><div class="ph"><h3><div class="pico rd">${ICONS.edit}</div>الإجراءات</h3></div><div class="pb"><div class="act-panel">
+  ${!req.checkedOutBy ? `<button class="btn btn-primary" onclick="checkout()">${ICONS.lock} حجز الطلب</button>` : req.checkedOutBy===me ? `<button class="btn btn-secondary" onclick="release()">${ICONS.unlock} تحرير الطلب</button><button class="btn btn-primary" onclick="approve()">${ICONS.check} اعتماد وإحالة للجنة الطبية</button><button class="btn btn-warning" onclick="returnForCompletion()">${ICONS.refresh} إعادة للاستيفاء</button>` : `<div class="alert alert-i">${ICONS.info}<span>الطلب محجوز بواسطة ${req.checkedOutBy}</span></div>`}
+  </div></div></div>`;
+});
+function checkout(){ req.checkedOutBy=me; req.status='قيد مراجعة موظف طلبات العرض المباشر'; req.timeline.push({ action:'حجز الطلب', actor:me, role:'موظف طلبات العرض المباشر', time:new Date().toISOString().slice(0,16).replace('T',' '), fromStatus:'تم تقديم طلب العرض المباشر — بانتظار مراجعة موظف طلبات العرض المباشر', toStatus:req.status, note:'تم الحجز للمراجعة', type:'info', phone:myPhone }); location.reload(); }
+function release(){ req.checkedOutBy=''; req.status='تم تقديم طلب العرض المباشر — بانتظار مراجعة موظف طلبات العرض المباشر'; req.timeline.push({ action:'تحرير الطلب', actor:me, role:'موظف طلبات العرض المباشر', time:new Date().toISOString().slice(0,16).replace('T',' '), fromStatus:'قيد مراجعة موظف طلبات العرض المباشر', toStatus:req.status, note:'تم تحرير الطلب', type:'info', phone:myPhone }); location.reload(); }
+function approve(){ req.checkedOutBy=''; req.status='تم اعتماد طلب العرض المباشر — بانتظار مراجعة موظف قسم اللجان الطبية'; req.lastUpdate=new Date().toISOString().slice(0,16).replace('T',' '); req.lastUpdatedBy=me; req.timeline.push({ action:'اعتماد وإحالة للجان الطبية', actor:me, role:'موظف طلبات العرض المباشر', time:req.lastUpdate, fromStatus:'قيد مراجعة موظف طلبات العرض المباشر', toStatus:req.status, note:'تم اعتماد الطلب وإحالته لمسار اللجان الطبية', type:'success', phone:myPhone }); location.reload(); }
+function returnForCompletion(){ const note=prompt('سبب الإعادة للاستيفاء:'); if(!note) return; req.checkedOutBy=''; req.status='تمت إعادة طلب العرض المباشر لاستيفاء البيانات'; req.timeline.push({ action:'إعادة للاستيفاء', actor:me, role:'موظف طلبات العرض المباشر', time:new Date().toISOString().slice(0,16).replace('T',' '), fromStatus:'قيد مراجعة موظف طلبات العرض المباشر', toStatus:req.status, note, type:'warning', phone:myPhone }); location.reload(); }
+</script>
+</body>
+</html>

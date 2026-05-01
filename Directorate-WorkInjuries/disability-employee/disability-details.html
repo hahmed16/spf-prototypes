@@ -10,15 +10,23 @@
 
 <body>
   <script src="../shared/config.js"></script>
+  <script src="../shared/data-users.js"></script>
+  <script src="../shared/data-allowances.js"></script>
+  <script src="../shared/data-disability.js"></script>
+  <script src="../shared/data-chronic.js"></script>
+  <script src="../shared/data-appeals.js"></script>
+  <script src="../shared/data-licensing.js"></script>
+  <script src="../shared/data-sessions.js"></script>
+  <script src="../shared/data-disability-retirement.js"></script>
   <script src="../shared/data.js"></script>
   <script src="../shared/layout.js"></script>
   <script src="../shared/utils.js"></script>
   <script>
     initLayout({ role: 'disability-employee', activePage: 'disability-list' });
     const params = new URLSearchParams(window.location.search);
-    const req = WI_DATA.disability.find(r => r.id === params.get('id')) || WI_DATA.disability[0];
+    const req = (WI_DATA.disability || []).find(r => r.id === params.get('id')) || (WI_DATA.disability || [])[0];
     currentRequestId = req.id;
-    const me = WI_DATA.users.disability_employee.name;
+    const me = WI_DATA.users?.disability_employee?.name || 'Unknown User';
     const isCheckedOutByMe = req.checkedOutBy === me;
     setBreadcrumb([{ label: 'منفعة الإعاقة', page: 'disability-list' }, { label: `تفاصيل ${req.id}` }]);
 

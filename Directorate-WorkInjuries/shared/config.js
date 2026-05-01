@@ -26,6 +26,8 @@ const WI_CONFIG = {
      19 مقرر لجنة التظلمات                               داخلي
      20 مقرر اللجنة الطبية الإشرافية                    داخلي
      21 المفوض عن المستشفيات والمؤسسات الصحية المختلفة  خارجي
+     22 لجنة الأمراض المهنية                             خارجي
+     23 منسق الإحالات والتحويلات                        داخلي
   */
 
   roles: {
@@ -41,6 +43,7 @@ const WI_CONFIG = {
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
         { label: 'طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
         { label: 'طلبات منفعة الإعاقة', page: 'disability-list', icon: 'list', badge: 'disability' },
+        { label: 'طلبات العرض المباشر', page: 'referrals-list', icon: 'clipboard', badge: 'referrals' },
         { label: 'التشخيصات الواردة (الأمراض المستديمة)', page: 'chronic-incoming', icon: 'inbox', badge: 'chronic-incoming' },
         { label: 'طلبات الأمراض المستديمة', page: 'chronic-list', icon: 'list', badge: null },
         { label: 'التظلمات', page: 'appeals-list', icon: 'list', badge: null },
@@ -57,6 +60,7 @@ const WI_CONFIG = {
       sidebar: [
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
         { label: 'طلبات بدلات الانقطاع عن العمل', page: 'allowances-list', icon: 'list', badge: 'allowances' },
+        { label: 'طلبات العرض المباشر', page: 'referrals-list', icon: 'clipboard', badge: 'referrals' },
         { label: 'التظلمات', page: 'appeals-list', icon: 'list', badge: null },
       ]
     },
@@ -168,6 +172,7 @@ const WI_CONFIG = {
         { label: 'الحالات الواردة (الأمراض المستديمة)', page: 'chronic-incoming', icon: 'inbox', badge: 'chronic-incoming' },
         { label: 'طلبات الأمراض المستديمة', page: 'chronic-list', icon: 'list', badge: 'chronic' },
         { label: 'إعادة التقييم الدوري (الأمراض المستديمة)', page: 'chronic-reassessment', icon: 'refresh', badge: 'reassessment' },
+        { label: 'استعلامات التقاعد', page: 'disability-retirement-list', icon: 'file', badge: 'retirement' },
         { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
       ]
     },
@@ -186,6 +191,7 @@ const WI_CONFIG = {
         { label: 'الحالات الواردة (الأمراض المستديمة)', page: 'chronic-incoming', icon: 'inbox', badge: 'chronic-incoming' },
         { label: 'طلبات الأمراض المستديمة', page: 'chronic-list', icon: 'list', badge: 'chronic' },
         { label: 'إعادة التقييم الدوري (الأمراض المستديمة)', page: 'chronic-reassessment', icon: 'refresh', badge: 'reassessment' },
+        { label: 'استعلامات التقاعد', page: 'disability-retirement-list', icon: 'file', badge: 'retirement' },
         { label: 'إعادة تخصيص الطلبات', page: 'reassignment', icon: 'switch', badge: null },
         { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
       ]
@@ -203,6 +209,7 @@ const WI_CONFIG = {
         { label: 'طلبات عرض المؤسسات الصحية الواردة', page: 'referrals-list', icon: 'inbox', badge: 'referrals' },
         { label: 'الحالات المحالة للمؤسسات الصحية', page: 'referred-list', icon: 'list', badge: null },
         { label: 'جلسات اللجان الطبية', page: 'sessions-list', icon: 'calendar', badge: null },
+        { label: 'قرارات اللجان الطبية', page: 'committee-decisions', icon: 'gavel', badge: 'decisions' },
         { label: 'التظلمات', page: 'appeals-list', icon: 'list', badge: 'appeals' },
         { label: 'جلسات لجنة التظلمات', page: 'appeals-sessions-list', icon: 'calendar', badge: null },
         { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
@@ -221,6 +228,7 @@ const WI_CONFIG = {
         { label: 'طلبات عرض المؤسسات الصحية الواردة', page: 'referrals-list', icon: 'inbox', badge: 'referrals' },
         { label: 'الحالات المحالة للمؤسسات الصحية', page: 'referred-list', icon: 'list', badge: null },
         { label: 'جلسات اللجان الطبية', page: 'sessions-list', icon: 'calendar', badge: null },
+        { label: 'قرارات اللجان الطبية', page: 'committee-decisions', icon: 'gavel', badge: 'decisions' },
         { label: 'التظلمات', page: 'appeals-list', icon: 'list', badge: 'appeals' },
         { label: 'جلسات لجنة التظلمات', page: 'appeals-sessions-list', icon: 'calendar', badge: null },
         { label: 'إعادة تخصيص الطلبات', page: 'reassignment', icon: 'switch', badge: null },
@@ -369,6 +377,36 @@ const WI_CONFIG = {
       ]
     },
 
+    'referral-coordinator': {
+      id: 23,
+      nameAr: 'منسق الإحالات والتحويلات',
+      type: 'internal',
+      folder: 'referral-coordinator',
+      avatarInitials: 'من',
+      canCheckout: true,
+      sidebar: [
+        { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
+        { label: 'طلبات الإحالة الواردة', page: 'referrals-list', icon: 'inbox', badge: 'referrals' },
+        { label: 'الحالات المحالة للمؤسسات الصحية', page: 'referred-list', icon: 'list', badge: null },
+        { label: 'قرارات اللجان الطبية', page: 'committee-decisions', icon: 'gavel', badge: 'decisions' },
+        { label: 'التظلمات', page: 'appeals-list', icon: 'list', badge: 'appeals' },
+        { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
+      ]
+    },
+
+    'direct-referral-employee': {
+      id: 24,
+      nameAr: 'موظف طلبات العرض المباشر',
+      type: 'internal',
+      folder: 'direct-referral-employee',
+      avatarInitials: 'عر',
+      canCheckout: true,
+      sidebar: [
+        { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
+        { label: 'طلبات العرض المباشر', page: 'referrals-list', icon: 'clipboard', badge: 'referrals' },
+      ]
+    },
+
   },
 
   /* ── ألوان حالات الطلبات ── */
@@ -383,6 +421,12 @@ const WI_CONFIG = {
     'قيد المراجعة من موظف قسم الإجازات المرضية':                        'b-sick',
     'بانتظار اعتماد رئيس قسم الإجازات المرضية':                         'b-phead',
     'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية': 'b-comm',
+    'تم اعتماد طلب العرض المباشر — بانتظار مراجعة موظف قسم اللجان الطبية': 'b-comm',
+    'تم اعتماد طلب العرض المباشر — بانتظار مراجعة رئيس قسم اللجان الطبية': 'b-phead',
+    'تم اعتماد طلب العرض المباشر — بانتظار إحالة المقرر': 'b-referred',
+    'تمت إعادة طلب العرض المباشر لاستيفاء البيانات': 'b-returned',
+    'قيد مراجعة موظف طلبات العرض المباشر': 'b-sick',
+    'تم تقديم طلب العرض المباشر — بانتظار مراجعة موظف طلبات العرض المباشر': 'b-submitted',
     'تم الموافقة على العرض على المؤسسات الصحية المرخصة — بانتظار إحالة المقرر': 'b-comm',
     'تم الإحالة إلى مقرر المؤسسة الصحية المرخصة — بانتظار جدولة جلسة':  'b-referred',
     'تم جدولة جلسة للعرض على المؤسسة الصحية المرخصة':                   'b-session',
@@ -490,8 +534,8 @@ const WI_CONFIG = {
     'sickleave-head': ['بانتظار اعتماد رئيس قسم الإجازات المرضية'],
     'disability-employee': ['تم تقديم طلب منفعة الأشخاص ذوي الإعاقة — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة'],
     'disability-head': ['بانتظار اعتماد رئيس قسم الإعاقة والأمراض المستديمة', 'بانتظار مراجعة رئيس قسم الإعاقة والأمراض المستديمة'],
-    'committees-employee': ['تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية', 'تم تقديم طلب التظلم — بانتظار مراجعة موظف قسم اللجان الطبية', 'تم الموافقة على العرض على المؤسسات الصحية المرخصة — بانتظار إحالة المقرر'],
-    'committees-head': ['بانتظار اعتماد رئيس قسم اللجان الطبية', 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة رئيس قسم اللجان الطبية', 'تم الموافقة على العرض على المؤسسات الصحية المرخصة — بانتظار إحالة المقرر'],
+    'committees-employee': ['تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية', 'تم اعتماد طلب العرض المباشر — بانتظار مراجعة موظف قسم اللجان الطبية', 'تم تقديم طلب التظلم — بانتظار مراجعة موظف قسم اللجان الطبية', 'تم الموافقة على العرض على المؤسسات الصحية المرخصة — بانتظار إحالة المقرر'],
+    'committees-head': ['بانتظار اعتماد رئيس قسم اللجان الطبية', 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة رئيس قسم اللجان الطبية', 'تم اعتماد طلب العرض المباشر — بانتظار مراجعة رئيس قسم اللجان الطبية', 'تم الموافقة على العرض على المؤسسات الصحية المرخصة — بانتظار إحالة المقرر', 'تم اعتماد طلب العرض المباشر — بانتظار إحالة المقرر'],
     'licensing-employee': ['تم تقديم طلب الترخيص / التجديد — بانتظار مراجعة موظف قسم التراخيص والرقابة'],
     'licensing-head': ['بانتظار اعتماد رئيس قسم التراخيص والرقابة'],
     'institution-rapporteur': ['مجدولة', 'بانتظار إكمال بيانات الجلسة']

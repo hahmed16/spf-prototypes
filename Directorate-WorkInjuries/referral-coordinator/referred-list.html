@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الحالات المحالة للمؤسسات الصحية — منسق الإحالات والتحويلات</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data-referrals.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'referral-coordinator', activePage: 'referred-list' });
+setBreadcrumb([{ label: 'الإحالات والتحويلات' }, { label: 'الحالات المحالة' }]);
+
+let activeTab = 'all';
+let searchQuery = '';
+
+document.addEventListener('DOMContentLoaded', render);
+
+function render() {
+  const referredCases = getReferredCases();
+  const filtered = filterReferredCases(referredCases, activeTab, searchQuery);
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>الحالات المحالة للمؤسسات الصحية</h1>
+        <p>${referredCases.length} حالة محالة إجمالي</p>
+      </div>
+    </div>
+
+    ${renderUnifiedFilterBar({ onSearch: 'updateSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+
+    <div class="card">
+      <div class="ttabs">
+        ${[
+          { key: 'all', label: 'الكل', count: referredCases.length },
+          { key: 'pending', label: 'قيد المعالجة', count: referredCases.filter(r => r.status.includes('قيد')).length },
+          { key: 'session', label: 'جلسة مجدولة', count: referredCases.filter(r => r.status.includes('جلسة')).length },
+          { key: 'decided', label: 'صدر قرار', count: referredCases.filter(r => r.status.includes('قرار')).length },
+        ].map(t => `<div class="ttab ${activeTab === t.key ? 'act' : ''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>نوع الطلب</th>
+                <th>المستفيد</th>
+                <th>المؤسسة الصحية</th>
+                <th>تاريخ الإحالة</th>
+                <th>تاريخ الجلسة</th>
+                <th>الحالة</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.length === 0 ? `
+                <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text3)">لا توجد حالات محالة</td></tr>
+              ` : filtered.map(r => `
+                <tr>
+                  <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                  <td>${r.requestType}</td>
+                  <td>${r.beneficiaryName}</td>
+                  <td>${r.institutionName}</td>
+                  <td style="font-size:12px">${r.referralDate}</td>
+                  <td style="font-size:12px">${r.sessionDate || '—'}</td>
+                  <td>${statusBadge(r.status)}</td>
+                  <td>
+                    <div style="display:flex;gap:4px">
+                      <button class="ibtn" onclick="viewDetails('${r.id}')" title="عرض التفاصيل">${ICONS.eye}</button>
+                      ${r.status.includes('قيد') ? `
+                        <button class="ibtn" onclick="followUp('${r.id}')" title="متابعة الحالة">${ICONS.bell}</button>
+                      ` : ''}
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function setTab(tab) {
+  activeTab = tab;
+  render();
+}
+
+function updateSearch(val) {
+  searchQuery = val;
+  render();
+}
+
+function getReferredCases() {
+  const referredCases = [];
+
+  // Get licensing requests that have been referred to institutions
+  WI_DATA.licensing.forEach(req => {
+    if (req.status.includes('إحالة') || req.status.includes('جلسة')) {
+      referredCases.push({
+        id: req.id,
+        requestType: 'ترخيص',
+        beneficiaryName: req.institution.name,
+        institutionName: req.assignedInstitution || 'اللجنة الطبية الإشرافية',
+        referralDate: req.submitDate,
+        sessionDate: req.sessionDate,
+        status: req.status
+      });
+    }
+  });
+
+  // Get appeals that have been referred
+  WI_DATA.appeals.forEach(appeal => {
+    if (appeal.status.includes('إحالة') || appeal.status.includes('جلسة')) {
+      referredCases.push({
+        id: appeal.id,
+        requestType: 'تظلم',
+        beneficiaryName: appeal.applicant.name,
+        institutionName: appeal.assignedInstitution || 'لجنة التظلمات',
+        referralDate: appeal.submitDate,
+        sessionDate: appeal.sessionDate,
+        status: appeal.status
+      });
+    }
+  });
+
+  // Get direct referral requests referred to institutions
+  WI_DATA.referrals.forEach(req => {
+    if (req.status.includes('إحالة المقرر') || req.status.includes('جلسة') || req.status.includes('قرار')) {
+      referredCases.push({
+        id: req.id,
+        requestType: req.requestType,
+        beneficiaryName: req.insured.name,
+        institutionName: req.referral.preferredInstitution || 'مؤسسة صحية مرخصة',
+        referralDate: req.submitDate,
+        sessionDate: req.sessionDate,
+        status: req.status
+      });
+    }
+  });
+
+  return referredCases.sort((a, b) => new Date(b.referralDate) - new Date(a.referralDate));
+}
+
+function filterReferredCases(cases, tab, query) {
+  let filtered = cases;
+
+  if (tab !== 'all') {
+    if (tab === 'pending') {
+      filtered = cases.filter(r => r.status.includes('قيد'));
+    } else if (tab === 'session') {
+      filtered = cases.filter(r => r.status.includes('جلسة'));
+    } else if (tab === 'decided') {
+      filtered = cases.filter(r => r.status.includes('قرار'));
+    }
+  }
+
+  if (query) {
+    const lowerQuery = query.toLowerCase();
+    filtered = filtered.filter(r =>
+      r.id.toLowerCase().includes(lowerQuery) ||
+      r.beneficiaryName.toLowerCase().includes(lowerQuery) ||
+      r.institutionName.toLowerCase().includes(lowerQuery)
+    );
+  }
+
+  return filtered;
+}
+
+function viewDetails(id) {
+  showToast(`عرض تفاصيل الحالة ${id}`, 'i');
+}
+
+function followUp(id) {
+  showToast(`متابعة الحالة ${id}`, 'i');
+}
+</script>
+</body>
+</html>

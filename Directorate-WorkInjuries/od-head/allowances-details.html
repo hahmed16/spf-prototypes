@@ -8,13 +8,21 @@
 </head>
 <body>
 <script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
 <script src="../shared/data.js"></script>
 <script src="../shared/layout.js"></script>
 <script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'od-head', activePage: 'allowances-list' });
 const params = new URLSearchParams(window.location.search);
-const req = WI_DATA.allowances.find(r => r.id === params.get('id')) || WI_DATA.allowances[1];
+const req = (WI_DATA.allowances || []).find(r => r.id === params.get('id')) || (WI_DATA.allowances || [])[1];
 currentRequestId = req.id;
 setBreadcrumb([{ label: 'بدلات الانقطاع', page: 'allowances-list' }, { label: `تفاصيل ${req.id}` }]);
 

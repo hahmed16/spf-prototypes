@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة البيانات — منسق الإحالات والتحويلات</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'referral-coordinator', activePage: 'dashboard' });
+setBreadcrumb([{ label: 'الإحالات والتحويلات' }, { label: 'لوحة البيانات' }]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const stats = WI_DATA.dashboardStats['referral-coordinator'] || [
+    { label: 'الإحالات الواردة اليوم', value: 12, type: 'p' },
+    { label: 'القرارات المعلقة', value: 5, type: 'w' },
+    { label: 'التظلمات الجديدة', value: 3, type: 'd' },
+    { label: 'الإحالات المنفذة هذا الأسبوع', value: 28, type: 's' },
+  ];
+
+  const recentReferrals = WI_DATA.licensing.slice(0, 5);
+  const recentAppeals = WI_DATA.appeals.slice(0, 5);
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>لوحة البيانات</h1><p>نظرة عامة على الإحالات والتحويلات</p></div>
+    </div>
+
+    <div class="stats-grid">
+      ${stats.map(stat => `
+        <div class="stat-card stat-${stat.type}">
+          <div class="stat-val">${stat.value}</div>
+          <div class="stat-lbl">${stat.label}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="fg fg-2">
+      <div class="card">
+        <div class="card-hd">
+          <h3>آخر الإحالات الواردة</h3>
+        </div>
+        <div class="card-b">
+          ${recentReferrals.length === 0 ? `
+            <div style="text-align:center;padding:20px;color:var(--text3)">لا توجد إحالات حديثة</div>
+          ` : recentReferrals.map(r => `
+            <div style="padding:12px 0;border-bottom:1px solid var(--g200)">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div style="font-weight:600">${r.id}</div>
+                  <div style="font-size:12px;color:var(--text2)">${r.institution.name}</div>
+                </div>
+                <span class="badge ${r.status.includes('اعتماد') ? 'b-approved' : 'b-submitted'}">${r.status.substring(0, 30)}...</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd">
+          <h3>آخر التظلمات</h3>
+        </div>
+        <div class="card-b">
+          ${recentAppeals.length === 0 ? `
+            <div style="text-align:center;padding:20px;color:var(--text3)">لا توجد تظلمات حديثة</div>
+          ` : recentAppeals.map(a => `
+            <div style="padding:12px 0;border-bottom:1px solid var(--g200)">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div style="font-weight:600">${a.id}</div>
+                  <div style="font-size:12px;color:var(--text2)">${a.applicant.name}</div>
+                </div>
+                <span class="badge ${a.status.includes('اعتماد') ? 'b-approved' : 'b-submitted'}">${a.status.substring(0, 30)}...</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">
+        <h3>إجراءات سريعة</h3>
+      </div>
+      <div class="card-b">
+        <div class="fg fg-3">
+          <button class="btn btn-primary" onclick="window.location.href='referrals-list.html'">
+            ${ICONS.inbox} عرض الإحالات الواردة
+          </button>
+          <button class="btn btn-secondary" onclick="window.location.href='committee-decisions.html'">
+            ${ICONS.gavel} عرض قرارات اللجان
+          </button>
+          <button class="btn btn-secondary" onclick="window.location.href='appeals-list.html'">
+            ${ICONS.shield} عرض التظلمات
+          </button>
+        </div>
+      </div>
+    </div>`;
+});
+</script>
+</body>
+</html>

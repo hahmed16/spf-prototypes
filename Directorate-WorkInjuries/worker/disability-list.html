@@ -8,6 +8,14 @@
 </head>
 <body>
 <script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
 <script src="../shared/data.js"></script>
 <script src="../shared/layout.js"></script>
 <script src="../shared/utils.js"></script>
@@ -45,9 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>` : `
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم الطلب</th><th>مقدم الطلب</th><th>رقم بطاقة الإعاقة</th><th>حالة البطاقة</th><th>حالة الطلب</th><th>تاريخ التقديم</th><th></th></tr></thead>
+            <thead><tr><th>رقم الطلب</th><th>مقدم الطلب</th><th>رقم بطاقة الإعاقة</th><th>حالة البطاقة</th><th>حالة الطلب</th><th>تاريخ التقديم</th><th>الأيام المتبقية</th><th></th></tr></thead>
             <tbody>
-              ${myReqs.map(r=>`
+              ${myReqs.map(r=> {
+                const meta = deriveRequestSummaryMeta(r);
+                const remainingDaysClass = getRemainingDaysClass(meta.remainingDays);
+                const remainingDaysLabel = getRemainingDaysLabel(meta.remainingDays);
+                return `
               <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
                 <td>${getSubmittedByName(r)}</td>
@@ -55,8 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><span class="badge ${r.card.status==='سارية'?'b-card-valid':r.card.status==='منتهية'?'b-card-expired':'b-card-cancelled'}">${r.card.status}</span></td>
                 <td>${statusBadge(r.status)}</td>
                 <td>${r.submitDate}</td>
+                <td><span class="sla-days ${remainingDaysClass}">${remainingDaysLabel}</span></td>
                 <td><button class="ibtn" onclick="window.location.href='disability-details.html?id=${r.id}'">${ICONS.eye}</button></td>
-              </tr>`).join('')}
+              </tr>`;
+                }).join('')}
             </tbody>
           </table>
         </div>`}

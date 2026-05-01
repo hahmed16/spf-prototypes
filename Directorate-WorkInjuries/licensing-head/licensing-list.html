@@ -4,8 +4,18 @@
 <title>قائمة الطلبات والمؤسسات — رئيس قسم التراخيص والرقابة</title>
 <link rel="stylesheet" href="../shared/style.css"></head>
 <body>
-<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
-<script src="../shared/layout.js"></script><script src="../shared/utils.js"></script>
+<script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'licensing-head', activePage: 'licensing-list' });
 setBreadcrumb([{ label: 'التراخيص والرقابة' }, { label: 'قائمة الطلبات والمؤسسات' }]);
@@ -62,11 +72,16 @@ function render() {
                 <th>حالة الترخيص</th>
                 <th>تاريخ الانتهاء</th>
                 <th>تاريخ التقديم</th>
+                <th>الأيام المتبقية</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              ${filtered.map(r=>`
+              ${filtered.map(r=> {
+                const meta = deriveRequestSummaryMeta(r);
+                const remainingDaysClass = getRemainingDaysClass(meta.remainingDays);
+                const remainingDaysLabel = getRemainingDaysLabel(meta.remainingDays);
+                return `
               <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
                 <td>${getSubmittedByName(r)}</td>
@@ -76,13 +91,16 @@ function render() {
                 <td>${r.activeLicense?`<span class="badge b-active">نشط</span>`:r.status.includes('رفض')?`<span class="badge b-rejected">مرفوض</span>`:`<span class="badge b-phead">معلق</span>`}</td>
                 <td style="font-size:12px">${r.activeLicense?.expiryDate||'—'}</td>
                 <td style="font-size:12px">${r.submitDate}</td>
+                <td><span class="sla-days ${remainingDaysClass}">${remainingDaysLabel}</span></td>
                 <td>
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='licensing-details.html?id=${r.id}'">${ICONS.eye}</button>
                     <button class="ibtn" onclick="window.location.href='institution-file.html?id=${r.id}'" title="ملف المؤسسة">${ICONS.file}</button>
+                    ${!r.suspended?`<button class="ibtn" onclick="doSuspend('${r.id}')" title="تعليق الطلب">${ICONS.pause}</button>`:`<button class="ibtn" onclick="doResume('${r.id}')" title="استئناف الطلب">${ICONS.play}</button>`}
                   </div>
                 </td>
-              </tr>`).join('')}
+              </tr>`;
+                }).join('')}
             </tbody>
           </table>
         </div>
@@ -92,4 +110,54 @@ function render() {
 function setTab(t){ activeTab=t; render(); }
 function updateSearch(val) { searchQuery = val; render(); }
 function toggleAll() { showAllStages = !showAllStages; render(); }
+function doSuspend(id){
+  const reason=prompt('سبب التعليق:');
+  if(reason){
+    const notes=prompt('ملاحظات إضافية (اختياري):');
+    const r=reqs.find(x=>x.id===id);
+    if(r){
+      r.suspended=true;
+      r.suspensionReason=reason;
+      r.suspensionNotes=notes||'';
+      r.suspendedBy=WI_DATA.users.licensing_head.name;
+      r.suspendedDate=new Date().toISOString().slice(0,10);
+      r.timeline.push({
+        action:'تعليق الطلب',
+        actor:WI_DATA.users.licensing_head.name,
+        role:'رئيس قسم التراخيص',
+        time:new Date().toISOString().slice(0,16).replace('T',' '),
+        fromStatus:r.status,
+        toStatus:r.status,
+        note:`تعليق: ${reason}${notes?` (${notes})`:''}`,
+        type:'warning'
+      });
+      r.lastUpdate=new Date().toISOString().slice(0,16).replace('T',' ');
+      r.lastUpdatedBy=WI_DATA.users.licensing_head.name;
+    }
+    showToast(`تم تعليق ${id}`,'w');
+    render();
+  }
+}
+function doResume(id){
+  const r=reqs.find(x=>x.id===id);
+  if(r){
+    r.suspended=false;
+    r.resumedBy=WI_DATA.users.licensing_head.name;
+    r.resumedDate=new Date().toISOString().slice(0,10);
+    r.timeline.push({
+      action:'استئناف الطلب',
+      actor:WI_DATA.users.licensing_head.name,
+      role:'رئيس قسم التراخيص',
+      time:new Date().toISOString().slice(0,16).replace('T',' '),
+      fromStatus:r.status,
+      toStatus:r.status,
+      note:'تم استئناف الطلب',
+      type:'success'
+    });
+    r.lastUpdate=new Date().toISOString().slice(0,16).replace('T',' ');
+    r.lastUpdatedBy=WI_DATA.users.licensing_head.name;
+  }
+  showToast(`تم استئناف ${id}`,'s');
+  render();
+}
 </script></body></html>

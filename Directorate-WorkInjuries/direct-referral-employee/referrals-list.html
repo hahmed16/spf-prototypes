@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>طلبات العرض المباشر — موظف طلبات العرض المباشر</title><link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data-users.js"></script><script src="../shared/data-allowances.js"></script><script src="../shared/data-disability.js"></script><script src="../shared/data-chronic.js"></script><script src="../shared/data-appeals.js"></script><script src="../shared/data-licensing.js"></script><script src="../shared/data-sessions.js"></script><script src="../shared/data-disability-retirement.js"></script><script src="../shared/data-referrals.js"></script><script src="../shared/data.js"></script><script src="../shared/layout.js"></script><script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'direct-referral-employee', activePage: 'referrals-list' });
+setBreadcrumb([{ label: 'طلبات العرض المباشر' }]);
+const me = WI_DATA.users.direct_referral_employee.name;
+let searchQuery = '';
+document.addEventListener('DOMContentLoaded', render);
+function render() {
+  const rows = getFilteredData({ role: 'direct-referral-employee', data: WI_DATA.referrals, query: searchQuery, showAll: true });
+  getContent().innerHTML = `<div class="pg-head"><div><h1>طلبات العرض المباشر الواردة</h1><p>${rows.length} طلب</p></div></div>
+  ${renderUnifiedFilterBar({ onSearch: 'updateSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+  <div class="card"><div class="pb-0"><div class="tbl-wrap"><table class="dtbl"><thead><tr><th>رقم الطلب</th><th>قناة التقديم</th><th>المستفيد</th><th>نوع الحالة</th><th>الحالة</th><th>الحجز</th><th></th></tr></thead><tbody>
+  ${rows.map(r => `<tr><td style="font-family:monospace;color:var(--primary);font-weight:700">${r.id}</td><td>${r.sourceChannel}</td><td>${r.insured.name}</td><td>${r.referral.requestCategory || '—'}</td><td>${statusBadge(r.status)}</td><td>${r.checkedOutBy || 'غير محجوز'}</td><td><div style="display:flex;gap:4px"><button class="ibtn" onclick="window.location.href='referrals-details.html?id=${r.id}'">${ICONS.eye}</button>${!r.checkedOutBy ? `<button class="ibtn" onclick="doCheckout('${r.id}')">${ICONS.lock}</button>` : r.checkedOutBy===me ? `<button class="ibtn" onclick="doCheckin('${r.id}')">${ICONS.unlock}</button>`:''}</div></td></tr>`).join('')}
+  </tbody></table></div></div></div>`;
+}
+function updateSearch(val) { searchQuery = val; render(); }
+function doCheckout(id) { const r = WI_DATA.referrals.find(x=>x.id===id); if(r){ r.checkedOutBy=me; r.status='قيد مراجعة موظف طلبات العرض المباشر'; } render(); }
+function doCheckin(id) { const r = WI_DATA.referrals.find(x=>x.id===id); if(r){ r.checkedOutBy=''; r.status='تم تقديم طلب العرض المباشر — بانتظار مراجعة موظف طلبات العرض المباشر'; } render(); }
+</script>
+</body>
+</html>

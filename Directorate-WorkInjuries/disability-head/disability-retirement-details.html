@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل استعلام التقاعد — رئيس قسم الإعاقة والأمراض المستديمة</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/workflow-stages.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'disability-head', activePage: 'disability-retirement-list' });
+const inquiryId = new URLSearchParams(window.location.search).get('id');
+const inquiry = WI_DATA.disabilityRetirement.find(r => r.id === inquiryId);
+const me = WI_DATA.users.disability_head.name;
+const myPhone = getCurrentUserPhone();
+
+if (!inquiry) {
+  document.addEventListener('DOMContentLoaded', () => renderContent(`<div class="card"><div class="pb"><div class="empty-st">${ICONS.warn}<p>الاستعلام غير موجود</p></div></div></div>`));
+} else {
+  currentRequestId = inquiry.id;
+  setBreadcrumb([{ label: 'منفعة الإعاقة والأمراض المستديمة', page: 'dashboard' }, { label: 'استعلامات التقاعد', page: 'disability-retirement-list' }, { label: inquiry.id }]);
+  document.addEventListener('DOMContentLoaded', render);
+}
+
+function render() {
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>اعتماد استعلام التقاعد</h1><p>${inquiry.id}</p></div>
+      <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='disability-retirement-list.html'">${ICONS.arrow_left} رجوع</button></div>
+    </div>
+    ${renderWorkflowPath(inquiry, 'disabilityRetirement')}
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.info}</div>ملخص سريع</h3></div>
+      <div class="pb">
+        <div class="fg fg-4 req-summary-grid">
+          <div><div class="flbl" style="margin-bottom:4px">الحالة</div><div style="font-size:12px;color:var(--text2)">${statusBadge(inquiry.status)}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">المستفيد</div><div style="font-size:12px;color:var(--text2)">${inquiry.applicant.name}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">جهة العمل الحالية</div><div style="font-size:12px;color:var(--text2)">${inquiry.currentEmployer || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر شهر إيداع</div><div style="font-size:12px;color:var(--text2)">${inquiry.activeBenefit?.lastDepositedMonth || '—'}</div></div>
+        </div>
+      </div>
+    </div>
+    ${inquiry.employeeRecommendation ? `
+    <div class="card">
+      <div class="ph"><h3><div class="pico pu">${ICONS.user}</div>توصية الموظف</h3></div>
+      <div class="pb">
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">النتيجة</label><div class="fro">${inquiry.employeeRecommendation.type}</div></div>
+          <div class="fgrp"><label class="flbl">معد التوصية</label><div class="fro">${inquiry.employeeRecommendation.issuer || '—'}</div></div>
+        </div>
+        <div class="fgrp"><label class="flbl">التفاصيل</label><div class="fro">${inquiry.employeeRecommendation.details || '—'}</div></div>
+      </div>
+    </div>` : ''}
+    <div class="card">
+      <div class="ph"><h3><div class="pico or">${ICONS.clipboard}</div>بيانات الإعاقة والمنفعة</h3></div>
+      <div class="pb">
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">رقم بطاقة الإعاقة</label><div class="fro">${inquiry.mosdCard?.number || inquiry.disabilityCard}</div></div>
+          <div class="fgrp"><label class="flbl">نوع الإعاقة</label><div class="fro">${inquiry.disabilityType}</div></div>
+          <div class="fgrp"><label class="flbl">درجة الإعاقة</label><div class="fro">${inquiry.disabilityLevel}</div></div>
+          <div class="fgrp"><label class="flbl">حالة منفعة الإعاقة</label><div class="fro">${inquiry.activeBenefit?.currentStatus || '—'}</div></div>
+        </div>
+        <div class="fgrp"><label class="flbl">تفاصيل الإعاقة</label><div class="fro">${inquiry.disabilityDetails || '—'}</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.clock}</div>السجل الزمني</h3></div>
+      <div class="pb">${renderTimelineList(inquiry.timeline)}</div>
+    </div>
+    <div class="card">
+      <div class="ph"><h3><div class="pico rd">${ICONS.edit}</div>قرار رئيس القسم</h3></div>
+      <div class="pb">
+        <div class="act-panel">
+          ${inquiry.status.includes('بانتظار اعتماد رئيس القسم') ? `
+            <button class="btn btn-primary" onclick="closeInquiry(true)">${ICONS.check} إغلاق كمؤهل للتقاعد المبكر</button>
+            <button class="btn btn-danger" onclick="closeInquiry(false)">${ICONS.x} إغلاق كغير مؤهل</button>` : `
+            <div class="alert alert-i">${ICONS.info}<span>تم إغلاق هذا الاستعلام بالفعل.</span></div>`}
+        </div>
+      </div>
+    </div>`;
+}
+
+function closeInquiry(isEligible) {
+  const details = prompt(isEligible ? 'أدخل مبررات اعتماد الأهلية:' : 'أدخل مبررات عدم الأهلية:');
+  if (!details || !details.trim()) {
+    showToast('المبررات مطلوبة', 'w');
+    return;
+  }
+  const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  inquiry.headDecision = {
+    type: isEligible ? 'معتمد' : 'مرفوض',
+    date: now.slice(0, 10),
+    issuer: me,
+    details: details.trim(),
+    retirementEligible: isEligible
+  };
+  inquiry.decision = {
+    type: isEligible ? 'معتمد' : 'مرفوض',
+    date: now.slice(0, 10),
+    issuer: me,
+    details: details.trim(),
+    retirementEligible: isEligible,
+    retirementDate: isEligible ? inquiry.retirementDate : '',
+    pensionAmount: isEligible ? 450 : null
+  };
+  inquiry.status = isEligible ? 'تم إغلاق الاستعلام — مؤهل للتقاعد المبكر' : 'تم إغلاق الاستعلام — غير مؤهل للتقاعد المبكر';
+  inquiry.closedBy = me;
+  inquiry.closedDate = now.slice(0, 10);
+  inquiry.checkedOutBy = null;
+  inquiry.lastUpdate = now;
+  inquiry.lastUpdatedBy = me;
+  inquiry.timeline.push({
+    action: 'إغلاق الاستعلام',
+    actor: me,
+    role: 'رئيس قسم الإعاقة والأمراض المستديمة',
+    time: now,
+    fromStatus: 'بانتظار اعتماد رئيس قسم الإعاقة والأمراض المستديمة',
+    toStatus: inquiry.status,
+    note: details.trim(),
+    type: isEligible ? 'success' : 'error',
+    phone: myPhone
+  });
+  showToast('تم اعتماد القرار النهائي وإغلاق الاستعلام', 's');
+  render();
+}
+</script>
+</body>
+</html>

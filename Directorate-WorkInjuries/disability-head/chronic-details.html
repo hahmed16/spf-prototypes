@@ -10,6 +10,14 @@
 
 <body>
   <script src="../shared/config.js"></script>
+  <script src="../shared/data-users.js"></script>
+  <script src="../shared/data-allowances.js"></script>
+  <script src="../shared/data-disability.js"></script>
+  <script src="../shared/data-chronic.js"></script>
+  <script src="../shared/data-appeals.js"></script>
+  <script src="../shared/data-licensing.js"></script>
+  <script src="../shared/data-sessions.js"></script>
+  <script src="../shared/data-disability-retirement.js"></script>
   <script src="../shared/data.js"></script>
   <script src="../shared/layout.js"></script>
   <script src="../shared/utils.js"></script>
@@ -83,6 +91,7 @@
         chronicDisease: refData?.chronicDisease,
         affectedSystem: refData?.affectedSystem,
         severityIndex: refData?.severityIndex,
+        path: refData?.path,
         firstRequestRef: refData?.firstRequestRef,
         overallCondition: refData?.overallCondition,
       },
@@ -218,6 +227,7 @@
           <div class="fgrp"><label class="flbl">تاريخ ووقت زيارة المؤسسة الصحية</label><div class="fro">${normalizeDisplay(med.visitDateTime)}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ ثبوت المرض</label><div class="fro">${formatDate(med.provenDate)}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ شدة المرض</label><div class="fro">${formatDate(med.severityDate)}</div></div>
+          <div class="fgrp"><label class="flbl">المسار</label><div class="fro">${normalizeDisplay(med.path)}</div></div>
           <div class="fgrp"><label class="flbl">المرض المستديم</label><div class="fro">${normalizeDisplay(med.chronicDisease || med.diagnosis)}</div></div>
           <div class="fgrp"><label class="flbl">الجهاز المتأثر</label><div class="fro">${normalizeDisplay(med.affectedSystem)}</div></div>
           <div class="fgrp span-full"><label class="flbl">Medical Severity Index and Treatment Burden</label><div class="fro">${normalizeDisplay(med.severityIndex)}</div></div>

@@ -8,15 +8,23 @@
 </head>
 <body>
 <script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
 <script src="../shared/data.js"></script>
 <script src="../shared/layout.js"></script>
 <script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'committees-head', activePage: 'appeals-list' });
 const params = new URLSearchParams(window.location.search);
-const appeal = WI_DATA.appeals.find(a => a.id === params.get('id')) || WI_DATA.appeals[0];
+const appeal = (WI_DATA.appeals || []).find(a => a.id === params.get('id')) || (WI_DATA.appeals || [])[0];
 currentRequestId = appeal.id;
-const me = WI_DATA.users.committees_head.name;
+const me = WI_DATA.users?.committees_head?.name || 'Unknown User';
 const isCheckedOutByMe = appeal.checkedOutBy === me;
 setBreadcrumb([{ label: 'التظلمات', page: 'appeals-list' }, { label: `تفاصيل ${appeal.id}` }]);
 
@@ -271,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>`;
 });
 
-function doCheckout() { appeal.checkedOutBy = WI_DATA.users.committees_head.name; showToast('تم الحجز', 's'); setTimeout(() => location.reload(), 800); }
+function doCheckout() { appeal.checkedOutBy = WI_DATA.users?.committees_head?.name || 'Unknown User'; showToast('تم الحجز', 's'); setTimeout(() => location.reload(), 800); }
 function doCheckin() { appeal.checkedOutBy = null; showToast('تم التحرير', 'i'); setTimeout(() => window.location.href = 'appeals-list.html', 800); }
 function appealsDecision(type) {
   const msgs = { قبول: 'تم قبول التظلم — سيتم تحديد موعد الجلسة', استيفاء: 'تم إعادة التظلم لاستيفاء البيانات', رفض: 'تم رفض التظلم شكلياً' };

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الإحالات الواردة — منسق الإحالات والتحويلات</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data-referrals.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'referral-coordinator', activePage: 'referrals-list' });
+setBreadcrumb([{ label: 'الإحالات والتحويلات' }, { label: 'الإحالات الواردة' }]);
+
+let activeTab = 'all';
+let searchQuery = '';
+
+document.addEventListener('DOMContentLoaded', render);
+
+function render() {
+  const referrals = getReferrals();
+  const filtered = filterReferrals(referrals, activeTab, searchQuery);
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>طلبات الإحالة الواردة</h1>
+        <p>${referrals.length} إحالة إجمالي</p>
+      </div>
+    </div>
+
+    ${renderUnifiedFilterBar({ onSearch: 'updateSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+
+    <div class="card">
+      <div class="ttabs">
+        ${[
+          { key: 'all', label: 'الكل', count: referrals.length },
+          { key: 'pending', label: 'قيد المراجعة', count: referrals.filter(r => r.status.includes('بانتظار')).length },
+          { key: 'referred', label: 'تمت الإحالة', count: referrals.filter(r => r.status.includes('إحالة')).length },
+          { key: 'decided', label: 'صدر قرار', count: referrals.filter(r => r.status.includes('قرار')).length },
+        ].map(t => `<div class="ttab ${activeTab === t.key ? 'act' : ''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>نوع الطلب</th>
+                <th>المستفيد/المؤسسة</th>
+                <th>اللجنة المُحال إليها</th>
+                <th>تاريخ الإحالة</th>
+                <th>الحالة</th>
+                <th>الأيام المتبقية</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.length === 0 ? `
+                <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text3)">لا توجد إحالات</td></tr>
+              ` : filtered.map(r => {
+                const meta = deriveRequestSummaryMeta(r);
+                const remainingDaysClass = getRemainingDaysClass(meta.remainingDays);
+                const remainingDaysLabel = getRemainingDaysLabel(meta.remainingDays);
+                return `
+                <tr>
+                  <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                  <td>${r.requestType || 'ترخيص'}</td>
+                  <td>${r.beneficiaryName}</td>
+                  <td>${r.committeeType}</td>
+                  <td style="font-size:12px">${r.referralDate}</td>
+                  <td>${statusBadge(r.status)}</td>
+                  <td><span class="sla-days ${remainingDaysClass}">${remainingDaysLabel}</span></td>
+                  <td>
+                    <div style="display:flex;gap:4px">
+                      <button class="ibtn" onclick="viewDetails('${r.id}')" title="عرض التفاصيل">${ICONS.eye}</button>
+                      ${r.status.includes('بانتظار') ? `
+                        <button class="ibtn" onclick="processReferral('${r.id}')" title="معالجة الإحالة">${ICONS.pen}</button>
+                      ` : ''}
+                    </div>
+                  </td>
+                </tr>
+              `}).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function setTab(tab) {
+  activeTab = tab;
+  render();
+}
+
+function updateSearch(val) {
+  searchQuery = val;
+  render();
+}
+
+function getReferrals() {
+  const referrals = [];
+
+  // Get licensing requests that have been referred
+  WI_DATA.licensing.forEach(req => {
+    if (req.status.includes('إحالة') || req.status.includes('لجنة')) {
+      referrals.push({
+        id: req.id,
+        requestType: 'ترخيص',
+        beneficiaryName: req.institution.name,
+        committeeType: 'اللجنة الطبية الإشرافية',
+        referralDate: req.submitDate,
+        status: req.status,
+        expectedClosureDate: req.expectedClosureDate,
+        remainingDays: req.remainingDays
+      });
+    }
+  });
+
+  // Get appeals that have been referred
+  WI_DATA.appeals.forEach(appeal => {
+    if (appeal.status.includes('إحالة') || appeal.status.includes('لجنة')) {
+      referrals.push({
+        id: appeal.id,
+        requestType: 'تظلم',
+        beneficiaryName: appeal.applicant.name,
+        committeeType: 'لجنة التظلمات',
+        referralDate: appeal.submitDate,
+        status: appeal.status,
+        expectedClosureDate: appeal.expectedClosureDate,
+        remainingDays: appeal.remainingDays
+      });
+    }
+  });
+
+  // Get direct referral requests that were approved by committees
+  WI_DATA.referrals.forEach(req => {
+    if (req.status.includes('إحالة المقرر') || req.status.includes('المؤسسة الصحية المرخصة') || req.status.includes('جلسة') || req.status.includes('قرار')) {
+      referrals.push({
+        id: req.id,
+        requestType: req.requestType,
+        beneficiaryName: req.insured.name,
+        committeeType: 'قسم اللجان الطبية',
+        referralDate: req.submitDate,
+        status: req.status,
+        expectedClosureDate: req.expectedClosureDate,
+        remainingDays: req.remainingDays
+      });
+    }
+  });
+
+  return referrals.sort((a, b) => new Date(b.referralDate) - new Date(a.referralDate));
+}
+
+function filterReferrals(referrals, tab, query) {
+  let filtered = referrals;
+
+  if (tab !== 'all') {
+    if (tab === 'pending') {
+      filtered = referrals.filter(r => r.status.includes('بانتظار'));
+    } else if (tab === 'referred') {
+      filtered = referrals.filter(r => r.status.includes('إحالة'));
+    } else if (tab === 'decided') {
+      filtered = referrals.filter(r => r.status.includes('قرار'));
+    }
+  }
+
+  if (query) {
+    const lowerQuery = query.toLowerCase();
+    filtered = filtered.filter(r =>
+      r.id.toLowerCase().includes(lowerQuery) ||
+      r.beneficiaryName.toLowerCase().includes(lowerQuery) ||
+      r.committeeType.toLowerCase().includes(lowerQuery)
+    );
+  }
+
+  return filtered;
+}
+
+function viewDetails(id) {
+  showToast(`عرض تفاصيل الإحالة ${id}`, 'i');
+}
+
+function processReferral(id) {
+  showToast(`معالجة الإحالة ${id}`, 'i');
+}
+</script>
+</body>
+</html>

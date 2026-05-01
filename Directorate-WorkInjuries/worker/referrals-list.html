@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>طلبات العرض المباشر — العامل</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data-referrals.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'worker', activePage: 'referrals-list' });
+setBreadcrumb([{ label: 'طلبات العرض المباشر' }]);
+
+const currentUser = WI_DATA.users.worker;
+
+document.addEventListener('DOMContentLoaded', render);
+
+function getMyReferrals() {
+  return WI_DATA.referrals.filter(r =>
+    r.applicant.civil === currentUser.civil || r.insured.civil === currentUser.civil
+  );
+}
+
+function render() {
+  const rows = getMyReferrals();
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div><h1>طلبات العرض المباشر على المؤسسات الصحية المرخصة</h1><p>${rows.length} طلب</p></div>
+      <div class="pg-acts"><button class="btn btn-primary" onclick="window.location.href='referrals-new.html'">${ICONS.plus} طلب جديد</button></div>
+    </div>
+    <div class="alert alert-i">${ICONS.info}<span>يمكنك من هذه الشاشة تقديم طلب عرض مباشر على مؤسسة صحية مرخصة مع إرفاق السبب والمستندات الداعمة.</span></div>
+    <div class="card">
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>رقم الطلب</th><th>نوع الحالة</th><th>سبب الإحالة</th><th>الحالة</th><th>الأيام المتبقية</th><th></th></tr></thead>
+            <tbody>
+              ${rows.length ? rows.map(r => {
+                const meta = deriveRequestSummaryMeta(r);
+                return `
+                <tr>
+                  <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
+                  <td>${r.referral.requestCategory || '—'}</td>
+                  <td>${r.referral.reason}</td>
+                  <td>${statusBadge(r.status)}</td>
+                  <td><span class="sla-days ${getRemainingDaysClass(meta.remainingDays)}">${getRemainingDaysLabel(meta.remainingDays)}</span></td>
+                  <td><button class="ibtn" onclick="window.location.href='referrals-details.html?id=${r.id}'">${ICONS.eye}</button></td>
+                </tr>`;
+              }).join('') : '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text3)">لا توجد طلبات عرض مباشر حتى الآن</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+</script>
+</body>
+</html>

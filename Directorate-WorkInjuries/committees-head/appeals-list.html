@@ -4,8 +4,18 @@
 <title>قائمة التظلمات — رئيس قسم اللجان الطبية</title>
 <link rel="stylesheet" href="../shared/style.css"></head>
 <body>
-<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
-<script src="../shared/layout.js"></script><script src="../shared/utils.js"></script>
+<script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'committees-head', activePage: 'appeals-list' });
 setBreadcrumb([{ label: 'التظلمات' }, { label: 'قائمة التظلمات' }]);
@@ -43,9 +53,13 @@ function render() {
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم التظلم</th><th>الطلب الأصلي</th><th>مقدم التظلم</th><th>سبب التظلم</th><th>الحالة</th><th>تاريخ التقديم</th><th></th></tr></thead>
+            <thead><tr><th>رقم التظلم</th><th>الطلب الأصلي</th><th>مقدم التظلم</th><th>سبب التظلم</th><th>الحالة</th><th>تاريخ التقديم</th><th>الأيام المتبقية</th><th></th></tr></thead>
             <tbody>
-              ${appeals.map(a=>`
+              ${appeals.map(a=> {
+                const meta = deriveRequestSummaryMeta(a);
+                const remainingDaysClass = getRemainingDaysClass(meta.remainingDays);
+                const remainingDaysLabel = getRemainingDaysLabel(meta.remainingDays);
+                return `
               <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${a.id}</td>
                 <td style="font-family:monospace">${a.originalRequestId}</td>
@@ -53,13 +67,16 @@ function render() {
                 <td>${a.appealReason}</td>
                 <td>${statusBadge(a.status)}</td>
                 <td style="font-size:12px">${a.submitDate}</td>
+                <td><span class="sla-days ${remainingDaysClass}">${remainingDaysLabel}</span></td>
                 <td>
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='appeals-details.html?id=${a.id}'">${ICONS.eye}</button>
+                    ${!a.suspended?`<button class="ibtn" onclick="doSuspend('${a.id}')" title="تعليق التظلم">${ICONS.pause}</button>`:`<button class="ibtn" onclick="doResume('${a.id}')" title="استئناف التظلم">${ICONS.play}</button>`}
                     <button class="ibtn" onclick="openAddNoteModal('${a.id}')">${ICONS.note}</button>
                   </div>
                 </td>
-              </tr>`).join('')}
+              </tr>`;
+                }).join('')}
             </tbody>
           </table>
         </div>
@@ -72,4 +89,54 @@ function render() {
 }
 function updateSearch(val) { searchQuery = val; render(); }
 function toggleAll() { showAllStages = !showAllStages; render(); }
+function doSuspend(id){
+  const reason=prompt('سبب التعليق:');
+  if(reason){
+    const notes=prompt('ملاحظات إضافية (اختياري):');
+    const a=WI_DATA.appeals.find(x=>x.id===id);
+    if(a){
+      a.suspended=true;
+      a.suspensionReason=reason;
+      a.suspensionNotes=notes||'';
+      a.suspendedBy=WI_DATA.users.committees_head.name;
+      a.suspendedDate=new Date().toISOString().slice(0,10);
+      a.timeline.push({
+        action:'تعليق التظلم',
+        actor:WI_DATA.users.committees_head.name,
+        role:'رئيس قسم اللجان الطبية',
+        time:new Date().toISOString().slice(0,16).replace('T',' '),
+        fromStatus:a.status,
+        toStatus:a.status,
+        note:`تعليق: ${reason}${notes?` (${notes})`:''}`,
+        type:'warning'
+      });
+      a.lastUpdate=new Date().toISOString().slice(0,16).replace('T',' ');
+      a.lastUpdatedBy=WI_DATA.users.committees_head.name;
+    }
+    showToast(`تم تعليق ${id}`,'w');
+    render();
+  }
+}
+function doResume(id){
+  const a=WI_DATA.appeals.find(x=>x.id===id);
+  if(a){
+    a.suspended=false;
+    a.resumedBy=WI_DATA.users.committees_head.name;
+    a.resumedDate=new Date().toISOString().slice(0,10);
+    a.timeline.push({
+      action:'استئناف التظلم',
+      actor:WI_DATA.users.committees_head.name,
+      role:'رئيس قسم اللجان الطبية',
+      time:new Date().toISOString().slice(0,16).replace('T',' '),
+      fromStatus:a.status,
+      toStatus:a.status,
+      note:'تم استئناف التظلم',
+      type:'success'
+    });
+    a.lastUpdate=new Date().toISOString().slice(0,16).replace('T',' ');
+    a.lastUpdatedBy=WI_DATA.users.committees_head.name;
+  }
+  showToast(`تم استئناف ${id}`,'s');
+  render();
+}
 </script></body></html>

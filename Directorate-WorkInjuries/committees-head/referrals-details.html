@@ -8,17 +8,36 @@
 </head>
 <body>
 <script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data-referrals.js"></script>
 <script src="../shared/data.js"></script>
 <script src="../shared/layout.js"></script>
 <script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'committees-head', activePage: 'referrals-list' });
 const params = new URLSearchParams(window.location.search);
-const req = WI_DATA.allowances.find(r => r.id === params.get('id')) || WI_DATA.allowances[0];
-currentRequestId = req.id;
+const directReq = WI_DATA.referrals.find(r => r.id === params.get('id'));
+const req = directReq || WI_DATA.allowances.find(r => r.id === params.get('id')) || WI_DATA.allowances[0];
+const isDirectReferral = Boolean(directReq);
+currentRequestId = req ? req.id : '';
 setBreadcrumb([{ label: 'طلبات العرض', page: 'referrals-list' }, { label: `تفاصيل ${req.id}` }]);
 
 document.addEventListener('DOMContentLoaded', () => {
+  if (!req) {
+    getContent().innerHTML = '<div class="card"><div class="pb"><div class="empty-st">الطلب غير موجود</div></div></div>';
+    return;
+  }
+  if (isDirectReferral) {
+    renderDirectReferralCommitteesHead();
+    return;
+  }
   const canAct = req.status === 'تم الموافقة على العرض على المؤسسات الصحية المرخصة — بانتظار إحالة المقرر'
     || req.status === 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة رئيس قسم اللجان الطبية';
   const isSamePerson = req.applicant?.civil && req.insured?.civil && req.applicant.civil === req.insured.civil;
@@ -282,7 +301,154 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>`;
 });
 
+function renderDirectReferralCommitteesHead() {
+  const canAct = req.status === 'تم اعتماد طلب العرض المباشر — بانتظار مراجعة رئيس قسم اللجان الطبية';
+  const atts = req.attachments || [];
+  const notes = req.notes || [];
+  const timeline = req.timeline || [];
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>تفاصيل طلب العرض المباشر</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div class="req-summary-grid">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">نوع الطلب</div><div style="font-size:13px;font-weight:600">${req.requestType}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">التصنيف</div><div style="font-size:13px;font-weight:600">${req.referral?.requestCategory || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الحالة الحالية</div>${statusBadge(req.status)}</div>
+          <div><div class="flbl" style="margin-bottom:4px">المؤسسة المقترحة</div><div style="font-size:12.5px;font-weight:600">${req.referral?.preferredInstitution || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر تحديث</div><div style="font-size:12px;color:var(--text2)">${req.lastUpdate || '—'}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب والمؤمن عليه</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">مقدم الطلب</label><div class="fro">${req.applicant?.name || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant?.role || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${req.applicant?.phone || req.insured?.phone || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">المؤمن عليه</label><div class="fro">${req.insured?.name || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.insured?.civil || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro">${req.insured?.insuranceStatus || '—'}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات جهة العمل</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">اسم الجهة</label><div class="fro">${req.employer?.name || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">السجل التجاري</label><div class="fro" style="font-family:monospace">${req.employer?.cr || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${req.employer?.jobTitle || '—'}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>بيانات العرض المباشر</h3></div>
+      <div class="pb">
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">المؤسسة المقترحة</label><div class="fro">${req.referral?.preferredInstitution || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">نوع المؤسسة</label><div class="fro">${req.referral?.institutionType || '—'}</div></div>
+          <div class="fgrp span-full"><label class="flbl">سبب الإحالة</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${req.referral?.reason || '—'}</div></div>
+          <div class="fgrp span-full"><label class="flbl">ملاحظات الطلب</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${req.referral?.notes || '—'}</div></div>
+        </div>
+      </div>
+    </div>
+
+    ${canAct ? `
+    <div class="dp">
+      <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>اتخاذ القرار — رئيس قسم اللجان الطبية</h3></div>
+      <div class="dp-body">
+        <div class="fgrp">
+          <label class="flbl">تأكيد المؤسسة الصحية المرخصة</label>
+          <select class="fc" id="institution-final">
+            <option>${req.referral?.preferredInstitution || '— اختر المؤسسة —'}</option>
+            <option>مستشفى النور التخصصي</option>
+            <option>مستشفى ابن سينا</option>
+            <option>مستشفى الأمل التخصصي</option>
+          </select>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">ملاحظات الرئيس</label>
+          <textarea class="fc" id="direct-head-note" rows="3" placeholder="أكتب ملاحظاتك..."></textarea>
+        </div>
+        <div class="dp-acts">
+          <button class="btn btn-accent" onclick="headReferralDecision('توجيه')">${ICONS.check} اعتماد وإحالة للمقرر</button>
+          <button class="btn btn-warning" onclick="headReferralDecision('إعادة')">إعادة لموظف القسم</button>
+          <button class="btn btn-danger" onclick="headReferralDecision('رفض')">رفض الإحالة</button>
+        </div>
+      </div>
+    </div>` : ''}
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات <span style="font-size:11px;font-weight:400;color:var(--text3)">(${atts.length} مرفق)</span></h3></div>
+      <div class="pb">
+        ${atts.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد مرفقات</div>' : atts.map(att => `<div class="att-row"><div class="att-ico file">${ICONS.file}</div><div class="att-info"><div class="att-name">${att.name}</div><div class="att-meta">${att.type} · رفعه: ${att.uploadedBy} (${att.role}) · ${att.uploadDate}</div></div><div class="att-acts"><button class="ibtn" title="تحميل" onclick="showToast('جارٍ تحميل الملف...','i')">${ICONS.download}</button></div></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="card op-notes-card collapsed" data-notes-init="0">
+      <div class="ph op-notes-head" onclick="toggleOperationalNotes(this.closest('.op-notes-card'))">
+        <h3><div class="pico gy">${ICONS.note}</div>الملاحظات التشغيلية</h3>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="op-notes-chevron">${ICONS.arrow_left}</span>
+          <button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();openAddNoteModal(currentRequestId)">${ICONS.plus} إضافة ملاحظة</button>
+        </div>
+      </div>
+      <div class="pb">
+        ${notes.length === 0 ? '<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">لا توجد ملاحظات تشغيلية</div>' : notes.map(n => `<div class="note-item"><div class="note-av">${n.author?.charAt(0) || '؟'}</div><div class="note-c"><div class="note-hd"><span class="note-auth">${n.author}</span><span class="note-role">${n.role}</span><span class="note-time">${n.time}</span></div><div class="note-txt">${n.text}</div></div></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني الكامل للطلب</h3></div>
+      <div class="pb">${renderTimelineList(timeline)}</div>
+    </div>`;
+}
+
 function headReferralDecision(type) {
+  if (isDirectReferral) {
+    const note = document.getElementById('direct-head-note')?.value?.trim() || '';
+    const institution = document.getElementById('institution-final')?.value || req.referral?.preferredInstitution || '';
+    const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+    const actor = WI_DATA.users.committees_head.name;
+    const phone = WI_DATA.users.committees_head.phone || getCurrentUserPhone();
+    if (type === 'توجيه') {
+      req.referral.preferredInstitution = institution;
+      req.assignedTo = 'منسق الإحالات والتحويلات';
+      req.lastUpdate = now;
+      req.lastUpdatedBy = actor;
+      req.status = 'تم اعتماد طلب العرض المباشر — بانتظار إحالة المقرر';
+      req.timeline.push({ action: 'اعتماد وإحالة للمقرر', actor, role: 'رئيس قسم اللجان الطبية', time: now, fromStatus: 'تم اعتماد طلب العرض المباشر — بانتظار مراجعة رئيس قسم اللجان الطبية', toStatus: req.status, note: note || 'تم اعتماد الطلب وتحويله للتنسيق مع المؤسسة الصحية المرخصة', type: 'success', phone });
+      showToast('تم اعتماد الطلب وإحالته للمقرر', 's');
+    } else if (type === 'إعادة') {
+      req.lastUpdate = now;
+      req.lastUpdatedBy = actor;
+      req.status = 'تم اعتماد طلب العرض المباشر — بانتظار مراجعة موظف قسم اللجان الطبية';
+      req.timeline.push({ action: 'إعادة إلى موظف القسم', actor, role: 'رئيس قسم اللجان الطبية', time: now, fromStatus: 'تم اعتماد طلب العرض المباشر — بانتظار مراجعة رئيس قسم اللجان الطبية', toStatus: req.status, note: note || 'يرجى استكمال المراجعة قبل الإحالة', type: 'warning', phone });
+      showToast('تمت إعادة الطلب لموظف القسم', 'w');
+    } else {
+      req.lastUpdate = now;
+      req.lastUpdatedBy = actor;
+      req.status = 'تم رفض الطلب';
+      req.timeline.push({ action: 'رفض الإحالة المباشرة', actor, role: 'رئيس قسم اللجان الطبية', time: now, fromStatus: 'تم اعتماد طلب العرض المباشر — بانتظار مراجعة رئيس قسم اللجان الطبية', toStatus: req.status, note: note || 'تم رفض الطلب من رئيس القسم', type: 'danger', phone });
+      showToast('تم رفض الإحالة', 'd');
+    }
+    setTimeout(() => window.location.href = 'referrals-list.html', 1200);
+    return;
+  }
   const msgs = { توجيه: 'تم توجيه الطلب لمقرر المؤسسة الصحية المرخصة', إعادة: 'تم إعادة الطلب لموظف القسم', رفض: 'تم رفض الإحالة' };
   const types = { توجيه: 's', إعادة: 'w', رفض: 'd' };
   showToast(msgs[type], types[type]);
@@ -291,7 +457,6 @@ function headReferralDecision(type) {
 </script>
 </body>
 </html>
-
 
 
 

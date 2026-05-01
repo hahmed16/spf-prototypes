@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>لوحة البيانات — موظف طلبات العرض المباشر</title><link rel="stylesheet" href="../shared/style.css"></head>
+<body>
+<script src="../shared/config.js"></script><script src="../shared/data-users.js"></script><script src="../shared/data-allowances.js"></script><script src="../shared/data-disability.js"></script><script src="../shared/data-chronic.js"></script><script src="../shared/data-appeals.js"></script><script src="../shared/data-licensing.js"></script><script src="../shared/data-sessions.js"></script><script src="../shared/data-disability-retirement.js"></script><script src="../shared/data-referrals.js"></script><script src="../shared/data.js"></script><script src="../shared/layout.js"></script><script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'direct-referral-employee', activePage: 'dashboard' });
+setBreadcrumb([{ label: 'لوحة البيانات' }]);
+document.addEventListener('DOMContentLoaded', () => {
+  const reqs = WI_DATA.referrals;
+  const pending = reqs.filter(r => r.status.includes('بانتظار مراجعة') || r.status.includes('قيد مراجعة'));
+  getContent().innerHTML = `<div class="pg-head"><div><h1>لوحة بيانات طلبات العرض المباشر</h1><p>${pending.length} طلب بانتظار الإجراء</p></div></div>
+  <div class="stats-grid">
+    <div class="scard p" onclick="window.location.href='referrals-list.html'"><div class="sc-lbl">إجمالي الطلبات</div><div class="sc-val">${reqs.length}</div><div class="sc-sub">من جميع القنوات</div></div>
+    <div class="scard w" onclick="window.location.href='referrals-list.html'"><div class="sc-lbl">بانتظار المراجعة</div><div class="sc-val">${pending.length}</div><div class="sc-sub">طلبات جديدة ومحجوزة</div></div>
+    <div class="scard s" onclick="window.location.href='referrals-list.html'"><div class="sc-lbl">تم اعتمادها</div><div class="sc-val">${reqs.filter(r => r.status.includes('تم اعتماد')).length}</div><div class="sc-sub">أُحيلت إلى اللجان الطبية</div></div>
+  </div>`;
+});
+</script>
+</body>
+</html>

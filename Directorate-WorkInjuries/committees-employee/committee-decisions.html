@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قرارات اللجان الطبية — موظف قسم اللجان الطبية</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'committees-employee', activePage: 'committee-decisions' });
+setBreadcrumb([{ label: 'اللجان الطبية' }, { label: 'قرارات اللجان' }]);
+
+let activeTab = 'all';
+let searchQuery = '';
+
+document.addEventListener('DOMContentLoaded', render);
+
+function render() {
+  const decisions = getCommitteeDecisions();
+  const filtered = filterDecisions(decisions, activeTab, searchQuery);
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>قرارات اللجان الطبية</h1>
+        <p>${decisions.length} قرار إجمالي</p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="exportDecisions()">
+          ${ICONS.download} تصدير القرارات
+        </button>
+      </div>
+    </div>
+
+    ${renderUnifiedFilterBar({ onSearch: 'updateSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+
+    <div class="card">
+      <div class="ttabs">
+        ${[
+          { key: 'all', label: 'الكل', count: decisions.length },
+          { key: 'pending', label: 'قيد التنفيذ', count: decisions.filter(d => d.status === 'قيد التنفيذ').length },
+          { key: 'approved', label: 'منفذة', count: decisions.filter(d => d.status === 'منفذة').length },
+          { key: 'appealed', label: 'مُتظلم عليها', count: decisions.filter(d => d.hasAppeal).length },
+          { key: 'recent', label: 'الأحدث', count: decisions.filter(d => isRecentDecision(d)).length },
+        ].map(t => `<div class="ttab ${activeTab === t.key ? 'act' : ''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم القرار</th>
+                <th>نوع اللجنة</th>
+                <th>رقم الطلب</th>
+                <th>المستفيد</th>
+                <th>نوع القرار</th>
+                <th>تاريخ القرار</th>
+                <th>الحالة</th>
+                <th>التظلمات</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.length === 0 ? `
+                <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text3)">لا توجد قرارات</td></tr>
+              ` : filtered.map(d => `
+                <tr>
+                  <td style="font-family:monospace;font-weight:700;color:var(--primary)">${d.decisionId}</td>
+                  <td>${d.committeeType}</td>
+                  <td style="font-family:monospace">${d.requestId}</td>
+                  <td>${d.beneficiaryName}</td>
+                  <td><span class="badge ${d.decisionType === 'موافقة' ? 'b-approved' : d.decisionType === 'رفض' ? 'b-rejected' : 'b-secondary'}">${d.decisionType}</span></td>
+                  <td style="font-size:12px">${d.decisionDate}</td>
+                  <td>${statusBadge(d.status)}</td>
+                  <td>
+                    ${d.hasAppeal ? `
+                      <div style="display:flex;align-items:center;gap:4px">
+                        <span class="badge b-warning">${d.appealCount} تظلم</span>
+                        <button class="ibtn" onclick="viewAppeals('${d.decisionId}')" title="عرض التظلمات">${ICONS.eye}</button>
+                      </div>
+                    ` : '<span style="color:var(--text3)">—</span>'}
+                  </td>
+                  <td>
+                    <div style="display:flex;gap:4px">
+                      <button class="ibtn" onclick="viewDecisionDetails('${d.decisionId}')" title="عرض التفاصيل">${ICONS.eye}</button>
+                      ${d.status === 'قيد التنفيذ' ? `
+                        <button class="ibtn" onclick="markAsExecuted('${d.decisionId}')" title="تعيين كمنفذ">${ICONS.check}</button>
+                      ` : ''}
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function setTab(tab) {
+  activeTab = tab;
+  render();
+}
+
+function updateSearch(val) {
+  searchQuery = val;
+  render();
+}
+
+function getCommitteeDecisions() {
+  const decisions = [];
+
+  // Get decisions from licensing requests
+  WI_DATA.licensing.forEach(req => {
+    if (req.decision && req.decision.type) {
+      decisions.push({
+        decisionId: `DEC-LIC-${req.id}`,
+        committeeType: 'اللجنة الطبية الإشرافية',
+        requestId: req.id,
+        beneficiaryName: req.institution.name,
+        decisionType: req.decision.type === 'معتمد' ? 'موافقة' : 'رفض',
+        decisionDate: req.decision.date,
+        status: req.status.includes('اعتماد') ? 'منفذة' : 'قيد التنفيذ',
+        hasAppeal: false,
+        appealCount: 0,
+        details: req.decision
+      });
+    }
+  });
+
+  // Get decisions from disability requests
+  WI_DATA.disability.forEach(req => {
+    if (req.decision && req.decision.type) {
+      decisions.push({
+        decisionId: `DEC-DIS-${req.id}`,
+        committeeType: 'لجنة الإعاقة',
+        requestId: req.id,
+        beneficiaryName: req.applicant.name,
+        decisionType: req.decision.type === 'معتمد' ? 'موافقة' : 'رفض',
+        decisionDate: req.decision.date,
+        status: req.status.includes('اعتماد') ? 'منفذة' : 'قيد التنفيذ',
+        hasAppeal: false,
+        appealCount: 0,
+        details: req.decision
+      });
+    }
+  });
+
+  // Get decisions from appeals
+  WI_DATA.appeals.forEach(appeal => {
+    if (appeal.decision && appeal.decision.type) {
+      const hasAppeal = appeal.status.includes('تظلم');
+      decisions.push({
+        decisionId: `DEC-APP-${appeal.id}`,
+        committeeType: 'لجنة التظلمات',
+        requestId: appeal.originalRequestId,
+        beneficiaryName: appeal.applicant.name,
+        decisionType: appeal.decision.type === 'معتمد' ? 'موافقة' : 'رفض',
+        decisionDate: appeal.decision.date,
+        status: appeal.status.includes('اعتماد') ? 'منفذة' : 'قيد التنفيذ',
+        hasAppeal: hasAppeal,
+        appealCount: hasAppeal ? 1 : 0,
+        details: appeal.decision
+      });
+    }
+  });
+
+  // Get decisions from disability retirement
+  if (WI_DATA.disabilityRetirement) {
+    WI_DATA.disabilityRetirement.forEach(req => {
+      if (req.decision && req.decision.type) {
+        decisions.push({
+          decisionId: `DEC-RET-${req.id}`,
+          committeeType: 'لجنة التقاعد',
+          requestId: req.id,
+          beneficiaryName: req.applicant.name,
+          decisionType: req.decision.type === 'معتمد' ? 'موافقة' : 'رفض',
+          decisionDate: req.decision.date,
+          status: req.status.includes('اعتماد') ? 'منفذة' : 'قيد التنفيذ',
+          hasAppeal: false,
+          appealCount: 0,
+          details: req.decision
+        });
+      }
+    });
+  }
+
+  return decisions.sort((a, b) => new Date(b.decisionDate) - new Date(a.decisionDate));
+}
+
+function filterDecisions(decisions, tab, query) {
+  let filtered = decisions;
+
+  if (tab !== 'all') {
+    if (tab === 'pending') {
+      filtered = decisions.filter(d => d.status === 'قيد التنفيذ');
+    } else if (tab === 'approved') {
+      filtered = decisions.filter(d => d.status === 'منفذة');
+    } else if (tab === 'appealed') {
+      filtered = decisions.filter(d => d.hasAppeal);
+    } else if (tab === 'recent') {
+      filtered = decisions.filter(d => isRecentDecision(d));
+    }
+  }
+
+  if (query) {
+    const lowerQuery = query.toLowerCase();
+    filtered = filtered.filter(d =>
+      d.decisionId.toLowerCase().includes(lowerQuery) ||
+      d.requestId.toLowerCase().includes(lowerQuery) ||
+      d.beneficiaryName.toLowerCase().includes(lowerQuery) ||
+      d.committeeType.toLowerCase().includes(lowerQuery)
+    );
+  }
+
+  return filtered;
+}
+
+function isRecentDecision(decision) {
+  const decisionDate = new Date(decision.decisionDate);
+  const today = new Date();
+  const diffDays = Math.floor((today - decisionDate) / (1000 * 60 * 60 * 24));
+  return diffDays <= 30;
+}
+
+function viewDecisionDetails(decisionId) {
+  showToast(`عرض تفاصيل القرار ${decisionId}`, 'i');
+}
+
+function viewAppeals(decisionId) {
+  showToast(`عرض التظلمات للقرار ${decisionId}`, 'i');
+}
+
+function markAsExecuted(decisionId) {
+  showToast(`تم تعيين القرار ${decisionId} كمنفذ`, 's');
+  render();
+}
+
+function exportDecisions() {
+  showToast('جارٍ تصدير القرارات...', 'i');
+  setTimeout(() => {
+    showToast('تم تصدير القرارات بنجاح', 's');
+  }, 1500);
+}
+</script>
+</body>
+</html>

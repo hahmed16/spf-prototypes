@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل استعلام التقاعد — موظف قسم الإعاقة والأمراض المستديمة</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/workflow-stages.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'disability-employee', activePage: 'disability-retirement-list' });
+
+const urlParams = new URLSearchParams(window.location.search);
+const inquiryId = urlParams.get('id');
+const inquiry = WI_DATA.disabilityRetirement.find(r => r.id === inquiryId);
+const me = WI_DATA.users.disability_employee.name;
+const myPhone = getCurrentUserPhone();
+
+if (!inquiry) {
+  document.addEventListener('DOMContentLoaded', () => {
+    getContent().innerHTML = `
+      <div class="pg-head"><div><h1>استعلام غير موجود</h1></div></div>
+      <div class="card"><div class="pb"><div class="empty-st">${ICONS.warn}<p>لم يتم العثور على الاستعلام المطلوب</p></div></div></div>`;
+  });
+} else {
+  currentRequestId = inquiry.id;
+  setBreadcrumb([{ label: 'منفعة الإعاقة والأمراض المستديمة', page: 'dashboard' }, { label: 'استعلامات التقاعد', page: 'disability-retirement-list' }, { label: inquiry.id }]);
+  document.addEventListener('DOMContentLoaded', render);
+}
+
+function render() {
+  const meta = deriveRequestSummaryMeta(inquiry);
+  const remainingDaysClass = getRemainingDaysClass(meta.remainingDays);
+  const remainingDaysLabel = getRemainingDaysLabel(meta.remainingDays);
+  const employeeRecommendation = inquiry.employeeRecommendation;
+  const canReview = inquiry.status.includes('بانتظار مراجعة موظف');
+  const isMine = !inquiry.checkedOutBy || inquiry.checkedOutBy === me;
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>تفاصيل استعلام التقاعد</h1>
+        <p>${inquiry.id}</p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='disability-retirement-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    ${renderWorkflowPath(inquiry, 'disabilityRetirement')}
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.file}</div>معلومات الاستعلام</h3></div>
+      <div class="pb">
+        <div class="fg fg-4 req-summary-grid">
+          <div><div class="flbl" style="margin-bottom:4px">الحالة</div><div style="font-size:12px;color:var(--text2)">${statusBadge(inquiry.status)}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ الاستلام</div><div style="font-size:12px;color:var(--text2)">${inquiry.receivedDate}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الموظف المسؤول</div><div style="font-size:12px;color:var(--text2)">${inquiry.assignedTo || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الحجز الحالي</div><div style="font-size:12px;color:var(--text2)">${inquiry.checkedOutBy || 'غير محجوز'}</div></div>
+        </div>
+        ${inquiry.suspended ? `
+        <div class="alert alert-w" style="margin-top:12px">
+          ${ICONS.warn}
+          <div><strong>الاستعلام معلّق</strong><br>${inquiry.suspensionReason}<br><small>${inquiry.suspensionNotes || ''}</small></div>
+        </div>` : ''}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico pu">${ICONS.user}</div>بيانات المتقاعد</h3></div>
+      <div class="pb">
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${inquiry.applicant.name}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${inquiry.applicant.civil}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${inquiry.applicant.phone || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${inquiry.applicant.email || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${inquiry.applicant.dob || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${inquiry.applicant.nationality || '—'}</div></div>
+          <div class="fgrp span-full"><label class="flbl">العنوان</label><div class="fro">${inquiry.applicant.address || '—'}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico or">${ICONS.clipboard}</div>تفاصيل بطاقة الإعاقة من وزارة التنمية الاجتماعية</h3></div>
+      <div class="pb">
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">رقم البطاقة</label><div class="fro" style="font-family:monospace">${inquiry.mosdCard?.number || inquiry.disabilityCard}</div></div>
+          <div class="fgrp"><label class="flbl">حالة البطاقة</label><div class="fro">${inquiry.mosdCard?.status || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الإصدار</label><div class="fro">${inquiry.mosdCard?.issueDate || inquiry.cardIssueDate || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الانتهاء</label><div class="fro">${inquiry.mosdCard?.expiryDate || '—'}</div></div>
+        </div>
+        <div class="tbl-wrap" style="margin-top:14px">
+          <table class="dtbl">
+            <thead><tr><th>الجهة</th><th>نوع الإعاقة</th><th>المستوى</th><th>تاريخ الفحص</th></tr></thead>
+            <tbody>
+              ${(inquiry.mosdCard?.disabilities || []).map(item => `
+                <tr>
+                  <td>${item.source}</td>
+                  <td>${item.name}</td>
+                  <td>${item.level}</td>
+                  <td>${item.examinationDate}</td>
+                </tr>`).join('') || '<tr><td colspan="4" style="text-align:center">لا توجد بيانات تفصيلية</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico gr">${ICONS.chart}</div>المنفعة الحالية والسجل الوظيفي</h3></div>
+      <div class="pb">
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">هل توجد منفعة إعاقة نشطة؟</label><div class="fro">${inquiry.activeBenefit?.hasActiveRequest ? 'نعم' : 'لا'}</div></div>
+          <div class="fgrp"><label class="flbl">آخر شهر إيداع</label><div class="fro">${inquiry.activeBenefit?.lastDepositedMonth || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">حالة المنفعة</label><div class="fro">${inquiry.activeBenefit?.currentStatus || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الطلب المرتبط</label><div class="fro" style="font-family:monospace">${inquiry.activeBenefit?.requestId || '—'}</div></div>
+        </div>
+        <div class="tbl-wrap" style="margin-top:14px">
+          <table class="dtbl">
+            <thead><tr><th>جهة العمل</th><th>المسمى الوظيفي</th><th>من</th><th>إلى</th></tr></thead>
+            <tbody>
+              ${(inquiry.employmentHistory || []).map(item => `
+                <tr>
+                  <td>${item.employerName}</td>
+                  <td>${item.jobTitle || '—'}</td>
+                  <td>${item.startDate || '—'}</td>
+                  <td>${item.current ? '<span class="badge b-approved">الحالية</span>' : (item.endDate || '—')}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    ${employeeRecommendation ? `
+    <div class="card">
+      <div class="ph"><h3><div class="pico pu">${ICONS.check}</div>توصية الموظف</h3></div>
+      <div class="pb">
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">النتيجة</label><div class="fro">${employeeRecommendation.type}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التوصية</label><div class="fro">${employeeRecommendation.date || '—'}</div></div>
+        </div>
+        <div class="fgrp"><label class="flbl">التفاصيل</label><div class="fro">${employeeRecommendation.details || '—'}</div></div>
+      </div>
+    </div>` : ''}
+
+    ${inquiry.attachments?.length ? `
+    <div class="card">
+      <div class="ph"><h3><div class="pico gy">${ICONS.upload}</div>المرفقات</h3></div>
+      <div class="pb">
+        <div class="att-list">
+          ${inquiry.attachments.map(att => `
+            <div class="att-item">
+              <div class="att-icon">${ICONS.file}</div>
+              <div class="att-info">
+                <div class="att-name">${att.name}</div>
+                <div class="att-meta">${att.type} — ${att.size} — ${att.uploadDate}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>` : ''}
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.clock}</div>السجل الزمني</h3></div>
+      <div class="pb">${renderTimelineList(inquiry.timeline)}</div>
+    </div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico rd">${ICONS.edit}</div>الإجراءات</h3></div>
+      <div class="pb">
+        <div class="act-panel">
+          ${canReview && !inquiry.checkedOutBy ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} حجز الاستعلام</button>` : ''}
+          ${canReview && inquiry.checkedOutBy === me ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} تحرير الاستعلام</button>` : ''}
+          ${canReview && isMine ? `
+            <button class="btn btn-primary" onclick="submitRecommendation(true)">${ICONS.check} رفع توصية بالأهلية</button>
+            <button class="btn btn-danger" onclick="submitRecommendation(false)">${ICONS.x} رفع توصية بعدم الأهلية</button>` : ''}
+          ${!inquiry.suspended ? `<button class="btn btn-warning" onclick="doSuspend()">${ICONS.pause} تعليق الاستعلام</button>` : `<button class="btn btn-success" onclick="doResume()">${ICONS.play} استئناف الاستعلام</button>`}
+          <button class="btn btn-ghost" onclick="addManualNote()">${ICONS.note} إضافة ملاحظة</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function doCheckout() {
+  inquiry.checkedOutBy = me;
+  inquiry.lastUpdate = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  inquiry.lastUpdatedBy = me;
+  inquiry.timeline.push({
+    action: 'حجز الاستعلام',
+    actor: me,
+    role: 'موظف قسم الإعاقة والأمراض المستديمة',
+    time: inquiry.lastUpdate,
+    fromStatus: inquiry.status,
+    toStatus: inquiry.status,
+    note: 'تم حجز الاستعلام للمراجعة',
+    type: 'info',
+    phone: myPhone
+  });
+  showToast('تم حجز الاستعلام', 's');
+  render();
+}
+
+function doCheckin() {
+  inquiry.checkedOutBy = null;
+  inquiry.lastUpdate = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  inquiry.lastUpdatedBy = me;
+  inquiry.timeline.push({
+    action: 'تحرير الاستعلام',
+    actor: me,
+    role: 'موظف قسم الإعاقة والأمراض المستديمة',
+    time: inquiry.lastUpdate,
+    fromStatus: inquiry.status,
+    toStatus: inquiry.status,
+    note: 'تم تحرير الاستعلام',
+    type: 'info',
+    phone: myPhone
+  });
+  showToast('تم تحرير الاستعلام', 'i');
+  render();
+}
+
+function submitRecommendation(isEligible) {
+  if (inquiry.checkedOutBy && inquiry.checkedOutBy !== me) {
+    showToast('الاستعلام محجوز بواسطة مستخدم آخر', 'w');
+    return;
+  }
+  const details = prompt(isEligible ? 'أدخل تفاصيل توصية الأهلية:' : 'أدخل أسباب عدم الأهلية:');
+  if (!details || !details.trim()) {
+    showToast('التفاصيل مطلوبة لرفع التوصية', 'w');
+    return;
+  }
+  const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  inquiry.employeeRecommendation = {
+    type: isEligible ? 'معتمد' : 'مرفوض',
+    date: now.slice(0, 10),
+    issuer: me,
+    details: details.trim(),
+    retirementEligible: isEligible,
+  };
+  inquiry.status = 'بانتظار اعتماد رئيس قسم الإعاقة والأمراض المستديمة';
+  inquiry.checkedOutBy = null;
+  inquiry.lastUpdate = now;
+  inquiry.lastUpdatedBy = me;
+  inquiry.timeline.push({
+    action: 'رفع توصية الموظف',
+    actor: me,
+    role: 'موظف قسم الإعاقة والأمراض المستديمة',
+    time: now,
+    fromStatus: 'تم استلام الاستعلام — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة',
+    toStatus: inquiry.status,
+    note: details.trim(),
+    type: isEligible ? 'success' : 'warning',
+    phone: myPhone
+  });
+  showToast('تم رفع التوصية لرئيس القسم', 's');
+  render();
+}
+
+function doSuspend() {
+  const reason = prompt('سبب التعليق:');
+  const notes = prompt('ملاحظات التعليق:');
+  if (!reason || !reason.trim() || !notes || !notes.trim()) {
+    showToast('سبب التعليق والملاحظات إلزاميان', 'w');
+    return;
+  }
+  inquiry.suspended = true;
+  inquiry.suspensionReason = reason.trim();
+  inquiry.suspensionNotes = notes.trim();
+  inquiry.suspendedBy = me;
+  inquiry.suspendedDate = new Date().toISOString().slice(0, 10);
+  inquiry.lastUpdate = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  inquiry.lastUpdatedBy = me;
+  inquiry.timeline.push({
+    action: 'تعليق الاستعلام',
+    actor: me,
+    role: 'موظف قسم الإعاقة والأمراض المستديمة',
+    time: inquiry.lastUpdate,
+    fromStatus: inquiry.status,
+    toStatus: inquiry.status,
+    note: `${reason.trim()} — ${notes.trim()}`,
+    type: 'warning',
+    phone: myPhone
+  });
+  render();
+}
+
+function doResume() {
+  inquiry.suspended = false;
+  inquiry.resumedBy = me;
+  inquiry.resumedDate = new Date().toISOString().slice(0, 10);
+  inquiry.lastUpdate = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  inquiry.lastUpdatedBy = me;
+  inquiry.timeline.push({
+    action: 'استئناف الاستعلام',
+    actor: me,
+    role: 'موظف قسم الإعاقة والأمراض المستديمة',
+    time: inquiry.lastUpdate,
+    fromStatus: inquiry.status,
+    toStatus: inquiry.status,
+    note: 'تم استئناف الاستعلام',
+    type: 'success',
+    phone: myPhone
+  });
+  render();
+}
+
+function addManualNote() {
+  const note = prompt('أدخل الملاحظة:');
+  if (!note || !note.trim()) return;
+  if (!Array.isArray(inquiry.notes)) inquiry.notes = [];
+  inquiry.notes.push({ text: note.trim(), addedBy: me, addedDate: new Date().toISOString().slice(0, 16).replace('T', ' ') });
+  inquiry.timeline.push({
+    action: 'إضافة ملاحظة',
+    actor: me,
+    role: 'موظف قسم الإعاقة والأمراض المستديمة',
+    time: new Date().toISOString().slice(0, 16).replace('T', ' '),
+    fromStatus: inquiry.status,
+    toStatus: inquiry.status,
+    note: note.trim(),
+    type: 'info',
+    phone: myPhone
+  });
+  render();
+}
+</script>
+</body>
+</html>

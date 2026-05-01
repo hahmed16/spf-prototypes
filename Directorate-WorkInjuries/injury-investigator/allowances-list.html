@@ -8,6 +8,14 @@
 </head>
 <body>
 <script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
 <script src="../shared/data.js"></script>
 <script src="../shared/layout.js"></script>
 <script src="../shared/utils.js"></script>
@@ -58,13 +66,18 @@ function render() {
                 <th>جهة العمل</th>
                 <th>الحالة</th>
                 <th>تاريخ التقديم</th>
+                <th>الأيام المتبقية</th>
                 <th>إجراءات</th>
               </tr>
             </thead>
             <tbody>
-              ${filtered.length === 0 
-                ? `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text3)">لا توجد نتائج تطابق البحث أو المرحلة الحالية</td></tr>`
-                : filtered.map(r=>`
+              ${filtered.length === 0
+                ? `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text3)">لا توجد نتائج تطابق البحث أو المرحلة الحالية</td></tr>`
+                : filtered.map(r=> {
+                  const meta = deriveRequestSummaryMeta(r);
+                  const remainingDaysClass = getRemainingDaysClass(meta.remainingDays);
+                  const remainingDaysLabel = getRemainingDaysLabel(meta.remainingDays);
+                  return `
               <tr style="${r.checkedOutBy===me?'background:#f0fdf4':''}">
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
                 <td>${getSubmittedByName(r)}</td>
@@ -72,6 +85,7 @@ function render() {
                 <td style="font-size:11.5px">${r.employer?.name?.substring(0,25) || '—'}...</td>
                 <td>${statusBadge(r.status)}</td>
                 <td style="font-size:12px">${r.submitDate}</td>
+                <td><span class="sla-days ${remainingDaysClass}">${remainingDaysLabel}</span></td>
                 <td>
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='allowances-details.html?id=${r.id}'" title="عرض التفاصيل">${ICONS.eye}</button>
@@ -82,10 +96,12 @@ function render() {
                           ? `<button class="ibtn" onclick="doCheckin('${r.id}')" title="Check-in — إلغاء الحجز">${ICONS.unlock}</button>`
                           : ''
                       : ''}
+                    ${!r.suspended?`<button class="ibtn" onclick="doSuspend('${r.id}')" title="تعليق الطلب">${ICONS.pause}</button>`:`<button class="ibtn" onclick="doResume('${r.id}')" title="استئناف الطلب">${ICONS.play}</button>`}
                     <button class="ibtn" onclick="openAddNoteModal('${r.id}')" title="إضافة ملاحظة">${ICONS.note}</button>
                   </div>
                 </td>
-              </tr>`).join('')}
+              </tr>`;
+                }).join('')}
             </tbody>
           </table>
         </div>
@@ -124,6 +140,58 @@ function doCheckin(id) {
   const req = WI_DATA.allowances.find(r=>r.id===id);
   if (req) { req.checkedOutBy = null; }
   showToast(`تم تحرير الطلب ${id} — Check-in`, 'i');
+  render();
+}
+
+function doSuspend(id){
+  const reason=prompt('سبب التعليق:');
+  if(reason){
+    const notes=prompt('ملاحظات إضافية (اختياري):');
+    const r=WI_DATA.allowances.find(x=>x.id===id);
+    if(r){
+      r.suspended=true;
+      r.suspensionReason=reason;
+      r.suspensionNotes=notes||'';
+      r.suspendedBy=me;
+      r.suspendedDate=new Date().toISOString().slice(0,10);
+      r.timeline.push({
+        action:'تعليق الطلب',
+        actor:me,
+        role:'موظف قسم التحقيق',
+        time:new Date().toISOString().slice(0,16).replace('T',' '),
+        fromStatus:r.status,
+        toStatus:r.status,
+        note:`تعليق: ${reason}${notes?` (${notes})`:''}`,
+        type:'warning'
+      });
+      r.lastUpdate=new Date().toISOString().slice(0,16).replace('T',' ');
+      r.lastUpdatedBy=me;
+    }
+    showToast(`تم تعليق ${id}`,'w');
+    render();
+  }
+}
+
+function doResume(id){
+  const r=WI_DATA.allowances.find(x=>x.id===id);
+  if(r){
+    r.suspended=false;
+    r.resumedBy=me;
+    r.resumedDate=new Date().toISOString().slice(0,10);
+    r.timeline.push({
+      action:'استئناف الطلب',
+      actor:me,
+      role:'موظف قسم التحقيق',
+      time:new Date().toISOString().slice(0,16).replace('T',' '),
+      fromStatus:r.status,
+      toStatus:r.status,
+      note:'تم استئناف الطلب',
+      type:'success'
+    });
+    r.lastUpdate=new Date().toISOString().slice(0,16).replace('T',' ');
+    r.lastUpdatedBy=me;
+  }
+  showToast(`تم استئناف ${id}`,'s');
   render();
 }
 </script>

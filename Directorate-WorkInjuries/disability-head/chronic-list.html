@@ -4,8 +4,18 @@
 <title>قائمة طلبات الأمراض المستديمة — رئيس قسم الإعاقة</title>
 <link rel="stylesheet" href="../shared/style.css"></head>
 <body>
-<script src="../shared/config.js"></script><script src="../shared/data.js"></script>
-<script src="../shared/layout.js"></script><script src="../shared/utils.js"></script>
+<script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'disability-head', activePage: 'chronic-list' });
 setBreadcrumb([{ label: 'منفعة الأمراض المستديمة' }, { label: 'قائمة الطلبات' }]);
@@ -37,9 +47,22 @@ function render() {
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم الطلب</th><th>مقدم الطلب</th><th>المستفيد</th><th>التشخيص</th><th>الحالة</th><th>تاريخ التقديم</th><th></th></tr></thead>
+            <thead><tr><th>رقم الطلب</th><th>مقدم الطلب</th><th>المستفيد</th><th>التشخيص</th><th>الحالة</th><th>تاريخ التقديم</th><th>الأيام المتبقية</th><th></th></tr></thead>
             <tbody>
-              ${reqs.map(d=>`
+              ${reqs.map(d=> {
+                const record = {
+                  id: d.requestId,
+                  status: d.requestStatus,
+                  submitDate: d.requestSubmitDate || d.provenDate,
+                  lastUpdate: d.requestLastUpdate,
+                  lastUpdatedBy: d.assignedTo,
+                  expectedClosureDate: null,
+                  slaDays: 10
+                };
+                const meta = deriveRequestSummaryMeta(record);
+                const remainingDaysClass = getRemainingDaysClass(meta.remainingDays);
+                const remainingDaysLabel = getRemainingDaysLabel(meta.remainingDays);
+                return `
               <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${d.requestId}</td>
                 <td>${getSubmittedByName(d)}</td>
@@ -47,11 +70,16 @@ function render() {
                 <td>${d.diagnosis}</td>
                 <td>${statusBadge(d.requestStatus || '—')}</td>
                 <td>${formatDate(d.requestSubmitDate || d.provenDate)}</td>
+                <td><span class="sla-days ${remainingDaysClass}">${remainingDaysLabel}</span></td>
                 <td>
-                  <button class="ibtn" onclick="window.location.href='chronic-details.html?id=${d.requestId}'">${ICONS.eye}</button>
-                  <button class="ibtn" onclick="openAddNoteModal('${d.requestId}')">${ICONS.note}</button>
+                  <div style="display:flex;gap:4px">
+                    <button class="ibtn" onclick="window.location.href='chronic-details.html?id=${d.requestId}'">${ICONS.eye}</button>
+                    ${!d.suspended?`<button class="ibtn" onclick="doSuspend('${d.requestId}')" title="تعليق الطلب">${ICONS.pause}</button>`:`<button class="ibtn" onclick="doResume('${d.requestId}')" title="استئناف الطلب">${ICONS.play}</button>`}
+                    <button class="ibtn" onclick="openAddNoteModal('${d.requestId}')">${ICONS.note}</button>
+                  </div>
                 </td>
-              </tr>`).join('')}
+              </tr>`;
+                }).join('')}
             </tbody>
           </table>
         </div>
@@ -60,4 +88,52 @@ function render() {
 }
 function updateSearch(val) { searchQuery = val; render(); }
 function toggleAll() { showAllStages = !showAllStages; render(); }
+function doSuspend(id){
+  const reason=prompt('سبب التعليق:');
+  if(reason){
+    const notes=prompt('ملاحظات إضافية (اختياري):');
+    const d=WI_DATA.chronicIncoming.find(x=>x.requestId===id);
+    if(d){
+      d.suspended=true;
+      d.suspensionReason=reason;
+      d.suspensionNotes=notes||'';
+      d.suspendedBy=WI_DATA.users.disability_head.name;
+      d.suspendedDate=new Date().toISOString().slice(0,10);
+      d.timeline.push({
+        action:'تعليق الطلب',
+        actor:WI_DATA.users.disability_head.name,
+        role:'رئيس قسم الإعاقة',
+        time:new Date().toISOString().slice(0,16).replace('T',' '),
+        fromStatus:d.requestStatus,
+        toStatus:d.requestStatus,
+        note:`تعليق: ${reason}${notes?` (${notes})`:''}`,
+        type:'warning'
+      });
+      d.requestLastUpdate=new Date().toISOString().slice(0,16).replace('T',' ');
+    }
+    showToast(`تم تعليق ${id}`,'w');
+    render();
+  }
+}
+function doResume(id){
+  const d=WI_DATA.chronicIncoming.find(x=>x.requestId===id);
+  if(d){
+    d.suspended=false;
+    d.resumedBy=WI_DATA.users.disability_head.name;
+    d.resumedDate=new Date().toISOString().slice(0,10);
+    d.timeline.push({
+      action:'استئناف الطلب',
+      actor:WI_DATA.users.disability_head.name,
+      role:'رئيس قسم الإعاقة',
+      time:new Date().toISOString().slice(0,16).replace('T',' '),
+      fromStatus:d.requestStatus,
+      toStatus:d.requestStatus,
+      note:'تم استئناف الطلب',
+      type:'success'
+    });
+    d.requestLastUpdate=new Date().toISOString().slice(0,16).replace('T',' ');
+  }
+  showToast(`تم استئناف ${id}`,'s');
+  render();
+}
 </script></body></html>

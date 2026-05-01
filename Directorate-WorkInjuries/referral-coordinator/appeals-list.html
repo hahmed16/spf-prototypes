@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>التظلمات — منسق الإحالات والتحويلات</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'referral-coordinator', activePage: 'appeals-list' });
+setBreadcrumb([{ label: 'الإحالات والتحويلات' }, { label: 'التظلمات' }]);
+
+let activeTab = 'all';
+let searchQuery = '';
+
+document.addEventListener('DOMContentLoaded', render);
+
+function render() {
+  const appeals = WI_DATA.appeals;
+  const filtered = filterAppeals(appeals, activeTab, searchQuery);
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>التظلمات من قرارات المؤسسات الصحية</h1>
+        <p>${appeals.length} تظلم إجمالي</p>
+      </div>
+    </div>
+
+    ${renderUnifiedFilterBar({ onSearch: 'updateSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+
+    <div class="card">
+      <div class="ttabs">
+        ${[
+          { key: 'all', label: 'الكل', count: appeals.length },
+          { key: 'pending', label: 'قيد المعالجة', count: appeals.filter(a => a.status.includes('بانتظار')).length },
+          { key: 'session', label: 'جلسة مجدولة', count: appeals.filter(a => a.status.includes('جلسة')).length },
+          { key: 'decided', label: 'صدر قرار', count: appeals.filter(a => a.status.includes('قرار')).length },
+        ].map(t => `<div class="ttab ${activeTab === t.key ? 'act' : ''}" onclick="setTab('${t.key}')">${t.label} <span class="tc">${t.count}</span></div>`).join('')}
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم التظلم</th>
+                <th>الطلب الأصلي</th>
+                <th>مقدم التظلم</th>
+                <th>سبب التظلم</th>
+                <th>القرار الأصلي</th>
+                <th>تاريخ التقديم</th>
+                <th>الحالة</th>
+                <th>الأيام المتبقية</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.length === 0 ? `
+                <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text3)">لا توجد تظلمات</td></tr>
+              ` : filtered.map(a => {
+                const meta = deriveRequestSummaryMeta(a);
+                const remainingDaysClass = getRemainingDaysClass(meta.remainingDays);
+                const remainingDaysLabel = getRemainingDaysLabel(meta.remainingDays);
+                return `
+                <tr>
+                  <td style="font-family:monospace;font-weight:700;color:var(--primary)">${a.id}</td>
+                  <td style="font-family:monospace">${a.originalRequestId}</td>
+                  <td>${a.applicant.name}</td>
+                  <td>${a.appealReason}</td>
+                  <td><span class="badge ${a.originalDecision === 'موافقة' ? 'b-approved' : 'b-rejected'}">${a.originalDecision || '—'}</span></td>
+                  <td style="font-size:12px">${a.submitDate}</td>
+                  <td>${statusBadge(a.status)}</td>
+                  <td><span class="sla-days ${remainingDaysClass}">${remainingDaysLabel}</span></td>
+                  <td>
+                    <div style="display:flex;gap:4px">
+                      <button class="ibtn" onclick="viewDetails('${a.id}')" title="عرض التفاصيل">${ICONS.eye}</button>
+                      ${a.status.includes('بانتظار') ? `
+                        <button class="ibtn" onclick="processAppeal('${a.id}')" title="معالجة التظلم">${ICONS.pen}</button>
+                      ` : ''}
+                    </div>
+                  </td>
+                </tr>
+              `}).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function setTab(tab) {
+  activeTab = tab;
+  render();
+}
+
+function updateSearch(val) {
+  searchQuery = val;
+  render();
+}
+
+function filterAppeals(appeals, tab, query) {
+  let filtered = appeals;
+
+  if (tab !== 'all') {
+    if (tab === 'pending') {
+      filtered = appeals.filter(a => a.status.includes('بانتظار'));
+    } else if (tab === 'session') {
+      filtered = appeals.filter(a => a.status.includes('جلسة'));
+    } else if (tab === 'decided') {
+      filtered = appeals.filter(a => a.status.includes('قرار'));
+    }
+  }
+
+  if (query) {
+    const lowerQuery = query.toLowerCase();
+    filtered = filtered.filter(a =>
+      a.id.toLowerCase().includes(lowerQuery) ||
+      a.originalRequestId.toLowerCase().includes(lowerQuery) ||
+      a.applicant.name.toLowerCase().includes(lowerQuery) ||
+      a.appealReason.toLowerCase().includes(lowerQuery)
+    );
+  }
+
+  return filtered;
+}
+
+function viewDetails(id) {
+  showToast(`عرض تفاصيل التظلم ${id}`, 'i');
+}
+
+function processAppeal(id) {
+  showToast(`معالجة التظلم ${id}`, 'i');
+}
+</script>
+</body>
+</html>

@@ -43,6 +43,8 @@ const ICONS = {
   shield: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
   clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>`,
   chart: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  pause: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="4" x2="10" y2="20"/><line x1="14" y1="4" x2="14" y2="20"/></svg>`,
+  play: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="8 5 19 12 8 19 8 5"/></svg>`,
 };
 
 /* ── إنشاء التخطيط الرئيسي ── */
@@ -94,8 +96,22 @@ function getUserData(role) {
     'institution-rapporteur': WI_DATA.users.institution_rapporteur,
     'appeals-rapporteur': WI_DATA.users.appeals_rapporteur,
     'supervisory-rapporteur': WI_DATA.users.supervisory_rapporteur,
+    'direct-referral-employee': WI_DATA.users.direct_referral_employee,
   };
   return map[role] || { name: 'مستخدم النظام', civil: '' };
+}
+
+function getCurrentUserData() {
+  return getUserData(CURRENT_ROLE);
+}
+
+function getCurrentUserPhone() {
+  return getCurrentUserData()?.phone || '';
+}
+
+function getPhoneForActor(actorName) {
+  if (!window.WI_DATA?.users || !actorName) return '';
+  return Object.values(WI_DATA.users).find((user) => user?.name === actorName)?.phone || '';
 }
 
 function buildHeader(roleConfig, userData) {
@@ -135,6 +151,13 @@ function buildHeader(roleConfig, userData) {
         <div>
           <div class="u-name">${userData.name}</div>
           <div class="u-role">${roleConfig.nameAr}</div>
+          ${userData.availability ? `
+          <div class="u-availability">
+            <span class="avail-dot ${userData.availability.status === 'متاح' ? 'avail' : 'unavail'}"></span>
+            <span class="avail-status">${userData.availability.status}</span>
+            ${userData.availability.status === 'غير متاح' && userData.availability.note ? `<span class="avail-note">— ${userData.availability.note}</span>` : ''}
+          </div>
+          ` : ''}
         </div>
       </div>
     </div>
@@ -272,6 +295,56 @@ function showProfile() {
   });
 }
 
+function openAvailabilityModal() {
+  const userData = getCurrentUserData();
+  if (!userData || !userData.availability) {
+    showToast('لا تتوفر بيانات الحالة لهذا المستخدم', 'w');
+    return;
+  }
+
+  openModal({
+    title: 'تحديث حالة التوفر',
+    body: `
+      <div class="fg" style="gap:14px">
+        <div class="alert alert-i">
+          ${ICONS.info}
+          <span>تظهر حالة التوفر في رأس الصفحة وتُستخدم عند إعادة التخصيص والتواصل الداخلي.</span>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">الحالة الحالية</label>
+          <select class="fc" id="availability-status-input">
+            <option value="متاح" ${userData.availability.status === 'متاح' ? 'selected' : ''}>متاح</option>
+            <option value="غير متاح" ${userData.availability.status === 'غير متاح' ? 'selected' : ''}>غير متاح</option>
+          </select>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">ملاحظة</label>
+          <textarea class="fc" id="availability-note-input" rows="3" placeholder="مثال: في اجتماع، خارج المكتب، إجازة قصيرة">${userData.availability.note || ''}</textarea>
+        </div>
+      </div>`,
+    footer: `
+      <button class="btn btn-primary" onclick="saveAvailabilityStatus()">${ICONS.check} حفظ الحالة</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+
+function saveAvailabilityStatus() {
+  const userData = getCurrentUserData();
+  const statusEl = document.getElementById('availability-status-input');
+  const noteEl = document.getElementById('availability-note-input');
+  if (!userData || !statusEl || !noteEl) return;
+
+  userData.availability = {
+    status: statusEl.value,
+    note: noteEl.value.trim(),
+  };
+
+  closeModal();
+  initLayout({ role: CURRENT_ROLE, activePage: CURRENT_PAGE, breadcrumb: CURRENT_BREADCRUMB });
+  if (CURRENT_BREADCRUMB.length) setBreadcrumb(CURRENT_BREADCRUMB);
+  showToast('تم تحديث حالة التوفر', 's');
+}
+
 function bindHeaderEvents() {
   document.addEventListener('click', () => closeNotifications());
 }
@@ -374,14 +447,27 @@ function showNotifications(event) {
 
 function showUserMenu() {
   const roleConfig = WI_CONFIG.roles[CURRENT_ROLE];
+  const userData = getUserData(CURRENT_ROLE);
   openModal({
     title: 'إعدادات الحساب',
     body: `
       <div style="text-align:center;margin-bottom:16px">
         <div style="width:60px;height:60px;border-radius:50%;background:var(--primary);color:#fff;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">${roleConfig.avatarInitials}</div>
-        <p style="font-size:14px;font-weight:700;color:var(--text)">${getUserData(CURRENT_ROLE).name}</p>
+        <p style="font-size:14px;font-weight:700;color:var(--text)">${userData.name}</p>
         <p style="font-size:12px;color:var(--text3)">${roleConfig.nameAr}</p>
       </div>
+      ${roleConfig.type === 'internal' && userData.availability ? `
+      <div class="availability-card">
+        <div>
+          <div class="availability-card-label">حالة التوفر الحالية</div>
+          <div class="availability-card-status">
+            <span class="avail-dot ${userData.availability.status === 'متاح' ? 'avail' : 'unavail'}"></span>
+            <span>${userData.availability.status}</span>
+          </div>
+          ${userData.availability.note ? `<div class="availability-card-note">${userData.availability.note}</div>` : ''}
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="openAvailabilityModal()">${ICONS.edit} تعديل</button>
+      </div>` : ''}
       <div class="divider"></div>
       <div style="display:flex;flex-direction:column;gap:6px">
         <button class="btn btn-ghost" style="justify-content:flex-start;gap:10px" onclick="switchRole(); closeModal();">${ICONS.switch} تغيير الدور</button>
@@ -538,6 +624,83 @@ function createSummaryCell(label, valueHtml, extraClass = '') {
   return `<div class="${extraClass}"><div class="flbl" style="margin-bottom:4px">${label}</div><div style="font-size:12px;color:var(--text2)">${valueHtml}</div></div>`;
 }
 
+function inferWorkflowStageId(requestType, status, record = {}) {
+  const text = normalizeDisplay(status, '').replace(/\s+/g, ' ');
+  if (record?.suspended) return 'suspended';
+
+  if (requestType === 'disabilityRetirement') {
+    if (text.includes('بانتظار اعتماد رئيس القسم')) return 'head_review';
+    if (text.includes('بانتظار مراجعة موظف')) return 'employee_review';
+    if (text.includes('مؤهل للتقاعد المبكر')) return 'closed_approved';
+    if (text.includes('غير مؤهل')) return 'closed_rejected';
+    return 'received';
+  }
+
+  return '';
+}
+
+function renderWorkflowPath(record, requestType) {
+  const workflowStages = window.getWorkflowStages ? getWorkflowStages(requestType) : [];
+  if (!workflowStages.length || !record) return '';
+
+  const currentStageId = inferWorkflowStageId(requestType, record.status, record);
+  return `
+    <div class="card workflow-card">
+      <div class="card-hd">
+        <h3>مسار العمل المتوقع</h3>
+      </div>
+      <div class="card-b">
+        <div class="workflow-strip">
+          ${workflowStages.map((stage, index) => {
+            const isCurrent = stage.id === currentStageId;
+            const isDone = currentStageId && workflowStages.findIndex(item => item.id === currentStageId) > index;
+            return `
+              <div class="workflow-stage ${isCurrent ? 'current' : ''} ${isDone ? 'done' : ''}">
+                <div class="workflow-stage-dot">${isDone ? ICONS.check : index + 1}</div>
+                <div class="workflow-stage-body">
+                  <div class="workflow-stage-name">${stage.name}</div>
+                  <div class="workflow-stage-desc">${stage.description}</div>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderTimelineList(timeline) {
+  const safeTimeline = Array.isArray(timeline) ? timeline : [];
+  if (!safeTimeline.length) {
+    return `<div class="empty-st" style="padding:18px 0">${ICONS.info}<p>لا يوجد سجل إجراءات حتى الآن</p></div>`;
+  }
+
+  return `
+    <div class="timeline">
+      ${safeTimeline.map((event) => {
+        const eventPhone = event.phone || getPhoneForActor(event.actor);
+        return `
+          <div class="tl-item ${event.type || 'default'}">
+            <div class="tl-dot"></div>
+            <div class="tl-content">
+              <div class="tl-header">
+                <span class="tl-action">${normalizeDisplay(event.action)}</span>
+                <span class="tl-time">${normalizeDisplay(event.time)}</span>
+              </div>
+              <div class="tl-actor">${normalizeDisplay(event.actor)} — ${normalizeDisplay(event.role)}</div>
+              ${event.note ? `<div class="tl-note">${event.note}</div>` : ''}
+              ${event.fromStatus && event.toStatus ? `
+              <div class="tl-status">
+                <span class="badge b-secondary">${event.fromStatus || '—'}</span>
+                ${ICONS.arrow_left}
+                <span class="badge b-primary">${event.toStatus}</span>
+              </div>` : ''}
+              ${eventPhone ? `<div class="tl-phone"><small>رقم الهاتف: ${eventPhone}</small></div>` : ''}
+            </div>
+          </div>`;
+      }).join('')}
+    </div>`;
+}
+
 function enhanceRequestSummaryPanels() {
   const record = resolveCurrentRequestRecord();
   const meta = deriveRequestSummaryMeta(record);
@@ -621,4 +784,3 @@ function renderContent(html) {
   const ct = getContent();
   if (ct) ct.innerHTML = html;
 }
-

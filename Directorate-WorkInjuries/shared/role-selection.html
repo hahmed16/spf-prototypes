@@ -447,6 +447,15 @@
   </div>
 
   <script src="config.js"></script>
+  <script src="data-users.js"></script>
+  <script src="data-allowances.js"></script>
+  <script src="data-disability.js"></script>
+  <script src="data-chronic.js"></script>
+  <script src="data-appeals.js"></script>
+  <script src="data-licensing.js"></script>
+  <script src="data-sessions.js"></script>
+  <script src="data-disability-retirement.js"></script>
+  <script src="data-referrals.js"></script>
   <script src="data.js"></script>
   <script>
     const roleIcons = {
@@ -470,6 +479,7 @@
       'committees-head': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>',
       'licensing-employee': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg>',
       'licensing-head': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>',
+      'direct-referral-employee': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v8a2 2 0 0 1-2 2H7l-4 4V6a2 2 0 0 1 2-2h10"/><path d="M17 3h4v4"/><path d="m21 3-7 7"/></svg>',
 
       // Committees
       'licensed-institution': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3l.5-4h17l.5 4Z"/><path d="M4 21V11"/><path d="M7 21v-4"/><path d="M12 21v-6"/><path d="M17 21v-2"/><path d="M20 21V11"/></svg>',
@@ -488,7 +498,7 @@
         title: 'أقسام صندوق الحماية الاجتماعية', roles: [
           'injury-investigator', 'injury-head', 'od-investigator', 'od-head',
           'sickleave-employee', 'sickleave-head', 'disability-employee', 'disability-head',
-          'committees-employee', 'committees-head', 'licensing-employee', 'licensing-head'
+          'committees-employee', 'committees-head', 'licensing-employee', 'licensing-head', 'direct-referral-employee'
         ]
       },
       { title: 'اللجان الطبية والمؤسسات', roles: ['licensed-institution', 'supervisory-committee', 'appeals-committee'] },
