@@ -49,7 +49,7 @@ const WI_DATA = {
   dashboardStats: {
     'injury-investigator': [
       { label: 'الطلبات الجديدة في انتظار التحقيق', value: 7, type: 'p' },
-      { label: 'الطلبات التي حجزتها (Check-out)', value: 3, type: 'i' },
+      { label: 'الطلبات التي حجزتها (حجز الطلب)', value: 3, type: 'i' },
       { label: 'طلبات مُعادة لي من الرئيس', value: 1, type: 'd' },
       { label: 'طلبات أرسلتها للرئيس هذا الأسبوع', value: 5, type: 's' },
     ],

@@ -23,7 +23,7 @@
 initLayout({ role: 'supervisory-committee', activePage: 'licensing-list' });
 setBreadcrumb([{ label: 'التراخيص' }, { label: 'قائمة الطلبات المحالة' }]);
 
-const reqs = WI_DATA.licensing;
+const reqs = getFilteredData({ role: 'supervisory-committee', data: WI_DATA.licensing, showAll: false });
 let activeTab = 'all';
 
 document.addEventListener('DOMContentLoaded', render);

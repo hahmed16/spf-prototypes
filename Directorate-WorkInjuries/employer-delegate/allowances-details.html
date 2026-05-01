@@ -17,6 +17,7 @@
 <script src="../shared/data-sessions.js"></script>
 <script src="../shared/data-disability-retirement.js"></script>
 <script src="../shared/data.js"></script>
+<script src="../shared/workflow-stages.js"></script>
 <script src="../shared/layout.js"></script>
 <script src="../shared/utils.js"></script>
 <script>
@@ -66,6 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     </div>
+
+    ${renderWorkflowPath(req, 'allowances')}
 
     ${isSamePerson ? `
     <!-- بيانات المؤمن عليه / المستفيد (مدمجة) -->
@@ -377,15 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- السجل الزمني -->
     <div class="card">
       <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني الكامل للطلب</h3></div>
-      <div class="pb">
-        <div class="tl">
-          ${tl.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد أحداث</div>' : tl.map(e => {
-            const dc = e.type === 'success' ? 's' : e.type === 'danger' ? 'd' : e.type === 'warning' ? 'w' : '';
-            const ic = e.type === 'success' ? ICONS.check : e.type === 'danger' ? ICONS.x : e.type === 'warning' ? ICONS.warn : ICONS.clock;
-            return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus ? `<div class="tl-states">${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus}</span><span>${ICONS.arrow_right}</span>` : ''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus}</span></div>` : ''}${e.note ? `<div class="tl-note">${e.note}</div>` : ''}</div></div>`;
-          }).join('')}
-        </div>
-      </div>
+      <div class="pb">${renderTimelineList(tl)}</div>
     </div>`;
 });
 
@@ -439,7 +434,5 @@ function submitSubsequentAllowance() {
 </script>
 </body>
 </html>
-
-
 
 

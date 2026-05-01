@@ -59,7 +59,7 @@ function render() {
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم الطلب</th><th>مقدم الطلب</th><th>اسم الموظف</th><th>الرقم المدني</th><th>النوع</th><th>الحالة</th><th>تاريخ التقديم</th><th>آخر تحديث</th><th></th></tr></thead>
+            <thead><tr><th>رقم الطلب</th><th>مقدم الطلب</th><th>اسم الموظف</th><th>الرقم المدني</th><th>النوع</th><th>الحالة</th><th>تاريخ التقديم</th><th>الأيام المتبقية</th><th>آخر تحديث</th><th></th></tr></thead>
             <tbody>
               ${filtered.map(r=>`
               <tr>
@@ -70,6 +70,7 @@ function render() {
                 <td>${r.type}</td>
                 <td>${statusBadge(r.status)}</td>
                 <td style="font-size:12px">${r.submitDate}</td>
+                <td>${renderRemainingDaysBadge(r)}</td>
                 <td style="font-size:12px;color:var(--text3)">${r.lastUpdate}</td>
                 <td>
                   <button class="ibtn" onclick="window.location.href='allowances-details.html?id=${r.id}'">${ICONS.eye}</button>

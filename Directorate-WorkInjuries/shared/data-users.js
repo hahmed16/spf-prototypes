@@ -49,6 +49,7 @@ const USERS_DATA = {
   supervisory_committee: { name: 'د. سيف بن حمد المسكري', civil: '9066665555', phone: '96896665555', committeeId: 'SUP-COM-01', availability: { status: 'متاح', note: '' } },
   appeals_committee: { name: 'د. خالد بن سالم الهاشمي', civil: '9066666666', phone: '96896666666', committeeId: 'APP-COM-01', availability: { status: 'متاح', note: '' } },
   hospital_delegate: { name: 'منى بنت عبدالله الرحبية', civil: '9066663333', phone: '96896663333', email: 'mona@hospital.om', availability: { status: 'متاح', note: '' } },
+  od_committee: { name: 'د. ناصر بن حمود الفارسي', civil: '9066671111', phone: '96896671111', committeeId: 'OD-COM-01', availability: { status: 'متاح', note: '' } },
   institution_rapporteur: { name: 'أنس بن خلفان الجابري', civil: '9066664444', phone: '96896664444', employeeId: 'SPF-0589', availability: { status: 'متاح', note: '' } },
   appeals_rapporteur: { name: 'ليلى بنت حمود الفارسية', civil: '9066667777', phone: '96896667777', employeeId: 'SPF-0611', availability: { status: 'متاح', note: '' } },
   supervisory_rapporteur: { name: 'مازن بن سعيد اللواتي', civil: '9066668888', phone: '96896668888', employeeId: 'SPF-0624', availability: { status: 'متاح', note: '' } },

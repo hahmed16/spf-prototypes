@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل الإحالة — منسق الإحالات والتحويلات</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data-referrals.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/workflow-stages.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'referral-coordinator', activePage: 'referrals-list' });
+const params = new URLSearchParams(window.location.search);
+const directReq = WI_DATA.referrals.find(r => r.id === params.get('id'));
+const req = directReq || WI_DATA.allowances.find(r => r.id === params.get('id')) || WI_DATA.licensing.find(r => r.id === params.get('id')) || WI_DATA.appeals.find(r => r.id === params.get('id')) || null;
+const isDirectReferral = Boolean(directReq);
+currentRequestId = req ? req.id : '';
+const me = WI_DATA.users.referral_coordinator.name;
+const isCheckedOutByMe = req.checkedOutBy === me;
+
+setBreadcrumb([{ label: 'الإحالات الواردة', page: 'referrals-list' }, { label: `تفاصيل ${req.id}` }]);
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!req) {
+    getContent().innerHTML = '<div class="card"><div class="pb"><div class="empty-st">الطلب غير موجود</div></div></div>';
+    return;
+  }
+  renderReferralCoordinatorDetails();
+});
+
+function renderReferralCoordinatorDetails() {
+  const canAct = !req.checkedOutBy || req.checkedOutBy === me;
+  const isSamePerson = req.applicant?.civil && req.insured?.civil && req.applicant.civil === req.insured.civil;
+
+  const isWork     = req.type === 'إصابة عمل';
+  const isOD       = req.type === 'مرض مهني';
+  const isDisab    = req.type === 'إعاقة';
+  const isChronic  = req.type === 'أمراض مستديمة';
+  const isLicensing = req.requestType === 'ترخيص';
+  const isAppeal   = req.originalRequestId ? true : false;
+
+  const atts       = req.attachments || [];
+  const notes      = req.notes || [];
+  const tl         = req.timeline || [];
+
+  // Determine request type for display
+  const requestTypeDisplay = isDirectReferral ? 'عرض مباشر' :
+                              isLicensing ? 'ترخيص' :
+                              isAppeal ? 'تظلم' :
+                              req.type || 'طلب';
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>تفاصيل الإحالة</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
+      </div>
+      <div class="pg-acts">
+        ${!req.checkedOutBy
+          ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} حجز الطلب</button>`
+          : isCheckedOutByMe
+            ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} تحرير الطلب</button>`
+            : `<span style="font-size:12px;color:var(--warning);padding:8px 14px;border:1px solid var(--warning-l);border-radius:var(--rsm);background:var(--warning-l)">${ICONS.lock} محجوز: ${req.checkedOutBy}</span>`}
+        <button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    <!-- ملخص الطلب -->
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div class="req-summary-grid">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">نوع الطلب</div><div style="font-size:13px;font-weight:600">${requestTypeDisplay}${req.subtype ? ` — ${req.subtype}` : ''}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الحالة الحالية</div>${statusBadge(req.status)}</div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ الطلب</div><div style="font-size:12.5px">${formatDate(req.submitDate)}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">المسند إليه</div><div style="font-size:12.5px;font-weight:600">${normalizeDisplay(req.assignedTo)}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر تحديث</div><div style="font-size:12px;color:var(--text2)">${req.lastUpdate || '—'}</div></div>
+        </div>
+      </div>
+    </div>
+
+    ${isDirectReferral ? renderWorkflowPath(req, 'directReferral') : ''}
+    ${renderInsuredSummaryCards(req.insured?.civil || req.applicant?.civil, req.id)}
+    ${isDirectReferral ? renderDirectReferralDetails(req, canAct) : renderStandardReferralDetails(req, canAct, isSamePerson)}
+    ${isDirectReferral ? renderInstitutionFollowUpCard(req) : ''}
+
+    <!-- المرفقات -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.file}</div>المرفقات</h3></div>
+      <div class="pb">
+        ${atts.length === 0 ? '<div class="empty-st">لا توجد مرفقات</div>' : `
+          <div class="tbl-wrap">
+            <table class="dtbl">
+              <thead><tr><th>اسم الملف</th><th>النوع</th><th>تاريخ الرفع</th><th>تم الرفع بواسطة</th><th>الحجم</th><th></th></tr></thead>
+              <tbody>
+                ${atts.map(att => `
+                  <tr>
+                    <td>${att.name}</td>
+                    <td><span class="badge b-secondary">${att.type}</span></td>
+                    <td style="font-size:12px">${formatDate(att.uploadDate)}</td>
+                    <td style="font-size:12px">${att.uploadedBy} (${att.role})</td>
+                    <td style="font-size:12px">${att.size}</td>
+                    <td><button class="ibtn" onclick="showToast('جارٍ تحميل الملف...','i')">${ICONS.download}</button></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `}
+      </div>
+    </div>
+
+    <!-- الملاحظات التشغيلية -->
+    <div class="card op-notes-card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.note}</div>الملاحظات التشغيلية</h3></div>
+      <div class="pb">
+        ${notes.length === 0 ? '<div class="empty-st">لا توجد ملاحظات</div>' : `
+          <div style="display:flex;flex-direction:column;gap:12px">
+            ${notes.map(note => `
+              <div style="padding:12px;background:var(--g50);border-radius:8px;border-right:3px solid var(--primary)">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <span style="font-weight:700;font-size:13px">${note.author}</span>
+                  <span style="font-size:11px;color:var(--text3)">${note.time}</span>
+                </div>
+                <div style="font-size:13px;line-height:1.6">${note.text}</div>
+              </div>
+            `).join('')}
+          </div>
+        `}
+        <div style="margin-top:16px">
+          <div class="fg" style="gap:8px">
+            <input type="text" class="fc" id="quick-note-input" placeholder="أضف ملاحظة تشغيلية سريعة...">
+            <button class="btn btn-secondary btn-sm" onclick="quickAddNote()">${ICONS.plus} إضافة</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- سجل الإجراءات -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.clock}</div>سجل الإجراءات</h3></div>
+      <div class="pb">
+        ${renderTimelineList(tl)}
+      </div>
+    </div>
+
+    ${canAct ? renderCoordinatorActionPanel(req) : ''}
+  `;
+}
+
+function renderDirectReferralDetails(req, canAct) {
+  const referral = req.referral || {};
+  const insured = req.insured || {};
+  const employer = req.employer || {};
+
+  return `
+    ${renderDirectReferralDetailsCard(referral)}
+    ${renderReferralInsuredCard(insured, { extended: true })}
+    ${renderReferralEmployerCard(employer, { extended: true })}
+  `;
+}
+
+function renderStandardReferralDetails(req, canAct, isSamePerson) {
+  const insured = req.insured || {};
+  const employer = req.employer || {};
+  const applicant = req.applicant || {};
+
+  return `
+    ${renderReferralApplicantCard(applicant)}
+    ${!isSamePerson ? renderReferralInsuredCard(insured) : ''}
+    ${renderReferralEmployerCard(employer)}
+  `;
+}
+
+function renderCoordinatorActionPanel(req) {
+  const isDirectReferral = req.requestType === 'عرض مباشر';
+  const isLicensing = req.requestType === 'ترخيص';
+  const isAppeal = req.originalRequestId ? true : false;
+
+  let actions = [];
+
+  if (isDirectReferral) {
+    actions = [
+      { label: 'توجيه إلى قسم اللجان الطبية', class: 'btn-primary', icon: ICONS.arrow_right, fn: 'forwardDirectReferral()' },
+      { label: 'متابعة مع المؤسسة الصحية', class: 'btn-secondary', icon: ICONS.bell, fn: 'followUpWithInstitution()' },
+      { label: 'استلام القرار واستكمال التنفيذ', class: 'btn-accent', icon: ICONS.check, fn: 'receiveDecisionAndContinue()' },
+      { label: 'تعليق الطلب', class: 'btn-warning', icon: ICONS.pause, fn: 'toggleSuspendResume()' },
+      { label: 'توصية برفض الإحالة مع تحديد السبب', class: 'btn-danger', icon: ICONS.x, fn: 'returnForCompletionByCoordinator()' }
+    ];
+  } else if (isLicensing) {
+    actions = [
+      { label: 'توجيه إلى اللجنة الإشرافية', class: 'btn-primary', icon: ICONS.arrow_right },
+      { label: 'توصية برفض الإحالة مع تحديد السبب', class: 'btn-danger', icon: ICONS.x },
+      { label: 'إعادة للاستيفاء', class: 'btn-warning', icon: ICONS.refresh }
+    ];
+  } else if (isAppeal) {
+    actions = [
+      { label: 'توجيه إلى لجنة التظلمات', class: 'btn-primary', icon: ICONS.arrow_right },
+      { label: 'توصية برفض التظلم مع تحديد السبب', class: 'btn-danger', icon: ICONS.x },
+      { label: 'إعادة للاستيفاء', class: 'btn-warning', icon: ICONS.refresh }
+    ];
+  } else {
+    actions = [
+      { label: 'توجيه إلى قسم اللجان الطبية', class: 'btn-primary', icon: ICONS.arrow_right },
+      { label: 'توصية برفض الإحالة مع تحديد السبب', class: 'btn-danger', icon: ICONS.x },
+      { label: 'إعادة للاستيفاء', class: 'btn-warning', icon: ICONS.refresh }
+    ];
+  }
+
+  return renderActionButtonsPanel(
+    actions.map((action) => ({ ...action, fn: action.fn || `executeAction('${action.label}')` })),
+    { title: 'الإجراءات المتاحة' }
+  );
+}
+
+function renderInstitutionFollowUpCard(req) {
+  return renderDirectReferralFollowUpCard(req);
+}
+
+function forwardDirectReferral() {
+  req.status = 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية';
+  req.lastUpdate = new Date().toISOString().slice(0,16).replace('T',' ');
+  req.lastUpdatedBy = me;
+  req.timeline.push({
+    action: 'توجيه إلى قسم اللجان الطبية',
+    actor: me,
+    role: 'منسق الإحالات والتحويلات',
+    time: req.lastUpdate,
+    fromStatus: 'قيد مراجعة منسق الإحالات والتحويلات',
+    toStatus: req.status,
+    note: 'تم اعتماد الإحالة وتحويلها إلى قسم اللجان الطبية لاستكمال اختيار المؤسسة الصحية.',
+    type: 'success',
+    phone: getCurrentUserPhone()
+  });
+  showToast('تم تحويل الطلب إلى قسم اللجان الطبية', 's');
+  setTimeout(() => window.location.reload(), 900);
+}
+
+function followUpWithInstitution() {
+  const previousStatus = req.status;
+  req.assignedInstitution = req.assignedInstitution || req.referral?.preferredInstitution || 'مؤسسة صحية مرخصة';
+  req.status = 'تمت متابعة الحالة مع المؤسسة الصحية — بانتظار انعقاد الجلسة';
+  req.lastUpdate = new Date().toISOString().slice(0,16).replace('T',' ');
+  req.lastUpdatedBy = me;
+  req.timeline.push({
+    action: 'متابعة مع المؤسسة الصحية',
+    actor: me,
+    role: 'منسق الإحالات والتحويلات',
+    time: req.lastUpdate,
+    fromStatus: previousStatus,
+    toStatus: 'تمت متابعة الحالة مع المؤسسة الصحية — بانتظار انعقاد الجلسة',
+    note: `تم التواصل مع ${req.assignedInstitution} وتأكيد استمرار الطلب ضمن مسار الجلسة/القرار.`,
+    type: 'info',
+    phone: getCurrentUserPhone()
+  });
+  showToast('تم تحديث متابعة المؤسسة الصحية', 's');
+  setTimeout(() => window.location.reload(), 900);
+}
+
+function receiveDecisionAndContinue() {
+  const previousStatus = req.status;
+  req.decisionDate = new Date().toISOString().slice(0,10);
+  req.status = 'تم استلام قرار المؤسسة الصحية — بانتظار استكمال التنفيذ';
+  req.committeeDecision = req.committeeDecision || {
+    id: `DEC-REF-${req.id}`,
+    type: 'موافقة',
+    date: req.decisionDate,
+    summary: 'أوصت المؤسسة الصحية باستكمال الإجراءات التنفيذية وفق التقرير الطبي.',
+    executionStatus: 'قيد التنفيذ',
+    executed: false,
+  };
+  req.committeeDecision.date = req.decisionDate;
+  req.committeeDecision.executionStatus = 'قيد التنفيذ';
+  req.lastUpdate = new Date().toISOString().slice(0,16).replace('T',' ');
+  req.lastUpdatedBy = me;
+  req.timeline.push({
+    action: 'استلام القرار واستكمال التنفيذ',
+    actor: me,
+    role: 'منسق الإحالات والتحويلات',
+    time: req.lastUpdate,
+    fromStatus: previousStatus,
+    toStatus: 'تم استلام قرار المؤسسة الصحية — بانتظار استكمال التنفيذ',
+    note: 'تم استلام القرار وربطه بملف الإحالة، ويمكن متابعته من سجل القرارات والتظلمات.',
+    type: 'success',
+    phone: getCurrentUserPhone()
+  });
+  showToast('تم استلام القرار وربط مسار التنفيذ', 's');
+  setTimeout(() => window.location.reload(), 900);
+}
+
+function toggleSuspendResume() {
+  if (req.suspended) {
+    resumeRecord(req, { roleLabel: 'منسق الإحالات والتحويلات', resumeStatus: 'قيد مراجعة منسق الإحالات والتحويلات' });
+    return;
+  }
+  suspendRecord(req, { roleLabel: 'منسق الإحالات والتحويلات' });
+}
+
+function returnForCompletionByCoordinator() {
+  const note = prompt('اذكر سبب الإعادة للاستيفاء:');
+  if (!note) return;
+  const previousStatus = req.status;
+  req.status = 'تمت إعادة طلب العرض المباشر لاستيفاء البيانات';
+  req.lastUpdate = new Date().toISOString().slice(0,16).replace('T',' ');
+  req.lastUpdatedBy = me;
+  req.timeline.push({
+    action: 'إعادة للاستيفاء',
+    actor: me,
+    role: 'منسق الإحالات والتحويلات',
+    time: req.lastUpdate,
+    fromStatus: previousStatus,
+    toStatus: req.status,
+    note,
+    type: 'warning',
+    phone: getCurrentUserPhone()
+  });
+  showToast('تمت إعادة الطلب للاستيفاء', 's');
+  setTimeout(() => window.location.reload(), 900);
+}
+
+function doCheckout() {
+  confirmAction({
+    title: 'حجز الطلب',
+    msg: 'هل تريد حجز هذا الطلب للعمل عليه؟ لن يتمكن موظف آخر من اتخاذ إجراء حتى يتم تحريره.',
+    confirmLabel: 'نعم، احجز الطلب',
+    confirmClass: 'btn-primary',
+    onConfirm: () => {
+      req.checkedOutBy = me;
+      const previousStatus = req.status;
+      req.status = 'قيد مراجعة منسق الإحالات والتحويلات';
+      req.timeline.push({
+        action: 'بدء المراجعة',
+        actor: me,
+        role: 'منسق الإحالات والتحويلات',
+        time: new Date().toISOString(),
+        fromStatus: previousStatus,
+        toStatus: 'قيد مراجعة منسق الإحالات والتحويلات',
+        note: 'تم حجز الطلب للمراجعة',
+        type: 'info',
+        phone: getCurrentUserPhone()
+      });
+      showToast('تم حجز الطلب بنجاح', 's');
+      setTimeout(() => window.location.reload(), 1200);
+    }
+  });
+}
+
+function doCheckin() {
+  confirmAction({
+    title: 'تحرير الطلب',
+    msg: 'هل تريد تحرير هذا الطلب؟ سيتمكن الآخرون من العمل عليه بعد التحرير.',
+    confirmLabel: 'نعم، حرّر الطلب',
+    confirmClass: 'btn-secondary',
+    onConfirm: () => {
+      req.checkedOutBy = '';
+      const releaseStatus = req.requestType === 'عرض مباشر'
+        ? 'تم تقديم طلب العرض المباشر — بانتظار مراجعة منسق الإحالات والتحويلات'
+        : req.status;
+      req.status = releaseStatus;
+      req.timeline.push({
+        action: 'تحرير الطلب',
+        actor: me,
+        role: 'منسق الإحالات والتحويلات',
+        time: new Date().toISOString(),
+        fromStatus: 'قيد مراجعة منسق الإحالات والتحويلات',
+        toStatus: releaseStatus,
+        note: 'تم تحرير الطلب',
+        type: 'info',
+        phone: getCurrentUserPhone()
+      });
+      showToast('تم تحرير الطلب', 'i');
+      setTimeout(() => window.location.reload(), 1200);
+    }
+  });
+}
+</script>
+</body>
+</html>

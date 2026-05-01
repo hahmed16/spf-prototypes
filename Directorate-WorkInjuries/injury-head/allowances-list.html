@@ -42,10 +42,10 @@ function render() {
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم الطلب</th><th>مقدم الطلب</th><th>المؤمن عليه</th><th>جهة العمل</th><th>الحالة</th><th>الموظف المسؤول</th><th>تاريخ التقديم</th><th></th></tr></thead>
+            <thead><tr><th>رقم الطلب</th><th>مقدم الطلب</th><th>المؤمن عليه</th><th>جهة العمل</th><th>الحالة</th><th>الموظف المسؤول</th><th>تاريخ التقديم</th><th>الأيام المتبقية</th><th></th></tr></thead>
             <tbody>
               ${filtered.length === 0
-                ? `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text3)">لا توجد نتائج تطابق البحث أو المرحلة الحالية</td></tr>`
+                ? `<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text3)">لا توجد نتائج تطابق البحث أو المرحلة الحالية</td></tr>`
                 : filtered.map(r=>`
               <tr style="${r.status==='بانتظار اعتماد رئيس قسم التحقيق في إصابات العمل'?'background:var(--primary-l)':''}">
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
@@ -55,6 +55,7 @@ function render() {
                 <td>${statusBadge(r.status)}</td>
                 <td style="font-size:11.5px">${r.assignedTo||'—'}</td>
                 <td style="font-size:12px">${r.submitDate}</td>
+                <td>${renderRemainingDaysBadge(r)}</td>
                 <td>
                   <button class="ibtn" onclick="window.location.href='allowances-details.html?id=${r.id}'">${ICONS.eye}</button>
                   <button class="ibtn" onclick="openAddNoteModal('${r.id}')">${ICONS.note}</button>

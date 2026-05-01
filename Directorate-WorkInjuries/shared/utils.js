@@ -6,6 +6,26 @@
 
 /* ── متغير الطلب الحالي ── */
 let currentRequestId = null;
+let currentRequestTypeFilter = 'all';
+
+/* ── Request Type Filter Handling ── */
+function updateRequestTypeFilter(value) {
+  currentRequestTypeFilter = value;
+  // Trigger re-render by calling the page-specific update function if it exists
+  if (typeof window.handleRequestTypeFilterChange === 'function') {
+    window.handleRequestTypeFilterChange(value);
+  }
+}
+
+function getRequestTypeFilter() {
+  return currentRequestTypeFilter;
+}
+
+function resetRequestTypeFilter() {
+  currentRequestTypeFilter = 'all';
+  const select = document.getElementById('request-type-filter');
+  if (select) select.value = 'all';
+}
 
 /* ── تنسيق حجم الملف ── */
 function formatFileSize(bytes) {
@@ -351,6 +371,27 @@ function getCurrentRoleUser(role) {
   const key = String(role || '').replace(/-/g, '_');
   return WI_DATA.users?.[key] || null;
 }
+function findUserByName(name) {
+  if (!name) return null;
+  return Object.values(WI_DATA.users || {}).find((user) => user?.name === name) || null;
+}
+function getAvailabilityAwareRoster(seedList = []) {
+  return seedList.map((seed) => {
+    const user = seed.roleKey ? getCurrentRoleUser(String(seed.roleKey).replace(/_/g, '-')) : findUserByName(seed.name);
+    const availability = user?.availability || null;
+    const status = availability?.status || (seed.available === false ? 'غير متاح' : 'متاح');
+    return {
+      ...seed,
+      roleKey: seed.roleKey || '',
+      name: user?.name || seed.name || '—',
+      employeeId: user?.employeeId || seed.employeeId || seed.id || '—',
+      load: Number(seed.load || 0),
+      availabilityStatus: status,
+      available: status === 'متاح',
+      availabilityNote: availability?.note || seed.availabilityNote || '',
+    };
+  });
+}
 function isVisibleForRole(role, item) {
   const roleConfig = WI_CONFIG.roles?.[role] || {};
   const roleUser = getCurrentRoleUser(role);
@@ -378,7 +419,7 @@ function isVisibleForRole(role, item) {
   return pendingForRole || assignedToMe;
 }
 
-function getFilteredData({ role, data, query = '', showAll = false }) {
+function getFilteredData({ role, data, query = '', showAll = false, requestTypeFilter = '' }) {
   const q = String(query || '').toLowerCase().trim();
   return (data || []).filter(r => {
     const searchText = [
@@ -401,14 +442,33 @@ function getFilteredData({ role, data, query = '', showAll = false }) {
     ].filter(Boolean).join(' ').toLowerCase();
     const matchesSearch = !q || searchText.includes(q);
     if (!matchesSearch) return false;
+
+    // Request type filtering
+    if (requestTypeFilter && requestTypeFilter !== 'all') {
+      const requestType = (r?.requestType || r?.type || '').toLowerCase();
+      const filterType = requestTypeFilter.toLowerCase();
+      if (!requestType.includes(filterType)) return false;
+    }
+
     return showAll || isVisibleForRole(role, r);
   });
 }
 
-function renderUnifiedFilterBar({ onSearch = 'noopUnifiedSearch', onToggleAll = 'noopUnifiedToggleAll', isAllVisible = false, includeToggle = true, requestPlaceholder = 'WI-2025-001234' } = {}) {
+function renderUnifiedFilterBar({ onSearch = 'noopUnifiedSearch', onToggleAll = 'noopUnifiedToggleAll', isAllVisible = false, includeToggle = true, requestPlaceholder = 'WI-2025-001234', includeRequestTypeFilter = false, requestTypeOptions = [] } = {}) {
+  const requestTypeOptionsHtml = includeRequestTypeFilter && requestTypeOptions.length > 0
+    ? `
+        <div class="fgrp" style="margin:0">
+          <label class="flbl">نوع الطلب</label>
+          <select class="fc" id="request-type-filter" onchange="updateRequestTypeFilter(this.value)">
+            <option value="all">الكل</option>
+            ${requestTypeOptions.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('')}
+          </select>
+        </div>`
+    : '';
+
   return `
     <div class="filters unified-filter-panel" style="margin-bottom:20px;display:flex;flex-direction:column;gap:12px;padding:16px;background:var(--g50);border:1px solid var(--border);border-radius:14px">
-      <div class="unified-filter-row" style="display:grid;grid-template-columns:1.15fr 1fr 1fr 0.9fr 0.9fr 1.2fr auto;gap:12px;align-items:end">
+      <div class="unified-filter-row" style="display:grid;grid-template-columns:${includeRequestTypeFilter ? '1fr 1fr 1fr 0.9fr 0.9fr 1.2fr auto' : '1.15fr 1fr 1fr 0.9fr 0.9fr 1.2fr auto'};gap:12px;align-items:end">
         <div class="fgrp" style="margin:0">
           <label class="flbl">رقم الطلب</label>
           <input type="text" class="fc" id="global-search-input" placeholder="${requestPlaceholder}" oninput="handleGlobalSearch(this.value, ${onSearch})">
@@ -421,6 +481,7 @@ function renderUnifiedFilterBar({ onSearch = 'noopUnifiedSearch', onToggleAll = 
           <label class="flbl">رقم السجل التجاري</label>
           <input type="text" class="fc" placeholder="1234567">
         </div>
+        ${requestTypeOptionsHtml}
         <div class="fgrp" style="margin:0">
           <label class="flbl">من تاريخ</label>
           <input type="date" class="fc">
@@ -444,6 +505,530 @@ function renderUnifiedFilterBar({ onSearch = 'noopUnifiedSearch', onToggleAll = 
         </div>` : '<div></div>'}
       </div>
     </div>`;
+}
+
+function findRequestByIdAcrossScopes(id) {
+  if (!id) return null;
+  return WI_DATA.referrals.find((r) => r.id === id)
+    || WI_DATA.allowances.find((r) => r.id === id)
+    || WI_DATA.disability.find((r) => r.id === id)
+    || WI_DATA.appeals.find((r) => r.id === id)
+    || WI_DATA.licensing.find((r) => r.id === id)
+    || WI_DATA.disabilityRetirement.find((r) => r.id === id)
+    || null;
+}
+
+function getRequestHrefById(id) {
+  const record = findRequestByIdAcrossScopes(id);
+  if (!record) return '';
+  if (WI_DATA.referrals.includes(record)) return `../referral-coordinator/referrals-details.html?id=${id}`;
+  if (WI_DATA.appeals.includes(record)) return `../committees-employee/appeals-details.html?id=${id}`;
+  if (WI_DATA.disability.includes(record)) return `../disability-employee/disability-details.html?id=${id}`;
+  if (WI_DATA.disabilityRetirement.includes(record)) return `../disability-employee/disability-retirement-details.html?id=${id}`;
+  if (WI_DATA.licensing.includes(record)) return `../licensing-employee/licensing-details.html?id=${id}`;
+  return '';
+}
+
+function buildSuspendResumeNote({ action, actorRole, reason, notes, fromStatus, toStatus }) {
+  return {
+    action,
+    actor: getCurrentUserData()?.name || 'مستخدم النظام',
+    role: actorRole || WI_CONFIG.roles?.[CURRENT_ROLE]?.nameAr || 'مستخدم النظام',
+    time: new Date().toISOString().slice(0, 16).replace('T', ' '),
+    fromStatus,
+    toStatus,
+    note: `${reason}${notes ? ` — ${notes}` : ''}`,
+    type: action.includes('استئناف') ? 'success' : 'warning',
+    phone: getCurrentUserPhone(),
+  };
+}
+
+function suspendRecord(record, { status = 'معلّق مؤقتاً — بانتظار الاستئناف', roleLabel = '' } = {}) {
+  if (!record) return;
+  openModal({
+    title: 'تعليق الطلب',
+    body: `
+      <div class="fg" style="gap:14px">
+        <div class="fgrp">
+          <label class="flbl">سبب التعليق <span class="req">*</span></label>
+          <input class="fc" id="suspend-reason-input" placeholder="اكتب سبب التعليق">
+        </div>
+        <div class="fgrp">
+          <label class="flbl">ملاحظات التعليق <span class="req">*</span></label>
+          <textarea class="fc" id="suspend-notes-input" rows="4" placeholder="اشرح تفاصيل التعليق والإجراء المطلوب"></textarea>
+        </div>
+      </div>`,
+    footer: `<button class="btn btn-warning" onclick="confirmSuspendRecord('${record.id}','${status}','${roleLabel.replace(/'/g, "\\'")}')">تعليق الطلب</button><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+
+function confirmSuspendRecord(id, status, roleLabel) {
+  const record = findRequestByIdAcrossScopes(id);
+  if (!record) return;
+  const reason = (document.getElementById('suspend-reason-input')?.value || '').trim();
+  const notes = (document.getElementById('suspend-notes-input')?.value || '').trim();
+  if (!reason || !notes) {
+    showToast('سبب التعليق وملاحظات التعليق حقول إلزامية', 'w');
+    return;
+  }
+  const fromStatus = record.status || '—';
+  record.suspended = true;
+  record.suspensionReason = reason;
+  record.suspensionNotes = notes;
+  record.suspendedBy = getCurrentUserData()?.name || '';
+  record.suspendedDate = new Date().toISOString().slice(0, 10);
+  record.status = status;
+  record.timeline = record.timeline || [];
+  record.timeline.push(buildSuspendResumeNote({
+    action: 'تعليق الطلب',
+    actorRole: roleLabel,
+    reason,
+    notes,
+    fromStatus,
+    toStatus: status,
+  }));
+  closeModal();
+  showToast('تم تعليق الطلب', 's');
+  setTimeout(() => window.location.reload(), 800);
+}
+
+function resumeRecord(record, { resumeStatus = '', roleLabel = '' } = {}) {
+  if (!record) return;
+  openModal({
+    title: 'استئناف الطلب',
+    body: `
+      <div class="fgrp">
+        <label class="flbl">ملاحظات الاستئناف <span class="req">*</span></label>
+        <textarea class="fc" id="resume-notes-input" rows="4" placeholder="اشرح ما الذي تم استكماله أو تغييره"></textarea>
+      </div>`,
+    footer: `<button class="btn btn-primary" onclick="confirmResumeRecord('${record.id}','${resumeStatus || ''}','${roleLabel.replace(/'/g, "\\'")}')">استئناف الطلب</button><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>`
+  });
+}
+
+function confirmResumeRecord(id, resumeStatus, roleLabel) {
+  const record = findRequestByIdAcrossScopes(id);
+  if (!record) return;
+  const notes = (document.getElementById('resume-notes-input')?.value || '').trim();
+  if (!notes) {
+    showToast('ملاحظات الاستئناف حقل إلزامي', 'w');
+    return;
+  }
+  const fromStatus = record.status || '—';
+  const toStatus = resumeStatus || record.previousStatusBeforeSuspend || 'تم استئناف المعالجة';
+  record.suspended = false;
+  record.resumedBy = getCurrentUserData()?.name || '';
+  record.resumedDate = new Date().toISOString().slice(0, 10);
+  record.status = toStatus;
+  record.timeline = record.timeline || [];
+  record.timeline.push(buildSuspendResumeNote({
+    action: 'استئناف الطلب',
+    actorRole: roleLabel,
+    reason: 'تمت معالجة سبب التعليق',
+    notes,
+    fromStatus,
+    toStatus,
+  }));
+  closeModal();
+  showToast('تم استئناف الطلب', 's');
+  setTimeout(() => window.location.reload(), 800);
+}
+
+function renderDisabilityCardPanel(card, { showSourceBreakdown = true } = {}) {
+  if (!card) return '';
+  const disabilities = Array.isArray(card.disabilities) ? card.disabilities : [];
+  const socialDisabilities = disabilities.filter((item) => item.source === 'MOSD');
+  const healthDisabilities = disabilities.filter((item) => item.source === 'MOH');
+  const sourceSummary = [
+    socialDisabilities.length ? `وزارة التنمية الاجتماعية: ${socialDisabilities.map((item) => item.name).join('، ')}` : '',
+    healthDisabilities.length ? `وزارة الصحة: ${healthDisabilities.map((item) => item.name).join('، ')}` : '',
+  ].filter(Boolean);
+
+  return `
+    <div class="card card-ro">
+      <div class="ph"><h3><div class="pico pu">${ICONS.shield}</div>بيانات بطاقة الإعاقة <span style="font-size:10px;color:var(--text3)">(وزارة التنمية الاجتماعية + وزارة الصحة)</span></h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">حالة البطاقة</label><div class="fro"><span class="badge ${card.status === 'سارية' ? 'b-card-valid' : card.status === 'منتهية' ? 'b-card-expired' : 'b-card-cancelled'}">${card.status || '—'}</span></div></div>
+          <div class="fgrp"><label class="flbl">رقم البطاقة</label><div class="fro" style="font-family:monospace">${card.number || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الإصدار</label><div class="fro">${formatDate(card.issueDate)}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التفعيل</label><div class="fro">${formatDate(card.activationDate)}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الانتهاء</label><div class="fro">${formatDate(card.expiryDate)}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ ثبوت الإعاقة</label><div class="fro">${formatDate(card.provenDate)}</div></div>
+          <div class="fgrp span-full"><label class="flbl">ملخص الإعاقات</label><div class="fro">${sourceSummary.join(' — ') || '—'}</div></div>
+          <div class="fgrp span-full"><label class="flbl">تفصيل الإعاقات المسجلة</label><div class="fro" style="height:auto">
+            ${disabilities.length ? disabilities.map((item, index) => `
+              <div style="padding:10px 0;${index ? 'border-top:1px solid var(--border);' : ''}">
+                <strong>${item.name || '—'}</strong>
+                <div style="font-size:12px;color:var(--text3)">المصدر: ${item.source === 'MOSD' ? 'وزارة التنمية الاجتماعية' : item.source === 'MOH' ? 'وزارة الصحة' : '—'} · الدرجة: ${item.level || '—'} · تاريخ الفحص: ${formatDate(item.examinationDate)}</div>
+              </div>`).join('') : '—'}
+          </div></div>
+          ${showSourceBreakdown ? `<div class="fgrp"><label class="flbl">آخر تحقق تلقائي</label><div class="fro">${card.lastCheck || '—'}</div></div>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderInsuredSummaryCards(civil, currentId = '') {
+  if (!civil) return '';
+  const activeBenefits = WI_DATA.disability.filter((item) => item.applicant?.civil === civil && !item.status.includes('إيقاف'));
+  const activePaidBenefits = WI_DATA.disability.filter((item) => item.applicant?.civil === civil && item.disbursement?.approved);
+  const allowanceRequests = WI_DATA.allowances.filter((item) => item.applicant?.civil === civil || item.insured?.civil === civil);
+  const appeals = WI_DATA.appeals.filter((item) => item.applicant?.civil === civil || item.insured?.civil === civil || item.originalRequestId === currentId);
+  const referrals = WI_DATA.referrals.filter((item) => item.applicant?.civil === civil || item.insured?.civil === civil);
+  const cards = [
+    { label: 'طلبات منفعة الإعاقة النشطة', items: activeBenefits },
+    { label: 'المنافع المصروفة حالياً', items: activePaidBenefits },
+    { label: 'طلبات بدل الانقطاع', items: allowanceRequests },
+    { label: 'التظلمات', items: appeals },
+    { label: 'طلبات العرض المباشر', items: referrals },
+  ];
+
+  return `
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.chart}</div>ملخص طلبات المؤمن عليه المرتبطة</h3></div>
+      <div class="pb">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+          ${cards.map((card) => `
+            <div style="border:1px solid var(--border);border-radius:12px;padding:14px;background:#fff">
+              <div style="font-size:12px;color:var(--text3);margin-bottom:6px">${card.label}</div>
+              <div style="font-size:26px;font-weight:800;color:var(--primary);margin-bottom:10px">${card.items.length}</div>
+              <div class="tbl-wrap" style="max-height:190px;overflow:auto">
+                <table class="dtbl">
+                  <thead><tr><th>الرقم</th><th>الحالة</th></tr></thead>
+                  <tbody>
+                    ${card.items.length ? card.items.slice(0, 4).map((item) => `
+                      <tr>
+                        <td style="font-family:monospace">${item.id}</td>
+                        <td>${statusBadge(item.status)}</td>
+                      </tr>`).join('') : '<tr><td colspan="2" style="text-align:center;color:var(--text3)">لا توجد بيانات</td></tr>'}
+                  </tbody>
+                </table>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderDirectReferralSummaryCard(req, { variant = 'internal' } = {}) {
+  if (!req) return '';
+  if (variant === 'worker') {
+    return `
+      <div class="card">
+        <div class="pb">
+          <div class="req-summary-grid">
+            <div><div class="flbl" style="margin-bottom:4px">الحالة</div>${statusBadge(req.status)}</div>
+            <div><div class="flbl" style="margin-bottom:4px">نوع الحالة</div><div style="font-size:12px;color:var(--text2)">${req.referral?.requestCategory || '—'}</div></div>
+            <div><div class="flbl" style="margin-bottom:4px">المؤسسة المفضلة</div><div style="font-size:12px;color:var(--text2)">${req.referral?.preferredInstitution || '—'}</div></div>
+            <div><div class="flbl" style="margin-bottom:4px">الموظف المسؤول</div><div style="font-size:12px;color:var(--text2)">${req.assignedTo || '—'}</div></div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  if (variant === 'employer') {
+    return `
+      <div class="card">
+        <div class="pb">
+          <div class="fg fg-2">
+            <div class="fgrp"><label class="flbl">العامل</label><div class="fro">${req.insured?.name || '—'}</div></div>
+            <div class="fgrp"><label class="flbl">الحالة</label><div class="fro">${statusBadge(req.status)}</div></div>
+            <div class="fgrp"><label class="flbl">نوع الحالة</label><div class="fro">${req.referral?.requestCategory || '—'}</div></div>
+            <div class="fgrp"><label class="flbl">المؤسسة المفضلة</label><div class="fro">${req.referral?.preferredInstitution || '—'}</div></div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  return `
+    <div class="card"><div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب والمؤمن عليه</h3></div><div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">مقدم الطلب</label><div class="fro">${req.applicant?.name || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant?.role || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">المؤمن عليه</label><div class="fro">${req.insured?.name || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${req.applicant?.phone || req.insured?.phone || '—'}</div></div>
+    </div></div></div>
+    <div class="card"><div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات جهة العمل</h3></div><div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">اسم الجهة</label><div class="fro">${req.employer?.name || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">السجل التجاري</label><div class="fro">${req.employer?.cr || '—'}</div></div>
+    </div></div></div>`;
+}
+
+function renderDirectReferralReasonCard(req) {
+  if (!req) return '';
+  return `
+    <div class="card"><div class="ph"><h3><div class="pico or">${ICONS.note}</div>سبب الطلب والملاحظات</h3></div><div class="pb">
+      <div class="fgrp"><label class="flbl">سبب الطلب</label><div class="fro">${req.referral?.reason || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">الملاحظات</label><div class="fro">${req.referral?.notes || '—'}</div></div>
+    </div></div>`;
+}
+
+function renderInfoCard({ title, icon = ICONS.info, iconClass = 'bl', columns = 'fg fg-3', fields = [] } = {}) {
+  if (!fields.length) return '';
+  return `
+    <div class="card">
+      <div class="ph"><h3><div class="pico ${iconClass}">${icon}</div>${title}</h3></div>
+      <div class="pb">
+        <div class="${columns}">
+          ${fields.map((field) => `
+            <div class="fgrp${field.spanFull ? ' span-full' : ''}">
+              <label class="flbl">${field.label}</label>
+              <div class="fro"${field.mono ? ' style="font-family:monospace"' : ''}>${field.value ?? '—'}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderReferralApplicantCard(applicant = {}) {
+  return renderInfoCard({
+    title: 'بيانات مقدم الطلب',
+    icon: ICONS.user,
+    iconClass: 'bl',
+    columns: 'fg fg-3',
+    fields: [
+      { label: 'الاسم الكامل', value: applicant.name || '—' },
+      { label: 'الرقم المدني', value: applicant.civil || '—', mono: true },
+      { label: 'الدور', value: applicant.role || '—' },
+      { label: 'رقم الهاتف', value: applicant.phone || '—' },
+      { label: 'البريد الإلكتروني', value: applicant.email || '—' },
+      { label: 'المنطقة', value: applicant.region || '—' },
+    ],
+  });
+}
+
+function renderReferralInsuredCard(insured = {}, { extended = false } = {}) {
+  const fields = [
+    { label: 'الاسم الكامل', value: insured.name || '—' },
+    { label: 'الرقم المدني', value: insured.civil || '—', mono: true },
+    { label: 'رقم التأمين', value: insured.insurance || '—', mono: true },
+    { label: 'تاريخ الميلاد', value: formatDate(insured.dob) },
+    { label: 'الجنس', value: insured.gender || '—' },
+    { label: 'الجنسية', value: insured.nationality || '—' },
+  ];
+
+  if (extended) {
+    fields.push(
+      { label: 'الحالة التأمينية', value: insured.insuranceStatus || '—' },
+      { label: 'تاريخ التسجيل', value: formatDate(insured.regDate) },
+      { label: 'نوع الاشتراك', value: insured.subType || '—' },
+      { label: 'رقم الهاتف', value: insured.phone || '—' },
+      { label: 'البريد الإلكتروني', value: insured.email || '—' },
+    );
+  }
+
+  return renderInfoCard({
+    title: 'بيانات المؤمن عليه',
+    icon: ICONS.user,
+    iconClass: 'bl',
+    columns: 'fg fg-3',
+    fields,
+  });
+}
+
+function renderReferralEmployerCard(employer = {}, { extended = false } = {}) {
+  const fields = [
+    { label: 'اسم جهة العمل', value: employer.name || '—' },
+    { label: 'السجل التجاري', value: employer.cr || '—', mono: true },
+    { label: 'رقم المنشأة', value: employer.establishment || '—', mono: true },
+    { label: 'المسمى الوظيفي', value: employer.jobTitle || '—' },
+    { label: 'تاريخ الالتحاق', value: formatDate(employer.joinDate) },
+    { label: 'الموقع', value: employer.location || '—' },
+  ];
+
+  if (extended) {
+    fields.push(
+      { label: 'القطاع', value: employer.sector || '—' },
+      { label: 'نوع جهة العمل', value: employer.employerType || '—' },
+      { label: 'رقم الهاتف', value: employer.phone || '—' },
+    );
+  }
+
+  return renderInfoCard({
+    title: 'بيانات جهة العمل',
+    icon: ICONS.building,
+    iconClass: 'bl',
+    columns: 'fg fg-2',
+    fields,
+  });
+}
+
+function renderDirectReferralDetailsCard(referral = {}) {
+  return renderInfoCard({
+    title: 'بيانات العرض المباشر',
+    icon: ICONS.clipboard,
+    iconClass: 'bl',
+    columns: 'fg fg-2',
+    fields: [
+      { label: 'سبب طلب العرض', value: referral.reason || '—' },
+      { label: 'نوع الحالة', value: referral.requestCategory || '—' },
+      { label: 'المؤسسة المفضلة', value: referral.preferredInstitution || '—' },
+      { label: 'نوع المؤسسة', value: referral.institutionType || '—' },
+      { label: 'ملاحظات إضافية', value: referral.notes || '—', spanFull: true },
+    ],
+  });
+}
+
+function renderDirectReferralFollowUpCard(req = {}) {
+  return renderInfoCard({
+    title: 'متابعة المؤسسة الصحية والقرار',
+    icon: ICONS.calendar,
+    iconClass: 'bl',
+    columns: 'fg fg-3',
+    fields: [
+      { label: 'المؤسسة الصحية', value: req.assignedInstitution || req.referral?.preferredInstitution || '—' },
+      { label: 'رقم الجلسة', value: req.sessionId || '—', mono: true },
+      { label: 'تاريخ الجلسة', value: formatDate(req.sessionDate) },
+      { label: 'تاريخ القرار', value: formatDate(req.decisionDate) },
+      { label: 'حالة التنفيذ', value: statusBadge(req.committeeDecision?.executionStatus || (req.committeeDecision ? 'قيد التنفيذ' : '—')) },
+      { label: 'ملخص قرار المؤسسة الصحية', value: req.committeeDecision?.summary || 'لم يتم استلام القرار بعد', spanFull: true },
+    ],
+  });
+}
+
+function renderActionButtonsPanel(actions = [], {
+  title = 'الإجراءات المتاحة',
+  description = 'يمكنك تنفيذ أحد الإجراءات التالية على هذا الطلب. سيتم تسجيل الإجراء في سجل الإجراءات.',
+  icon = ICONS.pen,
+  iconClass = 'bl',
+  cardClass = 'dp',
+} = {}) {
+  return `
+    <div class="card ${cardClass}">
+      <div class="ph"><h3><div class="pico ${iconClass}">${icon}</div>${title}</h3></div>
+      <div class="pb">
+        ${description ? `<div class="alert alert-i" style="margin-bottom:16px">${ICONS.info}<span>${description}</span></div>` : ''}
+        <div style="display:flex;flex-direction:column;gap:10px">
+          ${actions.map((action) => `
+            <button class="btn ${action.class || 'btn-secondary'} btn-sm" onclick="${action.fn || ''}">
+              ${action.icon || ''} ${action.label}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function getCommitteeDecisionsData() {
+  const decisions = [];
+  WI_DATA.referrals.forEach((req) => {
+    const decision = req.committeeDecision || req.decision;
+    if (!decision?.type) return;
+    const linkedAppeals = WI_DATA.appeals.filter((appeal) => appeal.originalRequestId === req.id);
+    decisions.push({
+      decisionId: decision.id || `DEC-REF-${req.id}`,
+      sourceType: 'directReferral',
+      committeeType: 'اللجان الطبية',
+      requestId: req.id,
+      beneficiaryName: req.insured?.name || req.applicant?.name || '—',
+      decisionType: decision.type,
+      decisionDate: decision.date || req.lastUpdate || req.submitDate,
+      status: decision.executionStatus || (decision.executed ? 'منفذة' : 'قيد التنفيذ'),
+      hasAppeal: linkedAppeals.length > 0,
+      appealCount: linkedAppeals.length,
+      linkedAppeals,
+      details: decision,
+      record: req,
+    });
+  });
+  return decisions.sort((a, b) => new Date(b.decisionDate) - new Date(a.decisionDate));
+}
+
+function openCommitteeDecisionDetailsModal(decisionId) {
+  const decision = getCommitteeDecisionsData().find((item) => item.decisionId === decisionId);
+  if (!decision) return;
+  openModal({
+    title: `تفاصيل القرار ${decision.decisionId}`,
+    size: 'md-lg',
+    body: `
+      <div class="fg fg-2">
+        <div class="fgrp"><label class="flbl">رقم القرار</label><div class="fro" style="font-family:monospace">${decision.decisionId}</div></div>
+        <div class="fgrp"><label class="flbl">رقم الطلب</label><div class="fro" style="font-family:monospace">${decision.requestId}</div></div>
+        <div class="fgrp"><label class="flbl">المستفيد</label><div class="fro">${decision.beneficiaryName}</div></div>
+        <div class="fgrp"><label class="flbl">نوع القرار</label><div class="fro">${decision.decisionType}</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ القرار</label><div class="fro">${formatDate(decision.decisionDate)}</div></div>
+        <div class="fgrp"><label class="flbl">الحالة التنفيذية</label><div class="fro">${statusBadge(decision.status)}</div></div>
+        <div class="fgrp span-full"><label class="flbl">نص القرار</label><div class="fro">${decision.details?.summary || decision.details?.details || decision.details?.content || '—'}</div></div>
+        <div class="fgrp span-full"><label class="flbl">التظلمات المرتبطة</label><div class="fro">${decision.linkedAppeals.length ? decision.linkedAppeals.map((appeal) => `${appeal.id} — ${appeal.status}`).join('<br>') : 'لا توجد تظلمات مرتبطة'}</div></div>
+      </div>`,
+    footer: `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`
+  });
+}
+
+function viewCommitteeDecisionAppeals(decisionId) {
+  const decision = getCommitteeDecisionsData().find((item) => item.decisionId === decisionId);
+  if (!decision) return;
+  openModal({
+    title: `سجل التظلمات — ${decision.decisionId}`,
+    body: `
+      <div class="tbl-wrap">
+        <table class="dtbl">
+          <thead><tr><th>رقم التظلم</th><th>الحالة</th><th>تاريخ التقديم</th></tr></thead>
+          <tbody>
+            ${decision.linkedAppeals.length ? decision.linkedAppeals.map((appeal) => `
+              <tr>
+                <td style="font-family:monospace">${appeal.id}</td>
+                <td>${statusBadge(appeal.status)}</td>
+                <td>${formatDate(appeal.submitDate)}</td>
+              </tr>`).join('') : '<tr><td colspan="3" style="text-align:center;color:var(--text3)">لا توجد تظلمات</td></tr>'}
+          </tbody>
+        </table>
+      </div>`,
+    footer: `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`
+  });
+}
+
+function initiateAppealFromDecision(decisionId) {
+  const decision = getCommitteeDecisionsData().find((item) => item.decisionId === decisionId);
+  if (!decision) return;
+  const existing = WI_DATA.appeals.find((appeal) => appeal.originalRequestId === decision.requestId);
+  if (existing) {
+    showToast(`يوجد تظلم مرتبط بالفعل: ${existing.id}`, 'i');
+    return;
+  }
+  const appealId = `APP-2025-${String(WI_DATA.appeals.length + 68).padStart(6, '0')}`;
+  const newAppeal = createAppealRequest({
+    id: appealId,
+    originalRequestId: decision.requestId,
+    originalRequestType: 'عرض مباشر',
+    status: 'تم تقديم طلب التظلم — بانتظار مراجعة موظف قسم اللجان الطبية',
+    submitDate: new Date().toISOString().slice(0, 10),
+    lastUpdate: new Date().toISOString().slice(0, 16).replace('T', ' '),
+    lastUpdatedBy: getCurrentUserData()?.name || '',
+    applicant: {
+      name: decision.record?.applicant?.name || decision.beneficiaryName,
+      civil: decision.record?.applicant?.civil || decision.record?.insured?.civil || '',
+      role: decision.record?.applicant?.role || 'مقدم الطلب',
+      phone: decision.record?.applicant?.phone || decision.record?.insured?.phone || '',
+      email: decision.record?.applicant?.email || decision.record?.insured?.email || '',
+    },
+    insured: { ...(decision.record?.insured || {}) },
+    employer: { ...(decision.record?.employer || {}) },
+    decision: {
+      type: decision.decisionType,
+      date: decision.decisionDate,
+      issuer: 'اللجان الطبية',
+      details: decision.details?.summary || decision.details?.details || 'قرار لجنة طبية مرتبط بطلب عرض مباشر',
+      knowledgeDate: new Date().toISOString().slice(0, 10),
+    },
+    appealReason: 'تظلم على قرار اللجنة الطبية المرتبط بطلب العرض المباشر',
+    appealDetails: 'تم إنشاء تظلم تجريبي من شاشة قرارات اللجان الطبية لربط القرار بسجل التظلمات.',
+    timeline: [
+      {
+        action: 'تقديم التظلم',
+        actor: getCurrentUserData()?.name || 'مستخدم النظام',
+        role: WI_CONFIG.roles?.[CURRENT_ROLE]?.nameAr || 'مستخدم النظام',
+        time: new Date().toISOString().slice(0, 16).replace('T', ' '),
+        fromStatus: '',
+        toStatus: 'تم تقديم طلب التظلم — بانتظار مراجعة موظف قسم اللجان الطبية',
+        note: `تم إنشاء التظلم من سياق القرار ${decision.decisionId}`,
+        type: 'info',
+        phone: getCurrentUserPhone(),
+      }
+    ],
+  });
+  WI_DATA.appeals.unshift(newAppeal);
+  showToast(`تم إنشاء التظلم ${appealId}`, 's');
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -474,8 +1059,7 @@ function buildMonthBuckets(entries, dateGetter) {
 }
 
 function findRequestById(id) {
-  return WI_DATA.allowances.find(r => r.id === id) || WI_DATA.disability.find(r => r.id === id)
-      || WI_DATA.appeals.find(r => r.id === id)    || WI_DATA.licensing.find(r => r.id === id) || null;
+  return findRequestByIdAcrossScopes(id);
 }
 
 function getDashboardEntityName(item) {
@@ -511,6 +1095,8 @@ function getRoleDataset(role) {
     case 'institution-rapporteur': return { scopeLabel: 'الجلسات الطبية', entries: WI_DATA.sessions };
     case 'appeals-committee':
     case 'appeals-rapporteur':     return { scopeLabel: 'ملفات التظلمات', entries: WI_DATA.appeals };
+    case 'direct-referral-employee': return { scopeLabel: 'طلبات العرض المباشر', entries: WI_DATA.referrals };
+    case 'referral-coordinator': return { scopeLabel: 'إحالات المؤسسات الصحية', entries: [...WI_DATA.referrals, ...WI_DATA.appeals] };
     default: return { scopeLabel: 'الملفات الحالية', entries: [] };
   }
 }
@@ -668,10 +1254,10 @@ function enhanceListContent() {
   observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
 
-/* Check-out / Check-in helpers (used by investigator pages) */
+/* حجز الطلب / تحرير الطلب helpers (used by investigator pages) */
 function doCheckout() {
   confirmAction({
-    title: 'حجز الطلب (Check-out)',
+    title: 'حجز الطلب',
     msg: 'هل تريد حجز هذا الطلب للعمل عليه؟ لن يتمكن موظف آخر من اتخاذ إجراء حتى يتم تحريره.',
     confirmLabel: 'نعم، احجز الطلب',
     confirmClass: 'btn-primary',
@@ -681,7 +1267,7 @@ function doCheckout() {
 
 function doCheckin() {
   confirmAction({
-    title: 'تحرير الطلب (Check-in)',
+    title: 'تحرير الطلب',
     msg: 'هل تريد تحرير هذا الطلب؟ سيتمكن الآخرون من العمل عليه بعد التحرير.',
     confirmLabel: 'نعم، حرّر الطلب',
     confirmClass: 'btn-secondary',

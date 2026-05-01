@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td style="font-size:11.5px">${r.submitDate}</td>
                 <td>
                   ${!r.checkedOutBy
-                    ? `<button class="btn btn-primary btn-xs" onclick="checkOut('${r.id}')">Check-out</button>`
+                    ? `<button class="btn btn-primary btn-xs" onclick="checkOut('${r.id}')">حجز الطلب</button>`
                     : `<span style="font-size:11px;color:var(--warning)">محجوز</span>`}
                 </td>
               </tr>`).join('')}

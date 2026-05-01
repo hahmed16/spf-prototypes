@@ -35,14 +35,14 @@ function render() {
 
   getContent().innerHTML = `
     <div class="pg-head">
-      <div><h1>استعلامات التقاعد</h1><p>${pending.length} استعلام بانتظار قرارك</p></div>
+      <div><h1>استعلامات التقاعد</h1><p>${pending.length} استعلام بانتظار قرارك من أصل ${reqs.length}</p></div>
     </div>
     ${renderUnifiedFilterBar({ onSearch: 'updateSearch', onToggleAll: 'toggleAll', isAllVisible: showAllStages })}
     <div class="card">
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم الاستعلام</th><th>المستفيد</th><th>الرقم المدني</th><th>توصية الموظف</th><th>الحالة</th><th>الأيام المتبقية</th><th></th></tr></thead>
+            <thead><tr><th>رقم الاستعلام</th><th>المستفيد</th><th>الرقم المدني</th><th>جهة العمل</th><th>تاريخ التقاعد المطلوب</th><th>توصية الموظف</th><th>قرار الرئيس</th><th>الحالة</th><th>الأيام المتبقية</th><th></th></tr></thead>
             <tbody>
               ${filtered.map(r => {
                 const meta = deriveRequestSummaryMeta(r);
@@ -51,8 +51,11 @@ function render() {
                   <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
                   <td>${r.applicant.name}</td>
                   <td style="font-family:monospace">${r.applicant.civil}</td>
-                  <td>${r.employeeRecommendation?.type || '—'}</td>
-                  <td>${statusBadge(r.status)}</td>
+                  <td>${r.currentEmployer || '—'}</td>
+                  <td>${formatDate(r.retirementDate)}</td>
+                  <td><span class="badge ${r.employeeRecommendation?.type === 'معتمد' ? 'b-approved' : r.employeeRecommendation?.type === 'مرفوض' ? 'b-rejected' : 'b-secondary'}">${r.employeeRecommendation?.type || '—'}</span></td>
+                  <td><span class="badge ${r.headDecision?.type === 'معتمد' ? 'b-approved' : r.headDecision?.type === 'مرفوض' ? 'b-rejected' : 'b-secondary'}">${r.headDecision?.type || '—'}</span></td>
+                  <td><div style="display:flex;align-items:center;gap:6px">${statusBadge(r.status)}${r.suspended ? `<span class="badge b-returned">معلّق</span>` : ''}</div></td>
                   <td><span class="sla-days ${getRemainingDaysClass(meta.remainingDays)}">${getRemainingDaysLabel(meta.remainingDays)}</span></td>
                   <td><button class="ibtn" onclick="window.location.href='disability-retirement-details.html?id=${r.id}'">${ICONS.eye}</button></td>
                 </tr>`;

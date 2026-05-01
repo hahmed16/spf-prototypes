@@ -23,12 +23,12 @@
 initLayout({ role: 'committees-head', activePage: 'reassignment' });
 setBreadcrumb([{ label: 'إعادة تخصيص الطلبات' }]);
 
-const employees = [
-  { id: 'COM-EMP-001', name: WI_DATA.users.committees_employee.name, load: 5, available: true },
-  { id: 'COM-EMP-002', name: 'راشد بن سالم الغافري', load: 3, available: true },
-  { id: 'COM-EMP-003', name: 'مها بنت علي البلوشية', load: 4, available: true },
-  { id: 'COM-EMP-004', name: WI_DATA.users.appeals_rapporteur.name, load: 2, available: true },
-];
+const employees = getAvailabilityAwareRoster([
+  { id: 'COM-EMP-001', roleKey: 'committees_employee', load: 5 },
+  { id: 'COM-EMP-002', name: 'راشد بن سالم الغافري', load: 3 },
+  { id: 'COM-EMP-003', name: 'مها بنت علي البلوشية', load: 4 },
+  { id: 'COM-EMP-004', roleKey: 'appeals_rapporteur', load: 2 },
+]);
 
 function getPendingRequests() {
   const referrals = WI_DATA.allowances
@@ -62,6 +62,7 @@ function getPendingRequests() {
 
 document.addEventListener('DOMContentLoaded', () => {
   const pendingRequests = getPendingRequests();
+  const unavailableCount = employees.filter(emp => !emp.available).length;
   getContent().innerHTML = `
     <div class="pg-head">
       <div>
@@ -71,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     <div class="alert alert-i">${ICONS.info}<span>هذه الشاشة مخصصة لإعادة التعيين الإداري فقط، ولا تستخدم حجز أو تحرير الطلبات.</span></div>
+    ${unavailableCount ? `<div class="alert alert-w">${ICONS.warning}<span>يوجد ${unavailableCount} موظف/موظفين بحالة "غير متاح"، ولن يظهروا ضمن خيارات إعادة التخصيص حتى يتم تحديث حالة التوفر.</span></div>` : ''}
 
     ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
 
@@ -79,13 +81,14 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb">
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">
           ${employees.map(emp => `
-          <div style="padding:14px;border:1px solid var(--border);border-radius:var(--r);background:var(--g50)">
+          <div style="padding:14px;border:1px solid var(--border);border-radius:var(--r);background:${emp.available ? 'var(--g50)' : '#fff5f5'}">
             <div style="display:flex;justify-content:space-between;gap:8px">
               <strong style="font-size:13px">${emp.name}</strong>
-              <span class="badge b-approved">متاح</span>
+              <span class="badge ${emp.available ? 'b-approved' : 'b-returned'}">${emp.availabilityStatus}</span>
             </div>
-            <div style="font-size:12px;color:var(--text3);margin-top:6px">${emp.id}</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:6px">${emp.employeeId}</div>
             <div style="font-size:13px;margin-top:8px">الطلبات النشطة: <strong>${emp.load}</strong></div>
+            ${emp.availabilityNote ? `<div style="margin-top:6px;font-size:12px;color:var(--text2)">${emp.availabilityNote}</div>` : ''}
           </div>`).join('')}
         </div>
       </div>
@@ -135,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="ph"><h3><div class="pico pu">${ICONS.switch}</div>إعادة التخصيص</h3></div>
       <div class="dp-body">
         <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">الموظف الجديد <span class="req">*</span></label><select class="fc" id="new-employee"><option value="">— اختر الموظف —</option>${employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('')}</select></div>
+          <div class="fgrp"><label class="flbl">الموظف الجديد <span class="req">*</span></label><select class="fc" id="new-employee"><option value="">— اختر الموظف —</option>${employees.filter(e => e.available).map(e => `<option value="${e.id}">${e.name} (${e.load} طلبات نشطة)</option>`).join('')}</select></div>
           <div class="fgrp span-2"><label class="flbl">سبب إعادة التخصيص <span class="req">*</span></label><select class="fc" id="reassign-reason"><option value="">— اختر السبب —</option><option>تعادل أحمال العمل</option><option>غياب الموظف الأصلي</option><option>اختصاص الموظف الجديد أنسب</option><option>سبب آخر</option></select></div>
           <div class="fgrp span-full"><label class="flbl">ملاحظات</label><textarea class="fc" id="reassign-notes" rows="2"></textarea></div>
         </div>

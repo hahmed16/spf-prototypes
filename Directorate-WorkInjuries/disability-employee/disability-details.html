@@ -19,6 +19,7 @@
   <script src="../shared/data-sessions.js"></script>
   <script src="../shared/data-disability-retirement.js"></script>
   <script src="../shared/data.js"></script>
+  <script src="../shared/workflow-stages.js"></script>
   <script src="../shared/layout.js"></script>
   <script src="../shared/utils.js"></script>
   <script>
@@ -26,7 +27,7 @@
     const params = new URLSearchParams(window.location.search);
     const req = (WI_DATA.disability || []).find(r => r.id === params.get('id')) || (WI_DATA.disability || [])[0];
     currentRequestId = req.id;
-    const me = WI_DATA.users?.disability_employee?.name || 'Unknown User';
+    const me = WI_DATA.users?.disability_employee?.name || 'مستخدم غير معروف';
     const isCheckedOutByMe = req.checkedOutBy === me;
     setBreadcrumb([{ label: 'منفعة الإعاقة', page: 'disability-list' }, { label: `تفاصيل ${req.id}` }]);
 
@@ -53,9 +54,9 @@
       </div>
       <div class="pg-acts">
         ${req.status === statusPending && !req.checkedOutBy
-          ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out</button>`
+          ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} حجز الطلب</button>`
           : isCheckedOutByMe
-            ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in</button>`
+            ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} تحرير الطلب</button>`
             : req.checkedOutBy
               ? `<span style="font-size:12px;color:var(--warning);padding:8px 14px;border:1px solid var(--warning-l);border-radius:var(--rsm);background:var(--warning-l)">${ICONS.lock} محجوز: ${req.checkedOutBy}</span>`
               : ''}
@@ -79,6 +80,8 @@
       </div>
     </div>
 
+    ${renderWorkflowPath(req, 'disability')}
+    ${renderInsuredSummaryCards(req.applicant?.civil || req.insured?.civil, req.id)}
     ${isSamePerson ? `
     <!-- بيانات المؤمن عليه / المستفيد (نفس الشخص) -->
     <div class="card card-ro">
@@ -158,22 +161,7 @@
     </div>
 
     <!-- بيانات بطاقة الإعاقة -->
-    ${card ? `
-    <div class="card card-ro">
-      <div class="ph"><h3><div class="pico pu">${ICONS.shield}</div>بيانات بطاقة الإعاقة <span style="font-size:10px;color:var(--text3)">(وزارة التنمية الاجتماعية + وزارة الصحة)</span></h3></div>
-      <div class="pb">
-        ${isExpired ? `<div class="alert alert-d" style="margin-bottom:12px">${ICONS.warn}<span>بطاقة الإعاقة منتهية الصلاحية — لا يمكن الصرف حتى يتم تجديدها</span></div>` : ''}
-        <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">حالة البطاقة</label><div class="fro"><span class="badge ${card.status === 'سارية' ? 'b-card-valid' : card.status === 'منتهية' ? 'b-card-expired' : 'b-card-cancelled'}">${card.status || '—'}</span></div></div>
-          <div class="fgrp"><label class="flbl">تاريخ التفعيل</label><div class="fro">${formatDate(card.activationDate)}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ الانتهاء</label><div class="fro" style="${isExpired ? 'color:var(--danger);font-weight:700' : ''}">${formatDate(card.expiryDate)}</div></div>
-          <div class="fgrp"><label class="flbl">طبيعة الإعاقة (وزارة التنمية الاجتماعية)</label><div class="fro">${card.typeSD || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">طبيعة الإعاقة (وزارة الصحة)</label><div class="fro">${card.typeMOH || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ ثبوت الإعاقة</label><div class="fro">${formatDate(card.provenDate)}</div></div>
-          <div class="fgrp"><label class="flbl">آخر تحقق تلقائي</label><div class="fro" style="color:var(--text3)">${card.lastCheck || '—'}</div></div>
-        </div>
-      </div>
-    </div>` : ''}
+    ${card ? `${isExpired ? `<div class="alert alert-d" style="margin-bottom:12px">${ICONS.warn}<span>بطاقة الإعاقة منتهية الصلاحية — لا يمكن الصرف حتى يتم تجديدها</span></div>` : ''}${renderDisabilityCardPanel(card)}` : ''}
 
     <!-- بيانات التأمين -->
     <div class="card card-ro">
@@ -262,15 +250,7 @@
     <!-- السجل الزمني -->
     <div class="card">
       <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني الكامل للطلب</h3></div>
-      <div class="pb">
-        <div class="tl">
-          ${tl.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد أحداث</div>' : tl.map(e => {
-                const dc = e.type === 'success' ? 's' : e.type === 'danger' ? 'd' : e.type === 'warning' ? 'w' : '';
-                const ic = e.type === 'success' ? ICONS.check : e.type === 'danger' ? ICONS.x : e.type === 'warning' ? ICONS.warn : ICONS.clock;
-                return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus ? `<div class="tl-states">${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus}</span><span>${ICONS.arrow_right}</span>` : ''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus}</span></div>` : ''}${e.note ? `<div class="tl-note">${e.note}</div>` : ''}</div></div>`;
-              }).join('')}
-        </div>
-      </div>
+      <div class="pb">${renderTimelineList(tl)}</div>
     </div>`;
     });
 

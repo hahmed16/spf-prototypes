@@ -23,7 +23,7 @@
 initLayout({ role: 'hospital-delegate', activePage: 'licensing-list' });
 setBreadcrumb([{ label: 'الترخيص والتجديد' }, { label: 'قائمة الطلبات' }]);
 
-const myReqs = WI_DATA.licensing;
+const myReqs = WI_DATA.licensing.filter(r => isVisibleForRole('hospital-delegate', r));
 let activeTab = 'all';
 
 document.addEventListener('DOMContentLoaded', render);

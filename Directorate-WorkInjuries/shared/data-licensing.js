@@ -242,7 +242,7 @@ const LICENSING_DATA = [
     lastUpdatedBy: null,
     expectedClosureDate: null,
     remainingDays: null,
-    delegate: { name: 'ناصر بن راشد الحارثي', civil: '9077001122', role: 'المفوض عن المستشفى', phone: '96897700112', email: 'nasser.h@royalcare.om' },
+    delegate: { name: 'منى بنت عبدالله الرحبية', civil: '9066663333', role: 'المفوض عن المستشفى', phone: '96896663333', email: 'mona@hospital.om' },
     institution: { name: 'مستشفى رويال كير التخصصي', cr: '7788991', crStatus: 'سارٍ', crExpiry: '2026-12-31', type: 'مستشفى خاص', address: 'مسقط — الغبرة', governorate: 'مسقط — ولاية بوشر', phone: '96824445566', email: 'info@royalcare.om', currentLicenseNo: null },
     doctors: [
       { name: 'د. سامي بن خميس العجمي', civil: '9019988771', specialty: 'جراحة عامة', role: 'رئيس', confirmStatus: 'بانتظار التأكيد', duplicateCheck: 'لا يوجد تعارض' },
@@ -251,17 +251,17 @@ const LICENSING_DATA = [
     ],
     verification: { totalDoctors: 3, confirmedDoctors: 1, minMet: false },
     attachments: [
-      { id: 'lic165-att1', type: 'السجل التجاري', name: 'السجل_التجاري.pdf', uploadDate: '2025-01-21', uploadedBy: 'ناصر بن راشد الحارثي', role: 'المفوض عن المستشفى', size: '0.7 MB', icon: 'pdf' },
-      { id: 'lic165-att2', type: 'عقد الإيجار', name: 'عقد_الإيجار.pdf', uploadDate: '2025-01-21', uploadedBy: 'ناصر بن راشد الحارثي', role: 'المفوض عن المستشفى', size: '0.9 MB', icon: 'pdf' },
+      { id: 'lic165-att1', type: 'السجل التجاري', name: 'السجل_التجاري.pdf', uploadDate: '2025-01-21', uploadedBy: 'منى بنت عبدالله الرحبية', role: 'المفوض عن المستشفى', size: '0.7 MB', icon: 'pdf' },
+      { id: 'lic165-att2', type: 'عقد الإيجار', name: 'عقد_الإيجار.pdf', uploadDate: '2025-01-21', uploadedBy: 'منى بنت عبدالله الرحبية', role: 'المفوض عن المستشفى', size: '0.9 MB', icon: 'pdf' },
     ],
     notes: [
-      { id: 'lic165-note1', author: 'ناصر بن راشد الحارثي', role: 'المفوض عن المستشفى', text: 'تم حفظ الطلب كمسودة لحين استكمال تأكيد جميع الأطباء وإرفاق بقية المستندات.', time: '2025-01-21 09:15' },
+      { id: 'lic165-note1', author: 'منى بنت عبدالله الرحبية', role: 'المفوض عن المستشفى', text: 'تم حفظ الطلب كمسودة لحين استكمال تأكيد جميع الأطباء وإرفاق بقية المستندات.', time: '2025-01-21 09:15' },
     ],
     session: null,
     committeeDecision: null,
     activeLicense: null,
     timeline: [
-      { action: 'إنشاء الطلب كمسودة', actor: 'ناصر بن راشد الحارثي', role: 'المفوض عن المستشفى', time: '2025-01-21 09:15', fromStatus: '', toStatus: 'مسودة', note: 'تم حفظ الطلب قبل الإرسال النهائي', type: 'default' },
+      { action: 'إنشاء الطلب كمسودة', actor: 'منى بنت عبدالله الرحبية', role: 'المفوض عن المستشفى', time: '2025-01-21 09:15', fromStatus: '', toStatus: 'مسودة', note: 'تم حفظ الطلب قبل الإرسال النهائي', type: 'default' },
     ],
     assignedTo: null,
     checkedOutBy: null,
@@ -387,6 +387,40 @@ const LICENSING_DATA = [
     ],
     assignedTo: 'هدى بنت ناصر الوهيبية',
     checkedOutBy: 'هدى بنت ناصر الوهيبية',
+  },
+  {
+    id: 'LIC-2025-001606',
+    requestType: 'تجديد',
+    status: 'تم اتخاذ القرار من اللجنة الطبية الإشرافية — بانتظار تنفيذ القرار',
+    submitDate: '2025-01-09',
+    lastUpdate: '2025-01-22 13:10',
+    lastUpdatedBy: 'مقرر اللجنة الطبية الإشرافية',
+    expectedClosureDate: '2025-01-29',
+    remainingDays: 3,
+    delegate: { name: 'طارق بن ناصر الزدجالي', civil: '9077778888', role: 'المفوض عن المستشفيات', phone: '96897778888', email: 'tariq@noor-hospital.om' },
+    institution: { name: 'مستشفى النور التخصصي', cr: '8901234', crStatus: 'سارٍ', crExpiry: '2027-05-31', type: 'مستشفى خاص', address: 'شارع قابوس — مسقط', governorate: 'مسقط — ولاية بوشر', phone: '96824678901', email: 'info@noor-hospital.om', currentLicenseNo: 'LIC-INST-2022-0045' },
+    doctors: [
+      { name: 'د. سيف بن حمد المسكري', civil: '9055566677', specialty: 'جراحة العظام', role: 'رئيس', confirmStatus: 'تم التأكيد', duplicateCheck: 'لا يوجد تعارض' },
+      { name: 'د. هند بنت علي الحارثية', civil: '9066677788', specialty: 'طب الأمراض المهنية', role: 'نائب رئيس', confirmStatus: 'تم التأكيد', duplicateCheck: 'لا يوجد تعارض' },
+      { name: 'د. وائل بن صالح الحوسني', civil: '9078899001', specialty: 'الطب النفسي المهني', role: 'عضو', confirmStatus: 'تم التأكيد', duplicateCheck: 'لا يوجد تعارض' },
+    ],
+    verification: { totalDoctors: 3, confirmedDoctors: 3, minMet: true, duplicates: [] },
+    attachments: [
+      { id: 'lic166-att1', type: 'ترخيص سابق', name: 'الترخيص_السابق.pdf', uploadDate: '2025-01-09', uploadedBy: 'طارق بن ناصر الزدجالي', role: 'المفوض', size: '0.8 MB', icon: 'pdf' },
+      { id: 'lic166-att2', type: 'سجل تجاري', name: 'سجل_تجاري_محدث.pdf', uploadDate: '2025-01-09', uploadedBy: 'طارق بن ناصر الزدجالي', role: 'المفوض', size: '0.9 MB', icon: 'pdf' },
+    ],
+    notes: [
+      { id: 'lic166-note1', author: 'مازن بن سعيد اللواتي', role: 'مقرر اللجنة الطبية الإشرافية', text: 'تم إدخال قرار اللجنة، بانتظار التوقيع الإلكتروني ثم التنفيذ من رئيس القسم.', time: '2025-01-22 13:10' },
+    ],
+    session: { id: 'SUP-SES-2025-0021', institution: 'مستشفى النور التخصصي', date: '2025-01-22', time: '11:00', quorum: true, members: ['د. سيف بن حمد المسكري', 'د. هند بنت علي الحارثية', 'د. وائل بن صالح الحوسني'] },
+    committeeDecision: { type: 'اعتماد التجديد', content: 'أوصت اللجنة الطبية الإشرافية باعتماد التجديد بعد مراجعة التشكيل الطبي والتراخيص المساندة.', date: '2025-01-22', signatories: ['د. هند بنت علي الحارثية'] },
+    activeLicense: null,
+    timeline: [
+      { action: 'إحالة الطلب إلى اللجنة الطبية الإشرافية', actor: 'طالب بن سعيد الحنبلي', role: 'رئيس قسم التراخيص والرقابة', time: '2025-01-18 10:00', fromStatus: 'بانتظار اعتماد رئيس قسم التراخيص والرقابة', toStatus: 'تم إحالة الطلب إلى اللجنة الطبية الإشرافية — بانتظار جدولة جلسة', note: 'تم اعتماد الإحالة إلى اللجنة', type: 'success', phone: '96896662222' },
+      { action: 'انعقاد الجلسة وإدخال القرار', actor: 'مازن بن سعيد اللواتي', role: 'مقرر اللجنة الطبية الإشرافية', time: '2025-01-22 13:10', fromStatus: 'تم جدولة جلسة اللجنة الطبية الإشرافية', toStatus: 'تم اتخاذ القرار من اللجنة الطبية الإشرافية — بانتظار تنفيذ القرار', note: 'تم إدخال القرار بعد اكتمال النصاب', type: 'success', phone: '96896668888' },
+    ],
+    assignedTo: 'طالب بن سعيد الحنبلي',
+    checkedOutBy: null,
   },
 ];
 

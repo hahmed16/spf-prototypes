@@ -36,20 +36,41 @@ if (!inquiry) {
 }
 
 function render() {
+  const meta = deriveRequestSummaryMeta(inquiry);
   getContent().innerHTML = `
     <div class="pg-head">
       <div><h1>اعتماد استعلام التقاعد</h1><p>${inquiry.id}</p></div>
       <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='disability-retirement-list.html'">${ICONS.arrow_left} رجوع</button></div>
     </div>
     ${renderWorkflowPath(inquiry, 'disabilityRetirement')}
+    ${renderInsuredSummaryCards(inquiry.applicant?.civil, inquiry.activeBenefit?.requestId || inquiry.id)}
     <div class="card">
       <div class="ph"><h3><div class="pico bl">${ICONS.info}</div>ملخص سريع</h3></div>
       <div class="pb">
         <div class="fg fg-4 req-summary-grid">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الاستعلام</div><div style="font-size:12px;color:var(--text2);font-family:monospace">${inquiry.id}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">الحالة</div><div style="font-size:12px;color:var(--text2)">${statusBadge(inquiry.status)}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">المستفيد</div><div style="font-size:12px;color:var(--text2)">${inquiry.applicant.name}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">جهة العمل الحالية</div><div style="font-size:12px;color:var(--text2)">${inquiry.currentEmployer || '—'}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">آخر شهر إيداع</div><div style="font-size:12px;color:var(--text2)">${inquiry.activeBenefit?.lastDepositedMonth || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقاعد المطلوب</div><div style="font-size:12px;color:var(--text2)">${formatDate(inquiry.retirementDate)}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">حجز المتابعة</div><div style="font-size:12px;color:var(--text2)">${inquiry.checkedOutBy || 'غير محجوز'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الأيام المتبقية</div><div style="font-size:12px;color:var(--text2)"><span class="sla-days ${getRemainingDaysClass(meta.remainingDays)}">${getRemainingDaysLabel(meta.remainingDays)}</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ph"><h3><div class="pico pu">${ICONS.user}</div>بيانات المستفيد</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${inquiry.applicant.name}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${inquiry.applicant.civil}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${inquiry.applicant.phone || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${inquiry.applicant.email || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${formatDate(inquiry.applicant.dob)}</div></div>
+          <div class="fgrp"><label class="flbl">الجنس</label><div class="fro">${inquiry.applicant.gender || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${inquiry.applicant.nationality || '—'}</div></div>
+          <div class="fgrp span-full"><label class="flbl">العنوان</label><div class="fro">${inquiry.applicant.address || '—'}</div></div>
         </div>
       </div>
     </div>
@@ -60,6 +81,8 @@ function render() {
         <div class="fg fg-2">
           <div class="fgrp"><label class="flbl">النتيجة</label><div class="fro">${inquiry.employeeRecommendation.type}</div></div>
           <div class="fgrp"><label class="flbl">معد التوصية</label><div class="fro">${inquiry.employeeRecommendation.issuer || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التوصية</label><div class="fro">${formatDate(inquiry.employeeRecommendation.date)}</div></div>
+          <div class="fgrp"><label class="flbl">الأهلية المقترحة</label><div class="fro">${inquiry.employeeRecommendation.retirementEligible ? 'مؤهل للتقاعد المبكر' : 'غير مؤهل للتقاعد المبكر'}</div></div>
         </div>
         <div class="fgrp"><label class="flbl">التفاصيل</label><div class="fro">${inquiry.employeeRecommendation.details || '—'}</div></div>
       </div>
@@ -67,15 +90,66 @@ function render() {
     <div class="card">
       <div class="ph"><h3><div class="pico or">${ICONS.clipboard}</div>بيانات الإعاقة والمنفعة</h3></div>
       <div class="pb">
-        <div class="fg fg-2">
+        <div class="fg fg-3">
           <div class="fgrp"><label class="flbl">رقم بطاقة الإعاقة</label><div class="fro">${inquiry.mosdCard?.number || inquiry.disabilityCard}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ إصدار البطاقة</label><div class="fro">${formatDate(inquiry.mosdCard?.issueDate || inquiry.cardIssueDate)}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ انتهاء البطاقة</label><div class="fro">${formatDate(inquiry.mosdCard?.expiryDate)}</div></div>
           <div class="fgrp"><label class="flbl">نوع الإعاقة</label><div class="fro">${inquiry.disabilityType}</div></div>
           <div class="fgrp"><label class="flbl">درجة الإعاقة</label><div class="fro">${inquiry.disabilityLevel}</div></div>
           <div class="fgrp"><label class="flbl">حالة منفعة الإعاقة</label><div class="fro">${inquiry.activeBenefit?.currentStatus || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الطلب المرتبط</label><div class="fro" style="font-family:monospace">${inquiry.activeBenefit?.requestId || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">آخر مسمى وظيفي</label><div class="fro">${inquiry.lastJobTitle || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التقاعد المطلوب</label><div class="fro">${formatDate(inquiry.retirementDate)}</div></div>
         </div>
         <div class="fgrp"><label class="flbl">تفاصيل الإعاقة</label><div class="fro">${inquiry.disabilityDetails || '—'}</div></div>
+        <div class="tbl-wrap" style="margin-top:14px">
+          <table class="dtbl">
+            <thead><tr><th>المصدر</th><th>نوع الإعاقة</th><th>المستوى</th><th>تاريخ الفحص</th></tr></thead>
+            <tbody>
+              ${(inquiry.mosdCard?.disabilities || []).map(item => `
+                <tr>
+                  <td>${item.source === 'MOH' ? 'وزارة الصحة' : item.source === 'MOSD' ? 'وزارة التنمية الاجتماعية' : item.source}</td>
+                  <td>${item.name}</td>
+                  <td>${item.level}</td>
+                  <td>${formatDate(item.examinationDate)}</td>
+                </tr>`).join('') || '<tr><td colspan="4" style="text-align:center">لا توجد بيانات تفصيلية</td></tr>'}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
+    <div class="card">
+      <div class="ph"><h3><div class="pico gr">${ICONS.building}</div>السجل الوظيفي</h3></div>
+      <div class="pb">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>جهة العمل</th><th>المسمى الوظيفي</th><th>من</th><th>إلى</th></tr></thead>
+            <tbody>
+              ${(inquiry.employmentHistory || []).map(item => `
+                <tr>
+                  <td>${item.employerName}</td>
+                  <td>${item.jobTitle || '—'}</td>
+                  <td>${formatDate(item.startDate)}</td>
+                  <td>${item.current ? '<span class="badge b-approved">الحالية</span>' : formatDate(item.endDate)}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    ${inquiry.headDecision ? `
+    <div class="card">
+      <div class="ph"><h3><div class="pico pu">${ICONS.check}</div>القرار النهائي المعتمد</h3></div>
+      <div class="pb">
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">النتيجة</label><div class="fro">${inquiry.headDecision.retirementEligible ? 'مؤهل للتقاعد المبكر' : 'غير مؤهل للتقاعد المبكر'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ القرار</label><div class="fro">${formatDate(inquiry.headDecision.date)}</div></div>
+          <div class="fgrp"><label class="flbl">اعتمد بواسطة</label><div class="fro">${inquiry.headDecision.issuer || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">قيمة المعاش التقديرية</label><div class="fro">${inquiry.decision?.pensionAmount ? `${inquiry.decision.pensionAmount} ر.ع` : '—'}</div></div>
+        </div>
+        <div class="fgrp"><label class="flbl">التفاصيل</label><div class="fro">${inquiry.headDecision.details || inquiry.decision?.details || '—'}</div></div>
+      </div>
+    </div>` : ''}
     <div class="card">
       <div class="ph"><h3><div class="pico bl">${ICONS.clock}</div>السجل الزمني</h3></div>
       <div class="pb">${renderTimelineList(inquiry.timeline)}</div>
@@ -85,8 +159,8 @@ function render() {
       <div class="pb">
         <div class="act-panel">
           ${inquiry.status.includes('بانتظار اعتماد رئيس القسم') ? `
-            <button class="btn btn-primary" onclick="closeInquiry(true)">${ICONS.check} إغلاق كمؤهل للتقاعد المبكر</button>
-            <button class="btn btn-danger" onclick="closeInquiry(false)">${ICONS.x} إغلاق كغير مؤهل</button>` : `
+            <button class="btn btn-primary" onclick="closeInquiry(true)">${ICONS.check} اعتماد كمؤهل للتقاعد المبكر</button>
+            <button class="btn btn-danger" onclick="closeInquiry(false)">${ICONS.x} اعتماد كغير مؤهل للتقاعد المبكر</button>` : `
             <div class="alert alert-i">${ICONS.info}<span>تم إغلاق هذا الاستعلام بالفعل.</span></div>`}
         </div>
       </div>
@@ -100,6 +174,7 @@ function closeInquiry(isEligible) {
     return;
   }
   const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  const previousStatus = inquiry.status;
   inquiry.headDecision = {
     type: isEligible ? 'معتمد' : 'مرفوض',
     date: now.slice(0, 10),
@@ -123,14 +198,14 @@ function closeInquiry(isEligible) {
   inquiry.lastUpdate = now;
   inquiry.lastUpdatedBy = me;
   inquiry.timeline.push({
-    action: 'إغلاق الاستعلام',
+    action: 'اعتماد القرار النهائي',
     actor: me,
     role: 'رئيس قسم الإعاقة والأمراض المستديمة',
     time: now,
-    fromStatus: 'بانتظار اعتماد رئيس قسم الإعاقة والأمراض المستديمة',
+    fromStatus: previousStatus,
     toStatus: inquiry.status,
     note: details.trim(),
-    type: isEligible ? 'success' : 'error',
+    type: isEligible ? 'success' : 'warning',
     phone: myPhone
   });
   showToast('تم اعتماد القرار النهائي وإغلاق الاستعلام', 's');

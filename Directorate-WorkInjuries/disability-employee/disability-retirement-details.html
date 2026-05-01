@@ -66,8 +66,9 @@ function render() {
       <div class="ph"><h3><div class="pico bl">${ICONS.file}</div>معلومات الاستعلام</h3></div>
       <div class="pb">
         <div class="fg fg-4 req-summary-grid">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الاستعلام</div><div style="font-size:12px;color:var(--text2);font-family:monospace">${inquiry.id}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">الحالة</div><div style="font-size:12px;color:var(--text2)">${statusBadge(inquiry.status)}</div></div>
-          <div><div class="flbl" style="margin-bottom:4px">تاريخ الاستلام</div><div style="font-size:12px;color:var(--text2)">${inquiry.receivedDate}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ الاستلام</div><div style="font-size:12px;color:var(--text2)">${formatDate(inquiry.receivedDate)}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">الموظف المسؤول</div><div style="font-size:12px;color:var(--text2)">${inquiry.assignedTo || '—'}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">الحجز الحالي</div><div style="font-size:12px;color:var(--text2)">${inquiry.checkedOutBy || 'غير محجوز'}</div></div>
         </div>
@@ -82,12 +83,13 @@ function render() {
     <div class="card">
       <div class="ph"><h3><div class="pico pu">${ICONS.user}</div>بيانات المتقاعد</h3></div>
       <div class="pb">
-        <div class="fg fg-2">
+        <div class="fg fg-3">
           <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${inquiry.applicant.name}</div></div>
           <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${inquiry.applicant.civil}</div></div>
           <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${inquiry.applicant.phone || '—'}</div></div>
           <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${inquiry.applicant.email || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${inquiry.applicant.dob || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${formatDate(inquiry.applicant.dob)}</div></div>
+          <div class="fgrp"><label class="flbl">الجنس</label><div class="fro">${inquiry.applicant.gender || '—'}</div></div>
           <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${inquiry.applicant.nationality || '—'}</div></div>
           <div class="fgrp span-full"><label class="flbl">العنوان</label><div class="fro">${inquiry.applicant.address || '—'}</div></div>
         </div>
@@ -100,8 +102,8 @@ function render() {
         <div class="fg fg-2">
           <div class="fgrp"><label class="flbl">رقم البطاقة</label><div class="fro" style="font-family:monospace">${inquiry.mosdCard?.number || inquiry.disabilityCard}</div></div>
           <div class="fgrp"><label class="flbl">حالة البطاقة</label><div class="fro">${inquiry.mosdCard?.status || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ الإصدار</label><div class="fro">${inquiry.mosdCard?.issueDate || inquiry.cardIssueDate || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ الانتهاء</label><div class="fro">${inquiry.mosdCard?.expiryDate || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الإصدار</label><div class="fro">${formatDate(inquiry.mosdCard?.issueDate || inquiry.cardIssueDate)}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الانتهاء</label><div class="fro">${formatDate(inquiry.mosdCard?.expiryDate)}</div></div>
         </div>
         <div class="tbl-wrap" style="margin-top:14px">
           <table class="dtbl">
@@ -109,10 +111,10 @@ function render() {
             <tbody>
               ${(inquiry.mosdCard?.disabilities || []).map(item => `
                 <tr>
-                  <td>${item.source}</td>
+                  <td>${item.source === 'MOH' ? 'وزارة الصحة' : item.source === 'MOSD' ? 'وزارة التنمية الاجتماعية' : item.source}</td>
                   <td>${item.name}</td>
                   <td>${item.level}</td>
-                  <td>${item.examinationDate}</td>
+                  <td>${formatDate(item.examinationDate)}</td>
                 </tr>`).join('') || '<tr><td colspan="4" style="text-align:center">لا توجد بيانات تفصيلية</td></tr>'}
             </tbody>
           </table>
@@ -123,11 +125,14 @@ function render() {
     <div class="card">
       <div class="ph"><h3><div class="pico gr">${ICONS.chart}</div>المنفعة الحالية والسجل الوظيفي</h3></div>
       <div class="pb">
-        <div class="fg fg-2">
+        <div class="fg fg-3">
           <div class="fgrp"><label class="flbl">هل توجد منفعة إعاقة نشطة؟</label><div class="fro">${inquiry.activeBenefit?.hasActiveRequest ? 'نعم' : 'لا'}</div></div>
           <div class="fgrp"><label class="flbl">آخر شهر إيداع</label><div class="fro">${inquiry.activeBenefit?.lastDepositedMonth || '—'}</div></div>
           <div class="fgrp"><label class="flbl">حالة المنفعة</label><div class="fro">${inquiry.activeBenefit?.currentStatus || '—'}</div></div>
           <div class="fgrp"><label class="flbl">رقم الطلب المرتبط</label><div class="fro" style="font-family:monospace">${inquiry.activeBenefit?.requestId || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">جهة العمل الحالية</label><div class="fro">${inquiry.currentEmployer || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">آخر مسمى وظيفي</label><div class="fro">${inquiry.lastJobTitle || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التقاعد المطلوب</label><div class="fro">${formatDate(inquiry.retirementDate)}</div></div>
         </div>
         <div class="tbl-wrap" style="margin-top:14px">
           <table class="dtbl">
@@ -137,8 +142,8 @@ function render() {
                 <tr>
                   <td>${item.employerName}</td>
                   <td>${item.jobTitle || '—'}</td>
-                  <td>${item.startDate || '—'}</td>
-                  <td>${item.current ? '<span class="badge b-approved">الحالية</span>' : (item.endDate || '—')}</td>
+                  <td>${formatDate(item.startDate)}</td>
+                  <td>${item.current ? '<span class="badge b-approved">الحالية</span>' : formatDate(item.endDate)}</td>
                 </tr>`).join('')}
             </tbody>
           </table>
@@ -152,9 +157,22 @@ function render() {
       <div class="pb">
         <div class="fg fg-2">
           <div class="fgrp"><label class="flbl">النتيجة</label><div class="fro">${employeeRecommendation.type}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ التوصية</label><div class="fro">${employeeRecommendation.date || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التوصية</label><div class="fro">${formatDate(employeeRecommendation.date)}</div></div>
+          <div class="fgrp"><label class="flbl">معد التوصية</label><div class="fro">${employeeRecommendation.issuer || '—'}</div></div>
         </div>
         <div class="fgrp"><label class="flbl">التفاصيل</label><div class="fro">${employeeRecommendation.details || '—'}</div></div>
+      </div>
+    </div>` : ''}
+
+    ${inquiry.headDecision ? `
+    <div class="card">
+      <div class="ph"><h3><div class="pico pu">${ICONS.check}</div>قرار رئيس القسم</h3></div>
+      <div class="pb">
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">النتيجة</label><div class="fro">${inquiry.headDecision.type}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ القرار</label><div class="fro">${formatDate(inquiry.headDecision.date)}</div></div>
+        </div>
+        <div class="fgrp"><label class="flbl">التفاصيل</label><div class="fro">${inquiry.headDecision.details || '—'}</div></div>
       </div>
     </div>` : ''}
 
@@ -245,6 +263,7 @@ function submitRecommendation(isEligible) {
     return;
   }
   const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  const previousStatus = inquiry.status;
   inquiry.employeeRecommendation = {
     type: isEligible ? 'معتمد' : 'مرفوض',
     date: now.slice(0, 10),
@@ -261,7 +280,7 @@ function submitRecommendation(isEligible) {
     actor: me,
     role: 'موظف قسم الإعاقة والأمراض المستديمة',
     time: now,
-    fromStatus: 'تم استلام الاستعلام — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة',
+    fromStatus: previousStatus,
     toStatus: inquiry.status,
     note: details.trim(),
     type: isEligible ? 'success' : 'warning',
@@ -272,51 +291,11 @@ function submitRecommendation(isEligible) {
 }
 
 function doSuspend() {
-  const reason = prompt('سبب التعليق:');
-  const notes = prompt('ملاحظات التعليق:');
-  if (!reason || !reason.trim() || !notes || !notes.trim()) {
-    showToast('سبب التعليق والملاحظات إلزاميان', 'w');
-    return;
-  }
-  inquiry.suspended = true;
-  inquiry.suspensionReason = reason.trim();
-  inquiry.suspensionNotes = notes.trim();
-  inquiry.suspendedBy = me;
-  inquiry.suspendedDate = new Date().toISOString().slice(0, 10);
-  inquiry.lastUpdate = new Date().toISOString().slice(0, 16).replace('T', ' ');
-  inquiry.lastUpdatedBy = me;
-  inquiry.timeline.push({
-    action: 'تعليق الاستعلام',
-    actor: me,
-    role: 'موظف قسم الإعاقة والأمراض المستديمة',
-    time: inquiry.lastUpdate,
-    fromStatus: inquiry.status,
-    toStatus: inquiry.status,
-    note: `${reason.trim()} — ${notes.trim()}`,
-    type: 'warning',
-    phone: myPhone
-  });
-  render();
+  suspendRecord(inquiry, { roleLabel: 'موظف قسم الإعاقة والأمراض المستديمة', status: 'معلّق مؤقتاً — بانتظار الاستئناف' });
 }
 
 function doResume() {
-  inquiry.suspended = false;
-  inquiry.resumedBy = me;
-  inquiry.resumedDate = new Date().toISOString().slice(0, 10);
-  inquiry.lastUpdate = new Date().toISOString().slice(0, 16).replace('T', ' ');
-  inquiry.lastUpdatedBy = me;
-  inquiry.timeline.push({
-    action: 'استئناف الاستعلام',
-    actor: me,
-    role: 'موظف قسم الإعاقة والأمراض المستديمة',
-    time: inquiry.lastUpdate,
-    fromStatus: inquiry.status,
-    toStatus: inquiry.status,
-    note: 'تم استئناف الاستعلام',
-    type: 'success',
-    phone: myPhone
-  });
-  render();
+  resumeRecord(inquiry, { roleLabel: 'موظف قسم الإعاقة والأمراض المستديمة', resumeStatus: 'تم استلام الاستعلام — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة' });
 }
 
 function addManualNote() {

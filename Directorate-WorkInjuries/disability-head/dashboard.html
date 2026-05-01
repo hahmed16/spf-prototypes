@@ -28,6 +28,9 @@
       const pending = WI_DATA.disability.filter(r => 
         ['تم تقديم طلب منفعة الأشخاص ذوي الإعاقة — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة', 'بانتظار اعتماد رئيس القسم'].includes(r.status)
       );
+      const retirementPending = WI_DATA.disabilityRetirement.filter(r =>
+        r.status.includes('بانتظار اعتماد رئيس قسم الإعاقة والأمراض المستديمة')
+      );
 
       getContent().innerHTML = `
         <div class="pg-head">
@@ -45,10 +48,10 @@
           </div>`).join('')}
         </div>
 
-        ${pending.length ? `
+        ${pending.length || retirementPending.length ? `
         <div class="alert alert-w">
           ${ICONS.warn}
-          <div><strong>لديك ${pending.length} حالات بانتظار الاعتماد النهائي.</strong> <a href="disability-list.html" style="color:var(--primary);margin-right:10px">عرض الكل ${ICONS.arrow_left}</a></div>
+          <div><strong>لديك ${pending.length} طلب منفعة و ${retirementPending.length} استعلام تقاعد بانتظار الاعتماد النهائي.</strong> <a href="disability-retirement-list.html" style="color:var(--primary);margin-right:10px">فتح استعلامات التقاعد ${ICONS.arrow_left}</a></div>
         </div>` : ''}
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
@@ -97,6 +100,29 @@
             </div>
           </div>
         </div>`;
+
+      const retirementCard = document.createElement('div');
+      retirementCard.className = 'card';
+      retirementCard.innerHTML = `
+        <div class="ph">
+          <h3><div class="pico bl">${ICONS.file}</div>استعلامات التقاعد بانتظار الاعتماد</h3>
+          <a href="disability-retirement-list.html" style="font-size:12px;color:var(--primary)">عرض الكل</a>
+        </div>
+        <div class="pb-0">
+          <table class="dtbl">
+            <thead><tr><th>رقم الاستعلام</th><th>المستفيد</th><th></th></tr></thead>
+            <tbody>
+              ${retirementPending.slice(0, 5).map(r => `
+                <tr>
+                  <td style="font-family:monospace;font-size:11.5px;color:var(--primary)">${r.id}</td>
+                  <td>${r.applicant.name}</td>
+                  <td><button class="btn btn-primary btn-xs" onclick="window.location.href='disability-retirement-details.html?id=${r.id}'">اعتماد</button></td>
+                </tr>`).join('')}
+              ${!retirementPending.length ? `<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text3)">لا توجد استعلامات تقاعد بانتظار الاعتماد حالياً</td></tr>` : ''}
+            </tbody>
+          </table>
+        </div>`;
+      getContent().querySelector('div[style*="display:grid"]').insertAdjacentElement('afterend', retirementCard);
     });
   </script>
 </body>

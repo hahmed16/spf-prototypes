@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>تفاصيل طلب العرض المباشر — جهة العمل</title><link rel="stylesheet" href="../shared/style.css"></head>
 <body>
-<script src="../shared/config.js"></script><script src="../shared/data-users.js"></script><script src="../shared/data-allowances.js"></script><script src="../shared/data-disability.js"></script><script src="../shared/data-chronic.js"></script><script src="../shared/data-appeals.js"></script><script src="../shared/data-licensing.js"></script><script src="../shared/data-sessions.js"></script><script src="../shared/data-disability-retirement.js"></script><script src="../shared/data-referrals.js"></script><script src="../shared/data.js"></script><script src="../shared/layout.js"></script><script src="../shared/utils.js"></script>
+<script src="../shared/config.js"></script><script src="../shared/data-users.js"></script><script src="../shared/data-allowances.js"></script><script src="../shared/data-disability.js"></script><script src="../shared/data-chronic.js"></script><script src="../shared/data-appeals.js"></script><script src="../shared/data-licensing.js"></script><script src="../shared/data-sessions.js"></script><script src="../shared/data-disability-retirement.js"></script><script src="../shared/data-referrals.js"></script><script src="../shared/data.js"></script><script src="../shared/workflow-stages.js"></script><script src="../shared/layout.js"></script><script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'employer-delegate', activePage: 'referrals-list' });
 const req = WI_DATA.referrals.find(r => r.id === new URLSearchParams(window.location.search).get('id'));
@@ -10,7 +10,9 @@ setBreadcrumb([{ label: 'طلبات العرض المباشر', page: 'referrals
 document.addEventListener('DOMContentLoaded', () => {
   if (!req) { renderContent('<div class="card"><div class="pb"><div class="empty-st">الطلب غير موجود</div></div></div>'); return; }
   getContent().innerHTML = `<div class="pg-head"><div><h1>تفاصيل طلب العرض المباشر</h1><p>${req.id}</p></div><div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.arrow_left} رجوع</button></div></div>
-  <div class="card"><div class="pb"><div class="fg fg-2"><div class="fgrp"><label class="flbl">العامل</label><div class="fro">${req.insured.name}</div></div><div class="fgrp"><label class="flbl">الحالة</label><div class="fro">${statusBadge(req.status)}</div></div><div class="fgrp span-full"><label class="flbl">سبب الطلب</label><div class="fro">${req.referral.reason}</div></div><div class="fgrp span-full"><label class="flbl">الملاحظات</label><div class="fro">${req.referral.notes || '—'}</div></div></div></div></div>
+  ${renderDirectReferralSummaryCard(req, { variant: 'employer' })}
+  ${renderWorkflowPath(req, 'directReferral')}
+  ${renderDirectReferralReasonCard(req)}
   <div class="card"><div class="ph"><h3><div class="pico bl">${ICONS.clock}</div>السجل الزمني</h3></div><div class="pb">${renderTimelineList(req.timeline)}</div></div>`;
 });
 </script>

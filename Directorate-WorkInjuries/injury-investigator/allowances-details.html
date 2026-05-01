@@ -17,6 +17,7 @@
 <script src="../shared/data-sessions.js"></script>
 <script src="../shared/data-disability-retirement.js"></script>
 <script src="../shared/data.js"></script>
+<script src="../shared/workflow-stages.js"></script>
 <script src="../shared/layout.js"></script>
 <script src="../shared/utils.js"></script>
 <script>
@@ -24,7 +25,7 @@ initLayout({ role: 'injury-investigator', activePage: 'allowances-list' });
 const params = new URLSearchParams(window.location.search);
 const req = (WI_DATA.allowances || []).find(r => r.id === params.get('id')) || (WI_DATA.allowances || [])[0];
 currentRequestId = req.id;
-const me = WI_DATA.users?.injury_investigator?.name || 'Unknown User';
+const me = WI_DATA.users?.injury_investigator?.name || 'مستخدم غير معروف';
 const isCheckedOutByMe = req.checkedOutBy === me;
 setBreadcrumb([{ label: 'بدلات الانقطاع', page: 'allowances-list' }, { label: `تفاصيل ${req.id}` }]);
 
@@ -53,9 +54,9 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <div class="pg-acts">
         ${!req.checkedOutBy && (req.status === 'قيد التحقيق — إصابات العمل' || req.status.includes('بانتظار تعيين'))
-          ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out — حجز الطلب</button>`
+          ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} حجز الطلب</button>`
           : isCheckedOutByMe
-            ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in — تحرير الطلب</button>`
+            ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} تحرير الطلب</button>`
             : req.checkedOutBy
               ? `<span style="font-size:12px;color:var(--warning);padding:8px 14px;border:1px solid var(--warning-l);border-radius:var(--rsm);background:var(--warning-l)">${ICONS.lock} محجوز بواسطة: ${req.checkedOutBy}</span>`
               : ''}
@@ -67,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ${!isCheckedOutByMe && (req.status === 'قيد التحقيق — إصابات العمل' || req.status.includes('بانتظار تعيين')) ? `
     <div class="alert alert-w">
       ${ICONS.warn}
-      <span>يجب عمل <strong>Check-out</strong> أولاً لتتمكن من اتخاذ إجراء على هذا الطلب وتجنب العمل المتزامن.</span>
+      <span>يجب حجز الطلب أولاً لتتمكن من اتخاذ إجراء على هذا الطلب وتجنب العمل المتزامن.</span>
     </div>` : ''}
 
     <!-- ملخص الطلب -->
@@ -85,6 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     </div>
+
+    ${renderWorkflowPath(req, 'allowances')}
 
     ${isSamePerson ? `
     <!-- بيانات المؤمن عليه / المستفيد (نفس الشخص) -->
@@ -325,13 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="card">
       <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني الكامل للطلب</h3></div>
       <div class="pb">
-        <div class="tl">
-          ${tl.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد أحداث</div>' : tl.map(e => {
-            const dc = e.type === 'success' ? 's' : e.type === 'danger' ? 'd' : e.type === 'warning' ? 'w' : '';
-            const ic = e.type === 'success' ? ICONS.check : e.type === 'danger' ? ICONS.x : e.type === 'warning' ? ICONS.warn : ICONS.clock;
-            return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus ? `<div class="tl-states">${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus}</span><span>${ICONS.arrow_right}</span>` : ''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus}</span></div>` : ''}${e.note ? `<div class="tl-note">${e.note}</div>` : ''}</div></div>`;
-          }).join('')}
-        </div>
+        ${renderTimelineList(tl)}
       </div>
     </div>`;
 });
@@ -413,8 +410,6 @@ function toggleOperationalNotes(card) {
 </script>
 </body>
 </html>
-
-
 
 
 

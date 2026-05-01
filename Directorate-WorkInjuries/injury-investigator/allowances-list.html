@@ -91,9 +91,9 @@ function render() {
                     <button class="ibtn" onclick="window.location.href='allowances-details.html?id=${r.id}'" title="عرض التفاصيل">${ICONS.eye}</button>
                     ${(r.status.includes('بانتظار تعيين') || r.status.includes('قيد التحقيق'))
                       ? !r.checkedOutBy
-                        ? `<button class="ibtn" onclick="doCheckout('${r.id}')" title="Check-out — حجز الطلب للمعالجة">${ICONS.lock}</button>`
+                        ? `<button class="ibtn" onclick="doCheckout('${r.id}')" title="حجز الطلب للمعالجة">${ICONS.lock}</button>`
                         : r.checkedOutBy === me
-                          ? `<button class="ibtn" onclick="doCheckin('${r.id}')" title="Check-in — إلغاء الحجز">${ICONS.unlock}</button>`
+                          ? `<button class="ibtn" onclick="doCheckin('${r.id}')" title="تحرير الطلب — إلغاء الحجز">${ICONS.unlock}</button>`
                           : ''
                       : ''}
                     ${!r.suspended?`<button class="ibtn" onclick="doSuspend('${r.id}')" title="تعليق الطلب">${ICONS.pause}</button>`:`<button class="ibtn" onclick="doResume('${r.id}')" title="استئناف الطلب">${ICONS.play}</button>`}
@@ -132,14 +132,14 @@ function toggleAll() {
 function doCheckout(id) {
   const req = WI_DATA.allowances.find(r=>r.id===id);
   if (req) { req.checkedOutBy = me; }
-  showToast(`تم حجز الطلب ${id} — Check-out`, 's');
+  showToast(`تم حجز الطلب ${id} — حجز الطلب`, 's');
   render();
 }
 
 function doCheckin(id) {
   const req = WI_DATA.allowances.find(r=>r.id===id);
   if (req) { req.checkedOutBy = null; }
-  showToast(`تم تحرير الطلب ${id} — Check-in`, 'i');
+  showToast(`تم تحرير الطلب ${id} — تحرير الطلب`, 'i');
   render();
 }
 

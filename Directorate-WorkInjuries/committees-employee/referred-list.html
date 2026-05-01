@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم الطلب</th><th>المؤمن عليه</th><th>المؤسسة الصحية</th><th>الحالة</th><th>تاريخ الإحالة</th><th></th></tr></thead>
+            <thead><tr><th>رقم الطلب</th><th>المؤمن عليه</th><th>المؤسسة الصحية</th><th>الحالة</th><th>تاريخ الإحالة</th><th>الأيام المتبقية</th><th></th></tr></thead>
             <tbody>
               ${all.map(r=>`
               <tr>
@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${r.referral?.institution || 'مستشفى النور التخصصي'}</td>
                 <td>${statusBadge(r.status)}</td>
                 <td style="font-size:12px">${r.lastUpdate}</td>
+                <td>${renderRemainingDaysBadge(r)}</td>
                 <td><button class="ibtn" onclick="window.location.href='referrals-details.html?id=${r.id}'">${ICONS.eye}</button></td>
               </tr>`).join('')}
             </tbody>

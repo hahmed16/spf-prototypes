@@ -34,23 +34,47 @@ const referralReqs = WI_DATA.allowances.filter(r =>
     r.status === 'تم اعتماد طلب العرض المباشر — بانتظار إحالة المقرر'
   )
 );
+
 let searchQuery = '';
 let showAllStages = false;
+let requestTypeFilter = 'all';
+
+// Request type options for filtering
+const requestTypeOptions = [
+  { value: 'إصابة عمل', label: 'إصابة عمل' },
+  { value: 'مرض مهني', label: 'مرض مهني' },
+  { value: 'إعاقة', label: 'إعاقة' },
+  { value: 'أمراض مستديمة', label: 'أمراض مستديمة' },
+  { value: 'عرض مباشر', label: 'عرض مباشر' }
+];
 
 document.addEventListener('DOMContentLoaded', render);
+
+function handleRequestTypeFilterChange(value) {
+  requestTypeFilter = value;
+  render();
+}
+
 function render() {
   const filtered = getFilteredData({
     role: 'committees-head',
     data: referralReqs,
     query: searchQuery,
-    showAll: showAllStages
+    showAll: showAllStages,
+    requestTypeFilter: requestTypeFilter
   });
   getContent().innerHTML = `
     <div class="pg-head">
       <div><h1>طلبات العرض على المؤسسات الصحية المرخصة</h1>
         <p>الطلبات التي تحتاج تنسيقاً مع المؤسسات الصحية المرخصة</p></div>
     </div>
-    ${renderUnifiedFilterBar({ onSearch: 'updateSearch', onToggleAll: 'toggleAll', isAllVisible: showAllStages })}
+    ${renderUnifiedFilterBar({
+      onSearch: 'updateSearch',
+      onToggleAll: 'toggleAll',
+      isAllVisible: showAllStages,
+      includeRequestTypeFilter: true,
+      requestTypeOptions: requestTypeOptions
+    })}
     <div class="filters" style="display:none">
       <div class="fgrid">
         <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc" placeholder="WI-YYYY-XXXXXX"></div>
@@ -72,6 +96,7 @@ function render() {
                 <th>نوع الطلب</th>
                 <th>الحالة</th>
                 <th>تاريخ التقديم</th>
+                <th>الأيام المتبقية</th>
                 <th></th>
               </tr>
             </thead>
@@ -84,6 +109,7 @@ function render() {
                 <td>${r.requestType || r.type || '—'}</td>
                 <td>${statusBadge(r.status)}</td>
                 <td style="font-size:12px">${r.submitDate}</td>
+                <td>${renderRemainingDaysBadge(r)}</td>
                 <td>
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='referrals-details.html?id=${r.id}'" title="عرض التفاصيل">${ICONS.eye}</button>
@@ -100,7 +126,15 @@ function render() {
     const inp = document.getElementById('global-search-input');
     if (inp) { inp.value = searchQuery; inp.focus(); inp.setSelectionRange(searchQuery.length, searchQuery.length); }
   }
+  // Restore request type filter selection
+  if (requestTypeFilter && requestTypeFilter !== 'all') {
+    const select = document.getElementById('request-type-filter');
+    if (select) select.value = requestTypeFilter;
+  }
 }
 function updateSearch(val) { searchQuery = val; render(); }
 function toggleAll() { showAllStages = !showAllStages; render(); }
+
+// Make the filter handler available globally
+window.handleRequestTypeFilterChange = handleRequestTypeFilterChange;
 </script></body></html>

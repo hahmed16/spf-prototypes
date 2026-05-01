@@ -24,7 +24,7 @@ initLayout({ role: 'od-committee', activePage: 'requests-list' });
 setBreadcrumb([{ label: 'طلبات الأمراض المهنية الواردة' }]);
 
 document.addEventListener('DOMContentLoaded', () => {
-  const odRequests = WI_DATA.allowances.filter(r => r.type === 'مرض مهني');
+  const odRequests = getFilteredData({ role: 'od-committee', data: WI_DATA.allowances, showAll: false });
 
   getContent().innerHTML = `
     <div class="pg-head">
@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <th>نوع المرض</th>
                 <th>الحالة</th>
                 <th>تاريخ التقديم</th>
+                <th>الأيام المتبقية</th>
                 <th>رأي اللجنة</th>
                 <th></th>
               </tr>
@@ -95,13 +96,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${r.subtype || r.type}</td>
                 <td>${statusBadge(r.status)}</td>
                 <td>${formatDate(r.submitDate)}</td>
+                <td>${renderRemainingDaysBadge(r)}</td>
                 <td id="opinion-${r.id}">
                   ${r.committeeOpinion
                     ? `<span class="badge ${r.committeeOpinion === 'موافقة' ? 'b-approved' : r.committeeOpinion === 'رفض' ? 'b-rejected' : 'b-phead'}">${r.committeeOpinion}</span>`
                     : '<span style="color:var(--text3);font-size:11px">لم يُبدَ رأي</span>'}
                 </td>
                 <td>
-                  <button class="btn btn-primary btn-xs" onclick="openOpinionModal('${r.id}', '${r.insured.name}')">إبداء الرأي</button>
+                  <div style="display:flex;gap:6px">
+                    <button class="ibtn" onclick="window.location.href='request-details.html?id=${r.id}'" title="عرض التفاصيل">${ICONS.eye}</button>
+                    <button class="btn btn-primary btn-xs" onclick="openOpinionModal('${r.id}', '${r.insured.name}')">إبداء الرأي</button>
+                  </div>
                 </td>
               </tr>`).join('')}
             </tbody>
@@ -151,7 +156,7 @@ function openOpinionModal(reqId, insuredName) {
         ${renderModernUploadComponent({ idPrefix: 'committee-att', subTitle: 'تقارير فنية، دراسات بيئية...' })}
       </div>`,
     footer: `<button class="btn btn-primary" onclick="submitOpinion('${reqId}')">إرسال الرأي</button>
-             <button class="btn btn-secondary" onclick="document.querySelector('.modal-overlay').remove()">إلغاء</button>`
+             <button class="btn btn-secondary" onclick="closeModal()">إلغاء</button>`
   });
 }
 

@@ -23,18 +23,19 @@
 initLayout({ role: 'sickleave-head', activePage: 'reassignment' });
 setBreadcrumb([{ label: 'إعادة تخصيص الطلبات' }]);
 
-const employees = [
-  { id: 'SLE-001', name: 'حمد بن سعيد الشريقي', load: 5, available: true },
-  { id: 'SLE-002', name: 'زينب بنت أحمد العامري', load: 3, available: true },
-  { id: 'SLE-003', name: 'يوسف بن ناصر اللواتي', load: 8, available: false },
-  { id: 'SLE-004', name: 'منى بنت سالم الغافري', load: 2, available: true },
-];
+const employees = getAvailabilityAwareRoster([
+  { id: 'SLE-001', roleKey: 'sickleave_employee', load: 5 },
+  { id: 'SLE-002', name: 'زينب بنت أحمد العامري', load: 3 },
+  { id: 'SLE-003', name: 'يوسف بن ناصر اللواتي', load: 8, available: false, availabilityNote: 'خارج المكتب' },
+  { id: 'SLE-004', name: 'منى بنت سالم الغافري', load: 2 },
+]);
 
 const pendingRequests = WI_DATA.allowances.filter(r =>
   r.status.includes('الإجازات المرضية') || r.status.includes('بانتظار')
 );
 
 document.addEventListener('DOMContentLoaded', () => {
+  const unavailableCount = employees.filter(emp => !emp.available).length;
   getContent().innerHTML = `
     <div class="pg-head">
       <div>
@@ -47,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ${ICONS.info}
       <span>يمكنك من هذه الشاشة إعادة تعيين الطلبات المعلقة إلى موظفين آخرين أو تغيير الموظف المسؤول عن طلب محدد.</span>
     </div>
+    ${unavailableCount ? `<div class="alert alert-w">${ICONS.warning}<span>يوجد ${unavailableCount} موظف/موظفين بحالة "غير متاح"، ولن يظهروا ضمن خيارات إعادة التخصيص حتى يتم تحديث حالة التوفر.</span></div>` : ''}
 
     <!-- أحمال العمل الحالية -->
     ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
@@ -61,10 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
               <div style="font-weight:700;font-size:13px">${emp.name}</div>
               <span class="badge ${emp.available ? 'b-approved' : 'b-returned'}">${emp.available ? 'متاح' : 'غير متاح'}</span>
             </div>
-            <div style="font-size:12px;color:var(--text3)">${emp.id}</div>
+            <div style="font-size:12px;color:var(--text3)">${emp.employeeId}</div>
             <div style="margin-top:8px;font-size:13px">
               الطلبات النشطة: <strong style="color:${emp.load > 6 ? 'var(--danger)' : emp.load > 4 ? 'var(--warning)' : 'var(--success)'}">${emp.load}</strong>
             </div>
+            ${emp.availabilityNote ? `<div style="margin-top:6px;font-size:12px;color:var(--text2)">${emp.availabilityNote}</div>` : ''}
             <div style="margin-top:6px;background:var(--border);border-radius:4px;height:6px;overflow:hidden">
               <div style="height:100%;background:${emp.load > 6 ? 'var(--danger)' : emp.load > 4 ? 'var(--warning)' : 'var(--success)'};width:${Math.min(100, emp.load * 12)}%;border-radius:4px"></div>
             </div>

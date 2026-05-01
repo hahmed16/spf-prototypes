@@ -23,12 +23,12 @@
 initLayout({ role: 'od-head', activePage: 'reassignment' });
 setBreadcrumb([{ label: 'إعادة تخصيص الطلبات' }]);
 
-const investigators = [
-  { id: 'ODI-001', name: 'سالم بن حمد السعدي', load: 3, available: true },
-  { id: 'ODI-002', name: 'مريم بنت علي الظاهري', load: 5, available: true },
-  { id: 'ODI-003', name: 'عبدالله بن ناصر البوسعيدي', load: 7, available: false },
-  { id: 'ODI-004', name: 'خديجة بنت سليمان الهاشمي', load: 2, available: true },
-];
+const investigators = getAvailabilityAwareRoster([
+  { id: 'ODI-001', roleKey: 'od_investigator', load: 3 },
+  { id: 'ODI-002', name: 'مريم بنت علي الظاهري', load: 5 },
+  { id: 'ODI-003', name: 'عبدالله بن ناصر البوسعيدي', load: 7, available: false, availabilityNote: 'في إجازة قصيرة' },
+  { id: 'ODI-004', name: 'خديجة بنت سليمان الهاشمي', load: 2 },
+]);
 
 const pendingRequests = WI_DATA.allowances.filter(r =>
   r.type === 'مرض مهني' &&
@@ -36,6 +36,7 @@ const pendingRequests = WI_DATA.allowances.filter(r =>
 );
 
 document.addEventListener('DOMContentLoaded', () => {
+  const unavailableCount = investigators.filter(inv => !inv.available).length;
   getContent().innerHTML = `
     <div class="pg-head">
       <div>
@@ -48,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ${ICONS.info}
       <span>يمكنك من هذه الشاشة إعادة تعيين الطلبات المعلقة إلى موظفين آخرين أو تغيير الموظف المسؤول عن طلب محدد.</span>
     </div>
+    ${unavailableCount ? `<div class="alert alert-w">${ICONS.warning}<span>يوجد ${unavailableCount} موظف/موظفين بحالة "غير متاح"، ولن يظهروا ضمن خيارات إعادة التخصيص حتى يتم تحديث حالة التوفر.</span></div>` : ''}
 
     <!-- أحمال العمل الحالية -->
     ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
@@ -62,10 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
               <div style="font-weight:700;font-size:13px">${inv.name}</div>
               <span class="badge ${inv.available ? 'b-approved' : 'b-returned'}">${inv.available ? 'متاح' : 'غير متاح'}</span>
             </div>
-            <div style="font-size:12px;color:var(--text3)">${inv.id}</div>
+            <div style="font-size:12px;color:var(--text3)">${inv.employeeId}</div>
             <div style="margin-top:8px;font-size:13px">
               الطلبات النشطة: <strong style="color:${inv.load > 5 ? 'var(--danger)' : inv.load > 3 ? 'var(--warning)' : 'var(--success)'}">${inv.load}</strong>
             </div>
+            ${inv.availabilityNote ? `<div style="margin-top:6px;font-size:12px;color:var(--text2)">${inv.availabilityNote}</div>` : ''}
             <div style="margin-top:6px;background:var(--border);border-radius:4px;height:6px;overflow:hidden">
               <div style="height:100%;background:${inv.load > 5 ? 'var(--danger)' : inv.load > 3 ? 'var(--warning)' : 'var(--success)'};width:${Math.min(100, inv.load * 14)}%;border-radius:4px"></div>
             </div>

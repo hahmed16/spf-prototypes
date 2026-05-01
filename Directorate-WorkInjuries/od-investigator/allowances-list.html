@@ -68,12 +68,13 @@
                 <th>جهة العمل</th>
                 <th>الحالة</th>
                 <th>تاريخ التقديم</th>
+                <th>الأيام المتبقية</th>
                 <th>إجراءات</th>
               </tr>
             </thead>
             <tbody>
               ${filtered.length === 0 
-                ? `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text3)">لا توجد نتائج تطابق البحث أو المرحلة الحالية</td></tr>`
+                ? `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text3)">لا توجد نتائج تطابق البحث أو المرحلة الحالية</td></tr>`
                 : filtered.map(r => `
               <tr style="${r.checkedOutBy === me ? 'background:#f0fdf4' : ''}">
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
@@ -82,14 +83,15 @@
                 <td style="font-size:11.5px">${r.employer?.name?.substring(0, 25) || '—'}...</td>
                 <td>${statusBadge(r.status)}</td>
                 <td style="font-size:12px">${r.submitDate}</td>
+                <td>${renderRemainingDaysBadge(r)}</td>
                 <td>
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='allowances-details.html?id=${r.id}'" title="عرض التفاصيل">${ICONS.eye}</button>
                     ${(r.status.includes('بانتظار تعيين') || r.status.includes('قيد التحقيق'))
                       ? !r.checkedOutBy
-                        ? `<button class="ibtn" onclick="doCheckout('${r.id}')" title="Check-out — حجز الطلب للمعالجة">${ICONS.lock}</button>`
+                        ? `<button class="ibtn" onclick="doCheckout('${r.id}')" title="حجز الطلب للمعالجة">${ICONS.lock}</button>`
                         : r.checkedOutBy === me
-                          ? `<button class="ibtn" onclick="doCheckin('${r.id}')" title="Check-in — إلغاء الحجز">${ICONS.unlock}</button>`
+                          ? `<button class="ibtn" onclick="doCheckin('${r.id}')" title="تحرير الطلب — إلغاء الحجز">${ICONS.unlock}</button>`
                           : ''
                       : ''}
                     <button class="ibtn" onclick="openAddNoteModal('${r.id}')" title="إضافة ملاحظة">${ICONS.note}</button>
@@ -126,14 +128,14 @@
     function doCheckout(id) {
       const req = WI_DATA.allowances.find(r => r.id === id);
       if (req) { req.checkedOutBy = me; }
-      showToast(`تم حجز الطلب ${id} — Check-out`, 's');
+      showToast(`تم حجز الطلب ${id} — حجز الطلب`, 's');
       render();
     }
 
     function doCheckin(id) {
       const req = WI_DATA.allowances.find(r => r.id === id);
       if (req) { req.checkedOutBy = null; }
-      showToast(`تم تحرير الطلب ${id} — Check-in`, 'i');
+      showToast(`تم تحرير الطلب ${id} — تحرير الطلب`, 'i');
       render();
     }
   </script>

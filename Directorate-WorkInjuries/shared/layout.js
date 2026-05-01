@@ -93,9 +93,11 @@ function getUserData(role) {
     'supervisory-committee': WI_DATA.users.supervisory_committee,
     'appeals-committee': WI_DATA.users.appeals_committee,
     'hospital-delegate': WI_DATA.users.hospital_delegate,
+    'od-committee': WI_DATA.users.od_committee,
     'institution-rapporteur': WI_DATA.users.institution_rapporteur,
     'appeals-rapporteur': WI_DATA.users.appeals_rapporteur,
     'supervisory-rapporteur': WI_DATA.users.supervisory_rapporteur,
+    'referral-coordinator': WI_DATA.users.referral_coordinator,
     'direct-referral-employee': WI_DATA.users.direct_referral_employee,
   };
   return map[role] || { name: 'مستخدم النظام', civil: '' };
@@ -558,6 +560,24 @@ function resolveCurrentRequestRecord() {
   return picks.find(item => item && typeof item === 'object') || null;
 }
 
+function inferDefaultSlaDays(record) {
+  if (!record || typeof record !== 'object') return 10;
+  if (Number(record.slaDays) > 0) return Number(record.slaDays);
+
+  const status = normalizeDisplay(record.status, '');
+  const requestType = normalizeDisplay(record.requestType || record.type || record.originalRequestType, '');
+
+  if (record.committeeDecision || record.activeLicense || record.institution || status.includes('التراخيص') || status.includes('اللجنة الطبية الإشرافية')) return 20;
+  if (record.referral || WI_DATA.referrals?.includes(record) || requestType.includes('عرض مباشر')) return 7;
+  if (record.appealReason || WI_DATA.appeals?.includes(record) || requestType.includes('تظلم')) return 15;
+  if (record.retirementDate || WI_DATA.disabilityRetirement?.includes(record)) return 5;
+  if (record.card || WI_DATA.disability?.includes(record) || requestType.includes('إعاقة')) return 10;
+  if (record.medical || record.chronicDisease || WI_DATA.chronic?.includes(record) || requestType.includes('مستديمة')) return 10;
+  if (record.sickLeavePeriods?.length || status.includes('الإجازات المرضية')) return 7;
+  if (WI_DATA.allowances?.includes(record) || requestType.includes('إصابة') || requestType.includes('مرض مهني')) return 14;
+  return 10;
+}
+
 function deriveRequestSummaryMeta(record) {
   if (!record || typeof record !== 'object') return null;
 
@@ -569,7 +589,7 @@ function deriveRequestSummaryMeta(record) {
 
   const submitDate = parseDateSafe(submitDateRaw);
   const lastUpdatedAt = parseDateSafe(lastUpdatedAtRaw);
-  const slaDays = Number(record.slaDays) > 0 ? Number(record.slaDays) : 10;
+  const slaDays = inferDefaultSlaDays(record);
 
   let expectedClosureDateRaw = record.expectedClosureDate || record.expectedCloseDate || record.targetClosureDate || record.closureDate || null;
   if (!expectedClosureDateRaw && submitDate) {
@@ -603,6 +623,7 @@ function deriveRequestSummaryMeta(record) {
     lastUpdatedByText: normalizeDisplay(lastUpdatedByRaw, 'غير محدد'),
     expectedClosureDateText: expectedClosureDate ? formatDate(expectedClosureDate) : '—',
     remainingDays,
+    slaDays,
   };
 }
 
@@ -620,6 +641,15 @@ function getRemainingDaysClass(remainingDays) {
   return 'sla-on-track';
 }
 
+function getRemainingDaysMeta(record) {
+  return deriveRequestSummaryMeta(record);
+}
+
+function renderRemainingDaysBadge(record) {
+  const meta = getRemainingDaysMeta(record);
+  return `<span class="sla-days ${getRemainingDaysClass(meta?.remainingDays)}">${getRemainingDaysLabel(meta?.remainingDays)}</span>`;
+}
+
 function createSummaryCell(label, valueHtml, extraClass = '') {
   return `<div class="${extraClass}"><div class="flbl" style="margin-bottom:4px">${label}</div><div style="font-size:12px;color:var(--text2)">${valueHtml}</div></div>`;
 }
@@ -628,8 +658,90 @@ function inferWorkflowStageId(requestType, status, record = {}) {
   const text = normalizeDisplay(status, '').replace(/\s+/g, ' ');
   if (record?.suspended) return 'suspended';
 
+  if (requestType === 'allowances') {
+    if (text.includes('تم رفض')) return 'rejected';
+    if (text.includes('معتمد') || text.includes('اعتماد الطلب')) return 'approved';
+    if (text.includes('إغلاق')) return 'completed';
+    if (text.includes('تظلم')) return 'appealed';
+    if (text.includes('استيفاء')) return 'returned';
+    if (text.includes('رئيس قسم الإجازات المرضية')) return 'sickleave_head_review';
+    if (text.includes('الإجازات المرضية')) return 'sickleave_review';
+    if (text.includes('رئيس قسم التحقيق')) return 'head_review';
+    if (text.includes('قيد التحقيق')) return 'investigation';
+    if (text.includes('بانتظار تعيين المحقق')) return 'submitted';
+    if (text.includes('تم تقديم الطلب')) return 'submitted';
+    return '';
+  }
+
+  if (requestType === 'disability') {
+    if (text.includes('غير متاح') || text.includes('إيقاف الصرف') || text.includes('منتهية') || text.includes('ملغاة')) return 'expired';
+    if (text.includes('إعادة التقييم')) return 'reassessment';
+    if (text.includes('تم رفض')) return 'rejected';
+    if (text.includes('إغلاق')) return 'completed';
+    if (text.includes('تظلم')) return 'appealed';
+    if (text.includes('استيفاء')) return 'returned';
+    if (text.includes('الصرف جار')) return 'active';
+    if (text.includes('تم اعتماد')) return 'approved';
+    if (text.includes('رئيس قسم الإعاقة')) return 'head_review';
+    if (text.includes('قيد مراجعة موظف')) return 'employee_review';
+    if (text.includes('موظف قسم الإعاقة')) return 'submitted';
+    if (text.includes('تم تقديم طلب منفعة الأشخاص ذوي الإعاقة')) return 'submitted';
+    return '';
+  }
+
+  if (requestType === 'chronic') {
+    if (text.includes('تم استلام التشخيص')) return 'incoming';
+    if (text.includes('إعادة التقييم')) return 'reassessment';
+    if (text.includes('تم رفض')) return 'rejected';
+    if (text.includes('إغلاق')) return 'completed';
+    if (text.includes('تظلم')) return 'appealed';
+    if (text.includes('استيفاء')) return 'returned';
+    if (text.includes('الصرف الدوري جار')) return 'active';
+    if (text.includes('تم اعتماد')) return 'approved';
+    if (text.includes('رئيس قسم الإعاقة') || text.includes('رئيس قسم الأمراض المستديمة')) return 'head_review';
+    if (text.includes('قيد مراجعة موظف')) return 'employee_review';
+    if (text.includes('موظف قسم الإعاقة') || text.includes('تم تقديم الطلب')) return 'submitted';
+    return '';
+  }
+
+  if (requestType === 'directReferral') {
+    if (text.includes('موظف طلبات العرض المباشر')) return text.includes('قيد مراجعة') ? 'employee_review' : 'submitted';
+    if (text.includes('منسق الإحالات والتحويلات')) return text.includes('قيد مراجعة') || text.includes('قيد المتابعة') ? 'coordinator_review' : 'coordinator_review';
+    if (text.includes('قسم اللجان الطبية') || text.includes('رئيس قسم اللجان الطبية')) return 'committee_review';
+    if (text.includes('إحالة المقرر')) return 'rapporteur_assignment';
+    if (text.includes('جلسة')) return 'institution_session';
+    if (text.includes('قرار المؤسسة الصحية')) return 'decision_received';
+    if (text.includes('تنفيذ') || text.includes('إغلاق')) return 'completed';
+    if (text.includes('استيفاء')) return 'returned';
+    return 'submitted';
+  }
+
+  if (requestType === 'appeals') {
+    if (text.includes('موظف قسم اللجان الطبية')) return 'employee_review';
+    if (text.includes('رئيس قسم اللجان الطبية')) return 'head_review';
+    if (text.includes('لجنة التظلمات') && text.includes('جلسة')) return 'session_scheduled';
+    if (text.includes('لجنة التظلمات')) return 'committee_review';
+    if (text.includes('القرار النهائي')) return 'decision';
+    if (text.includes('إغلاق التظلم')) return 'completed';
+    return 'submitted';
+  }
+
+  if (requestType === 'licensing') {
+    if (text.includes('موظف قسم التراخيص')) return 'employee_review';
+    if (text.includes('رئيس قسم التراخيص')) return 'head_review';
+    if (text.includes('اللجنة الطبية الإشرافية') && text.includes('جلسة')) return 'session_scheduled';
+    if (text.includes('اللجنة الطبية الإشرافية') && text.includes('قرار')) return 'decision';
+    if (text.includes('اللجنة الطبية الإشرافية')) return 'committee_review';
+    if (text.includes('تنفيذ القرار')) return 'approved';
+    if (text.includes('الترخيص نشط')) return 'active';
+    if (text.includes('انتهت صلاحية الترخيص')) return 'expired';
+    if (text.includes('استيفاء')) return 'returned';
+    if (text.includes('تم رفض')) return 'rejected';
+    return text.includes('تم تقديم طلب الترخيص') ? 'submitted' : '';
+  }
+
   if (requestType === 'disabilityRetirement') {
-    if (text.includes('بانتظار اعتماد رئيس القسم')) return 'head_review';
+    if (text.includes('بانتظار اعتماد رئيس قسم الإعاقة')) return 'head_review';
     if (text.includes('بانتظار مراجعة موظف')) return 'employee_review';
     if (text.includes('مؤهل للتقاعد المبكر')) return 'closed_approved';
     if (text.includes('غير مؤهل')) return 'closed_rejected';

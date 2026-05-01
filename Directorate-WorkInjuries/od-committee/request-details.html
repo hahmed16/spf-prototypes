@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل طلب الأمراض المهنية — لجنة الأمراض المهنية</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<script src="../shared/config.js"></script>
+<script src="../shared/data-users.js"></script>
+<script src="../shared/data-allowances.js"></script>
+<script src="../shared/data-disability.js"></script>
+<script src="../shared/data-chronic.js"></script>
+<script src="../shared/data-appeals.js"></script>
+<script src="../shared/data-licensing.js"></script>
+<script src="../shared/data-sessions.js"></script>
+<script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/utils.js"></script>
+<script>
+initLayout({ role: 'od-committee', activePage: 'requests-list' });
+const params = new URLSearchParams(window.location.search);
+const req = WI_DATA.allowances.find((item) => item.id === params.get('id'));
+const committeeUser = WI_DATA.users.od_committee;
+setBreadcrumb([{ label: 'طلبات الأمراض المهنية الواردة', page: 'requests-list' }, { label: req ? req.id : 'التفاصيل' }]);
+
+document.addEventListener('DOMContentLoaded', renderPage);
+
+function renderPage() {
+  if (!req) {
+    getContent().innerHTML = '<div class="card"><div class="pb"><div class="empty-st">الطلب غير موجود</div></div></div>';
+    return;
+  }
+
+  const hasOpinion = Boolean(req.committeeOpinion);
+  const opinionBadge = hasOpinion
+    ? `<span class="badge ${req.committeeOpinion === 'موافقة' ? 'b-approved' : req.committeeOpinion === 'رفض' ? 'b-rejected' : 'b-phead'}">${req.committeeOpinion}</span>`
+    : '<span class="badge b-comm">بانتظار رأي اللجنة</span>';
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>تفاصيل طلب الأمراض المهنية</h1>
+        <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-secondary" onclick="window.location.href='requests-list.html'">${ICONS.arrow_left} رجوع</button>
+      </div>
+    </div>
+
+    <div class="card" style="border-right:4px solid var(--primary)">
+      <div class="pb-c">
+        <div class="req-summary-grid">
+          <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">نوع الطلب</div><div style="font-size:12px;color:var(--text2)">${req.type} — ${req.subtype || '—'}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">الحالة الحالية</div>${statusBadge(req.status)}</div>
+          <div><div class="flbl" style="margin-bottom:4px">رأي اللجنة</div><div style="font-size:12px">${opinionBadge}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div style="font-size:12px;color:var(--text2)">${formatDate(req.submitDate)}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر تحديث</div><div style="font-size:12px;color:var(--text2)">${req.lastUpdate || '—'}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات المؤمن عليه</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.insured?.name || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.insured?.civil || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم التأمين</label><div class="fro" style="font-family:monospace">${req.insured?.insurance || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${req.insured?.phone || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro">${req.insured?.insuranceStatus || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">جهة العمل</label><div class="fro">${req.employer?.name || '—'}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>البيانات الطبية والمهنية</h3></div>
+      <div class="pb">
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">وصف الحالة</label><div class="fro">${req.injury?.description || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">وصف الحالة المهنية</label><div class="fro">${req.injury?.caseDescription || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">العوامل المسببة</label><div class="fro">${req.injury?.chemicalAgents || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">مدة التعرض</label><div class="fro">${req.injury?.exposureDuration || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ أول اشتباه</label><div class="fro">${formatDate(req.injury?.firstSuspicion)}</div></div>
+          <div class="fgrp"><label class="flbl">بيئة العمل</label><div class="fro">${req.injury?.workEnvironment || '—'}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>إبداء رأي اللجنة</h3></div>
+      <div class="pb">
+        ${hasOpinion ? `<div class="alert alert-s">${ICONS.check}<span>تم تسجيل رأي اللجنة ويمكن تعديله إذا استلزم الأمر قبل إحالة الملف للجهة المختصة.</span></div>` : `<div class="alert alert-i">${ICONS.info}<span>يلزم تسجيل رأي اللجنة الاستشاري لإكمال مسار الطلب.</span></div>`}
+        <div class="fgrp">
+          <label class="flbl">رأي اللجنة الاستشاري <span class="req">*</span></label>
+          <select class="fc" id="committee-opinion">
+            <option value="">— اختر الرأي —</option>
+            <option value="موافقة" ${req.committeeOpinion === 'موافقة' ? 'selected' : ''}>موافقة — الحالة تستوفي معايير المرض المهني</option>
+            <option value="رفض" ${req.committeeOpinion === 'رفض' ? 'selected' : ''}>رفض — لا تستوفي الحالة معايير المرض المهني</option>
+            <option value="طلب تحقيق إضافي" ${req.committeeOpinion === 'طلب تحقيق إضافي' ? 'selected' : ''}>طلب تحقيق إضافي — يلزم استكمال الدراسة</option>
+          </select>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">الملاحظات الفنية <span class="req">*</span></label>
+          <textarea class="fc" id="committee-notes" rows="5" placeholder="اكتب الرأي الفني التفصيلي للجنة...">${req.committeeNotes || ''}</textarea>
+        </div>
+        <div class="dp-acts">
+          <button class="btn btn-primary" onclick="submitOpinion()">${ICONS.check} حفظ وإرسال الرأي</button>
+          <button class="btn btn-secondary" onclick="window.location.href='requests-list.html'">العودة للقائمة</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات</h3></div>
+      <div class="pb">
+        ${(req.attachments || []).length ? req.attachments.map(att => `
+          <div class="att-row">
+            <div class="att-ico file">${ICONS.file}</div>
+            <div class="att-info">
+              <div class="att-name">${att.name}</div>
+              <div class="att-meta">${att.type} · ${att.uploadDate}</div>
+            </div>
+          </div>`).join('') : '<div class="empty-st">لا توجد مرفقات</div>'}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني</h3></div>
+      <div class="pb">${renderTimelineList(req.timeline || [])}</div>
+    </div>`;
+}
+
+function submitOpinion() {
+  const opinion = document.getElementById('committee-opinion')?.value;
+  const notes = document.getElementById('committee-notes')?.value.trim();
+  if (!opinion) { showToast('يرجى اختيار رأي اللجنة', 'w'); return; }
+  if (!notes) { showToast('يرجى كتابة الملاحظات الفنية', 'w'); return; }
+
+  req.committeeOpinion = opinion;
+  req.committeeNotes = notes;
+  req.lastUpdate = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  req.lastUpdatedBy = committeeUser.name;
+  req.timeline = req.timeline || [];
+  req.timeline.push({
+    action: 'إبداء رأي لجنة الأمراض المهنية',
+    actor: committeeUser.name,
+    role: 'لجنة الأمراض المهنية',
+    time: req.lastUpdate,
+    fromStatus: req.status,
+    toStatus: req.status,
+    note: `${opinion} — ${notes}`,
+    type: opinion === 'موافقة' ? 'success' : opinion === 'رفض' ? 'danger' : 'warning',
+    phone: committeeUser.phone,
+  });
+  showToast('تم حفظ رأي اللجنة بنجاح', 's');
+  renderPage();
+}
+</script>
+</body>
+</html>

@@ -99,9 +99,9 @@ function render() {
                     <button class="ibtn" onclick="window.location.href='institution-file.html?id=${r.id}'" title="ملف المؤسسة">${ICONS.file}</button>
                     ${r.status.includes('بانتظار مراجعة موظف')
                       ? !r.checkedOutBy
-                        ? `<button class="ibtn" onclick="doCheckout('${r.id}')" title="Check-out">${ICONS.lock}</button>`
+                        ? `<button class="ibtn" onclick="doCheckout('${r.id}')" title="حجز الطلب">${ICONS.lock}</button>`
                         : r.checkedOutBy===me
-                          ? `<button class="ibtn" onclick="doCheckin('${r.id}')" title="Check-in">${ICONS.unlock}</button>`
+                          ? `<button class="ibtn" onclick="doCheckin('${r.id}')" title="تحرير الطلب">${ICONS.unlock}</button>`
                           : ''
                       : ''}
                     ${!r.suspended?`<button class="ibtn" onclick="doSuspend('${r.id}')" title="تعليق الطلب">${ICONS.pause}</button>`:`<button class="ibtn" onclick="doResume('${r.id}')" title="استئناف الطلب">${ICONS.play}</button>`}

@@ -19,6 +19,7 @@
   <script src="../shared/data-sessions.js"></script>
   <script src="../shared/data-disability-retirement.js"></script>
   <script src="../shared/data.js"></script>
+  <script src="../shared/workflow-stages.js"></script>
   <script src="../shared/layout.js"></script>
   <script src="../shared/utils.js"></script>
   <script>
@@ -26,7 +27,7 @@
     const params = new URLSearchParams(window.location.search);
     const req = (WI_DATA.licensing || []).find(r => r.id === params.get('id')) || (WI_DATA.licensing || [])[0];
     currentRequestId = req.id;
-    const me = WI_DATA.users?.licensing_employee?.name || 'Unknown User';
+    const me = WI_DATA.users?.licensing_employee?.name || 'مستخدم غير معروف';
     const isCheckedOutByMe = req.checkedOutBy === me;
     setBreadcrumb([{ label: 'التراخيص والرقابة', page: 'licensing-list' }, { label: `تفاصيل ${req.id}` }]);
 
@@ -129,7 +130,7 @@
       <div><h1>تفاصيل طلب ${req.requestType === 'جديد' ? 'الترخيص' : 'التجديد'}</h1>
         <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p></div>
       <div class="pg-acts">
-        ${!req.checkedOutBy && (req.status === statusPending || req.status.includes('استيفاء البيانات')) ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out</button>` : isCheckedOutByMe ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in</button>` : ''}
+        ${!req.checkedOutBy && (req.status === statusPending || req.status.includes('استيفاء البيانات')) ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} حجز الطلب</button>` : isCheckedOutByMe ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} تحرير الطلب</button>` : ''}
         <button class="btn btn-secondary" onclick="window.location.href='licensing-list.html'">${ICONS.arrow_left} رجوع</button>
       </div>
     </div>
@@ -149,6 +150,8 @@
         </div>
       </div>
     </div>
+
+    ${renderWorkflowPath(req, 'licensing')}
 
     <!-- بيانات المؤسسة الصحية -->
     <div class="card card-ro">
@@ -267,12 +270,12 @@
     <!-- السجل الزمني -->
     <div class="card">
       <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني الكامل للطلب</h3></div>
-      <div class="pb"><div class="tl">${tlHtml}</div></div>
+      <div class="pb">${renderTimelineList(tl)}</div>
     </div>`;
     });
 
     function doCheckout() {
-      req.checkedOutBy = WI_DATA.users?.licensing_employee?.name || 'Unknown User';
+      req.checkedOutBy = WI_DATA.users?.licensing_employee?.name || 'مستخدم غير معروف';
       if (req.status.includes('بانتظار مراجعة موظف')) {
         req.status = 'قيد المراجعة — قسم التراخيص والرقابة';
       }

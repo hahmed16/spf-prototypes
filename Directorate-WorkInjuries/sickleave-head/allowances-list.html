@@ -42,10 +42,10 @@ function render() {
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم الطلب</th><th>مقدم الطلب</th><th>المؤمن عليه</th><th>النوع</th><th>الحالة</th><th>الفترات</th><th>تاريخ التقديم</th><th></th></tr></thead>
+            <thead><tr><th>رقم الطلب</th><th>مقدم الطلب</th><th>المؤمن عليه</th><th>النوع</th><th>الحالة</th><th>الفترات</th><th>تاريخ التقديم</th><th>الأيام المتبقية</th><th></th></tr></thead>
             <tbody>
               ${filtered.length === 0
-                ? `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text3)">لا توجد نتائج تطابق البحث أو المرحلة الحالية</td></tr>`
+                ? `<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text3)">لا توجد نتائج تطابق البحث أو المرحلة الحالية</td></tr>`
                 : filtered.map(r=>`
               <tr style="${r.status.includes('بانتظار اعتماد رئيس قسم الإجازات المرضية')?'background:var(--primary-l)':''}">
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
@@ -55,6 +55,7 @@ function render() {
                 <td>${statusBadge(r.status)}</td>
                 <td>${r.sickLeavePeriods?.length ? `<strong>${r.sickLeavePeriods.length}</strong> فترة` : '—'}</td>
                 <td style="font-size:12px">${r.submitDate}</td>
+                <td>${renderRemainingDaysBadge(r)}</td>
                 <td>
                   <div style="display:flex;gap:4px">
                     <button class="ibtn" onclick="window.location.href='allowances-details.html?id=${r.id}'">${ICONS.eye}</button>

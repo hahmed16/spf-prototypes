@@ -323,6 +323,36 @@ const APPEALS_DATA = [
     assignedTo: 'محمد بن راشد الهنائي',
     checkedOutBy: 'محمد بن راشد الهنائي',
   },
+  {
+    id: 'APP-2025-000069',
+    originalRequestId: 'REF-2025-000124',
+    originalRequestType: 'عرض مباشر',
+    status: 'تم جدولة جلسة لجنة التظلمات',
+    submitDate: '2025-01-27',
+    lastUpdate: '2025-01-29 10:40',
+    lastUpdatedBy: 'سعاد بنت أحمد الريامية',
+    expectedClosureDate: '2025-02-20',
+    remainingDays: 12,
+    applicant: { name: 'خالد بن سعيد البلوشي', civil: '9087654321', role: 'الشخص المفوض من جهة العمل', phone: '96891234567', email: 'khalid.b@company.com' },
+    insured: { name: 'حمد بن سلطان العزري', civil: '9049911223', insurance: 'INS-998812', dob: '1988-04-09', gender: 'ذكر', nationality: 'عُماني', insuranceStatus: 'نشط', regDate: '2020-02-11', subType: 'إلزامي' },
+    employer: { name: 'مجموعة النور للإنشاءات', cr: '1234567', establishment: 'EST-2023', jobTitle: 'مشرف موقع', joinDate: '2020-02-11', location: 'صحار', sector: 'الإنشاءات والمقاولات', employerType: 'خاص', branch: null },
+    decision: { type: 'موافقة', date: '2025-01-26', issuer: 'اللجان الطبية', details: 'قرار اللجنة الطبية بشأن طلب العرض المباشر المرتبط بالحالة المهنية.', knowledgeDate: '2025-01-27' },
+    appealReason: 'الاعتراض على القرار الطبي النهائي الصادر في طلب العرض المباشر',
+    appealDetails: 'ترى جهة العمل أن القرار يحتاج إعادة نظر لوجود تقارير إضافية لم تُعرض ضمن الجلسة الأصلية.',
+    additionalNotes: 'تم إنشاء التظلم من سياق قرار اللجنة الطبية.',
+    session: { id: 'APP-SES-2025-004', institution: 'لجنة التظلمات', date: '2025-02-05', time: '11:00', quorum: true, members: ['د. خالد الهاشمي', 'ليلى الفارسية'] },
+    finalDecision: null,
+    attachments: [
+      { id: 'aatt69-1', type: 'تقرير داعم', name: 'تقرير_طبي_إضافي.pdf', uploadDate: '2025-01-27', uploadedBy: 'خالد بن سعيد البلوشي', role: 'الشخص المفوض من جهة العمل', size: '0.9 MB', icon: 'pdf' },
+    ],
+    notes: [],
+    timeline: [
+      { action: 'تم تقديم التظلم', actor: 'خالد بن سعيد البلوشي', role: 'الشخص المفوض من جهة العمل', time: '2025-01-27 09:15', fromStatus: '', toStatus: 'تم تقديم طلب التظلم — بانتظار مراجعة موظف قسم اللجان الطبية', note: 'تم إنشاء التظلم على قرار مرتبط بطلب عرض مباشر', type: 'default' },
+      { action: 'جدولة جلسة لجنة التظلمات', actor: 'سعاد بنت أحمد الريامية', role: 'موظف قسم اللجان الطبية', time: '2025-01-29 10:40', fromStatus: 'تم تقديم طلب التظلم — بانتظار مراجعة موظف قسم اللجان الطبية', toStatus: 'تم جدولة جلسة لجنة التظلمات', note: 'ربط التظلم بسجل القرار الطبي السابق لعرضه على لجنة التظلمات', type: 'info', phone: '96895559999' },
+    ],
+    assignedTo: 'سعاد بنت أحمد الريامية',
+    checkedOutBy: '',
+  },
 ];
 
 /* ================================================================

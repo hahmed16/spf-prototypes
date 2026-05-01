@@ -17,6 +17,7 @@
 <script src="../shared/data-sessions.js"></script>
 <script src="../shared/data-disability-retirement.js"></script>
 <script src="../shared/data.js"></script>
+<script src="../shared/workflow-stages.js"></script>
 <script src="../shared/layout.js"></script>
 <script src="../shared/utils.js"></script>
 <script>
@@ -137,6 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
+    ${renderWorkflowPath(req, 'licensing')}
+
     <!-- بيانات المؤسسة الصحية -->
     <div class="card card-ro">
       <div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات المؤسسة الصحية</h3></div>
@@ -244,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- السجل الزمني -->
     <div class="card">
       <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني الكامل للطلب</h3></div>
-      <div class="pb"><div class="tl">${tlHtml}</div></div>
+      <div class="pb">${renderTimelineList(tl)}</div>
     </div>`;
 });
 
@@ -256,7 +259,5 @@ function delegate_delete(){
 </script>
 </body>
 </html>
-
-
 
 

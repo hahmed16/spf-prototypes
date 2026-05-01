@@ -68,9 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <div class="pg-acts">
         ${!req.checkedOutBy
-          ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out</button>`
+          ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} حجز الطلب</button>`
           : isCheckedOutByMe
-            ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in</button>`
+            ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} تحرير الطلب</button>`
             : `<span style="font-size:12px;color:var(--warning);padding:8px 14px;border:1px solid var(--warning-l);border-radius:var(--rsm);background:var(--warning-l)">${ICONS.lock} محجوز: ${req.checkedOutBy}</span>`}
         <button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.arrow_left} رجوع</button>
       </div>
@@ -384,15 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- السجل الزمني -->
     <div class="card">
       <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني الكامل للطلب</h3></div>
-      <div class="pb">
-        <div class="tl">
-          ${tl.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد أحداث</div>' : tl.map(e => {
-            const dc = e.type === 'success' ? 's' : e.type === 'danger' ? 'd' : e.type === 'warning' ? 'w' : '';
-            const ic = e.type === 'success' ? ICONS.check : e.type === 'danger' ? ICONS.x : e.type === 'warning' ? ICONS.warn : ICONS.clock;
-            return `<div class="tl-item"><div class="tl-dot ${dc}">${ic}</div><div class="tl-c"><div class="tl-hd"><span class="tl-act">${e.action}</span><span class="tl-time">${e.time}</span></div><div class="tl-meta"><span>${e.actor}</span><span style="color:var(--text3)">·</span><span>${e.role}</span></div>${e.toStatus ? `<div class="tl-states">${e.fromStatus ? `<span class="badge b-draft" style="font-size:10px">${e.fromStatus}</span><span>${ICONS.arrow_right}</span>` : ''}<span class="badge ${WI_CONFIG.statusBadges[e.toStatus] || 'b-draft'}" style="font-size:10px">${e.toStatus}</span></div>` : ''}${e.note ? `<div class="tl-note">${e.note}</div>` : ''}</div></div>`;
-          }).join('')}
-        </div>
-      </div>
+      <div class="pb">${renderTimelineList(tl)}</div>
     </div>`;
 });
 
@@ -409,9 +401,9 @@ function renderDirectReferralCommitteeEmployee() {
       </div>
       <div class="pg-acts">
         ${!req.checkedOutBy
-          ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} Check-out</button>`
+          ? `<button class="btn btn-primary" onclick="doCheckout()">${ICONS.lock} حجز الطلب</button>`
           : isCheckedOutByMe
-            ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} Check-in</button>`
+            ? `<button class="btn btn-secondary" onclick="doCheckin()">${ICONS.unlock} تحرير الطلب</button>`
             : `<span style="font-size:12px;color:var(--warning);padding:8px 14px;border:1px solid var(--warning-l);border-radius:var(--rsm);background:var(--warning-l)">${ICONS.lock} محجوز: ${req.checkedOutBy}</span>`}
         <button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.arrow_left} رجوع</button>
       </div>
