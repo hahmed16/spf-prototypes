@@ -26,8 +26,18 @@ setBreadcrumb([{ label: 'اللجان الطبية' }, { label: 'قرارات ا
 
 let activeTab = 'all';
 let searchQuery = '';
+let requestTypeFilter = 'all';
+let decisionTypeFilter = 'all';
+let dateFromFilter = '';
+let dateToFilter = '';
 
-document.addEventListener('DOMContentLoaded', render);
+document.addEventListener('DOMContentLoaded', () => {
+  if (!enforceRoleAccess(['committees-employee', 'committees-head'], {
+    title: 'صلاحية غير متاحة',
+    message: 'شاشة قرارات اللجان الطبية مخصصة لموظف قسم اللجان الطبية ورئيس القسم فقط.'
+  })) return;
+  render();
+});
 
 function render() {
   const decisions = getCommitteeDecisionsData();
@@ -37,6 +47,32 @@ function render() {
       <div><h1>قرارات اللجان الطبية</h1><p>${decisions.length} قرار مرتبط باللجان</p></div>
     </div>
     ${renderUnifiedFilterBar({ onSearch: 'updateSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
+    <div class="card">
+      <div class="pb">
+        <div class="fg fg-4">
+          <div class="fgrp"><label class="flbl">نوع الطلب</label>
+            <select class="fc" onchange="setRequestTypeFilter(this.value)">
+              <option value="all">الكل</option>
+              <option value="ترخيص" ${requestTypeFilter === 'ترخيص' ? 'selected' : ''}>ترخيص</option>
+              <option value="عرض مباشر" ${requestTypeFilter === 'عرض مباشر' ? 'selected' : ''}>عرض مباشر</option>
+              <option value="إصابة عمل" ${requestTypeFilter === 'إصابة عمل' ? 'selected' : ''}>إصابة عمل</option>
+              <option value="مرض مهني" ${requestTypeFilter === 'مرض مهني' ? 'selected' : ''}>مرض مهني</option>
+              <option value="أمراض مستديمة" ${requestTypeFilter === 'أمراض مستديمة' ? 'selected' : ''}>أمراض مستديمة</option>
+            </select>
+          </div>
+          <div class="fgrp"><label class="flbl">نوع القرار</label>
+            <select class="fc" onchange="setDecisionTypeFilter(this.value)">
+              <option value="all">الكل</option>
+              <option value="موافقة" ${decisionTypeFilter === 'موافقة' ? 'selected' : ''}>موافقة</option>
+              <option value="رفض" ${decisionTypeFilter === 'رفض' ? 'selected' : ''}>رفض</option>
+              <option value="اعتماد" ${decisionTypeFilter === 'اعتماد' ? 'selected' : ''}>اعتماد</option>
+            </select>
+          </div>
+          <div class="fgrp"><label class="flbl">من تاريخ</label><input type="date" class="fc" value="${dateFromFilter}" onchange="setDateFromFilter(this.value)"></div>
+          <div class="fgrp"><label class="flbl">إلى تاريخ</label><input type="date" class="fc" value="${dateToFilter}" onchange="setDateToFilter(this.value)"></div>
+        </div>
+      </div>
+    </div>
     <div class="card">
       <div class="ttabs">
         ${[
@@ -49,12 +85,13 @@ function render() {
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم القرار</th><th>رقم الطلب</th><th>المستفيد</th><th>نوع القرار</th><th>تاريخ القرار</th><th>الحالة</th><th>التظلمات</th><th></th></tr></thead>
+            <thead><tr><th>رقم القرار</th><th>رقم الطلب</th><th>نوع الطلب</th><th>المستفيد</th><th>نوع القرار</th><th>تاريخ القرار</th><th>الحالة</th><th>التظلمات</th><th></th></tr></thead>
             <tbody>
               ${filtered.length ? filtered.map((d) => `
                 <tr>
                   <td style="font-family:monospace;font-weight:700;color:var(--primary)">${d.decisionId}</td>
                   <td style="font-family:monospace">${d.requestId}</td>
+                  <td>${d.requestType}</td>
                   <td>${d.beneficiaryName}</td>
                   <td><span class="badge ${d.decisionType === 'موافقة' ? 'b-approved' : 'b-rejected'}">${d.decisionType}</span></td>
                   <td>${formatDate(d.decisionDate)}</td>
@@ -74,9 +111,13 @@ function filterDecisions(decisions) {
   if (activeTab === 'pending') rows = rows.filter((item) => item.status === 'قيد التنفيذ');
   if (activeTab === 'executed') rows = rows.filter((item) => item.status === 'منفذة');
   if (activeTab === 'appealed') rows = rows.filter((item) => item.hasAppeal);
+  if (requestTypeFilter !== 'all') rows = rows.filter((item) => (item.requestType || '').includes(requestTypeFilter));
+  if (decisionTypeFilter !== 'all') rows = rows.filter((item) => (item.decisionType || '').includes(decisionTypeFilter));
+  if (dateFromFilter) rows = rows.filter((item) => (item.decisionDate || '') >= dateFromFilter);
+  if (dateToFilter) rows = rows.filter((item) => (item.decisionDate || '') <= dateToFilter);
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
-    rows = rows.filter((item) => `${item.decisionId} ${item.requestId} ${item.beneficiaryName}`.toLowerCase().includes(q));
+    rows = rows.filter((item) => `${item.decisionId} ${item.requestId} ${item.beneficiaryName} ${item.requestType} ${item.committeeType}`.toLowerCase().includes(q));
   }
   return rows;
 }
@@ -104,6 +145,10 @@ function markExecuted(decisionId) {
 
 function setTab(tab) { activeTab = tab; render(); }
 function updateSearch(val) { searchQuery = val; render(); }
+function setRequestTypeFilter(val) { requestTypeFilter = val; render(); }
+function setDecisionTypeFilter(val) { decisionTypeFilter = val; render(); }
+function setDateFromFilter(val) { dateFromFilter = val; render(); }
+function setDateToFilter(val) { dateToFilter = val; render(); }
 </script>
 </body>
 </html>

@@ -5,6 +5,7 @@
 
 let CURRENT_ROLE = null;
 let CURRENT_PAGE = null;
+let CURRENT_AVAILABILITY_STATE = null;
 
 /* ── SVG Icons ── */
 const ICONS = {
@@ -66,6 +67,7 @@ function initLayout({ role, activePage, breadcrumb = [] }) {
     <div id="toast-ct"></div>
   `;
 
+  if (breadcrumb && breadcrumb.length) setBreadcrumb(breadcrumb);
   bindHeaderEvents();
 }
 
@@ -75,6 +77,8 @@ function buildHeader(roleConfig, userData) {
     { text: 'الزيارة ZYR-DWR-2025-0002 تنتظر مراجعة المحضر', time: 'منذ ساعتين', unread: true },
     { text: 'تم قبول التظلم INSP-TZL-2024-0089 وجدولة زيارة إعادة فحص', time: 'أمس', unread: false },
   ];
+  const profileSwitch = roleConfig.type === 'external' ? buildProfileSwitch(roleConfig) : '';
+  const availabilityBadge = roleConfig.type === 'internal' ? buildAvailabilityBadge(roleConfig) : '';
   const notifCount = notifications.filter(n => n.unread).length;
   return `
   <div id="app-header">
@@ -91,6 +95,8 @@ function buildHeader(roleConfig, userData) {
       <span class="bc-item bc-cur" id="bc-current">لوحة البيانات</span>
     </div>
     <div class="h-acts">
+      ${profileSwitch}
+      ${availabilityBadge}
       <button class="hbtn" onclick="showNotifications(event)">
         ${ICONS.bell}
         ${notifCount > 0 ? `<span class="nbadge">${notifCount}</span>` : ''}
@@ -120,6 +126,58 @@ function buildHeader(roleConfig, userData) {
   </div>`;
 }
 
+function getAvailabilitySampleState(role) {
+  const states = {
+    'fund-staff': { status: 'متاح', reason: 'استقبال ومتابعة داخلية' },
+    'monitoring-employee': { status: 'متاح', reason: 'متواجد على النظام' },
+    'monitoring-head': { status: 'في اجتماع', reason: 'اجتماع متابعة الأداء' },
+    'field-inspector': { status: 'في مهمة', reason: 'زيارة مفاجئة قيد التنفيذ' },
+    'field-head': { status: 'متاح', reason: 'متابعة محاضر اليوم' },
+    'inspection-director': { status: 'متاح', reason: 'متاحة للاعتماد والتصعيد' },
+    'ops-analyst': { status: 'غير متاح', reason: 'إعداد تحليل مخاطر' }
+  };
+  return states[role] || { status: 'متاح', reason: 'متواجد على النظام' };
+}
+
+function availabilityStatusClass(status) {
+  return status === 'متاح' ? 'b-approved'
+    : status === 'غير متاح' ? 'b-away'
+    : status === 'في مهمة' ? 'b-break'
+    : status === 'في اجتماع' ? 'b-meeting'
+    : 'b-draft';
+}
+
+function buildAvailabilityBadge(roleConfig) {
+  CURRENT_AVAILABILITY_STATE = getAvailabilitySampleState(CURRENT_ROLE);
+  return `<button class="h-availability-badge" onclick="openAvailabilitySwitcher()" title="${CURRENT_AVAILABILITY_STATE.reason}">
+    <span>حالتي</span>
+    <span id="header-availability-status" class="badge ${availabilityStatusClass(CURRENT_AVAILABILITY_STATE.status)}">${CURRENT_AVAILABILITY_STATE.status}</span>
+  </button>`;
+}
+
+function buildProfileSwitch(roleConfig) {
+  const optionsByRole = {
+    'insured': [
+      { value: 'insured-self', label: 'مؤمن عليه' },
+      { value: 'delegated-employer-1', label: 'مفوض عن شركة النور للتجارة' },
+      { value: 'delegated-employer-2', label: 'مفوض عن مؤسسة البناء المتكاملة' },
+    ],
+    'employer': [
+      { value: 'employer-primary', label: 'جهة العمل الحالية' },
+      { value: 'delegated-employer-2', label: 'مفوض عن مؤسسة البناء المتكاملة' },
+      { value: 'insured-self', label: 'مؤمن عليه' },
+    ]
+  };
+  const options = optionsByRole[CURRENT_ROLE] || [];
+  if (!options.length) return '';
+  return `<div class="h-profile-switch" title="نموذج استرشادي فقط — لا يغير الصلاحيات فعلياً">
+    <label for="sample-profile-switch">الصفة الفعالة</label>
+    <select id="sample-profile-switch" onchange="handleProfileSwitchSample(this)">
+      ${options.map((opt, idx) => `<option value="${opt.value}" ${idx === 0 ? 'selected' : ''}>${opt.label}</option>`).join('')}
+    </select>
+  </div>`;
+}
+
 function buildSidebar(roleConfig, activePage) {
   let html = `<div id="app-sb">
     <div class="sb-rb">
@@ -129,7 +187,7 @@ function buildSidebar(roleConfig, activePage) {
     <div class="sb-nav">`;
 
   for (const item of roleConfig.sidebar) {
-    const isActive = item.page === activePage;
+    const isActive = _pageKey(item.page) === _pageKey(activePage);
     const icon = ICONS[item.icon] || ICONS.list;
     html += `
       <div class="nav-i ${isActive ? 'act' : ''}" onclick="navigateTo('${item.page}')">
@@ -149,6 +207,11 @@ function buildSidebar(roleConfig, activePage) {
   return html;
 }
 
+function _pageKey(page) {
+  if (!page) return '';
+  return String(page).replace(/^.*\//, '').replace(/\.html$/, '');
+}
+
 /* ── تحديث الـ Breadcrumb ── */
 function setBreadcrumb(items) {
   const bcEl = document.getElementById('header-breadcrumb');
@@ -159,7 +222,10 @@ function setBreadcrumb(items) {
     if (i === items.length - 1) {
       html += `<span class="bc-item bc-cur">${items[i].label}</span>`;
     } else {
-      html += `<span class="bc-item bc-lnk" onclick="navigateTo('${items[i].page}')">${items[i].label}</span>`;
+      const clickHandler = items[i].onclick
+        ? items[i].onclick
+        : (items[i].page ? `navigateTo('${items[i].page}')` : '');
+      html += `<span class="bc-item bc-lnk" ${clickHandler ? `onclick="${clickHandler}"` : ''}>${items[i].label}</span>`;
     }
   }
   bcEl.innerHTML = html;
@@ -169,7 +235,11 @@ function setBreadcrumb(items) {
 function navigateTo(page, query) {
   const roleConfig = INSP_CONFIG.roles[CURRENT_ROLE];
   if (!roleConfig) return;
-  const qs = query ? '?' + query : '';
+  const params = new URLSearchParams(query || '');
+  if (page.startsWith('../services/')) {
+    params.set('role', CURRENT_ROLE);
+  }
+  const qs = params.toString() ? '?' + params.toString() : '';
   if (page.startsWith('../')) { window.location.href = page + '.html' + qs; return; }
   window.location.href = `../${roleConfig.folder}/${page}.html${qs}`;
 }
@@ -186,6 +256,52 @@ function goHome() {
 
 function switchRole() {
   window.location.href = '../role-selection.html';
+}
+
+function handleProfileSwitchSample(selectEl) {
+  if (!selectEl) return;
+  const label = selectEl.options[selectEl.selectedIndex] ? selectEl.options[selectEl.selectedIndex].text : 'الصفة المختارة';
+  showToast('تم تبديل الصفة الاسترشادية إلى: ' + label + ' — النموذج لا يغير الصلاحيات فعلياً', 'i');
+}
+
+function openAvailabilitySwitcher() {
+  if (!CURRENT_ROLE || !INSP_CONFIG.roles[CURRENT_ROLE] || INSP_CONFIG.roles[CURRENT_ROLE].type !== 'internal') return;
+  const current = CURRENT_AVAILABILITY_STATE || getAvailabilitySampleState(CURRENT_ROLE);
+  const options = ['متاح', 'غير متاح', 'في مهمة', 'في اجتماع'];
+  openModal({
+    title: 'تحديث الحالة الحالية',
+    body: `
+      <div class="alert alert-i" style="margin-bottom:12px">${ICONS.info}<span>تبديل سريع من الهيدر — نموذج استرشادي.</span></div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px">الحالة الحالية: <span class="badge ${availabilityStatusClass(current.status)}">${current.status}</span></div>
+      <div class="availability-switcher-grid">
+        ${options.map(function(option) {
+          return `<button class="availability-switcher-option" onclick="applyAvailabilitySample('${option}')">${option}</button>`;
+        }).join('')}
+      </div>
+      <div class="fgrp" style="margin-top:12px">
+        <label class="flbl">ملاحظة مختصرة</label>
+        <input class="fc" id="availability-quick-reason" value="${current.reason || ''}" placeholder="اختياري">
+      </div>
+    `,
+    footer: `<button class="btn btn-ghost btn-sm" onclick="closeModal()">إغلاق</button>`
+  });
+}
+
+function applyAvailabilitySample(status) {
+  const reasonInput = document.getElementById('availability-quick-reason');
+  const reason = reasonInput && reasonInput.value.trim() ? reasonInput.value.trim() : 'بدون ملاحظة إضافية';
+  CURRENT_AVAILABILITY_STATE = { status: status, reason: reason };
+  const badge = document.getElementById('header-availability-status');
+  const badgeWrap = badge ? badge.closest('.h-availability-badge') : null;
+  if (badge) {
+    badge.className = 'badge ' + availabilityStatusClass(status);
+    badge.textContent = status;
+  }
+  if (badgeWrap) {
+    badgeWrap.title = reason;
+  }
+  closeModal();
+  showToast('تم تحديث الحالة الحالية إلى: ' + status + ' (نموذج استرشادي)', 's');
 }
 
 function bindHeaderEvents() {
@@ -328,6 +444,12 @@ function renderContent(html) {
 /* ── URL Params ── */
 function getParam(key) {
   return new URLSearchParams(window.location.search).get(key);
+}
+
+function resolveContextRole(defaultRole) {
+  const requestedRole = getParam('role');
+  if (requestedRole && INSP_CONFIG.roles[requestedRole]) return requestedRole;
+  return defaultRole;
 }
 
 /* ── Priority Badge ── */

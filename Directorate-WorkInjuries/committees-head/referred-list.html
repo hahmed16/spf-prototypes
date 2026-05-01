@@ -13,62 +13,165 @@
 <script src="../shared/data-licensing.js"></script>
 <script src="../shared/data-sessions.js"></script>
 <script src="../shared/data-disability-retirement.js"></script>
+<script src="../shared/data-referrals.js"></script>
 <script src="../shared/data.js"></script>
 <script src="../shared/layout.js"></script>
 <script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'committees-head', activePage: 'referred-list' });
 setBreadcrumb([{ label: 'التنسيق مع المؤسسات الصحية' }, { label: 'الحالات المحالة للمؤسسات' }]);
-document.addEventListener('DOMContentLoaded', () => {
-  const referred = WI_DATA.allowances.filter(r =>
-    ['تم الموافقة على العرض على المؤسسات الصحية المرخصة — بانتظار إحالة المقرر',
-     'تم الإحالة إلى مقرر المؤسسة الصحية المرخصة — بانتظار جدولة جلسة',
-     'تم جدولة جلسة للعرض على المؤسسة الصحية المرخصة',
-     'تم اتخاذ القرار من المؤسسة الصحية المرخصة — بانتظار التنفيذ'].includes(r.status)
-  );
-  const all = referred.length ? referred : WI_DATA.allowances;
+let activeTab = 'all';
+let searchQuery = '';
+let requestTypeFilter = 'all';
+const requestTypeOptions = [
+  { value: 'إصابة عمل', label: 'إصابة عمل' },
+  { value: 'مرض مهني', label: 'مرض مهني' },
+  { value: 'عرض مباشر', label: 'عرض مباشر' },
+];
+
+document.addEventListener('DOMContentLoaded', render);
+
+function handleRequestTypeFilterChange(value) {
+  requestTypeFilter = value;
+  render();
+}
+
+function setTab(tab) {
+  activeTab = tab;
+  render();
+}
+
+function updateSearch(val) {
+  searchQuery = val;
+  render();
+}
+
+function render() {
+  const cases = getInstitutionReferralCases();
+  const filtered = filterInstitutionReferralCases(cases, {
+    tab: activeTab,
+    query: searchQuery,
+    requestTypeFilter,
+  });
+  const tabCounts = {
+    all: cases.length,
+    'pending-review': cases.filter((item) => item.stageKey === 'pending-review').length,
+    coordination: cases.filter((item) => item.stageKey === 'coordination').length,
+    scheduled: cases.filter((item) => item.stageKey === 'scheduled').length,
+    decision: cases.filter((item) => item.stageKey === 'decision').length,
+  };
+
   getContent().innerHTML = `
-    <div class="pg-head"><div><h1>الحالات المحالة للمؤسسات الصحية المرخصة</h1>
-      <p>متابعة مسار الإحالة حتى صدور القرار</p></div>
-    </div>
-    ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
-    <div class="filters" style="display:none">
-      <div class="fgrid">
-        <div class="fgrp"><label class="flbl">رقم الطلب</label><input type="text" class="fc" placeholder="WI-YYYY-XXXXXX"></div>
-        <div class="fgrp"><label class="flbl">الرقم المدني</label><input type="text" class="fc"></div>
-        <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><input type="text" class="fc"></div>
-        <div class="fgrp"><label class="flbl">من تاريخ</label><input type="date" class="fc"></div>
-        <div class="fgrp"><label class="flbl">إلى تاريخ</label><input type="date" class="fc"></div>
-        <div class="fgrp"><label class="flbl">الحالة</label><select class="fc"><option>جميع الحالات</option></select></div>
+    <div class="pg-head">
+      <div>
+        <h1>الحالات المحالة للمؤسسات الصحية المرخصة</h1>
+        <p>شاشة إشرافية لرئيس القسم لمتابعة الأحمال، التدخل في التأخير، والتأكد من وضوح المسار حتى التنفيذ</p>
       </div>
-      <div class="facts"><button class="btn btn-primary btn-sm">${ICONS.search} بحث</button><button class="btn btn-secondary btn-sm">مسح</button></div>
     </div>
+
+    <div class="stats-grid" style="margin-bottom:18px">
+      <div class="scard p"><div class="sc-lbl">إجمالي الحالات</div><div class="sc-val">${cases.length}</div><div class="sc-sub">جميع الطلبات المحالة للمؤسسات الصحية</div></div>
+      <div class="scard w"><div class="sc-lbl">بانتظار مراجعة القسم</div><div class="sc-val">${tabCounts['pending-review']}</div><div class="sc-sub">تحتاج تدخلاً أو اعتماداً من داخل القسم</div></div>
+      <div class="scard i"><div class="sc-lbl">قيد التنسيق والمتابعة</div><div class="sc-val">${tabCounts.coordination}</div><div class="sc-sub">حالات معلقة على المقرر أو المؤسسة الصحية</div></div>
+      <div class="scard s"><div class="sc-lbl">جلسة / قرار</div><div class="sc-val">${tabCounts.scheduled + tabCounts.decision}</div><div class="sc-sub">حالات تحتاج متابعة تنفيذية بعد الجلسة</div></div>
+    </div>
+
+    ${renderUnifiedFilterBar({
+      onSearch: 'updateSearch',
+      onToggleAll: 'noopUnifiedToggleAll',
+      isAllVisible: false,
+      includeToggle: false,
+      includeRequestTypeFilter: true,
+      requestTypeOptions,
+    })}
+
+    <div class="card" style="margin-bottom:18px">
+      <div class="pb" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div class="fgrp" style="margin:0">
+          <label class="flbl">هدف الشاشة</label>
+          <div class="fro">إعطاء الرئيس صورة واضحة عن مسار الإحالات للمؤسسات الصحية ومراحل التعثر أو التأخير.</div>
+        </div>
+        <div class="fgrp" style="margin:0">
+          <label class="flbl">إجراءات هذا الدور</label>
+          <div class="fro">التوجيه، المتابعة مع المنسق أو المقرر، مراجعة الحالات المتأخرة، والاطلاع على القرار قبل التنفيذ.</div>
+        </div>
+        <div class="fgrp" style="margin:0">
+          <label class="flbl">مؤشرات إشرافية</label>
+          <div class="fro">الحالات المتأخرة، الحالات المجدولة، والطلبات التي صدر بشأنها قرار وتنتظر ربط التنفيذ.</div>
+        </div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="ttabs">
-        <div class="ttab act">جميع الحالات <span class="tc">${all.length}</span></div>
-        <div class="ttab">بانتظار الجدولة <span class="tc">2</span></div>
-        <div class="ttab">جلسة مجدولة <span class="tc">1</span></div>
-        <div class="ttab">صدر قرار <span class="tc">1</span></div>
+        ${[
+          { key: 'all', label: 'جميع الحالات', count: tabCounts.all },
+          { key: 'pending-review', label: 'بانتظار المراجعة', count: tabCounts['pending-review'] },
+          { key: 'coordination', label: 'قيد التنسيق', count: tabCounts.coordination },
+          { key: 'scheduled', label: 'جلسة مجدولة', count: tabCounts.scheduled },
+          { key: 'decision', label: 'صدر قرار', count: tabCounts.decision },
+        ].map((tab) => `<div class="ttab ${activeTab === tab.key ? 'act' : ''}" onclick="setTab('${tab.key}')">${tab.label} <span class="tc">${tab.count}</span></div>`).join('')}
       </div>
       <div class="pb-0">
         <div class="tbl-wrap">
           <table class="dtbl">
-            <thead><tr><th>رقم الطلب</th><th>المؤمن عليه</th><th>المؤسسة الصحية</th><th>الحالة</th><th>تاريخ الإحالة</th><th>الأيام المتبقية</th><th></th></tr></thead>
-            <tbody>
-              ${all.map(r=>`
+            <thead>
               <tr>
-                <td style="font-family:monospace;font-weight:700;color:var(--primary)">${r.id}</td>
-                <td>${r.insured.name}</td>
-                <td>${r.referral?.institution || 'مستشفى النور التخصصي'}</td>
-                <td>${statusBadge(r.status)}</td>
-                <td style="font-size:12px">${r.lastUpdate}</td>
-                <td>${renderRemainingDaysBadge(r)}</td>
-                <td><button class="ibtn" onclick="window.location.href='referrals-details.html?id=${r.id}'">${ICONS.eye}</button></td>
-              </tr>`).join('')}
+                <th>رقم الطلب</th>
+                <th>نوع الطلب</th>
+                <th>المستفيد</th>
+                <th>المؤسسة الصحية</th>
+                <th>مرحلة الإحالة</th>
+                <th>المسؤول الحالي</th>
+                <th>الإجراء المتوقع</th>
+                <th>تاريخ الإحالة / الجلسة</th>
+                <th>الأيام المتبقية</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.length ? filtered.map((item) => `
+                <tr>
+                  <td style="font-family:monospace;font-weight:700;color:var(--primary)">${item.id}</td>
+                  <td>
+                    <div style="font-size:12.5px;font-weight:700">${item.requestType}</div>
+                    <div style="font-size:11px;color:var(--text3)">${item.sourceFlow}</div>
+                  </td>
+                  <td>${item.beneficiaryName}</td>
+                  <td>${item.institutionName}</td>
+                  <td>
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                      <span class="badge b-info">${getInstitutionReferralStageLabel(item.stageKey)}</span>
+                      ${statusBadge(item.status)}
+                    </div>
+                  </td>
+                  <td>${item.currentOwner}</td>
+                  <td style="font-size:12px;min-width:180px">${item.nextStep}</td>
+                  <td style="font-size:12px">
+                    <div>إحالة: ${formatDate(item.referralDate)}</div>
+                    <div style="color:var(--text3)">جلسة: ${item.sessionDate ? formatDate(item.sessionDate) : '—'}</div>
+                  </td>
+                  <td><span class="sla-days ${getRemainingDaysClass(item.remainingDays)}">${getRemainingDaysLabel(item.remainingDays)}</span></td>
+                  <td>
+                    <div style="display:flex;gap:4px">
+                      <button class="ibtn" onclick="window.location.href='referrals-details.html?id=${item.id}'" title="عرض التفاصيل">${ICONS.eye}</button>
+                      <button class="ibtn" onclick="openAddNoteModal('${item.id}')" title="إضافة ملاحظة">${ICONS.note}</button>
+                    </div>
+                  </td>
+                </tr>`).join('') : `
+                <tr><td colspan="10" style="text-align:center;padding:36px;color:var(--text3)">لا توجد حالات ضمن هذا التصنيف حالياً</td></tr>
+              `}
             </tbody>
           </table>
         </div>
       </div>
     </div>`;
-});
+
+  const searchInput = document.getElementById('global-search-input');
+  if (searchInput) searchInput.value = searchQuery;
+  const requestTypeSelect = document.getElementById('request-type-filter');
+  if (requestTypeSelect) requestTypeSelect.value = requestTypeFilter;
+}
+
+window.handleRequestTypeFilterChange = handleRequestTypeFilterChange;
 </script></body></html>

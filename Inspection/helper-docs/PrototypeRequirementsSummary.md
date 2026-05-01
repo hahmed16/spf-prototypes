@@ -366,6 +366,16 @@ Inspection/
 - Error handling
 - Continuous monitoring
 
+## Meeting Addendum
+
+Based on the inspection meeting held on **April 27, 2026**, the following additional BRD items should be captured as current-phase prototype concepts:
+
+- `Switch profile / delegation model` as a sample UX pattern for external users with multiple personas.
+- `Staff availability screen` to allow employees to set their current status and allow section heads and the director to monitor current team availability.
+
+Reference:
+- [15_متطلبات_إضافية_من_اجتماع_27042026.md](15_متطلبات_إضافية_من_اجتماع_27042026.md)
+
 ## Conclusion
 
 The Inspection Department prototype requires a comprehensive system with 106 screens across 9 user roles. While 60-70% of the functionality is already implemented in v1, significant work remains to complete the missing modules, business rules, and supporting systems. The implementation should follow the phased approach outlined in the roadmap to ensure successful delivery of all required functionality.

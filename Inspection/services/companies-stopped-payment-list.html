@@ -13,15 +13,16 @@
   <script src="../shared/components.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const role = resolveContextRole('monitoring-employee');
       initLayout({
-        role: 'monitoring-employee',
+        role: role,
         activePage: 'companies-stopped-payment-list',
         breadcrumb: [
           { label: 'الرئيسية', onclick: 'goHome()' },
           { label: 'المنشآت المتوقفة عن السداد' }
         ]
       });
-      renderContent(renderCompaniesStoppedPaymentList());
+      renderContent(renderCompaniesStoppedPaymentList(role));
     });
   </script>
 </body>

@@ -13,15 +13,16 @@
   <script src="../shared/components.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const role = resolveContextRole('monitoring-employee');
       initLayout({
-        role: 'monitoring-employee',
+        role: role,
         activePage: 'job-security-requests-list',
         breadcrumb: [
           { label: 'الرئيسية', onclick: 'goHome()' },
           { label: 'طلبات الأمان الوظيفي' }
         ]
       });
-      renderContent(renderJobSecurityRequestsList('monitoring-employee'));
+      renderContent(renderJobSecurityRequestsList(role));
     });
   </script>
 </body>

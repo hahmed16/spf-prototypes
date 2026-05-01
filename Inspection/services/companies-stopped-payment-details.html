@@ -13,8 +13,9 @@
   <script src="../shared/components.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const role = resolveContextRole('monitoring-employee');
       initLayout({
-        role: 'monitoring-employee',
+        role: role,
         activePage: 'companies-stopped-payment-details',
         breadcrumb: [
           { label: 'الرئيسية', onclick: 'goHome()' },
@@ -22,7 +23,7 @@
           { label: 'تفاصيل المنشأة' }
         ]
       });
-      renderContent(renderNonPaymentCompanyDetails('monitoring-employee'));
+      renderContent(renderNonPaymentCompanyDetails(role));
     });
   </script>
 </body>

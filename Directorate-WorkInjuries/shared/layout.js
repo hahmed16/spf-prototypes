@@ -73,6 +73,30 @@ function initLayout({ role, activePage, breadcrumb = [] }) {
   initRequestSummaryEnhancer();
 }
 
+function enforceRoleAccess(allowedRoles, options = {}) {
+  const fallbackPage = options.fallbackPage || 'dashboard';
+  const title = options.title || 'غير مصرح';
+  const message = options.message || 'هذه الشاشة غير متاحة لهذا الدور.';
+  if (!Array.isArray(allowedRoles) || allowedRoles.includes(CURRENT_ROLE)) return true;
+  const content = document.getElementById('app-content');
+  if (content) {
+    content.innerHTML = `
+      <div class="card">
+        <div class="pb">
+          <div class="empty-st">
+            ${ICONS.lock}
+            <h4>${title}</h4>
+            <p>${message}</p>
+            <div style="margin-top:14px">
+              <button class="btn btn-secondary btn-sm" onclick="navigateTo('${fallbackPage}')">${ICONS.arrow_right}الرجوع</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+  return false;
+}
+
 function getUserData(role) {
   const map = {
     'worker': WI_DATA.users.worker,
@@ -111,9 +135,19 @@ function getCurrentUserPhone() {
   return getCurrentUserData()?.phone || '';
 }
 
-function getPhoneForActor(actorName) {
-  if (!window.WI_DATA?.users || !actorName) return '';
-  return Object.values(WI_DATA.users).find((user) => user?.name === actorName)?.phone || '';
+function getPhoneForActor(actorName, roleName = '') {
+  if (!window.WI_DATA?.users) return '';
+  const users = Object.values(WI_DATA.users);
+  if (actorName) {
+    const byName = users.find((user) => user?.name === actorName);
+    if (byName?.phone) return byName.phone;
+  }
+  if (roleName) {
+    const normalizedRole = String(roleName).trim();
+    const byRoleLabel = users.find((user) => user?.role === normalizedRole || user?.roleAr === normalizedRole);
+    if (byRoleLabel?.phone) return byRoleLabel.phone;
+  }
+  return '';
 }
 
 function buildHeader(roleConfig, userData) {
@@ -789,7 +823,7 @@ function renderTimelineList(timeline) {
   return `
     <div class="timeline">
       ${safeTimeline.map((event) => {
-        const eventPhone = event.phone || getPhoneForActor(event.actor);
+        const eventPhone = event.phone || getPhoneForActor(event.actor, event.role);
         return `
           <div class="tl-item ${event.type || 'default'}">
             <div class="tl-dot"></div>

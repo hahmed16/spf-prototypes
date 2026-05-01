@@ -389,7 +389,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function renderDirectReferralCommitteeEmployee() {
-  const canAct = (req.status === 'تم اعتماد طلب العرض المباشر — بانتظار مراجعة موظف قسم اللجان الطبية' || req.status === 'قيد المراجعة — قسم اللجان الطبية') && isCheckedOutByMe;
+  const actionEligible = req.status === 'تم اعتماد طلب العرض المباشر — بانتظار مراجعة موظف قسم اللجان الطبية' || req.status === 'قيد المراجعة — قسم اللجان الطبية';
+  const canAct = actionEligible && isCheckedOutByMe;
   const atts = req.attachments || [];
   const notes = req.notes || [];
   const timeline = req.timeline || [];
@@ -459,13 +460,17 @@ function renderDirectReferralCommitteeEmployee() {
       </div>
     </div>
 
-    ${canAct ? `
+    ${actionEligible ? `
     <div class="dp">
       <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>اتخاذ القرار — موظف قسم اللجان الطبية</h3></div>
       <div class="dp-body">
+        ${canAct ? '' : `
+        <div class="alert alert-i" style="margin-bottom:14px">
+          ${ICONS.info}<span>هذه الحالة قابلة للإجراء، لكن يجب حجز الطلب أولاً حتى تظهر كحالة قيد المراجعة تحت مسؤوليتك.</span>
+        </div>`}
         <div class="fgrp">
           <label class="flbl">المؤسسة الصحية المرخصة المقترحة للعرض <span class="req">*</span></label>
-          <select class="fc" id="institution-sel">
+          <select class="fc" id="institution-sel" ${canAct ? '' : 'disabled'}>
             <option value="">— اختر المؤسسة —</option>
             <option ${req.referral?.preferredInstitution === 'مستشفى النور التخصصي' ? 'selected' : ''}>مستشفى النور التخصصي</option>
             <option ${req.referral?.preferredInstitution === 'مستشفى ابن سينا' ? 'selected' : ''}>مستشفى ابن سينا</option>
@@ -474,12 +479,12 @@ function renderDirectReferralCommitteeEmployee() {
         </div>
         <div class="fgrp">
           <label class="flbl">ملاحظات موظف القسم</label>
-          <textarea class="fc" id="direct-committee-note" rows="3" placeholder="أكتب ملاحظاتك..."></textarea>
+          <textarea class="fc" id="direct-committee-note" rows="3" placeholder="أكتب ملاحظاتك..." ${canAct ? '' : 'disabled'}></textarea>
         </div>
         <div class="dp-acts">
-          <button class="btn btn-primary" onclick="committeesDecision('توجيه')">${ICONS.arrow_left} توجيه لرئيس القسم</button>
-          <button class="btn btn-warning" onclick="committeesDecision('استيفاء')">إعادة للاستيفاء</button>
-          <button class="btn btn-danger" onclick="committeesDecision('رفض')">توصية برفض الإحالة</button>
+          <button class="btn btn-primary" onclick="committeesDecision('توجيه')" ${canAct ? '' : 'disabled'}>${ICONS.arrow_left} توجيه لرئيس القسم</button>
+          <button class="btn btn-warning" onclick="committeesDecision('استيفاء')" ${canAct ? '' : 'disabled'}>إعادة للاستيفاء</button>
+          <button class="btn btn-danger" onclick="committeesDecision('رفض')" ${canAct ? '' : 'disabled'}>توصية برفض الإحالة</button>
         </div>
       </div>
     </div>` : ''}
@@ -505,7 +510,7 @@ function renderDirectReferralCommitteeEmployee() {
     </div>
 
     <div class="card">
-      <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني الكامل للطلب</h3></div>
+      <div class="ph"><h3><div class="pico gy" style="width:30px;height:30px;font-size:14px">${ICONS.clock}</div>السجل الزمني الكامل للطلب</h3></div>
       <div class="pb">${renderTimelineList(timeline)}</div>
     </div>`;
 }

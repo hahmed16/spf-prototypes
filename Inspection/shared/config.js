@@ -28,6 +28,7 @@ const INSP_CONFIG = {
       sidebar: [
         { label: 'قائمة البلاغات', page: 'complaints-list', icon: 'inbox', badge: 'complaints' },
         { label: 'إنشاء بلاغ جديد', page: 'complaint-new', icon: 'plus', badge: null },
+        { label: 'حالة التوفر', page: 'staff-availability', icon: 'user', badge: null },
       ]
     },
 
@@ -80,6 +81,7 @@ const INSP_CONFIG = {
         { label: 'المنشآت المتوقفة عن السداد', page: '../services/companies-stopped-payment-list', icon: 'building', badge: null },
         { label: 'تحليل بيانات العامل', page: 'worker-analysis', icon: 'chart', badge: null },
         { label: 'تحليل بيانات صاحب العمل', page: 'employer-analysis', icon: 'building', badge: null },
+        { label: 'حالة التوفر', page: 'staff-availability', icon: 'user', badge: null },
         { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
@@ -96,15 +98,16 @@ const INSP_CONFIG = {
         { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
         { label: 'قائمة البلاغات', page: 'complaints-list', icon: 'list', badge: 'complaints' },
         { label: 'قائمة التظلمات', page: 'appeals-list', icon: 'list', badge: 'appeals' },
-        { label: 'طلبات منافع دخل الأسرة', page: 'family-benefit-requests-list', icon: 'list', badge: null },
-        { label: 'طلبات الأمان الوظيفي', page: 'job-security-requests-list', icon: 'list', badge: null },
-        { label: 'طلبات إجازة الأمومة', page: 'maternity-leave-requests-list', icon: 'list', badge: null },
-        { label: 'حالات التصفية والإفلاس', page: 'liquidation-bankruptcy-list', icon: 'alert', badge: null },
+        { label: 'طلبات منافع دخل الأسرة', page: '../services/family-benefits-requests-list', icon: 'list', badge: null },
+        { label: 'طلبات الأمان الوظيفي', page: '../services/job-security-requests-list', icon: 'list', badge: null },
+        { label: 'طلبات إجازة الأمومة', page: '../services/maternity-leave-requests-list', icon: 'list', badge: null },
+        { label: 'حالات التصفية والإفلاس', page: '../services/liquidation-bankruptcy-cases-list', icon: 'alert', badge: null },
         { label: 'تحليل بيانات العامل', page: 'worker-analysis', icon: 'chart', badge: null },
         { label: 'تحليل بيانات صاحب العمل', page: 'employer-analysis', icon: 'building', badge: null },
         { label: 'إعادة التخصيص', page: 'reassignment', icon: 'switch', badge: null },
         { label: 'متابعة الأعمال المتأخرة', page: 'overdue-tracking', icon: 'clock', badge: 'overdue' },
         { label: 'مراقبة عبء العمل', page: 'workload-monitoring', icon: 'user', badge: null },
+        { label: 'حالة فريق العمل', page: 'staff-availability', icon: 'user', badge: null },
         { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
@@ -130,6 +133,7 @@ const INSP_CONFIG = {
         { label: 'المنشآت المتوقفة عن السداد', page: '../services/companies-stopped-payment-list', icon: 'building', badge: null },
         { label: 'تحليل بيانات العامل', page: 'worker-analysis', icon: 'chart', badge: null },
         { label: 'تحليل بيانات صاحب العمل', page: 'employer-analysis', icon: 'building', badge: null },
+        { label: 'حالة التوفر', page: 'staff-availability', icon: 'user', badge: null },
         { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
@@ -156,6 +160,7 @@ const INSP_CONFIG = {
         { label: 'مراجعة المحاضر', page: 'records-review', icon: 'pen', badge: 'records' },
         { label: 'متابعة الإجراءات التصحيحية', page: 'corrective-actions', icon: 'check', badge: null },
         { label: 'إعادة توزيع المفتشين', page: 'inspector-redistribution', icon: 'switch', badge: null },
+        { label: 'حالة فريق العمل', page: 'staff-availability', icon: 'user', badge: null },
         { label: 'تحليل بيانات العامل', page: 'worker-analysis', icon: 'chart', badge: null },
         { label: 'تحليل بيانات صاحب العمل', page: 'employer-analysis', icon: 'building', badge: null },
         { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
@@ -183,6 +188,7 @@ const INSP_CONFIG = {
         { label: 'المنشآت المتوقفة عن السداد', page: '../services/companies-stopped-payment-list', icon: 'building', badge: null },
         { label: 'خطط التفتيش الدورية', page: 'inspection-plans-list', icon: 'file', badge: null },
         { label: 'قائمة حالات الحظر', page: 'ban-cases-list', icon: 'lock', badge: null },
+        { label: 'حالة الموظفين', page: 'staff-availability', icon: 'user', badge: null },
         { label: 'تحليل بيانات العامل', page: 'worker-analysis', icon: 'chart', badge: null },
         { label: 'تحليل بيانات صاحب العمل', page: 'employer-analysis', icon: 'building', badge: null },
         { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
@@ -213,6 +219,7 @@ const INSP_CONFIG = {
         { label: 'تحليل بيانات العمال', page: 'worker-analysis', icon: 'user', badge: null },
         { label: 'تحليل بيانات أصحاب العمل', page: 'employer-analysis', icon: 'building', badge: null },
         { label: 'إعداد خطة التفتيش الدوري', page: 'inspection-plan-draft', icon: 'pen', badge: null },
+        { label: 'حالة التوفر', page: 'staff-availability', icon: 'user', badge: null },
         { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]

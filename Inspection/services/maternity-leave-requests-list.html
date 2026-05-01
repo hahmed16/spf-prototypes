@@ -13,15 +13,16 @@
   <script src="../shared/components.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const role = resolveContextRole('monitoring-employee');
       initLayout({
-        role: 'monitoring-employee',
+        role: role,
         activePage: 'maternity-leave-requests-list',
         breadcrumb: [
           { label: 'الرئيسية', onclick: 'goHome()' },
           { label: 'طلبات إجازة الأمومة' }
         ]
       });
-      renderContent(renderMaternityLeaveRequestsList('monitoring-employee'));
+      renderContent(renderMaternityLeaveRequestsList(role));
     });
   </script>
 </body>

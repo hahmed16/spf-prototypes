@@ -9,11 +9,25 @@ const req = WI_DATA.referrals.find(r => r.id === new URLSearchParams(window.loca
 setBreadcrumb([{ label: 'طلبات العرض المباشر', page: 'referrals-list' }, { label: req ? req.id : 'التفاصيل' }]);
 document.addEventListener('DOMContentLoaded', () => {
   if (!req) { renderContent('<div class="card"><div class="pb"><div class="empty-st">الطلب غير موجود</div></div></div>'); return; }
+  const attachments = req.attachments || [];
   getContent().innerHTML = `
     <div class="pg-head"><div><h1>تفاصيل طلب العرض المباشر</h1><p>${req.id}</p></div><div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.arrow_left} رجوع</button></div></div>
+    <div class="card"><div class="pb"><div class="fg fg-3">
+      <div class="fgrp"><label class="flbl">هدف الشاشة</label><div class="fro">متابعة حالة الطلب، معرفة المؤسسة الصحية المقترحة، والاطلاع على مسار المعالجة والقرار.</div></div>
+      <div class="fgrp"><label class="flbl">إجراءات هذا الدور</label><div class="fro">الاطلاع فقط على البيانات والمسار الزمني. لا توجد قرارات على العامل من هذه الشاشة.</div></div>
+      <div class="fgrp"><label class="flbl">ما الذي يظهر هنا</label><div class="fro">بيانات الطلب، المؤمن عليه، جهة العمل، سبب العرض المباشر، المرفقات، والمتابعة مع المؤسسة الصحية.</div></div>
+    </div></div></div>
     ${renderDirectReferralSummaryCard(req, { variant: 'worker' })}
     ${renderWorkflowPath(req, 'directReferral')}
     ${renderDirectReferralReasonCard(req)}
+    ${renderReferralInsuredCard(req.insured || {}, { extended: true })}
+    ${renderReferralEmployerCard(req.employer || {})}
+    ${renderDirectReferralFollowUpCard(req)}
+    <div class="card"><div class="ph"><h3><div class="pico bl">${ICONS.file}</div>المرفقات المرتبطة بالطلب</h3></div><div class="pb">
+      ${attachments.length ? `<div class="tbl-wrap"><table class="dtbl"><thead><tr><th>اسم الملف</th><th>النوع</th><th>تاريخ الرفع</th><th>الرافع</th></tr></thead><tbody>
+      ${attachments.map((att) => `<tr><td>${att.name}</td><td>${att.type || 'مستند'}</td><td style="font-size:12px">${formatDate(att.uploadDate)}</td><td style="font-size:12px">${att.uploadedBy || att.role || '—'}</td></tr>`).join('')}
+      </tbody></table></div>` : '<div class="empty-st">لا توجد مرفقات مضافة على هذا الطلب</div>'}
+    </div></div>
     <div class="card"><div class="ph"><h3><div class="pico bl">${ICONS.clock}</div>السجل الزمني</h3></div><div class="pb">${renderTimelineList(req.timeline)}</div></div>`;
 });
 </script>

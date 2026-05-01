@@ -1468,6 +1468,8 @@ function renderAppealDetails(role) {
   const id = getParam('id') || '2025-02-000001';
   const a = INSP_DATA.appeals.find(x => x.id === id) || INSP_DATA.appeals[0];
   const isExternal = role === 'employer' || role === 'insured';
+  const allVisits = [...(INSP_DATA.visits.periodic||[]), ...(INSP_DATA.visits.surprise||[]), ...(INSP_DATA.visits.scheduled||[])];
+  const relatedBan = a.relatedType === 'قرار حظر' ? (INSP_DATA.banCases || []).find(x => x.id === a.relatedId) : null;
 
   /* related complaint or visit lookup */
   let relatedPanel = '';
@@ -1493,7 +1495,6 @@ function renderAppealDetails(role) {
         </div></div>`;
     }
   } else if (a.relatedType === 'زيارة ميدانية' || a.relatedType === 'زيارة') {
-    const allVisits = [...(INSP_DATA.visits.periodic||[]), ...(INSP_DATA.visits.surprise||[]), ...(INSP_DATA.visits.scheduled||[])];
     const rv = allVisits.find(v => v.id === a.relatedId);
     if (rv) {
       relatedPanel = `
@@ -1519,6 +1520,9 @@ function renderAppealDetails(role) {
       <div class="pb"><div class="fg fg-2">
         <div class="fgrp"><label class="flbl">رقم قرار الحظر</label><div class="fro fw7 txp">${a.relatedId}</div></div>
         <div class="fgrp"><label class="flbl">المنشأة</label><div class="fro">${a.employerName}</div></div>
+        ${relatedBan ? `<div class="fgrp"><label class="flbl">نوع الحظر</label><div class="fro">${relatedBan.type}</div></div>` : ''}
+        ${relatedBan ? `<div class="fgrp"><label class="flbl">تاريخ الإصدار</label><div class="fro">${relatedBan.issuedDate}</div></div>` : ''}
+        ${relatedBan ? `<div class="fgrp span-full"><label class="flbl">السبب النظامي</label><div class="fro" style="min-height:50px">${relatedBan.reason}</div></div>` : ''}
       </div></div></div>`;
   }
 
@@ -1561,6 +1565,36 @@ function renderAppealDetails(role) {
           <button class="btn btn-danger btn-sm" onclick="(function(){var n=document.getElementById('appeal-decision-note');if(!n||!n.value.trim()){showToast('يرجى كتابة مبرر الرفض','w');return;}showToast('تم رفض التظلم','s');})()">${ICONS.x}رفض التظلم</button>
         </div>
       </div></div>`;
+  } else if (role === 'inspection-director') {
+    const visitLinkedToAppeal = allVisits.find(v => v.id === a.relatedId)
+      || (relatedBan && relatedBan.relatedVisitId ? allVisits.find(v => v.id === relatedBan.relatedVisitId) : null);
+    const linkedVisitPage = visitLinkedToAppeal
+      ? (visitLinkedToAppeal.id.includes('-04-') ? 'visit-surprise-details' : visitLinkedToAppeal.id.includes('-05-') ? 'visit-scheduled-details' : 'visit-periodic-details')
+      : null;
+    const roleActionHint = a.decision
+      ? 'يعرض هذا الجزء قرار التظلم الصادر ومسار المتابعة المرتبط به.'
+      : 'يعرض هذا الجزء ما يحتاجه مدير الدائرة عند وجود تصعيد أو اعتماد نهائي أو توجيه بإعادة الفحص.';
+    actionPanel = `
+      <div class="card">
+        <div class="ph"><h3><span class="pico bl">${ICONS.pen}</span>لوحة المدير</h3></div>
+        <div class="pb">
+          <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} ${roleActionHint}</div>
+          <div class="fg fg-2">
+            <div class="fgrp"><label class="flbl">وضع التظلم الحالي</label><div class="fro">${statusBadge(a.status)}</div></div>
+            <div class="fgrp"><label class="flbl">هل يتطلب اعتماداً نهائياً؟</label><div class="fro">${a.status.includes('بانتظار') || a.status.includes('اعتماد') ? 'نعم' : 'بحسب مسار التظلم'}</div></div>
+            <div class="fgrp"><label class="flbl">الجهة المرفوع منها</label><div class="fro">${a.submittedBy === 'employer' ? 'صاحب العمل' : a.submittedBy === 'insured' ? 'مؤمن عليه' : a.submittedBy}</div></div>
+            <div class="fgrp"><label class="flbl">المسار المقترح</label><div class="fro">${a.relatedType === 'قرار حظر' ? 'قرار إداري مع احتمال إعادة فحص' : a.relatedType === 'زيارة ميدانية' ? 'مراجعة محضر الزيارة أو إعادة فحص' : 'مراجعة القرار النهائي على البلاغ'}</div></div>
+          </div>
+          <div class="fgrp" style="margin-top:12px"><label class="flbl">ملاحظات المدير / التوجيه النهائي</label>
+            <textarea class="fc" rows="3" placeholder="يسجل هنا التوجيه النهائي أو مبرر الاعتماد أو الإعادة..."></textarea></div>
+          <div class="df ac g8" style="flex-wrap:wrap;margin-top:14px">
+            <button class="btn btn-primary btn-sm" onclick="showToast('تم اعتماد القرار النهائي على التظلم','s')">${ICONS.check}اعتماد القرار</button>
+            <button class="btn btn-warning btn-sm" onclick="showToast('تم إرجاع التظلم لاستكمال الدراسة','w')">${ICONS.arrow_right}إعادة للدراسة</button>
+            <button class="btn btn-accent btn-sm" onclick="showToast('تم التوجيه بإعادة الفحص','s')">${ICONS.switch}توجيه بإعادة فحص</button>
+            ${linkedVisitPage ? `<button class="btn btn-secondary btn-sm" onclick="navigateTo('${linkedVisitPage}','id=${visitLinkedToAppeal.id}')">${ICONS.eye}عرض الزيارة المرتبطة</button>` : ''}
+          </div>
+        </div>
+      </div>`;
   }
 
   /* decision panel */
@@ -1880,6 +1914,8 @@ function renderVisitNew(role) {
   <div class="pb"><div class="fg fg-2">
     <div class="fgrp"><label class="flbl">نوع الزيارة <span class="req">*</span></label>
       <select class="fc"><option>زيارة مفاجئة</option><option>زيارة مجدولة</option></select></div>
+    <div class="fgrp"><label class="flbl">مصدر الزيارة <span class="req">*</span></label>
+      <select class="fc"><option>بلاغ محال من المتابعة</option><option>خطة تفتيش دورية</option><option>تظلم أو إعادة فحص</option><option>توجيه مدير الدائرة</option></select></div>
     <div class="fgrp"><label class="flbl">المنشأة المستهدفة <span class="req">*</span></label>
       <select class="fc">${INSP_DATA.employers.map(e=>`<option>${e.name}</option>`).join('')}</select></div>
     <div class="fgrp"><label class="flbl">المفتش المكلف <span class="req">*</span></label>
@@ -1890,6 +1926,10 @@ function renderVisitNew(role) {
       <select class="fc"><option>عادية</option><option>مرتفعة</option><option>عاجلة</option></select></div>
     <div class="fgrp"><label class="flbl">البلاغ/التظلم المرتبط</label>
       <select class="fc"><option value="">لا يوجد</option>${INSP_DATA.complaints.map(c=>`<option>${c.id}</option>`).join('')}</select></div>
+    <div class="fgrp"><label class="flbl">الخطة المرتبطة</label>
+      <select class="fc"><option value="">خارج خطة دورية</option>${INSP_DATA.inspectionPlans.map(p=>`<option>${p.id} — ${p.title}</option>`).join('')}</select></div>
+    <div class="fgrp"><label class="flbl">النتيجة المتوقعة</label>
+      <select class="fc"><option>التحقق من الامتثال</option><option>إثبات المخالفة</option><option>إعادة فحص بعد إجراء تصحيحي</option><option>استيفاء بيانات ميدانية للقرار</option></select></div>
     <div class="fgrp span-full"><label class="flbl">غرض الزيارة وملاحظات</label>
       <textarea class="fc" rows="4" placeholder="اكتب وصفاً لغرض الزيارة وأي توجيهات للمفتش..."></textarea></div>
   </div></div></div>
@@ -2534,6 +2574,7 @@ function renderReassignment(role) {
   <\/script>`;
 
   return `<div class="pg-head"><div><h1>إعادة تخصيص الطلبات</h1><p>ابحث عن طلب وحدد الموظف الجديد المكلف به</p></div></div>
+  <div class="alert alert-i" style="margin-bottom:16px">${ICONS.info} تعرض هذه الشاشة الطلب المراد نقله، المختص الحالي، عبء العمل المقارن، وسبب إعادة التخصيص قبل اعتماد النقل.</div>
   ${searchPanel}
   ${workloadCard}
   ${script}`;
@@ -2541,14 +2582,23 @@ function renderReassignment(role) {
 
 /* ── متابعة الأعمال المتأخرة (monitoring-head) ── */
 function renderOverdueTracking(role) {
-  const overdue = INSP_DATA.complaints.filter(c => c.dueDate < '2025-01-15' && !c.status.includes('إغلاق') && !c.status.includes('قرار'));
+  const today = '2025-01-22';
+  const overdue = INSP_DATA.complaints.filter(c => c.dueDate && c.dueDate < today && !c.status.includes('إغلاق') && !c.status.includes('قرار'));
+  const critical = overdue.filter(c => Math.floor((new Date(today) - new Date(c.dueDate)) / 86400000) >= 5).length;
   return `<div class="pg-head"><div><h1>متابعة الأعمال المتأخرة</h1><p>${overdue.length} بلاغ تجاوز الموعد النهائي</p></div>
     <div class="pg-acts"><button class="btn btn-warning" onclick="showToast('تم إرسال تنبيه للموظفين','w')">${ICONS.bell}إرسال تنبيه جماعي</button></div></div>
+    <div class="stats-grid">
+      <div class="scard d"><div class="sc-lbl">حالات متأخرة</div><div class="sc-val">${overdue.length}</div><div class="sc-sub">تستوجب متابعة</div></div>
+      <div class="scard w"><div class="sc-lbl">تأخير حرج</div><div class="sc-val">${critical}</div><div class="sc-sub">5 أيام فأكثر</div></div>
+      <div class="scard i"><div class="sc-lbl">معينة لموظف</div><div class="sc-val">${overdue.filter(c => c.assignedTo).length}</div><div class="sc-sub">تحتاج تنبيه أو تصعيد</div></div>
+      <div class="scard p"><div class="sc-lbl">غير معينة</div><div class="sc-val">${overdue.filter(c => !c.assignedTo).length}</div><div class="sc-sub">تحتاج قرار توزيع</div></div>
+    </div>
     <div class="alert alert-d">${ICONS.warn} يوجد ${overdue.length} بلاغ تجاوز الموعد النهائي ويستوجب تدخلاً فورياً.</div>
-    ${_tblWrap(['رقم البلاغ','النوع','الموعد النهائي','التأخير (أيام)','الموظف المختص','الإجراء'],
+    ${_tblWrap(['رقم البلاغ','النوع','الحالة الحالية','الموعد النهائي','التأخير (أيام)','الموظف المختص','الإجراء'],
       overdue.map(c=>{
-        const days = Math.floor((new Date('2025-01-22') - new Date(c.dueDate)) / 86400000);
+        const days = Math.floor((new Date(today) - new Date(c.dueDate)) / 86400000);
         return `<tr><td class="fw7 txd">${c.id}</td><td>${c.type}</td>
+          <td>${statusBadge(c.status)}</td>
           <td class="txd">${c.dueDate}</td>
           <td><span class="badge b-high">${days} يوم</span></td>
           <td>${c.assignedTo || 'غير معين'}</td>
@@ -2561,40 +2611,144 @@ function renderOverdueTracking(role) {
 /* ── مراقبة عبء العمل (monitoring-head) ── */
 function renderWorkloadMonitoring(role) {
   const staff = [
-    { name: 'سيف خلفان الأمري', active: 4, pending: 2, closed: 8, capacity: 80 },
-    { name: 'موظف آخر', active: 2, pending: 1, closed: 5, capacity: 50 },
+    { name: 'سيف خلفان الأمري', active: 4, pending: 2, closed: 8, capacity: 80, overdue: 1, specialty: 'شكاوى الأجور والتسجيل' },
+    { name: 'هند بنت ناصر العبرية', active: 2, pending: 1, closed: 5, capacity: 50, overdue: 0, specialty: 'الردود والاستيفاءات' },
+    { name: 'نجلاء الدعمية', active: 3, pending: 1, closed: 6, capacity: 65, overdue: 1, specialty: 'الملفات المحالة للتفتيش' },
   ];
   return `<div class="pg-head"><div><h1>مراقبة عبء العمل</h1><p>توزيع المهام والطاقة الاستيعابية للموظفين</p></div></div>
     <div class="stats-grid">
-      <div class="scard p"><div class="sc-lbl">إجمالي البلاغات المفتوحة</div><div class="sc-val">6</div></div>
+      <div class="scard p"><div class="sc-lbl">إجمالي البلاغات المفتوحة</div><div class="sc-val">${staff.reduce((s,x)=>s+x.active,0)}</div></div>
       <div class="scard w"><div class="sc-lbl">متوسط وقت المعالجة</div><div class="sc-val">5.2 يوم</div></div>
       <div class="scard s"><div class="sc-lbl">نسبة الإنجاز هذا الشهر</div><div class="sc-val">87%</div></div>
-      <div class="scard d"><div class="sc-lbl">موظفون فوق الطاقة</div><div class="sc-val">0</div></div>
+      <div class="scard d"><div class="sc-lbl">موظفون فوق الطاقة</div><div class="sc-val">${staff.filter(s=>s.capacity>=75).length}</div></div>
     </div>
     <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.user}</span>توزيع عبء العمل</h3></div>
     <div class="pb">${staff.map(s=>`
       <div style="margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:16px">
         <div class="df ac g8 mb0" style="margin-bottom:8px"><span class="fw7">${s.name}</span>
           <span class="badge ${s.capacity>75?'b-high':'b-low'}">${s.capacity}% مكتظ</span></div>
+        <div class="fs11 tx3" style="margin-bottom:6px">${s.specialty}</div>
         <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${s.capacity}%;background:${s.capacity>75?'var(--danger)':'var(--primary)'}"></div></div>
         <div class="m-row mt8">
           <span class="m-item">${ICONS.inbox} نشط: <strong>${s.active}</strong></span>
           <span class="m-item">${ICONS.clock} معلق: <strong>${s.pending}</strong></span>
           <span class="m-item">${ICONS.check} مكتمل: <strong>${s.closed}</strong></span>
+          <span class="m-item">${ICONS.warn} متأخر: <strong>${s.overdue}</strong></span>
+        </div>
+        <div class="df ac g8" style="margin-top:10px">
+          <button class="btn btn-secondary btn-xs" onclick="showToast('تم فتح تفاصيل الحمل الوظيفي','i')">${ICONS.eye}عرض التفاصيل</button>
+          <button class="btn btn-warning btn-xs" onclick="navigateTo('reassignment')">${ICONS.switch}إعادة توزيع</button>
         </div>
       </div>`).join('')}</div></div>`;
+}
+
+/* ── حالة التوفر للموظفين (نموذج استرشادي) ── */
+function renderStaffAvailability(role) {
+  const staffByRole = {
+    'fund-staff': { name: 'منى راشد البلوشي', unit: 'مستخدم داخلي للصندوق', scope: 'personal' },
+    'monitoring-employee': { name: 'سيف خلفان الأمري', unit: 'قسم المتابعة والبلاغات', scope: 'personal' },
+    'monitoring-head': { name: 'خالد بن ناصر الجابري', unit: 'قسم المتابعة والبلاغات', scope: 'section' },
+    'field-inspector': { name: 'أحمد سالم الحارثي', unit: 'قسم التفتيش الميداني', scope: 'personal' },
+    'field-head': { name: 'سالم راشد البلوشي', unit: 'قسم التفتيش الميداني', scope: 'section' },
+    'inspection-director': { name: 'مريم بنت عبدالله الهنائية', unit: 'دائرة التفتيش', scope: 'director' },
+    'ops-analyst': { name: 'يوسف سعيد المعشني', unit: 'دائرة التفتيش', scope: 'personal' },
+  };
+
+  const me = staffByRole[role] || { name: 'مستخدم النظام', unit: 'دائرة التفتيش', scope: 'personal' };
+  const allStaff = [
+    { name: 'سيف خلفان الأمري', role: 'موظف قسم المتابعة', unit: 'قسم المتابعة والبلاغات', status: 'متاح', reason: 'متواجد على النظام', updatedAt: 'اليوم 09:10', tasks: 4, today: 'مراجعة بلاغات جديدة' },
+    { name: 'هند بنت ناصر العبرية', role: 'موظفة قسم المتابعة', unit: 'قسم المتابعة والبلاغات', status: 'غير متاح', reason: 'زيارة تنسيقية مع جهة خارجية', updatedAt: 'اليوم 10:05', tasks: 2, today: 'مقابلات واتصالات' },
+    { name: 'أحمد سالم الحارثي', role: 'مفتش ميداني', unit: 'قسم التفتيش الميداني', status: 'في مهمة', reason: 'زيارة مفاجئة قيد التنفيذ', updatedAt: 'اليوم 08:40', tasks: 3, today: 'زيارة مفاجئة - ولاية السيب' },
+    { name: 'فاطمة محمد الرواحية', role: 'مفتشة ميدانية', unit: 'قسم التفتيش الميداني', status: 'متاح', reason: 'بالمكتب حتى إشعار آخر', updatedAt: 'اليوم 09:00', tasks: 1, today: 'مراجعة محاضر' },
+    { name: 'خالد بن ناصر الجابري', role: 'رئيس قسم المتابعة', unit: 'قسم المتابعة والبلاغات', status: 'في اجتماع', reason: 'اجتماع متابعة الأداء', updatedAt: 'اليوم 10:20', tasks: 5, today: 'اعتمادات وإعادة تخصيص' },
+    { name: 'سالم راشد البلوشي', role: 'رئيس قسم التفتيش الميداني', unit: 'قسم التفتيش الميداني', status: 'متاح', reason: 'متابعة محاضر اليوم', updatedAt: 'اليوم 09:25', tasks: 4, today: 'اعتماد محاضر وخطة زيارات' },
+    { name: 'يوسف سعيد المعشني', role: 'محلل عمليات', unit: 'دائرة التفتيش', status: 'غير متاح', reason: 'إعداد تحليل مخاطر', updatedAt: 'اليوم 09:35', tasks: 2, today: 'تحليل مخاطر المنشآت' },
+    { name: 'مريم بنت عبدالله الهنائية', role: 'مدير دائرة التفتيش', unit: 'دائرة التفتيش', status: 'متاح', reason: 'متاحة للاعتماد والتصعيد', updatedAt: 'اليوم 09:15', tasks: 6, today: 'اعتمادات واجتماعات تنفيذية' },
+    { name: 'منى راشد البلوشي', role: 'مستخدم داخلي للصندوق', unit: 'الصندوق', status: 'متاح', reason: 'استقبال ومتابعة داخلية', updatedAt: 'اليوم 08:55', tasks: 3, today: 'استقبال بلاغات' },
+  ];
+
+  const visibleStaff = me.scope === 'director'
+    ? allStaff
+    : me.scope === 'section'
+      ? allStaff.filter(item => item.unit === me.unit)
+      : allStaff.filter(item => item.name === me.name || item.unit === me.unit);
+
+  const counts = {
+    available: visibleStaff.filter(item => item.status === 'متاح').length,
+    unavailable: visibleStaff.filter(item => item.status === 'غير متاح').length,
+    away: visibleStaff.filter(item => item.status === 'في مهمة').length,
+    meeting: visibleStaff.filter(item => item.status === 'في اجتماع').length,
+  };
+
+  const statusClass = function(status) {
+    return availabilityStatusClass(status);
+  };
+
+  const canSeeTeamSummary = me.scope === 'section' || me.scope === 'director';
+  const tableRows = visibleStaff.map(item => `
+    <tr>
+      <td class="fw7">${item.name}</td>
+      <td>${item.role}</td>
+      <td>${item.unit}</td>
+      <td><span class="badge ${statusClass(item.status)}">${item.status}</span></td>
+      <td>${item.reason}</td>
+      <td>${item.today}</td>
+      <td>${item.tasks}</td>
+      <td>${item.updatedAt}</td>
+    </tr>
+  `).join('');
+
+  const screenTitle = me.scope === 'director' ? 'حالة الموظفين' : me.scope === 'section' ? 'حالة فريق العمل' : 'حالة التوفر';
+  const screenDesc = me.scope === 'director'
+    ? 'عرض استرشادي لحالة الموظفين في جميع أقسام دائرة التفتيش مع تحديثات اليوم.'
+    : me.scope === 'section'
+      ? `عرض استرشادي لحالة موظفي ${me.unit} خلال اليوم الحالي.`
+      : 'يمكنك تحديث حالتك الحالية مباشرة من الشارة الموجودة في أعلى الشاشة.';
+
+  return `<div class="pg-head"><div><h1>${screenTitle}</h1><p>${screenDesc}</p></div>
+    <div class="pg-acts"><span class="badge b-draft">نموذج استرشادي</span></div></div>
+
+    <div class="alert alert-i" style="margin-bottom:16px">${ICONS.info} هذه الشاشة نموذج أولي فقط لعرض الفكرة في الـ BRD والبروتوتايب، وليست مرتبطة بعد بإدارة حضور فعلية أو صلاحيات تشغيلية كاملة.</div>
+    ${canSeeTeamSummary ? `
+    <div class="stats-grid">
+      <div class="scard s"><div class="sc-lbl">متاح الآن</div><div class="sc-val">${counts.available}</div><div class="sc-sub">ضمن النطاق المعروض</div></div>
+      <div class="scard w"><div class="sc-lbl">غير متاح</div><div class="sc-val">${counts.unavailable}</div><div class="sc-sub">مع سبب مسجل</div></div>
+      <div class="scard i"><div class="sc-lbl">في مهمة ميدانية</div><div class="sc-val">${counts.away}</div><div class="sc-sub">خارج المكتب</div></div>
+      <div class="scard p"><div class="sc-lbl">في اجتماع</div><div class="sc-val">${counts.meeting}</div><div class="sc-sub">اجتماعات ومراجعات</div></div>
+    </div>
+
+    <div class="card">
+      <div class="ph"><h3><span class="pico tl">${ICONS.user}</span>${me.scope === 'director' ? 'عرض حالة موظفي الدائرة' : 'عرض حالة موظفي القسم'}</h3></div>
+      <div class="pb">
+        ${_tblWrap(['الاسم','الدور','القسم','الحالة','السبب','عمل اليوم','مهام نشطة','آخر تحديث'], tableRows)}
+      </div>
+    </div>` : `
+    <div class="card">
+      <div class="pb">
+        <div class="alert alert-i">${ICONS.info} تم تبسيط تحديث الحالة الحالية ليكون من الشارة الموجودة في أعلى الشاشة. عرض ملخص الفريق متاح فقط لرؤساء الأقسام ومدير دائرة التفتيش.</div>
+      </div>
+    </div>`}`;
 }
 
 /* ── مراجعة المحاضر (field-head) ── */
 function renderRecordsReview(role) {
   const pending = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled]
     .filter(v => v.status === 'بانتظار مراجعة المحضر');
+  const critical = pending.filter(v => v.findings && v.findings.violations && v.findings.violations.length >= 2).length;
   return `<div class="pg-head"><div><h1>مراجعة المحاضر</h1><p>${pending.length} محضر بانتظار الاعتماد</p></div></div>
+    <div class="stats-grid">
+      <div class="scard p"><div class="sc-lbl">محاضر قيد المراجعة</div><div class="sc-val">${pending.length}</div><div class="sc-sub">قبل الرفع للمدير</div></div>
+      <div class="scard d"><div class="sc-lbl">محاضر عالية الحساسية</div><div class="sc-val">${critical}</div><div class="sc-sub">تتضمن مخالفات متعددة</div></div>
+      <div class="scard i"><div class="sc-lbl">مرتبطة بزيارات مفاجئة</div><div class="sc-val">${pending.filter(v => v.id.includes('-04-')).length}</div><div class="sc-sub">تستوجب تدقيقاً أكبر</div></div>
+      <div class="scard s"><div class="sc-lbl">جاهزة للاعتماد</div><div class="sc-val">${pending.filter(v => v.report).length}</div><div class="sc-sub">المحضر مرفوع بالنظام</div></div>
+    </div>
     <div class="alert alert-w">${ICONS.warn} يوجد ${pending.length} محاضر تستوجب المراجعة والاعتماد قبل رفعها للمدير.</div>
-    ${_tblWrap(['رقم الزيارة','المنشأة','نوع الزيارة','تاريخ الرفع','الإجراء'],
+    ${_tblWrap(['رقم الزيارة','المنشأة','نوع الزيارة','المفتش','نتيجة أولية','تاريخ الرفع','الإجراء'],
       pending.map(v=>`<tr>
         <td class="fw7 txp">${v.id}</td><td>${v.employerName}</td>
         <td>${v.id.includes('-03-')?'دورية':v.id.includes('-04-')?'مفاجئة':'مجدولة'}</td>
+        <td>${v.inspectorName || '—'}</td>
+        <td>${v.findings ? `${v.findings.violations.length} مخالفة` : 'لا توجد نتائج بعد'}</td>
         <td>${v.actualDate || v.scheduledDate}</td>
         <td><div class="df ac g8">
           <button class="btn btn-primary btn-xs" onclick="navigateTo('${v.id.includes('-04-')?'visit-surprise-details':v.id.includes('-05-')?'visit-scheduled-details':'visit-periodic-details'}','id=${v.id}')">${ICONS.eye}مراجعة</button>
@@ -2606,16 +2760,24 @@ function renderRecordsReview(role) {
 /* ── الإجراءات التصحيحية (field-head) ── */
 function renderCorrectiveActions(role) {
   const actions = [
-    { visit: '2025-03-000002', employer: 'مصنع الإنتاج الغذائي', action: 'توفير معدات الحماية', deadline: '2025-01-19', status: 'معلق' },
-    { visit: '2025-03-000002', employer: 'مصنع الإنتاج الغذائي', action: 'تسجيل العمال غير المسجلين', deadline: '2025-01-13', status: 'منجز' },
-    { visit: '2025-04-000001', employer: 'مصنع الإنتاج الغذائي', action: 'سداد الاشتراكات المتأخرة', deadline: '2025-01-26', status: 'جارٍ' },
-    { visit: '2024-03-000095', employer: 'مؤسسة البناء والتشييد', action: 'صرف الرواتب المتأخرة', deadline: '2024-12-15', status: 'منجز' },
+    { visit: '2025-03-000002', employer: 'مصنع الإنتاج الغذائي', action: 'توفير معدات الحماية', deadline: '2025-01-19', status: 'معلق', owner: 'صاحب العمل', evidence: 'صور ومرفقات السلامة', source: 'محضر الزيارة الدوري' },
+    { visit: '2025-03-000002', employer: 'مصنع الإنتاج الغذائي', action: 'تسجيل العمال غير المسجلين', deadline: '2025-01-13', status: 'منجز', owner: 'صاحب العمل', evidence: 'تحديث بيانات الاشتراك', source: 'محضر الزيارة الدوري' },
+    { visit: '2025-04-000001', employer: 'مصنع الإنتاج الغذائي', action: 'سداد الاشتراكات المتأخرة', deadline: '2025-01-26', status: 'جارٍ', owner: 'الإدارة المالية بالمنشأة', evidence: 'إشعار السداد', source: 'زيارة مفاجئة' },
+    { visit: '2024-03-000095', employer: 'مؤسسة البناء والتشييد', action: 'صرف الرواتب المتأخرة', deadline: '2024-12-15', status: 'منجز', owner: 'إدارة الموارد البشرية', evidence: 'كشوفات بنكية', source: 'إعادة فحص ميداني' },
   ];
+  const overdueCount = actions.filter(a => a.status !== 'منجز' && a.deadline < '2025-01-22').length;
   return `<div class="pg-head"><div><h1>متابعة الإجراءات التصحيحية</h1><p>رصد تنفيذ الإجراءات التصحيحية من قبل المنشآت</p></div>
     <div class="pg-acts"><button class="btn btn-secondary btn-sm">${ICONS.download}تصدير</button></div></div>
-    ${_tblWrap(['رقم الزيارة','المنشأة','الإجراء التصحيحي المطلوب','الموعد النهائي','الحالة','إجراء'],
+    <div class="stats-grid">
+      <div class="scard p"><div class="sc-lbl">إجمالي الإجراءات</div><div class="sc-val">${actions.length}</div><div class="sc-sub">ضمن المتابعة</div></div>
+      <div class="scard s"><div class="sc-lbl">منجزة</div><div class="sc-val">${actions.filter(a => a.status === 'منجز').length}</div><div class="sc-sub">تم التحقق منها</div></div>
+      <div class="scard w"><div class="sc-lbl">قيد التنفيذ</div><div class="sc-val">${actions.filter(a => a.status === 'جارٍ').length}</div><div class="sc-sub">بانتظار استكمال</div></div>
+      <div class="scard d"><div class="sc-lbl">متأخرة</div><div class="sc-val">${overdueCount}</div><div class="sc-sub">تحتاج تصعيد</div></div>
+    </div>
+    ${_tblWrap(['رقم الزيارة','المنشأة','الإجراء التصحيحي المطلوب','المسؤول','الموعد النهائي','الحالة','إجراء'],
       actions.map(a=>`<tr>
-        <td class="txp fw7">${a.visit}</td><td>${a.employer}</td><td>${a.action}</td>
+        <td class="txp fw7">${a.visit}</td><td>${a.employer}<div class="fs11 tx3">${a.source}</div></td><td>${a.action}<div class="fs11 tx3">${a.evidence}</div></td>
+        <td>${a.owner}</td>
         <td>${a.deadline}</td>
         <td>${statusBadge(a.status==='منجز'?'تم اعتماد المحضر':a.status==='جارٍ'?'جارية':'بانتظار إجراء تصحيحي')}</td>
         <td><div class="df ac g8">
@@ -2636,7 +2798,9 @@ function renderInspectorRedistribution(role) {
 
   /* عبء العمل لكل مفتش */
   const inspectors = [
-    { name: 'حاتم سالم الزدجالي', civil: '04678901', dept: 'قسم التفتيش الميداني' },
+    { name: 'حاتم سالم الزدجالي', civil: '04678901', dept: 'قسم التفتيش الميداني', specialty: 'سلامة مهنية ومصانع' },
+    { name: 'فاطمة محمد الرواحية', civil: '04678902', dept: 'قسم التفتيش الميداني', specialty: 'إنشاءات ومتابعة ميدانية' },
+    { name: 'أحمد سالم الحارثي', civil: '04678903', dept: 'قسم التفتيش الميداني', specialty: 'إعادة الفحص والزيارات المفاجئة' },
   ].map(ins => ({
     ...ins,
     active: allVisits.filter(v => v.inspectorName === ins.name && activeStatuses.some(s => v.status && v.status.includes(s.split(' ')[0]))).length,
@@ -2653,7 +2817,7 @@ function renderInspectorRedistribution(role) {
             <div style="width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${ins.name.substring(0,2)}</div>
             <div style="flex:1">
               <div style="font-size:13px;font-weight:700;color:var(--text)">${ins.name}</div>
-              <div style="font-size:11.5px;color:var(--text3)">${ins.dept}</div>
+              <div style="font-size:11.5px;color:var(--text3)">${ins.dept} — ${ins.specialty}</div>
               <div class="progress-bar-wrap" style="margin-top:6px;height:6px"><div class="progress-bar-fill" style="width:${pct}%;background:${pct>75?'var(--danger)':pct>50?'var(--warning)':'var(--success)'}"></div></div>
             </div>
             <div style="text-align:center;min-width:80px">
@@ -2729,6 +2893,7 @@ function renderInspectorRedistribution(role) {
   <\/script>`;
 
   return `<div class="pg-head"><div><h1>إعادة توزيع المفتشين</h1><p>ابحث عن زيارة وحدد المفتش الجديد المكلف بها</p></div></div>
+  <div class="alert alert-i" style="margin-bottom:16px">${ICONS.info} تعرض الشاشة الزيارة المستهدفة، المفتش الحالي، أعباء العمل المقارنة، وتخصص كل مفتش قبل اعتماد إعادة التوزيع.</div>
   ${searchPanel}
   ${workloadCard}
   ${script}`;
@@ -2738,58 +2903,131 @@ function renderInspectorRedistribution(role) {
 function renderInspectionPlansList(role) {
   const rows = INSP_DATA.inspectionPlans.map(p => {
     const pct = p.targetCount ? Math.round(p.completedCount / p.targetCount * 100) : 0;
+    const targetStatus = p.status.includes('مكتملة') ? 'منتهية' : p.status.includes('معتمدة') ? 'نشطة' : 'بانتظار الاعتماد';
     return `<tr>
       <td><a href="#" onclick="navigateTo('inspection-plan-details','id=${p.id}')" class="txp fw7">${p.id}</a></td>
-      <td>${p.title}</td><td>${p.period}</td>
+      <td>${p.title}<div class="fs11 tx3">${p.createdBy || '—'} • ${p.createdDate || '—'}</div></td><td>${p.period}</td>
       <td>${statusBadge(p.status)}</td>
-      <td>${p.targetCount}</td>
+      <td><div class="fw7">${p.targetCount}</div><div class="fs11 tx3">${targetStatus}</div></td>
       <td><div style="display:flex;align-items:center;gap:8px"><div class="progress-bar-wrap" style="flex:1;margin:0"><div class="progress-bar-fill" style="width:${pct}%;background:${_compColor(pct)}"></div></div><span class="fs11">${pct}%</span></div></td>
       <td><button class="btn btn-primary btn-xs" onclick="navigateTo('inspection-plan-details','id=${p.id}')">${ICONS.eye}عرض</button></td>
     </tr>`;}).join('');
 
+  const totalPlans = INSP_DATA.inspectionPlans.length;
+  const activePlans = INSP_DATA.inspectionPlans.filter(p => p.status.includes('قيد التنفيذ')).length;
+  const completedPlans = INSP_DATA.inspectionPlans.filter(p => p.status.includes('مكتملة')).length;
+  const pendingPlans = totalPlans - activePlans - completedPlans;
+
   return `<div class="pg-head"><div><h1>خطط التفتيش الدورية</h1><p>إدارة واعتماد خطط التفتيش الربعية والسنوية</p></div>
     <div class="pg-acts"><button class="btn btn-accent" onclick="showToast('فتح نموذج الاعتماد','i')">${ICONS.check}اعتماد خطة</button></div></div>
-    ${_tblWrap(['رقم الخطة','اسم الخطة','الفترة','الحالة','المنشآت','نسبة الإنجاز','إجراء'], rows)}`;
+    <div class="stats-grid">
+      <div class="scard p"><div class="sc-lbl">إجمالي الخطط</div><div class="sc-val">${totalPlans}</div><div class="sc-sub">ضمن نطاق العرض</div></div>
+      <div class="scard i"><div class="sc-lbl">خطط نشطة</div><div class="sc-val">${activePlans}</div><div class="sc-sub">قيد التنفيذ</div></div>
+      <div class="scard s"><div class="sc-lbl">خطط مكتملة</div><div class="sc-val">${completedPlans}</div><div class="sc-sub">أغلقت بالكامل</div></div>
+      <div class="scard w"><div class="sc-lbl">بانتظار إجراء</div><div class="sc-val">${pendingPlans}</div><div class="sc-sub">مسودات أو اعتماد</div></div>
+    </div>
+    ${_tblWrap(['رقم الخطة','اسم الخطة','الفترة','الحالة','النطاق','نسبة الإنجاز','إجراء'], rows)}`;
 }
 
 /* ── تفاصيل خطة التفتيش (inspection-director) ── */
 function renderInspectionPlanDetails(role) {
   const id = getParam('id') || '2025-07-000001';
   const p = INSP_DATA.inspectionPlans.find(x => x.id === id) || INSP_DATA.inspectionPlans[0];
-
+  const relatedVisits = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled]
+    .filter(v => v.planId === p.id);
   const pct = p.targetCount ? Math.round(p.completedCount / p.targetCount * 100) : 0;
+  const pendingVisits = relatedVisits.filter(v => v.status === 'مجدولة' || v.status === 'بانتظار اجراء الزيارة التفتيشية').length;
+  const inProgressVisits = relatedVisits.filter(v => v.status === 'جارية' || v.status === 'قيد التنفيذ' || v.status === 'بانتظار مراجعة المحضر').length;
+  const completedVisits = relatedVisits.filter(v => v.status.includes('اعتماد') || v.status.includes('مغلقة')).length;
+  const visitRows = relatedVisits.map(v => {
+    const detailPage = v.id.includes('-04-') ? 'visit-surprise-details' : v.id.includes('-05-') ? 'visit-scheduled-details' : 'visit-periodic-details';
+    const typeLabel = v.id.includes('-04-') ? 'مفاجئة' : v.id.includes('-05-') ? 'مجدولة' : 'دورية';
+    return `<tr>
+      <td><a href="#" onclick="navigateTo('${detailPage}','id=${v.id}')" class="txp fw7">${v.id}</a></td>
+      <td>${v.employerName}</td>
+      <td>${typeLabel}</td>
+      <td>${v.inspectorName || 'غير معين'}</td>
+      <td>${statusBadge(v.status)}</td>
+      <td>${v.scheduledDate || '—'}</td>
+      <td>${v.actualDate || '—'}</td>
+      <td><button class="btn btn-primary btn-xs" onclick="navigateTo('${detailPage}','id=${v.id}')">${ICONS.eye}عرض</button></td>
+    </tr>`;
+  }).join('');
+  const planTimeline = [
+    { date: p.createdDate || '—', action: 'إعداد مسودة الخطة', actor: p.createdBy, actorRole: 'ops-analyst' },
+    { date: p.approvalDate || '—', action: p.approvedBy ? 'اعتماد الخطة ورفعها للتنفيذ' : 'بانتظار الاعتماد', actor: p.approvedBy || '—', actorRole: p.approvedBy ? 'inspection-director' : 'ops-analyst' },
+    ...(relatedVisits.length ? [{ date: relatedVisits[0].scheduledDate || relatedVisits[0].actualDate || '—', action: 'بدء تنفيذ أول زيارة ضمن الخطة', actor: relatedVisits[0].inspectorName || 'قسم التفتيش', actorRole: 'field-inspector' }] : [])
+  ];
   return `<div class="pg-head"><div><h1>${p.id}</h1><p>${p.title}</p></div>
     <div class="pg-acts">${statusBadge(p.status)}<button class="btn btn-secondary btn-sm" onclick="navigateTo('inspection-plans-list')">${ICONS.arrow_right}رجوع</button>
       ${p.status !== 'مكتملة' ? `<button class="btn btn-accent" onclick="showToast('تم اعتماد الخطة','s')">${ICONS.check}اعتماد</button>` : ''}</div></div>
+  ${_summaryBar([
+    ['رقم الخطة', `<strong>${p.id}</strong>`],
+    ['الفترة', p.period],
+    ['الحالة', statusBadge(p.status)],
+    ['المنشآت المستهدفة', `${p.targetCount}`],
+    ['الزيارات المنجزة', `${p.completedCount}`],
+    ['المعتمد بواسطة', p.approvedBy || 'بانتظار الاعتماد'],
+  ])}
+  <div class="stats-grid">
+    <div class="scard p"><div class="sc-lbl">نسبة الإنجاز</div><div class="sc-val">${pct}%</div><div class="sc-sub">${p.completedCount} من ${p.targetCount}</div></div>
+    <div class="scard w"><div class="sc-lbl">زيارات بانتظار التنفيذ</div><div class="sc-val">${pendingVisits}</div><div class="sc-sub">ضمن الخطة</div></div>
+    <div class="scard i"><div class="sc-lbl">زيارات قيد المعالجة</div><div class="sc-val">${inProgressVisits}</div><div class="sc-sub">تنفيذ أو مراجعة</div></div>
+    <div class="scard s"><div class="sc-lbl">زيارات مكتملة</div><div class="sc-val">${completedVisits}</div><div class="sc-sub">اعتمدت أو أغلقت</div></div>
+  </div>
   <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>تفاصيل الخطة</h3></div>
     <div class="pb"><div class="fg fg-2">
       <div class="fgrp"><label class="flbl">رقم الخطة</label><div class="fro fw7">${p.id}</div></div>
       <div class="fgrp"><label class="flbl">اسم الخطة</label><div class="fro">${p.title}</div></div>
       <div class="fgrp"><label class="flbl">الفترة</label><div class="fro">${p.period}</div></div>
+      <div class="fgrp"><label class="flbl">أعدت بواسطة</label><div class="fro">${p.createdBy || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">تاريخ الإعداد</label><div class="fro">${p.createdDate || '—'}</div></div>
       <div class="fgrp"><label class="flbl">إجمالي المنشآت المستهدفة</label><div class="fro">${p.targetCount}</div></div>
       <div class="fgrp"><label class="flbl">الزيارات المنجزة</label><div class="fro txp fw7">${p.completedCount}</div></div>
+      <div class="fgrp"><label class="flbl">زيارات قيد التنفيذ</label><div class="fro">${p.inProgressCount || 0}</div></div>
       <div class="fgrp"><label class="flbl">المعتمد بواسطة</label><div class="fro">${p.approvedBy || 'بانتظار الاعتماد'}</div></div>
       <div class="fgrp"><label class="flbl">تاريخ الاعتماد</label><div class="fro">${p.approvalDate || '—'}</div></div>
+      <div class="fgrp span-full"><label class="flbl">أساس اختيار المنشآت</label><div class="fro">${p.riskCriteria || 'اختيار تشغيلي حسب أولويات الدائرة'}</div></div>
+      <div class="fgrp span-full"><label class="flbl">القطاعات المستهدفة</label><div class="fro">${(p.sectors || []).join('، ') || '—'}</div></div>
+      <div class="fgrp span-full"><label class="flbl">المفتشون / الفرق المرتبطة</label><div class="fro">${(p.inspectors || []).join('، ') || '—'}</div></div>
     </div></div></div>
   <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.chart}</span>التقدم</h3></div>
     <div class="pb">
       <div class="progress-bar-wrap" style="height:14px;margin-bottom:8px"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
-      <p class="fs11 tx3 mt8">${pct}% من الزيارات مكتملة</p>
+      <p class="fs11 tx3 mt8">${pct}% من الزيارات مكتملة مع تتبع حالة التنفيذ على مستوى كل زيارة</p>
+    </div></div>
+  <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.clipboard}</span>الزيارات المرتبطة بالخطة</h3></div>
+    <div class="pb">
+      ${relatedVisits.length ? _tblWrap(['رقم الزيارة','المنشأة','النوع','المفتش','الحالة','المجدول','التنفيذ','إجراء'], visitRows) : '<div class="alert alert-i">'+ICONS.info+' لا توجد زيارات مرتبطة مسجلة على هذه الخطة في البيانات الحالية.</div>'}
+    </div></div>
+  <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>مسار الإعداد والاعتماد</h3></div>
+    <div class="pb">${renderTimeline(planTimeline)}</div></div>
+  <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.pen}</span>لوحة المدير</h3></div>
+    <div class="pb">
+      <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} تعرض هذه اللوحة ما يحتاجه مدير الدائرة لاعتماد الخطة أو إعادتها أو متابعة تنفيذ الزيارات التابعة لها.</div>
+      <div class="fgrp"><label class="flbl">ملاحظات الاعتماد أو التوجيه</label><textarea class="fc" rows="3" placeholder="تدوين ملاحظات المدير على الخطة أو توجيهات التنفيذ..."></textarea></div>
+      <div class="df ac g8" style="flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="showToast('تم اعتماد الخطة','s')">${ICONS.check}اعتماد الخطة</button>
+        <button class="btn btn-warning btn-sm" onclick="showToast('تمت إعادة الخطة لاستكمال التعديلات','w')">${ICONS.arrow_right}إعادة للمحلل</button>
+        <button class="btn btn-secondary btn-sm" onclick="showToast('تم توجيه الفريق بمتابعة الزيارات المرتبطة','i')">${ICONS.switch}توجيه بالتنفيذ</button>
+      </div>
     </div></div>`;
 }
 
 /* ── حالات الحظر (inspection-director) ── */
 function renderBanCasesList(role) {
-  const rows = INSP_DATA.banCases.map(b =>
-    `<tr>
+  const rows = INSP_DATA.banCases.map(b => {
+    const relatedVisit = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled].find(v => v.id === b.relatedVisitId);
+    return `<tr>
       <td><a href="#" onclick="navigateTo('ban-case-details','id=${b.id}')" class="txp fw7">${b.id}</a></td>
       <td class="fw7">${b.employerName}</td>
       <td>${b.type}</td>
+      <td>${relatedVisit ? `<a href="#" class="txp" onclick="navigateTo('${b.relatedVisitId.includes('-04-') ? 'visit-surprise-details' : b.relatedVisitId.includes('-05-') ? 'visit-scheduled-details' : 'visit-periodic-details'}','id=${b.relatedVisitId}')">${b.relatedVisitId}</a>` : '—'}</td>
       <td>${statusBadge(b.status)}</td>
       <td>${b.issuedDate}</td>
       <td>${b.liftedDate || '—'}</td>
       <td><button class="btn btn-primary btn-xs" onclick="navigateTo('ban-case-details','id=${b.id}')">${ICONS.eye}عرض</button></td>
-    </tr>`).join('');
+    </tr>`;}).join('');
 
   const mid = 'ban-issue-modal';
   const modal = `
@@ -2846,9 +3084,17 @@ function renderBanCasesList(role) {
   }
   </script>`;
 
+  const activeBanCount = INSP_DATA.banCases.filter(b => b.status.includes('سارٍ')).length;
+  const liftedBanCount = INSP_DATA.banCases.filter(b => b.liftedDate).length;
   return `<div class="pg-head"><div><h1>قائمة حالات الحظر</h1><p>إدارة أوامر الحظر عن التعامل مع المنشآت المخالفة</p></div>
     <div class="pg-acts"><button class="btn btn-danger" onclick="document.getElementById('${mid}').style.display='flex'">${ICONS.lock}إصدار أمر حظر</button></div></div>
-    ${_tblWrap(['رقم الحظر','المنشأة','نوع الحظر','الحالة','تاريخ الإصدار','تاريخ الرفع','إجراء'], rows)}
+    <div class="stats-grid">
+      <div class="scard d"><div class="sc-lbl">حظر نشط</div><div class="sc-val">${activeBanCount}</div><div class="sc-sub">يستوجب متابعة</div></div>
+      <div class="scard s"><div class="sc-lbl">حظر مرفوع</div><div class="sc-val">${liftedBanCount}</div><div class="sc-sub">بعد إثبات الامتثال</div></div>
+      <div class="scard i"><div class="sc-lbl">إجمالي الحالات</div><div class="sc-val">${INSP_DATA.banCases.length}</div><div class="sc-sub">ضمن السجل</div></div>
+      <div class="scard w"><div class="sc-lbl">مرتبطة بزيارات</div><div class="sc-val">${INSP_DATA.banCases.filter(b => b.relatedVisitId).length}</div><div class="sc-sub">يوجد أصل رقابي</div></div>
+    </div>
+    ${_tblWrap(['رقم الحظر','المنشأة','نوع الحظر','الزيارة/الأصل','الحالة','تاريخ الإصدار','تاريخ الرفع','إجراء'], rows)}
     ${modal}`;
 }
 
@@ -2856,6 +3102,9 @@ function renderBanCasesList(role) {
 function renderBanCaseDetails(role) {
   const id = getParam('id') || '2025-06-000001';
   const b = INSP_DATA.banCases.find(x => x.id === id) || INSP_DATA.banCases[0];
+  const relatedVisit = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled].find(v => v.id === b.relatedVisitId);
+  const relatedEmployer = (INSP_DATA.employers || []).find(e => e.id === b.employerId);
+  const relatedAppeals = (INSP_DATA.appeals || []).filter(a => a.relatedId === b.id);
 
   const pgHead = `<div class="pg-head"><div><h1>${b.id}</h1><p>حالة حظر — ${b.employerName}</p></div>
     <div class="pg-acts">${statusBadge(b.status)}<button class="btn btn-secondary btn-sm" onclick="navigateTo('ban-cases-list')">${ICONS.arrow_right}رجوع</button>
@@ -2877,13 +3126,34 @@ function renderBanCaseDetails(role) {
       <div class="fgrp"><label class="flbl">المنشأة</label><div class="fro txp fw7">${b.employerName}</div></div>
       <div class="fgrp"><label class="flbl">تاريخ الإصدار</label><div class="fro">${b.issuedDate}</div></div>
       <div class="fgrp"><label class="flbl">أصدره</label><div class="fro">${b.issuedBy}</div></div>
+      <div class="fgrp"><label class="flbl">نوع الحظر</label><div class="fro">${b.type}</div></div>
+      <div class="fgrp"><label class="flbl">المدة</label><div class="fro">${b.duration || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">انتهاء الحظر</label><div class="fro">${b.expiryDate || 'غير محدد'}</div></div>
+      ${relatedVisit ? `<div class="fgrp"><label class="flbl">الزيارة المرتبطة</label><div class="fro txp fw7">${b.relatedVisitId}</div></div>` : ''}
       <div class="fgrp span-full"><label class="flbl">سبب الحظر</label><div class="fro" style="min-height:50px">${b.reason}</div></div>
+      ${b.conditions && b.conditions.length ? `<div class="fgrp span-full"><label class="flbl">شروط رفع الحظر</label><div class="fro">${b.conditions.map(x => `<div style="padding:4px 0;border-bottom:1px solid var(--border)">${x}</div>`).join('')}</div></div>` : ''}
       ${b.liftedDate ? `<div class="fgrp"><label class="flbl">تاريخ رفع الحظر</label><div class="fro txp">${b.liftedDate}</div></div>` : ''}
       ${b.liftedBy ? `<div class="fgrp"><label class="flbl">رُفع بواسطة</label><div class="fro">${b.liftedBy}</div></div>` : ''}
     </div></div></div>`;
 
   const banActionPanel = b.status.includes('سارٍ') ? _dpanel('رفع الحظر أو تعديله', ['رفع الحظر','تعديل شروط الحظر'],
     `<div class="fgrp"><label class="flbl">سبب رفع الحظر أو تعديله</label><textarea class="fc" rows="3" placeholder="اكتب المبرر..."></textarea></div>`) : '';
+
+  const linkedCaseCard = `<div class="card"><div class="ph"><h3><span class="pico or">${ICONS.file}</span>الأصل الرقابي المرتبط</h3></div>
+    <div class="pb"><div class="fg fg-2">
+      ${relatedVisit ? `<div class="fgrp"><label class="flbl">رقم الزيارة</label><div class="fro txp fw7">${relatedVisit.id}</div></div>` : '<div class="fgrp"><label class="flbl">رقم الزيارة</label><div class="fro">—</div></div>'}
+      ${relatedVisit ? `<div class="fgrp"><label class="flbl">حالة الزيارة</label><div class="fro">${statusBadge(relatedVisit.status)}</div></div>` : '<div class="fgrp"><label class="flbl">حالة الزيارة</label><div class="fro">—</div></div>'}
+      ${relatedVisit ? `<div class="fgrp"><label class="flbl">المفتش</label><div class="fro">${relatedVisit.inspectorName || '—'}</div></div>` : ''}
+      ${relatedEmployer ? `<div class="fgrp"><label class="flbl">مستوى مخاطر المنشأة</label><div class="fro"><span class="badge ${_riskClass(relatedEmployer.riskLevel)}">${relatedEmployer.riskLevel}</span></div></div>` : ''}
+      ${relatedVisit ? `<div class="fgrp span-full"><label class="flbl">سبب الإجراء الرقابي</label><div class="fro">${relatedVisit.reason || relatedVisit.purpose || 'تم الربط بالزيارة المسجلة في النظام.'}</div></div>` : `<div class="fgrp span-full"><label class="flbl">سبب الإجراء الرقابي</label><div class="fro">تم إصدار الحظر بناءً على أصل رقابي مسجل.</div></div>`}
+    </div>
+    ${relatedVisit ? `<div class="df ac g8" style="margin-top:14px"><button class="btn btn-secondary btn-sm" onclick="navigateTo('${relatedVisit.id.includes('-04-') ? 'visit-surprise-details' : relatedVisit.id.includes('-05-') ? 'visit-scheduled-details' : 'visit-periodic-details'}','id=${relatedVisit.id}')">${ICONS.eye}عرض تفاصيل الزيارة</button></div>` : ''}
+    </div></div>`;
+
+  const relatedAppealsCard = `<div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.file}</span>التظلمات المرتبطة</h3></div>
+    <div class="pb">
+      ${relatedAppeals.length ? _tblWrap(['رقم التظلم','المقدم','الحالة','تاريخ التقديم','إجراء'], relatedAppeals.map(a => `<tr><td class="txp fw7">${a.id}</td><td>${a.submittedByName}</td><td>${statusBadge(a.status)}</td><td>${a.submitDate}</td><td><button class="btn btn-primary btn-xs" onclick="navigateTo('appeal-details','id=${a.id}')">${ICONS.eye}عرض</button></td></tr>`).join('')) : '<div class="tx3 fs11">لا توجد تظلمات مرتبطة بهذه الحالة</div>'}
+    </div></div>`;
 
   const timelineCard = `<div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>سجل الأحداث</h3></div>
     <div class="pb">${renderTimeline(b.timeline || [])}</div></div>`;
@@ -2892,10 +3162,11 @@ function renderBanCaseDetails(role) {
   const tid = 'bdt-' + b.id.replace(/[^a-z0-9]/gi, '-');
   const tabs = [
     { label: 'تفاصيل الحظر', content: banDetailsCard },
+    { label: 'الأصل المرتبط', content: linkedCaseCard + relatedAppealsCard },
     { label: 'الإجراءات', content: banActionPanel || '<p class="tx3 fs11" style="padding:16px">لا توجد إجراءات متاحة — الحظر مرفوع أو منتهي</p>', badge: hasAction ? '!' : '' },
     { label: 'سجل الأحداث', content: timelineCard },
   ];
-  return pgHead + summaryBar + _tabView(tid, tabs, hasAction ? 1 : 0);
+  return pgHead + summaryBar + _tabView(tid, tabs, hasAction ? 2 : 0);
 }
 
 /* ── تحليل المخاطر (ops-analyst) ── */
@@ -3668,12 +3939,26 @@ function renderReportDetails(role) {
 /* ── زيارات جهة العمل / المؤمن عليه ── */
 function renderEmployerVisitsList(role) {
   const all = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled];
+  const currentUser = INSP_DATA.users[role] || {};
+  const employer = role === 'employer'
+    ? (INSP_DATA.employers || []).find(e => e.name === currentUser.dept)
+    : null;
+  const myEmployerId = employer ? employer.id : null;
+  const myCivil = role === 'insured' ? currentUser.civil : null;
+  const scoped = role === 'employer'
+    ? all.filter(v => !myEmployerId || v.employerId === myEmployerId)
+    : role === 'insured'
+      ? all.filter(v => {
+          const workersForEmployer = (INSP_DATA.workers || []).filter(w => w.employerId === v.employerId).map(w => w.civil);
+          return workersForEmployer.includes(myCivil);
+        })
+      : all;
   const _vTypeKey = v => v.id.includes('-03-') ? 'periodic' : v.id.includes('-04-') ? 'surprise' : 'scheduled';
   const _vDetPage = v => v.id.includes('-03-') ? 'visit-periodic-details' : v.id.includes('-04-') ? 'visit-surprise-details' : 'visit-scheduled-details';
   const typeLabel = v => v.id.includes('-03-') ? 'دورية' : v.id.includes('-04-') ? 'مفاجئة' : 'مجدولة';
   const isCompleted = v => v.status && (v.status.includes('تم اعتماد') || v.status.includes('مغلقة'));
 
-  const rows = all.map(v =>
+  const rows = scoped.map(v =>
     `<tr>
       <td><a href="#" onclick="navigateTo('${_vDetPage(v)}','id=${v.id}&type=${_vTypeKey(v)}')" class="txp fw7">${v.id}</a></td>
       <td>${typeLabel(v)}</td>
@@ -3687,7 +3972,7 @@ function renderEmployerVisitsList(role) {
       </div></td>
     </tr>`).join('');
 
-  return `<div class="pg-head"><div><h1>الزيارات التفتيشية</h1><p>جميع الزيارات المتعلقة بمنشأتك — ${all.length} زيارة</p></div></div>
+  return `<div class="pg-head"><div><h1>الزيارات التفتيشية</h1><p>${role === 'insured' ? 'الزيارات المرتبطة بجهة عملك الحالية' : 'جميع الزيارات المتعلقة بمنشأتك'} — ${scoped.length} زيارة</p></div></div>
     ${_filterBar([{label:'نوع الزيارة',type:'select',opts:['دورية','مفاجئة','مجدولة']},{label:'الحالة',type:'select',opts:['مجدولة','جارية','بانتظار مراجعة المحضر','تم اعتماد المحضر','مغلقة']},{label:'من تاريخ',type:'date'}])}
     ${_tblWrap(['رقم الزيارة','النوع','المفتش','الحالة','التاريخ المجدول','تاريخ التنفيذ','إجراء'], rows || _noData())}`;
 }

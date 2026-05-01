@@ -13,15 +13,16 @@
   <script src="../shared/components.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const role = resolveContextRole('monitoring-employee');
       initLayout({
-        role: 'monitoring-employee',
+        role: role,
         activePage: 'family-benefits-requests-list',
         breadcrumb: [
           { label: 'الرئيسية', onclick: 'goHome()' },
           { label: 'طلبات منافع دخل الأسرة' }
         ]
       });
-      renderContent(renderFamilyBenefitRequestsList('monitoring-employee'));
+      renderContent(renderFamilyBenefitRequestsList(role));
     });
   </script>
 </body>

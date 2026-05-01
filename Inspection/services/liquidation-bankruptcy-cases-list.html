@@ -13,15 +13,16 @@
   <script src="../shared/components.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const role = resolveContextRole('monitoring-employee');
       initLayout({
-        role: 'monitoring-employee',
+        role: role,
         activePage: 'liquidation-bankruptcy-cases-list',
         breadcrumb: [
           { label: 'الرئيسية', onclick: 'goHome()' },
           { label: 'حالات التصفية والإفلاس' }
         ]
       });
-      renderContent(renderLiquidationBankruptcyCasesList());
+      renderContent(renderLiquidationBankruptcyCasesList(role));
     });
   </script>
 </body>

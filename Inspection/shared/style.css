@@ -87,6 +87,18 @@ input, select, textarea { font-family: inherit }
 .h-bc .bc-sep { font-size: 10px; color: rgba(255,255,255,.45) }
 
 .h-acts { display: flex; align-items: center; gap: 6px; flex-shrink: 0 }
+.h-profile-switch { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.1) }
+.h-profile-switch label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,.82); white-space: nowrap }
+.h-profile-switch select { min-width: 170px; padding: 5px 28px 5px 10px; border: 1px solid rgba(255,255,255,.22); border-radius: 999px; background: rgba(255,255,255,.12); color: #fff; font-size: 11px }
+.h-profile-switch select:focus { outline: none; border-color: rgba(255,255,255,.4); box-shadow: none }
+.h-profile-switch select option { color: var(--text) }
+.h-availability-badge { display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.1); color: #fff; font-size: 11px; font-weight: 700 }
+.h-availability-badge:hover { background: rgba(255,255,255,.16) }
+.h-availability-badge .badge { background: rgba(255,255,255,.18); color: #fff; padding: 3px 8px }
+.h-availability-badge .badge::before { background: currentColor }
+.availability-switcher-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px }
+.availability-switcher-option { display: flex; align-items: center; justify-content: center; min-height: 42px; border: 1px solid var(--border); border-radius: var(--rsm); background: #fff; font-size: 12.5px; font-weight: 700; color: var(--text2) }
+.availability-switcher-option:hover { border-color: var(--primary); background: var(--primary-l); color: var(--primary) }
 
 .hbtn { width: 34px; height: 34px; border-radius: var(--r); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.86); transition: var(--tr); position: relative; border: 1px solid transparent }
 .hbtn:hover { background: rgba(255,255,255,.16); color: #fff }
@@ -258,6 +270,14 @@ select.fc { cursor: pointer }
 .b-closed { background: var(--g100); color: var(--g500) }
 .b-closed::before { background: var(--g400) }
 .b-active { background: var(--success-l); color: var(--success) }
+.b-away { background: var(--warning-l); color: var(--warning) }
+.b-away::before { background: var(--warning) }
+.b-break { background: #e0f2fe; color: #075985 }
+.b-break::before { background: #0284c7 }
+.b-meeting { background: #ede9fe; color: #5b21b6 }
+.b-meeting::before { background: #8b5cf6 }
+.b-leave { background: #fce7f3; color: #9d174d }
+.b-leave::before { background: #ec4899 }
 .b-active::before { background: #16a34a }
 .b-expired { background: var(--warning-l); color: var(--warning) }
 .b-expired::before { background: var(--warning) }

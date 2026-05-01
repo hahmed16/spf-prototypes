@@ -507,6 +507,274 @@ function renderUnifiedFilterBar({ onSearch = 'noopUnifiedSearch', onToggleAll = 
     </div>`;
 }
 
+function renderPendingDiscussionPage(role, {
+  title = 'الطلبات المعلّقة للنقاش',
+  subtitle = 'الطلبات التي تم تعليمها أو ترشيحها لمناقشتها في الاجتماع الأسبوعي',
+  detailPage = 'allowances-details.html',
+  nextMeeting = '2026-05-04',
+} = {}) {
+  const accessible = getFilteredData({ role, data: WI_DATA.allowances || [], showAll: false });
+  const flagged = accessible.filter((item) => item.discussionFlagged);
+  const candidates = accessible.slice(0, 6);
+
+  getContent().innerHTML = `
+    <div class="pg-head">
+      <div>
+        <h1>${title}</h1>
+        <p>${subtitle}</p>
+      </div>
+    </div>
+
+    <div class="alert alert-i">
+      ${ICONS.bell}
+      <div>
+        <strong>الاجتماع الأسبوعي القادم:</strong> ${formatDate(nextMeeting)} — الغرض من هذه الشاشة هو إظهار الحالات المقترحة للنقاش دون تغيير مسار الطلب الحالي.
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:18px">
+      <div class="pb" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div class="fgrp" style="margin:0">
+          <label class="flbl">هدف الشاشة</label>
+          <div class="fro">تجميع الحالات التي تحتاج مناقشة جماعية أو رأياً إضافياً قبل استكمال الإجراء.</div>
+        </div>
+        <div class="fgrp" style="margin:0">
+          <label class="flbl">إجراءات هذا الدور</label>
+          <div class="fro">عرض الحالة، ووسم أي طلب متاح لهذا الدور بأنه <strong>للنقاش</strong> ليدرج في الاجتماع القادم.</div>
+        </div>
+        <div class="fgrp" style="margin:0">
+          <label class="flbl">ملاحظة Prototype</label>
+          <div class="fro">زر <strong>تعليم للنقاش</strong> هنا لإظهار القابلية فقط، وليس لتفعيل منطق تشغيلي كامل في هذه المرحلة.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-grid" style="margin-bottom:18px">
+      <div class="scard p"><div class="sc-lbl">طلبات هذا الدور</div><div class="sc-val">${accessible.length}</div><div class="sc-sub">طلبات متاحة ضمن صلاحية الدور</div></div>
+      <div class="scard w"><div class="sc-lbl">معلّمة للنقاش</div><div class="sc-val">${flagged.length}</div><div class="sc-sub">ستعرض في الاجتماع الأسبوعي</div></div>
+      <div class="scard i"><div class="sc-lbl">قابلة للوسم</div><div class="sc-val">${candidates.length}</div><div class="sc-sub">أمثلة على حالات يمكن تعليمها للنقاش</div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:18px">
+      <div class="ph">
+        <h3><div class="pico or">${ICONS.bell}</div>الطلبات المعلّقة / المعلّمة للنقاش</h3>
+        <span style="font-size:12px;color:var(--text3)">${flagged.length} طلب</span>
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>المؤمن عليه</th>
+                <th>النوع</th>
+                <th>الحالة الحالية</th>
+                <th>المسؤول الحالي</th>
+                <th>سبب النقاش</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${flagged.length ? flagged.map((item) => `
+                <tr>
+                  <td style="font-family:monospace;font-weight:700;color:var(--primary)">${item.id}</td>
+                  <td>${item.insured?.name || '—'}</td>
+                  <td>${item.type || '—'}${item.subtype ? ` — ${item.subtype}` : ''}</td>
+                  <td>${statusBadge(item.status)}</td>
+                  <td>${item.assignedTo || item.checkedOutBy || '—'}</td>
+                  <td style="font-size:12px">${item.discussionReason || 'وجود تعارض أو حاجة لرأي جماعي قبل استكمال الإجراء'}</td>
+                  <td><a href="${detailPage}?id=${item.id}" class="btn btn-secondary btn-xs">عرض</a></td>
+                </tr>`).join('') : `
+                <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text3)">لا توجد طلبات معلّمة للنقاش حالياً، لكن القدرة ظاهرة أدناه على الطلبات المتاحة.</td></tr>
+              `}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ph">
+        <h3><div class="pico bl">${ICONS.list}</div>طلبات متاحة يمكن تعليمها للنقاش</h3>
+        <span style="font-size:12px;color:var(--text3)">أمثلة توضيحية للقدرة المتاحة لهذا الدور</span>
+      </div>
+      <div class="pb-0">
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>المؤمن عليه</th>
+                <th>النوع</th>
+                <th>الحالة الحالية</th>
+                <th>المسؤول الحالي</th>
+                <th>إظهار القابلية</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${candidates.length ? candidates.map((item) => `
+                <tr>
+                  <td style="font-family:monospace;font-weight:700;color:var(--primary)">${item.id}</td>
+                  <td>${item.insured?.name || '—'}</td>
+                  <td>${item.type || '—'}${item.subtype ? ` — ${item.subtype}` : ''}</td>
+                  <td>${statusBadge(item.status)}</td>
+                  <td>${item.assignedTo || item.checkedOutBy || '—'}</td>
+                  <td>
+                    <button class="btn ${item.discussionFlagged ? 'btn-warning' : 'btn-secondary'} btn-xs" onclick="showToast('إظهار قابلية تعليم الطلب للنقاش ضمن هذا الدور فقط','i')">
+                      ${ICONS.bell} ${item.discussionFlagged ? 'معلّم للنقاش' : 'تعليم للنقاش'}
+                    </button>
+                  </td>
+                  <td><a href="${detailPage}?id=${item.id}" class="btn btn-secondary btn-xs">عرض</a></td>
+                </tr>`).join('') : `
+                <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text3)">لا توجد طلبات متاحة لهذا الدور في عينة البيانات الحالية</td></tr>
+              `}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function getInstitutionReferralStageKey(status = '') {
+  const text = String(status || '');
+  if (text.includes('بانتظار مراجعة موظف قسم اللجان الطبية') || text.includes('بانتظار مراجعة رئيس قسم اللجان الطبية')) {
+    return 'pending-review';
+  }
+  if (text.includes('بانتظار إحالة المقرر') || text.includes('متابعة الحالة مع المؤسسة الصحية')) {
+    return 'coordination';
+  }
+  if (text.includes('جدولة جلسة') || text.includes('جلسة')) {
+    return 'scheduled';
+  }
+  if (text.includes('تم اتخاذ القرار') || text.includes('تم استلام قرار المؤسسة الصحية')) {
+    return 'decision';
+  }
+  return 'other';
+}
+
+function getInstitutionReferralStageLabel(stageKey) {
+  const labels = {
+    'pending-review': 'بانتظار المراجعة',
+    coordination: 'قيد التنسيق',
+    scheduled: 'جلسة مجدولة',
+    decision: 'صدر قرار',
+    other: 'مسار آخر',
+  };
+  return labels[stageKey] || 'مسار آخر';
+}
+
+function getInstitutionReferralOwnerLabel(status = '') {
+  const text = String(status || '');
+  if (text.includes('بانتظار مراجعة موظف قسم اللجان الطبية')) return 'موظف قسم اللجان الطبية';
+  if (text.includes('بانتظار مراجعة رئيس قسم اللجان الطبية')) return 'رئيس قسم اللجان الطبية';
+  if (text.includes('بانتظار إحالة المقرر')) return 'مقرر المؤسسة الصحية';
+  if (text.includes('متابعة الحالة مع المؤسسة الصحية')) return 'منسق الإحالات / المؤسسة الصحية';
+  if (text.includes('جدولة جلسة')) return 'المؤسسة الصحية';
+  if (text.includes('تم اتخاذ القرار') || text.includes('تم استلام قرار المؤسسة الصحية')) return 'التنفيذ / الجهة المختصة';
+  return '—';
+}
+
+function getInstitutionReferralNextStepLabel(status = '') {
+  const text = String(status || '');
+  if (text.includes('بانتظار مراجعة موظف قسم اللجان الطبية')) return 'التحقق من الملف وإضافة التوصية';
+  if (text.includes('بانتظار مراجعة رئيس قسم اللجان الطبية')) return 'اعتماد المسار أو توجيه الملاحظات';
+  if (text.includes('بانتظار إحالة المقرر')) return 'ربط الطلب بمقرر المؤسسة وتأكيد الجهة';
+  if (text.includes('متابعة الحالة مع المؤسسة الصحية')) return 'التأكد من تثبيت الجلسة ومتابعة الرد';
+  if (text.includes('جدولة جلسة')) return 'متابعة انعقاد الجلسة ونتيجتها';
+  if (text.includes('تم اتخاذ القرار') || text.includes('تم استلام قرار المؤسسة الصحية')) return 'استكمال التنفيذ وربط القرار';
+  return 'متابعة الحالة';
+}
+
+function getInstitutionReferralCases() {
+  const allowanceStatuses = [
+    'بانتظار مراجعة موظف قسم اللجان الطبية',
+    'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية',
+    'تم إرسال قرار المؤسسة الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية',
+    'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة رئيس قسم اللجان الطبية',
+    'تم الموافقة على العرض على المؤسسات الصحية المرخصة — بانتظار إحالة المقرر',
+    'تم الإحالة إلى مقرر المؤسسة الصحية المرخصة — بانتظار جدولة جلسة',
+    'تم جدولة جلسة للعرض على المؤسسة الصحية المرخصة',
+    'تم اتخاذ القرار من المؤسسة الصحية المرخصة — بانتظار التنفيذ',
+  ];
+  const directReferralStatuses = [
+    'تم اعتماد طلب العرض المباشر — بانتظار مراجعة موظف قسم اللجان الطبية',
+    'تم اعتماد طلب العرض المباشر — بانتظار مراجعة رئيس قسم اللجان الطبية',
+    'تم اعتماد طلب العرض المباشر — بانتظار إحالة المقرر',
+    'تمت متابعة الحالة مع المؤسسة الصحية — بانتظار انعقاد الجلسة',
+    'تم استلام قرار المؤسسة الصحية — بانتظار استكمال التنفيذ',
+  ];
+
+  const cases = [];
+
+  (WI_DATA.allowances || []).forEach((req) => {
+    if (!allowanceStatuses.some((status) => req.status === status || String(req.status || '').includes(status))) return;
+    cases.push({
+      id: req.id,
+      requestType: req.type ? `${req.type}${req.subtype ? ` — ${req.subtype}` : ''}` : (req.requestType || 'بدلات انقطاع'),
+      beneficiaryName: req.insured?.name || req.applicant?.name || '—',
+      institutionName: req.referral?.institution || req.assignedInstitution || 'مؤسسة صحية مرخصة',
+      referralDate: req.referral?.date || req.lastUpdate || req.submitDate || '',
+      sessionDate: req.sessionDate || req.referral?.sessionDate || '',
+      status: req.status,
+      remainingDays: req.remainingDays,
+      suspended: req.suspended,
+      sourceFlow: 'بدلات الانقطاع',
+      currentOwner: getInstitutionReferralOwnerLabel(req.status),
+      nextStep: getInstitutionReferralNextStepLabel(req.status),
+      stageKey: getInstitutionReferralStageKey(req.status),
+      entityType: 'allowance',
+      raw: req,
+    });
+  });
+
+  (WI_DATA.referrals || []).forEach((req) => {
+    if (!directReferralStatuses.some((status) => req.status === status || String(req.status || '').includes(status))) return;
+    cases.push({
+      id: req.id,
+      requestType: req.requestType || 'عرض مباشر',
+      beneficiaryName: req.insured?.name || req.applicant?.name || '—',
+      institutionName: req.assignedInstitution || req.referral?.preferredInstitution || 'مؤسسة صحية مرخصة',
+      referralDate: req.referral?.date || req.lastUpdate || req.submitDate || '',
+      sessionDate: req.sessionDate || req.referral?.sessionDate || '',
+      status: req.status,
+      remainingDays: req.remainingDays,
+      suspended: req.suspended,
+      sourceFlow: 'طلبات العرض المباشر',
+      currentOwner: getInstitutionReferralOwnerLabel(req.status),
+      nextStep: getInstitutionReferralNextStepLabel(req.status),
+      stageKey: getInstitutionReferralStageKey(req.status),
+      entityType: 'direct-referral',
+      raw: req,
+    });
+  });
+
+  return cases.sort((a, b) => new Date(b.referralDate || b.sessionDate || 0) - new Date(a.referralDate || a.sessionDate || 0));
+}
+
+function filterInstitutionReferralCases(cases, { tab = 'all', query = '', requestTypeFilter = 'all' } = {}) {
+  const q = String(query || '').toLowerCase().trim();
+  return (cases || []).filter((item) => {
+    if (tab !== 'all' && item.stageKey !== tab) return false;
+    if (requestTypeFilter && requestTypeFilter !== 'all') {
+      const typeText = String(item.requestType || '').toLowerCase();
+      if (!typeText.includes(String(requestTypeFilter).toLowerCase())) return false;
+    }
+    if (!q) return true;
+    const haystack = [
+      item.id,
+      item.requestType,
+      item.beneficiaryName,
+      item.institutionName,
+      item.status,
+      item.currentOwner,
+      item.nextStep,
+      item.sourceFlow,
+    ].filter(Boolean).join(' ').toLowerCase();
+    return haystack.includes(q);
+  });
+}
+
 function findRequestByIdAcrossScopes(id) {
   if (!id) return null;
   return WI_DATA.referrals.find((r) => r.id === id)
@@ -911,16 +1179,18 @@ function renderActionButtonsPanel(actions = [], {
 
 function getCommitteeDecisionsData() {
   const decisions = [];
-  WI_DATA.referrals.forEach((req) => {
+
+  function pushDecision(req, meta = {}) {
     const decision = req.committeeDecision || req.decision;
     if (!decision?.type) return;
     const linkedAppeals = WI_DATA.appeals.filter((appeal) => appeal.originalRequestId === req.id);
     decisions.push({
-      decisionId: decision.id || `DEC-REF-${req.id}`,
-      sourceType: 'directReferral',
-      committeeType: 'اللجان الطبية',
+      decisionId: decision.id || (meta.decisionPrefix ? `${meta.decisionPrefix}-${req.id}` : `DEC-${req.id}`),
+      sourceType: meta.sourceType || 'request',
+      requestType: meta.requestType || req.requestType || req.type || req.originalRequestType || 'طلب',
+      committeeType: meta.committeeType || 'اللجان الطبية',
       requestId: req.id,
-      beneficiaryName: req.insured?.name || req.applicant?.name || '—',
+      beneficiaryName: meta.beneficiaryName || req.insured?.name || req.applicant?.name || req.institution?.name || req.employer?.name || '—',
       decisionType: decision.type,
       decisionDate: decision.date || req.lastUpdate || req.submitDate,
       status: decision.executionStatus || (decision.executed ? 'منفذة' : 'قيد التنفيذ'),
@@ -929,6 +1199,46 @@ function getCommitteeDecisionsData() {
       linkedAppeals,
       details: decision,
       record: req,
+    });
+  }
+
+  (WI_DATA.referrals || []).forEach((req) => {
+    pushDecision(req, {
+      sourceType: 'directReferral',
+      requestType: req.requestType || req.referral?.requestCategory || 'عرض مباشر',
+      committeeType: 'اللجان الطبية',
+      decisionPrefix: 'DEC-REF',
+      beneficiaryName: req.insured?.name || req.applicant?.name || '—',
+    });
+  });
+
+  (WI_DATA.licensing || []).forEach((req) => {
+    pushDecision(req, {
+      sourceType: 'licensing',
+      requestType: 'ترخيص',
+      committeeType: 'اللجنة الطبية الإشرافية',
+      decisionPrefix: 'DEC-LIC',
+      beneficiaryName: req.institution?.name || req.applicant?.name || 'مؤسسة صحية',
+    });
+  });
+
+  (WI_DATA.allowances || []).forEach((req) => {
+    pushDecision(req, {
+      sourceType: 'allowances',
+      requestType: req.type || 'بدلات انقطاع عن العمل',
+      committeeType: 'اللجان الطبية',
+      decisionPrefix: 'DEC-WI',
+      beneficiaryName: req.insured?.name || req.applicant?.name || '—',
+    });
+  });
+
+  (WI_DATA.chronic || []).forEach((req) => {
+    pushDecision(req, {
+      sourceType: 'chronic',
+      requestType: 'أمراض مستديمة',
+      committeeType: 'اللجان الطبية',
+      decisionPrefix: 'DEC-CHR',
+      beneficiaryName: req.insured?.name || req.applicant?.name || '—',
     });
   });
   return decisions.sort((a, b) => new Date(b.decisionDate) - new Date(a.decisionDate));
@@ -945,13 +1255,17 @@ function openCommitteeDecisionDetailsModal(decisionId) {
         <div class="fgrp"><label class="flbl">رقم القرار</label><div class="fro" style="font-family:monospace">${decision.decisionId}</div></div>
         <div class="fgrp"><label class="flbl">رقم الطلب</label><div class="fro" style="font-family:monospace">${decision.requestId}</div></div>
         <div class="fgrp"><label class="flbl">المستفيد</label><div class="fro">${decision.beneficiaryName}</div></div>
+        <div class="fgrp"><label class="flbl">نوع الطلب</label><div class="fro">${decision.requestType}</div></div>
+        <div class="fgrp"><label class="flbl">اللجنة / الجهة</label><div class="fro">${decision.committeeType}</div></div>
         <div class="fgrp"><label class="flbl">نوع القرار</label><div class="fro">${decision.decisionType}</div></div>
         <div class="fgrp"><label class="flbl">تاريخ القرار</label><div class="fro">${formatDate(decision.decisionDate)}</div></div>
         <div class="fgrp"><label class="flbl">الحالة التنفيذية</label><div class="fro">${statusBadge(decision.status)}</div></div>
         <div class="fgrp span-full"><label class="flbl">نص القرار</label><div class="fro">${decision.details?.summary || decision.details?.details || decision.details?.content || '—'}</div></div>
         <div class="fgrp span-full"><label class="flbl">التظلمات المرتبطة</label><div class="fro">${decision.linkedAppeals.length ? decision.linkedAppeals.map((appeal) => `${appeal.id} — ${appeal.status}`).join('<br>') : 'لا توجد تظلمات مرتبطة'}</div></div>
       </div>`,
-    footer: `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`
+    footer: `
+      <button class="btn btn-secondary btn-sm" onclick="window.location.href='${getRequestHrefById(decision.requestId) || '#'}'">${ICONS.eye} عرض الطلب الأصلي</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`
   });
 }
 
@@ -990,7 +1304,7 @@ function initiateAppealFromDecision(decisionId) {
   const newAppeal = createAppealRequest({
     id: appealId,
     originalRequestId: decision.requestId,
-    originalRequestType: 'عرض مباشر',
+    originalRequestType: decision.requestType || 'قرار لجنة',
     status: 'تم تقديم طلب التظلم — بانتظار مراجعة موظف قسم اللجان الطبية',
     submitDate: new Date().toISOString().slice(0, 10),
     lastUpdate: new Date().toISOString().slice(0, 16).replace('T', ' '),

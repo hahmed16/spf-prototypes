@@ -2793,18 +2793,25 @@ select.fc {
 }
 
 .workflow-strip {
-  display: grid;
-  gap: 10px;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-behavior: smooth;
 }
 
 .workflow-stage {
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
+  gap: 10px;
   padding: 12px 14px;
   border: 1px solid var(--border);
   border-radius: var(--r);
   background: #fff;
+  min-width: 210px;
+  flex: 0 0 210px;
+  position: relative;
 }
 
 .workflow-stage.done {
@@ -2816,6 +2823,21 @@ select.fc {
   border-color: var(--primary);
   box-shadow: 0 8px 18px rgba(18, 168, 101, 0.12);
   background: linear-gradient(180deg, rgba(18, 168, 101, 0.06), #fff);
+}
+
+.workflow-stage:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 27px;
+  left: -12px;
+  width: 12px;
+  height: 2px;
+  background: var(--border);
+}
+
+.workflow-stage.done:not(:last-child)::before,
+.workflow-stage.current:not(:last-child)::before {
+  background: var(--primary);
 }
 
 .workflow-stage-dot {
@@ -2841,6 +2863,7 @@ select.fc {
 .workflow-stage-body {
   display: grid;
   gap: 4px;
+  width: 100%;
 }
 
 .workflow-stage-name {

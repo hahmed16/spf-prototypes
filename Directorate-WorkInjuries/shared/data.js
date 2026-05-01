@@ -116,6 +116,64 @@ const WI_DATA = {
   },
 };
 
+function ensureDemoCheckedOutCoverage() {
+  const users = WI_DATA.users || {};
+  const byId = (collection, id) => (collection || []).find((item) => item.id === id) || null;
+  const assignCheckout = (record, userKey, extras = {}) => {
+    const user = users[userKey];
+    if (!record || !user) return;
+    record.checkedOutBy = user.name;
+    if (!record.assignedTo) record.assignedTo = user.name;
+    Object.assign(record, extras);
+  };
+
+  // Internal operational roles that should always open at least one actionable record
+  // already under their responsibility during prototype walkthroughs.
+  assignCheckout(byId(WI_DATA.allowances, 'WI-2025-001198'), 'injury_head', {
+    assignedTo: users.injury_head?.name || null,
+  });
+  assignCheckout(byId(WI_DATA.allowances, 'WI-2025-001243'), 'od_head', {
+    assignedTo: users.od_head?.name || null,
+  });
+  assignCheckout(byId(WI_DATA.allowances, 'WI-2025-001245'), 'sickleave_head', {
+    assignedTo: users.sickleave_head?.name || null,
+  });
+  assignCheckout(byId(WI_DATA.referrals, 'REF-2025-000123'), 'referral_coordinator', {
+    assignedTo: users.referral_coordinator?.name || null,
+  });
+
+  // Committee / rapporteur walkthrough coverage
+  assignCheckout(byId(WI_DATA.allowances, 'WI-2025-001246'), 'od_committee', {
+    assignedTo: users.od_committee?.name || null,
+  });
+  assignCheckout(byId(WI_DATA.appeals, 'APP-2025-000069'), 'appeals_rapporteur', {
+    assignedTo: users.appeals_rapporteur?.name || null,
+  });
+  assignCheckout(byId(WI_DATA.licensing, 'LIC-2025-001606'), 'supervisory_rapporteur', {
+    assignedTo: users.supervisory_rapporteur?.name || null,
+  });
+  assignCheckout(byId(WI_DATA.sessions, 'SES-2025-0112'), 'institution_rapporteur');
+  assignCheckout(byId(WI_DATA.sessions, 'SES-2025-0115'), 'licensed_institution');
+  assignCheckout(byId(WI_DATA.sessions, 'SES-2025-0101'), 'supervisory_committee');
+  assignCheckout(byId(WI_DATA.sessions, 'SES-2025-0120'), 'appeals_committee');
+  assignCheckout(byId(WI_DATA.licensing, 'LIC-2025-001605'), 'hospital_delegate');
+
+  // Sample requests to demonstrate "mark for discussion" capability on related internal pages.
+  const discussionSeeds = [
+    { id: 'WI-2025-001198', reason: 'الحالة تحتاج مناقشة التوصية قبل اعتماد رئيس القسم.' },
+    { id: 'WI-2025-001243', reason: 'يوجد جانب فني يحتاج رأياً جماعياً قبل قرار رئيس القسم.' },
+    { id: 'WI-2025-001245', reason: 'مراجعة فترات الإجازة المرضية تستدعي مناقشة داخلية.' },
+  ];
+  discussionSeeds.forEach(({ id, reason }) => {
+    const record = byId(WI_DATA.allowances, id);
+    if (!record) return;
+    record.discussionFlagged = true;
+    record.discussionReason = reason;
+  });
+}
+
+ensureDemoCheckedOutCoverage();
+
 /* ================================================================
    Make data available globally for browser loading
    ================================================================ */

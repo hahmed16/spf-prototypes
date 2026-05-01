@@ -13,8 +13,9 @@
   <script src="../shared/components.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const role = resolveContextRole('monitoring-employee');
       initLayout({
-        role: 'monitoring-employee',
+        role: role,
         activePage: 'liquidation-bankruptcy-case-details',
         breadcrumb: [
           { label: 'الرئيسية', onclick: 'goHome()' },
@@ -22,7 +23,7 @@
           { label: 'تفاصيل الحالة' }
         ]
       });
-      renderContent(renderLiquidationBankruptcyDetails('monitoring-employee'));
+      renderContent(renderLiquidationBankruptcyDetails(role));
     });
   </script>
 </body>
