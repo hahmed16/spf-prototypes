@@ -3,6 +3,27 @@
    نظام إدارة التفتيش — صندوق الحماية الاجتماعية
    ================================================================ */
 
+/* ── استلام البلاغ وكشف البيانات (global — must not be injected via innerHTML) ── */
+function _receiveComplaint(btn, id) {
+  var row = btn.closest('tr');
+  if (!row) return;
+  var c = (INSP_DATA.complaints || []).find(function(x) { return x.id === id; });
+  /* reveal complaint ID */
+  var idCell = row.cells[0];
+  if (idCell) idCell.innerHTML = '<a href="#" onclick="navigateTo(\'complaint-details\',\'id=' + id + '\')" class="txp fw7">' + id + '</a>';
+  /* reveal employer name */
+  var empCell = row.cells[3];
+  if (empCell && c) empCell.textContent = c.employerName || '—';
+  /* reveal submitter name */
+  var subCell = row.cells[2];
+  if (subCell && c) subCell.textContent = c.submittedByName || '—';
+  row.classList.remove('masked-row');
+  btn.disabled = true;
+  btn.textContent = '...';
+  showToast('تم استلام البلاغ — جارٍ الانتقال لصفحة التفاصيل', 's');
+  setTimeout(function() { navigateTo('complaint-details', 'id=' + id); }, 1200);
+}
+
 /* ── مساعدات داخلية ── */
 function _priClass(p) {
   return p === 'عاجل' ? 'b-high' : p === 'مرتفع' ? 'b-invest' : p === 'متوسط' ? 'b-medium' : 'b-low';
@@ -27,7 +48,7 @@ function _filterBar(fields) {
   const inputs = fields.map(f => `<div class="fgrp"><label class="flbl">${f.label}</label>${f.type === 'select' ?
     `<select class="fc"><option value="">الكل</option>${(f.opts || []).map(o => `<option>${o}</option>`).join('')}</select>` :
     `<input type="${f.type || 'text'}" class="fc" placeholder="${f.ph || ''}">`}</div>`).join('');
-  return `<div class="filters unified-filter-panel"><div class="fgrid unified-filter-row">${inputs}</div>
+  return `<div class="filters unified-filter-panel"><div class="fgrid unified-filter-row" style="grid-template-columns:repeat(${fields.length},minmax(0,1fr))">${inputs}</div>
   <div class="facts"><button class="btn btn-primary btn-sm">${ICONS.search}بحث</button><button class="btn btn-secondary btn-sm">إعادة تعيين</button></div></div>`;
 }
 function _tblWrap(headers, rows) {
@@ -307,11 +328,10 @@ function _recentItems(role) {
   const rows = INSP_DATA.complaints.slice(0, 4).map(c =>
     `<tr><td><a href="#" onclick="navigateTo('complaint-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
      <td>${c.type}</td><td>${statusBadge(c.status)}</td>
-     <td><span class="badge ${_priClass(c.priority)}">${c.priority}</span></td>
      <td>${c.submitDate || '—'}</td>
      <td><button class="btn btn-primary btn-xs" onclick="navigateTo('complaint-details','id=${c.id}')">عرض</button></td></tr>`).join('');
   return `<div class="card dashboard-current-work"><div class="ph"><h3>${ICONS.inbox} آخر البلاغات</h3></div>
-    <div class="tbl-wrap"><table class="dtbl"><thead><tr><th>الرقم</th><th>النوع</th><th>الحالة</th><th>الأولوية</th><th>تاريخ تقديم الطلب</th><th>إجراء</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+    <div class="tbl-wrap"><table class="dtbl"><thead><tr><th>الرقم</th><th>النوع</th><th>الحالة</th><th>تاريخ تقديم الطلب</th><th>إجراء</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
 
 /* ── قائمة البلاغات ── */
@@ -446,6 +466,26 @@ function renderComplaintsList(role) {
     data = [...preferred, ...rest];
   }
 
+  const TODAY_STR = '2025-01-22';
+  function _slaCell(c, isExternal) {
+    if (!c.dueDate || c.status.includes('إغلاق') || c.status.includes('قرار') || c.status.includes('حفظ') || c.status.includes('رفض')) {
+      return '<td>—</td>';
+    }
+    const remaining = Math.ceil((new Date(c.dueDate) - new Date(TODAY_STR)) / 86400000);
+    let badge, label;
+    if (remaining > 3) {
+      badge = 'b-approved'; label = `${remaining} يوم متبقي`;
+    } else if (remaining >= 0) {
+      badge = 'b-session'; label = `${remaining} أيام — قريب`;
+    } else {
+      badge = 'b-high'; label = `متأخر ${Math.abs(remaining)} يوم`;
+    }
+    const escalateBtn = isExternal && remaining < 0
+      ? `<br><button class="btn btn-xs btn-warning" style="margin-top:4px" onclick="showToast('تم إرسال طلب التصعيد بنجاح','s')">${ICONS.escalate}تصعيد</button>`
+      : '';
+    return `<td><span class="badge ${badge}" style="font-size:11px">${label}</span>${escalateBtn}</td>`;
+  }
+
   const rows = data.map(c => {
     const ml = maskLevel(c);
     const isMasked = ml !== 'none';
@@ -463,18 +503,23 @@ function renderComplaintsList(role) {
 
     const extraCols = isExt ? '' : `<td>${ml === 'none' ? (c.assignedTo || '<span class="tx3">غير معين</span>') : maskedText(ml, c.assignedTo, true)}</td>`;
 
+    const idCell = isFullMask
+      ? `<span class="masked-field">${ICONS.lock}<span class="masked-dots">••••••••</span></span>`
+      : `<a href="#" onclick="navigateTo('complaint-details','id=${c.id}')" class="txp fw7">${c.id}</a>`;
+
     return `<tr class="${rowClass}">
-      <td><a href="#" onclick="navigateTo('complaint-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
+      <td>${idCell}</td>
       <td>${c.type}</td>
       ${isExt ? '' : `<td>${maskedText(ml, c.submittedByName, true)}</td>`}
       <td>${maskedText(ml, c.employerName, false)}</td>
       <td>${statusBadge(c.status)}</td>
-      <td><span class="badge ${_priClass(c.priority)}">${c.priority}</span></td>
+      ${isExt ? '' : `<td><span class="badge ${_priClass(c.priority)}">${c.priority}</span></td>`}
       ${extraCols}
       <td>${c.submitDate || '—'}</td>
+      ${isFullMask ? '<td>—</td>' : _slaCell(c, isExt)}
       <td><div class="df ac g8">
         ${isMasked && isFullMask
-          ? checkoutBtn
+          ? `<button class="btn btn-accent btn-xs masked-checkout-btn" onclick="_receiveComplaint(this,'${c.id}')">${ICONS.unlock}استلام</button>`
           : `<button class="btn btn-primary btn-xs" onclick="navigateTo('complaint-details','id=${c.id}')">${ICONS.eye}عرض</button>${checkoutBtn}`
         }
       </div></td>
@@ -482,8 +527,8 @@ function renderComplaintsList(role) {
   }).join('');
 
   const headers = isExt
-    ? ['رقم البلاغ','النوع','المنشأة','الحالة','الأولوية','تاريخ تقديم الطلب','إجراء']
-    : ['رقم البلاغ','النوع','مقدم البلاغ','المنشأة','الحالة','الأولوية','الموظف المختص','تاريخ تقديم الطلب','إجراء'];
+    ? ['رقم البلاغ','النوع','المنشأة','الحالة','تاريخ تقديم الطلب','الأيام المتبقية / SLA','إجراء']
+    : ['رقم البلاغ','النوع','مقدم البلاغ','المنشأة','الحالة','الأولوية','الموظف المختص','تاريخ تقديم الطلب','الأيام المتبقية / SLA','إجراء'];
 
   /* Masking legend banner for internal roles */
   const maskBanner = applyMasking ? `
@@ -498,6 +543,8 @@ function renderComplaintsList(role) {
         <div class="mask-leg-item"><span class="mask-dot mine"></span>بيانات مرئية (معينة لك)</div>
       </div>
     </div>` : '';
+
+  /* _receiveComplaint is defined globally at top of components.js */
 
   return `<div class="pg-head"><div><h1>قائمة البلاغات</h1><p>${data.length} بلاغ إجمالاً</p></div>
     <div class="pg-acts">${createBtn}<button class="btn btn-secondary btn-sm">${ICONS.download}تصدير</button></div></div>
@@ -544,69 +591,85 @@ function renderComplaintNew(role) {
       </div></div></div>`;
     }
     if (isInsured && myEmp) {
-      /* المؤمن عليه — بيانات صاحب العمل الحالي تلقائية، مع خيار اختيار آخر */
-      return `<div class="card"><div class="ph"><h3><span class="pico or">${ICONS.building}</span>بيانات صاحب العمل</h3></div>
-      <div class="pb">
-        <div class="fg fg-2 mb12">
-          <div class="fgrp"><label class="flbl">يتعلق البلاغ بـ</label>
-            <select class="fc" onchange="_toggleEmployerLookup(this.value)">
-              <option value="current">صاحب العمل الحالي — ${myEmp.name}</option>
-              <option value="other">صاحب عمل آخر</option>
-            </select></div>
-        </div>
-        <div id="emp-current-data">
-          <div class="fg fg-2">
-            <div class="fgrp"><label class="flbl">اسم المنشأة</label><div class="fro fw7">${myEmp.name}</div></div>
-            <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro">${myEmp.crn}</div></div>
-          </div>
-        </div>
-        <div id="emp-other-lookup" style="display:none">
-          <div class="fg fg-2">
-            <div class="fgrp"><label class="flbl">رقم السجل التجاري <span class="req">*</span></label>
-              <div style="display:flex;gap:8px"><input class="fc" id="other-crn-input" placeholder="أدخل رقم السجل التجاري">
-              <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ الاستعلام من وزارة التجارة...','i');document.getElementById('emp-other-result').style.display='block'">استعلام</button></div></div>
-          </div>
-          <div id="emp-other-result" style="display:none;margin-top:10px">
-            <div class="fg fg-2">
-              <div class="fgrp"><label class="flbl">اسم المنشأة</label><div class="fro fw7">مؤسسة البناء والتشييد المتكاملة</div></div>
-              <div class="fgrp"><label class="flbl">القطاع</label><div class="fro">البناء والإنشاء</div></div>
-            </div>
-          </div>
-        </div>
-      </div></div>`;
+      /* المؤمن عليه — بيانات صاحب العمل الحالي تلقائية (قراءة فقط، بلا بحث عن جهات أخرى) */
+      return `<div class="card"><div class="ph"><h3><span class="pico or">${ICONS.building}</span>بيانات صاحب العمل</h3>
+        <span class="badge b-approved" style="font-size:11px">مستوردة تلقائياً من الحساب</span></div>
+      <div class="pb"><div class="fg fg-2">
+        <div class="fgrp"><label class="flbl">اسم المنشأة</label><div class="fro fw7">${myEmp.name}</div></div>
+        <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro">${myEmp.crn}</div></div>
+        <div class="fgrp"><label class="flbl">القطاع</label><div class="fro">${myEmp.sector}</div></div>
+        <div class="fgrp"><label class="flbl">الموقع</label><div class="fro">${myEmp.location}</div></div>
+      </div></div></div>`;
     }
-    /* داخلي */
+    /* داخلي (fund-staff / monitoring-employee) */
     return `<div class="card"><div class="ph"><h3><span class="pico or">${ICONS.building}</span>بيانات صاحب العمل</h3></div>
-    <div class="pb"><div class="fg fg-2">
-      <div class="fgrp"><label class="flbl">رقم السجل التجاري <span class="req">*</span></label>
-        <div style="display:flex;gap:8px"><input class="fc" placeholder="أدخل رقم السجل التجاري"><button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ الاستعلام من وزارة التجارة...','i')">استعلام</button></div></div>
-      <div class="fgrp"><label class="flbl">اسم المنشأة</label><input class="fc" placeholder="يُملأ تلقائياً بعد الاستعلام" readonly></div>
-      <div class="fgrp"><label class="flbl">القطاع</label><input class="fc" placeholder="يُملأ تلقائياً" readonly></div>
-      <div class="fgrp"><label class="flbl">رقم تواصل المنشأة</label><input class="fc" type="tel" placeholder="هاتف المنشأة"></div>
-    </div></div></div>`;
-  };
-
-  /* نموذج بيانات العامل — للمؤمن عليه: تُملأ تلقائياً من بيانات الحساب */
-  const _insuredWorker = isInsured ? INSP_DATA.workers.find(w => w.civil === '07345678') || null : null;
-  const _workerPanel = () => {
-    if (isInsured && _insuredWorker) {
-      const w = _insuredWorker;
-      return `
-    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.user}</span>بياناتك كعامل</h3>
-      <span class="badge b-approved" style="font-size:11px">مستوردة تلقائياً من الحساب</span></div>
     <div class="pb">
-      <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} البلاغ يُقدَّم عنك أنت — بياناتك مستوردة تلقائياً من سجلات الصندوق.</div>
-      <div class="fg fg-2">
-        <div class="fgrp"><label class="flbl">الاسم</label><div class="fro fw7">${w.name}</div></div>
-        <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro">${w.civil}</div></div>
-        <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${w.position}</div></div>
-        <div class="fgrp"><label class="flbl">الأجر الأساسي المسجّل</label><div class="fro fw7 txp">${w.salary} ر.ع / شهر</div></div>
-        <div class="fgrp"><label class="flbl">تاريخ الالتحاق</label><div class="fro">${w.joinDate || w.insuredFrom}</div></div>
-        <div class="fgrp"><label class="flbl">حالة التوظيف</label><div class="fro"><span class="badge ${w.employmentStatus === 'على رأس العمل' ? 'b-approved' : 'b-returned'}">${w.employmentStatus}</span></div></div>
-        ${w.resignDate ? `<div class="fgrp"><label class="flbl">تاريخ الاستقالة</label><div class="fro">${w.resignDate}</div></div>` : ''}
-        <div class="fgrp"><label class="flbl">القسم</label><div class="fro">${w.department}</div></div>
+      <div class="fg fg-2 mb12">
+        <div class="fgrp"><label class="flbl">رقم السجل التجاري <span class="req">*</span></label>
+          <div style="display:flex;gap:8px"><input class="fc" id="emp-crn-input" placeholder="أدخل رقم السجل التجاري">
+          <button class="btn btn-secondary btn-sm" onclick="_lookupEmployer()">استعلام</button></div></div>
+      </div>
+      <div id="emp-data-panel" style="display:none">
+        <div class="alert alert-s mb12">${ICONS.check} <span>تم العثور على بيانات المنشأة</span></div>
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">اسم المنشأة</label><div class="fro fw7" id="e-name"></div></div>
+          <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro" id="e-crn"></div></div>
+          <div class="fgrp"><label class="flbl">القطاع</label><div class="fro" id="e-sector"></div></div>
+          <div class="fgrp"><label class="flbl">الموقع</label><div class="fro" id="e-location"></div></div>
+          <div class="fgrp"><label class="flbl">عدد الموظفين المسجلين</label><div class="fro" id="e-employees"></div></div>
+          <div class="fgrp"><label class="flbl">حالة الاشتراكات</label><div class="fro" id="e-contrib"></div></div>
+          <div class="fgrp"><label class="flbl">مستوى المخاطر</label><div class="fro" id="e-risk"></div></div>
+          <div class="fgrp"><label class="flbl">درجة الامتثال</label><div class="fro" id="e-compliance"></div></div>
+          <div class="fgrp"><label class="flbl">آخر زيارة تفتيشية</label><div class="fro" id="e-lastvisit"></div></div>
+          <div class="fgrp"><label class="flbl">رقم تواصل المنشأة</label><input class="fc" type="tel" id="e-phone" placeholder="هاتف المنشأة"></div>
+        </div>
       </div>
     </div></div>`;
+  };
+
+  /* نموذج بيانات العامل — للمؤمن عليه: بحث بالرقم المدني (مسبق التعبئة من الحساب) */
+  const _insuredWorker = isInsured ? INSP_DATA.workers.find(w => w.civil === '07345678') || null : null;
+  const _workerPanel = () => {
+    if (isInsured) {
+      const w = _insuredWorker;
+      const dataPanel = w ? `
+        <div class="alert alert-s" style="margin-bottom:14px">${ICONS.check} تم العثور على بياناتك في سجلات الصندوق</div>
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro fw7">${w.name}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro">${w.civil}</div></div>
+          <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${w.nationality || 'عُماني'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${w.dob || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${w.position}</div></div>
+          <div class="fgrp"><label class="flbl">القسم</label><div class="fro">${w.department}</div></div>
+          <div class="fgrp"><label class="flbl">نوع العقد</label><div class="fro">${w.contractType || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">جهة العمل</label><div class="fro fw7">${w.employer}</div></div>
+          <div class="fgrp"><label class="flbl">الأجر الأساسي المسجّل</label><div class="fro fw7 txp">${w.salary} ر.ع / شهر</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التسجيل بالصندوق</label><div class="fro">${w.insuredFrom || w.joinDate}</div></div>
+          <div class="fgrp"><label class="flbl">حماية الأجور</label><div class="fro"><span class="badge ${(w.wageProtection||'').includes('منتظم')?'b-approved':'b-returned'}">${w.wageProtection || '—'}</span></div></div>
+          <div class="fgrp"><label class="flbl">حالة التأمين الصحي</label><div class="fro">${w.healthInsurance || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">حالة التوظيف</label><div class="fro"><span class="badge ${w.employmentStatus === 'على رأس العمل' ? 'b-approved' : 'b-returned'}">${w.employmentStatus}</span></div></div>
+          ${w.resignDate ? `<div class="fgrp"><label class="flbl">تاريخ انتهاء الخدمة</label><div class="fro">${w.resignDate}</div></div>` : ''}
+          <div class="fgrp"><label class="flbl">رقم التواصل</label><div class="fro">${w.phone || '—'}</div></div>
+        </div>` : `<div class="alert alert-w" style="margin-top:12px">${ICONS.warn} لم يتم العثور على سجل بهذا الرقم المدني. تواصل مع الصندوق للتحقق.</div>`;
+
+      return `
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.user}</span>بياناتك كمؤمن عليه</h3>
+      <span class="badge b-approved" style="font-size:11px">مستوردة من سجلات الصندوق</span></div>
+    <div class="pb">
+      <div class="alert alert-i" style="margin-bottom:16px">${ICONS.info} البلاغ يُقدَّم عنك — رقمك المدني معبّأ تلقائياً من حسابك. اضغط <strong>استعلام</strong> للتحقق من بياناتك.</div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;max-width:420px">
+        <input class="fc" id="insured-civil-input" value="07345678" readonly style="background:var(--g50);color:var(--text2);cursor:not-allowed;flex:1" placeholder="الرقم المدني">
+        <button class="btn btn-secondary" onclick="_insuredLookup()">${ICONS.search}استعلام</button>
+      </div>
+      <div id="insured-worker-panel" style="display:none">${dataPanel}</div>
+    </div></div>
+    <script>
+    function _insuredLookup() {
+      var panel = document.getElementById('insured-worker-panel');
+      if (panel) { panel.style.display = ''; panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    }
+    document.addEventListener('DOMContentLoaded', function(){ _insuredLookup(); });
+    <\/script>`;
     }
     return `
     <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.user}</span>بيانات العامل</h3>
@@ -624,12 +687,16 @@ function renderComplaintNew(role) {
         <div class="fg fg-2">
           <div class="fgrp"><label class="flbl">اسم العامل</label><div class="fro fw7" id="w-name"></div></div>
           <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" id="w-civil"></div></div>
+          <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro" id="w-nationality"></div></div>
           <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro" id="w-position"></div></div>
+          <div class="fgrp"><label class="flbl">نوع العقد</label><div class="fro" id="w-contract"></div></div>
+          <div class="fgrp"><label class="flbl">القسم</label><div class="fro" id="w-dept"></div></div>
           <div class="fgrp"><label class="flbl">الأجر الأساسي المسجّل</label><div class="fro fw7 txp" id="w-salary"></div></div>
+          <div class="fgrp"><label class="flbl">الاشتراكات المسجلة</label><div class="fro" id="w-contributions"></div></div>
           <div class="fgrp"><label class="flbl">تاريخ الالتحاق</label><div class="fro" id="w-joindate"></div></div>
           <div class="fgrp"><label class="flbl">حالة العامل</label><div class="fro" id="w-status"></div></div>
-          <div class="fgrp" id="w-resign-grp" style="display:none"><label class="flbl">تاريخ الاستقالة</label><div class="fro" id="w-resigndate"></div></div>
-          <div class="fgrp"><label class="flbl">القسم</label><div class="fro" id="w-dept"></div></div>
+          <div class="fgrp" id="w-resign-grp" style="display:none"><label class="flbl">تاريخ انتهاء الخدمة</label><div class="fro" id="w-resigndate"></div></div>
+          <div class="fgrp"><label class="flbl">هاتف العامل</label><div class="fro" id="w-phone"></div></div>
         </div>
       </div>
     </div></div>`;
@@ -649,7 +716,46 @@ function renderComplaintNew(role) {
       </div>
       <span class="badge b-approved">${_cu.label}</span>
     </div>
-    ${isInternal ? `<div class="fg fg-2 mt12">
+    ${(isEmployer || isInsured) ? `<div class="fg fg-2 mt12">
+      <div class="fgrp"><label class="flbl">رقم هاتف إضافي أول</label><input class="fc" type="tel" placeholder="مثال: 968 9XXXXXXX"></div>
+      <div class="fgrp"><label class="flbl">رقم هاتف إضافي ثانٍ</label><input class="fc" type="tel" placeholder="مثال: 968 9XXXXXXX"></div>
+    </div>` : ''}
+    ${isFundStaff ? `<div class="fg fg-2 mt12">
+      <div class="fgrp span-full"><label class="flbl">جهة الإحالة الخارجية</label>
+        <select class="fc" id="ext-ref-select" onchange="_toggleOtherRef(this.value)">
+          <option value="">— اختر جهة الإحالة —</option>
+          <optgroup label="الجهات القضائية والأمنية">
+            <option>المحكمة الابتدائية</option>
+            <option>محكمة الاستئناف</option>
+            <option>الادعاء العام</option>
+            <option>شرطة عُمان السلطانية</option>
+          </optgroup>
+          <optgroup label="الوزارات والجهات الحكومية">
+            <option>وزارة العمل</option>
+            <option>وزارة الاقتصاد</option>
+            <option>وزارة التجارة والصناعة وترويج الاستثمار</option>
+            <option>وزارة الصحة</option>
+            <option>ديوان البلاط السلطاني</option>
+            <option>مجلس الدولة</option>
+            <option>مجلس الشورى</option>
+          </optgroup>
+          <optgroup label="الهيئات والمؤسسات الرسمية">
+            <option>الهيئة العامة للتأمين الاجتماعي</option>
+            <option>هيئة سوق المال</option>
+            <option>هيئة تنظيم الاتصالات</option>
+            <option>المركز الوطني للإحصاء والمعلومات</option>
+            <option>الجهاز المركزي للتفتيش والرقابة المالية</option>
+            <option>ديوان المظالم</option>
+          </optgroup>
+          <option value="other">أخرى (يُحدد يدوياً)</option>
+        </select>
+      </div>
+      <div class="fgrp span-full" id="ext-ref-other-grp" style="display:none">
+        <label class="flbl">اسم الجهة المحيلة</label>
+        <input class="fc" id="ext-ref-other-input" placeholder="أدخل اسم الجهة المحيلة...">
+      </div>
+    </div>` : ''}
+    ${(!isFundStaff && isInternal) ? `<div class="fg fg-2 mt12">
       <div class="fgrp"><label class="flbl">صفة مقدم البلاغ <span class="req">*</span></label>
         <select class="fc">
           <option value="insured">مؤمن عليه (عامل)</option>
@@ -681,8 +787,6 @@ function renderComplaintNew(role) {
         <option value="salary">شكوى عدم صحة الأجر</option>
         <option value="other">أخرى</option>
       </select></div>
-    <div class="fgrp"><label class="flbl">الأولوية</label>
-      <select class="fc"><option>منخفض</option><option selected>متوسط</option><option>مرتفع</option>${isFundStaff ? '<option>عاجل</option>' : ''}</select></div>
     <div class="fgrp span-full"><label class="flbl">وصف البلاغ <span class="req">*</span></label>
       <textarea class="fc" rows="5" placeholder="اكتب وصفاً تفصيلياً للشكوى — التاريخ، المبالغ، الوقائع..."></textarea></div>
   </div></div></div>
@@ -732,12 +836,16 @@ function renderComplaintNew(role) {
     panel.style.display = 'block';
     document.getElementById('w-name').textContent = w.name;
     document.getElementById('w-civil').textContent = civil;
+    if (document.getElementById('w-nationality')) document.getElementById('w-nationality').textContent = w.nationality || '—';
     document.getElementById('w-position').textContent = w.position;
+    if (document.getElementById('w-contract')) document.getElementById('w-contract').textContent = w.contractType || '—';
+    document.getElementById('w-dept').textContent = w.department;
     document.getElementById('w-salary').textContent = (w.salary || '—') + ' ر.ع / شهر';
+    if (document.getElementById('w-contributions')) document.getElementById('w-contributions').textContent = w.contributions ? w.contributions + ' ر.ع' : 'مسجل';
     document.getElementById('w-joindate').textContent = w.joinDate || w.insuredFrom || '—';
     const statusBadgeTxt = w.employmentStatus === 'على رأس العمل' ? 'b-approved' : 'b-returned';
     document.getElementById('w-status').innerHTML = '<span class="badge ' + statusBadgeTxt + '">' + (w.employmentStatus || '—') + '</span>';
-    document.getElementById('w-dept').textContent = w.department;
+    if (document.getElementById('w-phone')) document.getElementById('w-phone').textContent = w.phone || '—';
     const resignGrp = document.getElementById('w-resign-grp');
     if (w.resignDate) {
       resignGrp.style.display = '';
@@ -746,11 +854,27 @@ function renderComplaintNew(role) {
       resignGrp.style.display = 'none';
     }
   }
-  function _toggleEmployerLookup(val) {
-    const cur = document.getElementById('emp-current-data');
-    const oth = document.getElementById('emp-other-lookup');
-    if (cur) cur.style.display = val === 'current' ? '' : 'none';
-    if (oth) oth.style.display = val === 'other' ? '' : 'none';
+  function _lookupEmployer() {
+    const crn = document.getElementById('emp-crn-input') ? document.getElementById('emp-crn-input').value.trim() : '';
+    const panel = document.getElementById('emp-data-panel');
+    if (!panel) return;
+    if (!crn) { showToast('يرجى إدخال رقم السجل التجاري', 'w'); return; }
+    showToast('جارٍ الاستعلام من وزارة التجارة...', 'i');
+    const e = INSP_DATA.employers.find(x => x.crn === crn) || INSP_DATA.employers[0];
+    panel.style.display = 'block';
+    document.getElementById('e-name').textContent = e.name;
+    document.getElementById('e-crn').textContent = e.crn;
+    document.getElementById('e-sector').textContent = e.sector;
+    document.getElementById('e-location').textContent = e.location;
+    document.getElementById('e-employees').textContent = (e.employees || '—') + ' عامل';
+    document.getElementById('e-contrib').innerHTML = '<span class="badge ' + (e.contributions && e.contributions.status === 'منتظم' ? 'b-approved' : 'b-returned') + '">' + (e.contributions ? e.contributions.status : '—') + '</span>';
+    document.getElementById('e-risk').innerHTML = '<span class="badge ' + (e.riskLevel === 'مرتفع' ? 'b-rejected' : e.riskLevel === 'متوسط' ? 'b-returned' : 'b-approved') + '">' + (e.riskLevel || '—') + '</span>';
+    document.getElementById('e-compliance').textContent = (e.complianceScore || '—') + '%';
+    document.getElementById('e-lastvisit').textContent = e.lastVisit || '—';
+  }
+  function _toggleOtherRef(val) {
+    const grp = document.getElementById('ext-ref-other-grp');
+    if (grp) grp.style.display = val === 'other' ? '' : 'none';
   }
   function _updateRequiredDocs(type) {
     const docsByType = {
@@ -800,12 +924,6 @@ function renderComplaintDetails(role, defaultId) {
           <option ${c.type==='شكوى عدم صحة الأجر'?'selected':''}>شكوى عدم صحة الأجر</option>
           <option ${c.type==='أخرى'?'selected':''}>أخرى</option>
         </select></div>
-      <div class="fgrp"><label class="flbl">الأولوية</label>
-        <select class="fc">
-          <option ${c.priority==='منخفض'?'selected':''}>منخفض</option>
-          <option ${c.priority==='متوسط'?'selected':''}>متوسط</option>
-          <option ${c.priority==='مرتفع'?'selected':''}>مرتفع</option>
-        </select></div>
       <div class="fgrp span-full"><label class="flbl">وصف البلاغ <span class="req">*</span></label>
         <textarea class="fc" rows="5" style="resize:vertical">${c.description}</textarea></div>
     </div></div></div>` : `
@@ -816,7 +934,7 @@ function renderComplaintDetails(role, defaultId) {
       <div class="fgrp"><label class="flbl">الموعد النهائي</label><div class="fro">${c.dueDate || '—'}</div></div>
       <div class="fgrp"><label class="flbl">نوع البلاغ</label><div class="fro">${c.type}</div></div>
       <div class="fgrp"><label class="flbl">قناة الإبلاغ</label><div class="fro">${c.channel}</div></div>
-      <div class="fgrp"><label class="flbl">الأولوية</label><div class="fro"><span class="badge ${_priClass(c.priority)}">${c.priority}</span></div></div>
+      ${isInternal ? `<div class="fgrp"><label class="flbl">الأولوية</label><div class="fro"><span class="badge ${_priClass(c.priority)}">${c.priority}</span></div></div>` : ''}
       ${isInternal ? `<div class="fgrp"><label class="flbl">الموظف المختص</label><div class="fro">${c.assignedTo || '<span class="tx3">لم يُعيَّن بعد</span>'}</div></div>` : ''}
       ${isInternal && c.assignedInspector ? `<div class="fgrp"><label class="flbl">المفتش المكلف</label><div class="fro">${c.assignedInspector}</div></div>` : ''}
       ${c.returnCount > 0 ? `<div class="fgrp"><label class="flbl">عدد مرات الإعادة</label><div class="fro"><span class="badge b-returned">${c.returnCount} / 2</span></div></div>` : ''}
@@ -979,12 +1097,21 @@ function renderComplaintDetails(role, defaultId) {
       ${isExternal ? `<button class="btn btn-secondary btn-sm" onclick="showToast('فتح نافذة الرفع','i')">${ICONS.plus}رفع مستند</button>` : ''}</div>
     <div class="pb">
       ${c.requiredDocuments.map(d => `
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border:1px solid var(--border);border-radius:var(--rsm);margin-bottom:8px;background:${d.status==='مرفق'?'var(--success-l)':'var(--g50)'}">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border:1px solid var(--border);border-radius:var(--rsm);margin-bottom:8px;background:${d.status==='مرفق'?'var(--success-l)':'var(--g50)'}">
           <div style="display:flex;align-items:center;gap:10px">
-            <span style="font-size:16px">${d.status==='مرفق'?'📎':'📋'}</span>
-            <span style="font-size:13px;font-weight:600;color:var(--text)">${d.name}</span>
+            <span style="font-size:18px">${d.status==='مرفق'?'📎':'📋'}</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text)">${d.name}</div>
+              ${d.uploadDate ? `<div style="font-size:11px;color:var(--text3)">رُفع بتاريخ ${d.uploadDate}</div>` : ''}
+            </div>
           </div>
-          <span class="badge ${d.status==='مرفق'?'b-approved':'b-returned'}">${d.status}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="badge ${d.status==='مرفق'?'b-approved':'b-returned'}">${d.status}</span>
+            ${d.status==='مرفق' ? `
+              <button class="btn btn-ghost btn-xs" onclick="showToast('جارٍ فتح المستند...','i')" title="استعراض">${ICONS.eye}</button>
+              <button class="btn btn-ghost btn-xs" onclick="showToast('جارٍ تحميل المستند...','i')" title="تحميل">${ICONS.download}</button>
+            ` : (isExternal ? `<button class="btn btn-secondary btn-xs" onclick="showToast('فتح نافذة الرفع','i')">${ICONS.plus}رفع</button>` : '')}
+          </div>
         </div>`).join('')}
     </div></div>` : '';
 
@@ -1030,14 +1157,14 @@ function renderComplaintDetails(role, defaultId) {
     </div></div>` : '';
 
   const pgHead = `<div class="pg-head"><div><h1>${c.id}</h1><p>${c.type} — ${c.employerName}</p></div>
-    <div class="pg-acts">${statusBadge(c.status)}<span class="badge ${_priClass(c.priority)}">${c.priority}</span>
+    <div class="pg-acts">${statusBadge(c.status)}${isInternal ? `<span class="badge ${_priClass(c.priority)}">${c.priority}</span>` : ''}
       <button class="btn btn-secondary btn-sm" onclick="navigateTo('complaints-list')">${ICONS.arrow_right}رجوع</button></div></div>`;
 
   const summaryBar = _summaryBar([
     ['رقم البلاغ', `<strong>${c.id}</strong>`],
     ['تاريخ التقديم', c.submitDate],
     ['نوع البلاغ', c.type],
-    ['الأولوية', `<span class="badge ${_priClass(c.priority)}">${c.priority}</span>`],
+    ...(isInternal ? [['الأولوية', `<span class="badge ${_priClass(c.priority)}">${c.priority}</span>`]] : []),
     ['الحالة', statusBadge(c.status)],
     ...(c.assignedTo && isInternal ? [['المختص', c.assignedTo]] : []),
   ]);
@@ -1067,18 +1194,97 @@ function renderComplaintDetails(role, defaultId) {
 
   const notesPanel = showWorkflowPanels ? renderNotes(complaintNotes, c.id) : '';
   const historyContent = timelinePanel + correspondencePanel + initScript;
-  const verifyContent = (dataComparePanel || '') + (verPanel || '') + (docsPanel || '');
-  const actionContent = (rolePanels || '') + (actionPanel || '');
-  const hasAction = (actionPanel || '').length > 0;
+  const verifyContent = (dataComparePanel || '') + (verPanel || '');
+  /* docs shown separately for internal roles */
+  const docsContent = docsPanel || '<p class="tx3 fs11" style="padding:16px">لا توجد مستندات مطلوبة لهذا البلاغ</p>';
+  /* actions tab shows ONLY the current role's action panel — cumulative history is in the timeline */
+  const actionContent = actionPanel || '';
+  const hasAction = actionContent.length > 0;
+
+  /* ── محضر الزيارة (field-inspector & field-head only) ── */
+  const showVisitMinutes = role === 'field-inspector' || role === 'field-head';
+  const minutesVid = 'vm-' + c.id.replace(/[^a-z0-9]/gi, '-');
+  const visitMinutesPanel = showVisitMinutes ? `
+    <div class="card">
+      <div class="ph"><h3><span class="pico tl">${ICONS.clipboard}</span>محضر الزيارة التفتيشية</h3>
+        <span class="badge b-invest" style="font-size:11px">يُحفظ باستقلالية عن حالة البلاغ</span></div>
+      <div class="pb">
+        <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} يمكن حفظ محضر الزيارة وتحديثه أكثر من مرة دون التأثير على حالة البلاغ. يتم إرسال البلاغ لرئيس القسم فقط من لوحة الإجراءات.</div>
+        <div class="fgrp" style="margin-bottom:14px">
+          <label class="flbl">تفاصيل المحضر الميداني <span class="req">*</span></label>
+          <textarea class="fc" id="${minutesVid}-details" rows="10" placeholder="أدخل تفاصيل المحضر الميداني بشكل كامل: المشاهدات الميدانية، السجلات التي تم مراجعتها، المخالفات المرصودة، مقارنة السجلات بالواقع، التوصيات والإجراءات المقترحة..." style="resize:vertical;font-size:13px;line-height:1.8">${c.visitMinutes || ''}</textarea>
+        </div>
+        <div class="fgrp" style="margin-bottom:14px">
+          <label class="flbl">ملخص المحضر</label>
+          <textarea class="fc" id="${minutesVid}-summary" rows="4" placeholder="ملخص موجز للنتائج والتوصيات..." style="resize:vertical">${c.visitSummary || ''}</textarea>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <label class="flbl" style="margin:0">الحضور أثناء الزيارة</label>
+            <button class="btn btn-sm btn-outline" type="button" onclick="_addAttendeeRow('${minutesVid}')">${ICONS.plus} إضافة حاضر</button>
+          </div>
+          <table class="tbl" id="${minutesVid}-att-table" style="margin-bottom:4px">
+            <thead><tr><th>الاسم</th><th>الجهة / الدور</th><th style="width:48px"></th></tr></thead>
+            <tbody id="${minutesVid}-att-body">
+              <tr id="${minutesVid}-att-0">
+                <td><input class="fc" style="margin:0;padding:6px 8px" placeholder="الاسم الكامل" value="حاتم سالم الزدجالي"></td>
+                <td><input class="fc" style="margin:0;padding:6px 8px" placeholder="المفتش الميداني" value="مفتش ميداني"></td>
+                <td><button class="btn btn-sm btn-ghost" style="color:var(--danger)" type="button" onclick="_removeAttendeeRow('${minutesVid}-att-0')">✕</button></td>
+              </tr>
+              <tr id="${minutesVid}-att-1">
+                <td><input class="fc" style="margin:0;padding:6px 8px" placeholder="الاسم الكامل" value="ممثل المنشأة"></td>
+                <td><input class="fc" style="margin:0;padding:6px 8px" placeholder="المسمى الوظيفي" value="مسؤول الموارد البشرية"></td>
+                <td><button class="btn btn-sm btn-ghost" style="color:var(--danger)" type="button" onclick="_removeAttendeeRow('${minutesVid}-att-1')">✕</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <script>
+          var _attCtr_${minutesVid.replace(/-/g,'_')} = 2;
+          function _addAttendeeRow(vid) {
+            var ctr = ++window['_attCtr_' + vid.replace(/-/g,'_')];
+            var rowId = vid + '-att-' + ctr;
+            var tbody = document.getElementById(vid + '-att-body');
+            if (!tbody) return;
+            var tr = document.createElement('tr');
+            tr.id = rowId;
+            tr.innerHTML = '<td><input class="fc" style="margin:0;padding:6px 8px" placeholder="الاسم الكامل"></td>'
+              + '<td><input class="fc" style="margin:0;padding:6px 8px" placeholder="الجهة / الدور"></td>'
+              + '<td><button class="btn btn-sm btn-ghost" style="color:var(--danger)" type="button" onclick="_removeAttendeeRow(\\'' + rowId + '\\')">✕</button></td>';
+            tbody.appendChild(tr);
+          }
+          function _removeAttendeeRow(rowId) {
+            var row = document.getElementById(rowId);
+            if (row) row.remove();
+          }
+          <\/script>
+        </div>
+        <div style="margin-bottom:14px">
+          <label class="flbl">مرفقات المحضر</label>
+          <div class="dz-box" style="padding:14px;min-height:auto">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="font-size:22px;color:var(--text3)">${ICONS.upload}</div>
+              <div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:var(--text2)">صور المحضر، وثائق المنشأة، إثباتات ميدانية</div>
+                <div style="font-size:11px;color:var(--text3)">PDF, JPG, PNG, DOC — الحد الأقصى 20 MB</div></div>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('فتح نافذة الرفع','i')">اختيار ملف</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="(function(){var d=document.getElementById('${minutesVid}-details');if(!d||!d.value.trim()){showToast('يرجى إدخال تفاصيل المحضر','w');return;}showToast('تم حفظ محضر الزيارة بنجاح — يمكنك تحديثه لاحقاً','s');})()">
+          ${ICONS.check}حفظ محضر الزيارة
+        </button>
+      </div>
+    </div>` : '';
 
   const tabs = [
     { label: 'البيانات الأساسية', content: requestPanel + submitterPanel + employerPanel + workerPanel },
     { label: 'التحقق والبيانات', content: verifyContent || '<p class="tx3 fs11" style="padding:16px">لا توجد بيانات تحقق لهذا البلاغ</p>' },
+    { label: 'المستندات المطلوبة', content: docsContent + attachmentsPanel },
+    ...(showVisitMinutes ? [{ label: 'محضر الزيارة', content: visitMinutesPanel, badge: c.visitMinutes ? '✓' : '' }] : []),
     { label: 'الإجراءات', content: actionContent || '<p class="tx3 fs11" style="padding:16px">لا توجد إجراءات متاحة في الوضع الحالي</p>', badge: hasAction ? '!' : '' },
-    { label: 'المرفقات والملاحظات', content: attachmentsPanel + notesPanel },
+    { label: 'الملاحظات', content: notesPanel || '<p class="tx3 fs11" style="padding:16px">لا توجد ملاحظات</p>' },
     { label: 'السجل والمراسلات', content: historyContent },
   ];
-  return pgHead + summaryBar + _tabView(tid, tabs, hasAction ? 2 : 0);
+  return pgHead + summaryBar + _tabView(tid, tabs, hasAction ? (showVisitMinutes ? 4 : 3) : 0);
 }
 
 function _renderComplaintTimeline(timeline) {
@@ -1182,7 +1388,6 @@ function _getComplaintActions(role, status) {
   if (role === 'inspection-director') {
     if (status !== 'انتظار اعتماد مدير الدائرة' && status !== 'تم اغلاق البلاغ') return [];
     return [
-      'إعادة تعيين الموظف المختص ببحث البلاغ',
       'إعادة البلاغ إلى موظف قسم المتابعة والبلاغات',
       'إعادة البلاغ إلى موظف قسم التفتيش',
       'إعادة البلاغ إلى رئيس قسم المتابعة والبلاغات',
@@ -1232,19 +1437,23 @@ function _buildComplaintActionPanel(role, c) {
   const isExternalRole = role === 'employer' || role === 'insured';
   const isApplicantRole = role === 'fund-staff' || isExternalRole;
   const reasonRequiredActions = [
-    'توصية برفض البلاغ',
-    'توصية بحفظ البلاغ',
-    'تأكيد رفض البلاغ',
-    'اغلاق البلاغ',
-    'حفظ البلاغ',
-    'رفض اجراء التفتيش على البلاغ',
-    'إعادة فتح البلاغ'
+    'توصية برفض البلاغ', 'توصية بحفظ البلاغ', 'تأكيد رفض البلاغ',
+    'اغلاق البلاغ', 'حفظ البلاغ', 'رفض اجراء التفتيش على البلاغ', 'إعادة فتح البلاغ'
   ];
   const showReasonField = btns.some(b => reasonRequiredActions.includes(b));
   const panelId = `action-panel-${c.id}`;
-  const actionBtnHtml = btns.map(b => {
+  const penaltiesRoles = ['monitoring-head', 'field-head', 'inspection-director'];
+  const showPenalties = penaltiesRoles.includes(role) && btns.includes('اغلاق البلاغ');
+  const hasReassign = (role === 'monitoring-head' || role === 'field-head') && btns.includes('إعادة تعيين الموظف المختص ببحث البلاغ');
+
+  /* filter reassign out of main buttons — handled inline */
+  const mainBtns = btns.filter(b => b !== 'إعادة تعيين الموظف المختص ببحث البلاغ');
+  const actionBtnHtml = mainBtns.map(b => {
     const cls = INSP_CONFIG.actionStyles[b] || 'btn-secondary btn-sm';
-    return `<button class="btn ${cls}" onclick="executeComplaintAction('${b}', '${c.id}', '${panelId}')">${b}</button>`;
+    const extra = b === 'اغلاق البلاغ' && showPenalties
+      ? `onclick="_togglePenaltiesPanel('${panelId}')"`
+      : `onclick="executeComplaintAction('${b}', '${c.id}', '${panelId}')"`;
+    return `<button class="btn ${cls}" ${extra}>${b}</button>`;
   }).join('');
 
   const isAssignment = btns.includes('تعيين مختص');
@@ -1257,6 +1466,54 @@ function _buildComplaintActionPanel(role, c) {
             <option value="منى راشد البلوشي">منى راشد البلوشي — الصندوق</option>
           </select>
         </div>` : '';
+
+  const reassignHtml = hasReassign ? `
+    <div class="card" style="margin-bottom:12px;border:1px dashed var(--primary)">
+      <div class="ph" style="cursor:pointer" onclick="_toggleSection('reassign-${panelId}')">
+        <h3><span class="pico tl">${ICONS.switch}</span>إعادة تعيين الموظف المختص ببحث البلاغ</h3>
+        <span class="tx3 fs11">انقر للتوسيع</span>
+      </div>
+      <div id="reassign-${panelId}" style="display:none">
+        <div class="pb"><div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">الموظف الجديد المكلف <span class="req">*</span></label>
+            <select class="fc" id="reassign-staff-${panelId}">
+              <option value="">— اختر الموظف —</option>
+              <option value="سيف خلفان الأمري">سيف خلفان الأمري — قسم المتابعة والبلاغات (3 بلاغات نشطة)</option>
+              <option value="منى راشد البلوشي">منى راشد البلوشي — الصندوق (1 بلاغ نشط)</option>
+            </select></div>
+          <div class="fgrp"><label class="flbl">سبب اختيار الموظف الجديد <span class="req">*</span></label>
+            <input class="fc" id="reassign-reason-${panelId}" placeholder="مثال: خبرة في هذا النوع من البلاغات، عبء عمل أقل..."></div>
+          <div class="fgrp span-full"><label class="flbl">سبب إعادة التخصيص <span class="req">*</span></label>
+            <textarea class="fc" id="reassign-note-${panelId}" rows="2" placeholder="أدخل سبب إعادة التخصيص..."></textarea></div>
+          <div class="fgrp"><button class="btn btn-primary btn-sm" onclick="_confirmReassignInline('${panelId}','${c.id}')">تأكيد إعادة التعيين</button></div>
+        </div></div>
+      </div>
+    </div>` : '';
+
+  const penaltiesHtml = showPenalties ? `
+    <div id="penalties-${panelId}" style="display:none;margin-bottom:16px;border:2px solid var(--danger);border-radius:var(--rsm);padding:16px">
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--danger);margin-bottom:14px"><span style="display:inline-flex;width:18px;height:18px;flex-shrink:0">${ICONS.warn}</span>العقوبات التي يمكن تطبيقها على جهة العمل</div>
+      <div class="fg fg-2">
+        <div class="fgrp"><label class="flbl">نوع العقوبة</label>
+          <select class="fc" id="penalty-type-${panelId}" onchange="_togglePenaltyFields('${panelId}')">
+            <option value="">— بدون عقوبة —</option>
+            <option value="fine">غرامة مالية</option>
+            <option value="ban">حظر صاحب العمل</option>
+            <option value="both">غرامة مالية وحظر صاحب العمل</option>
+          </select></div>
+        <div class="fgrp" id="penalty-amount-grp-${panelId}" style="display:none">
+          <label class="flbl">مبلغ الغرامة (ر.ع) <span class="req">*</span></label>
+          <input class="fc" type="number" id="penalty-amount-${panelId}" placeholder="أدخل مبلغ الغرامة" min="0">
+        </div>
+        <div class="fgrp span-full"><label class="flbl">ملاحظات العقوبة</label>
+          <textarea class="fc" id="penalty-notes-${panelId}" rows="3" placeholder="أي ملاحظات تفصيلية حول العقوبة المطبقة..." style="resize:vertical"></textarea>
+        </div>
+      </div>
+      <div class="dp-acts" style="margin-top:12px">
+        <button class="btn btn-danger btn-sm" onclick="executeComplaintAction('اغلاق البلاغ','${c.id}','${panelId}')">تأكيد الإغلاق مع تطبيق العقوبة</button>
+        <button class="btn btn-ghost btn-sm" onclick="executeComplaintAction('اغلاق البلاغ','${c.id}','${panelId}')">إغلاق بدون عقوبة</button>
+      </div>
+    </div>` : '';
 
   if (isApplicantRole) {
     return `
@@ -1273,10 +1530,8 @@ function _buildComplaintActionPanel(role, c) {
           <div class="dz-box" style="padding:14px;min-height:auto">
             <div style="display:flex;align-items:center;gap:12px">
               <div style="font-size:22px;color:var(--text3)">${ICONS.upload}</div>
-              <div style="flex:1">
-                <div style="font-size:12.5px;font-weight:600;color:var(--text2)">اسحب الملفات هنا أو انقر للرفع</div>
-                <div style="font-size:11px;color:var(--text3)">PDF, DOC, JPG — الحد الأقصى 10 MB</div>
-              </div>
+              <div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:var(--text2)">اسحب الملفات هنا أو انقر للرفع</div>
+                <div style="font-size:11px;color:var(--text3)">PDF, DOC, JPG — الحد الأقصى 10 MB</div></div>
               <button class="btn btn-secondary btn-sm" onclick="showToast('فتح نافذة الرفع','i')">اختيار ملف</button>
             </div>
           </div>
@@ -1291,6 +1546,7 @@ function _buildComplaintActionPanel(role, c) {
       <div class="ph"><h3><span class="pico bl">${ICONS.pen}</span>لوحة الإجراءات</h3>
         ${c.returnCount > 0 ? `<span class="badge b-returned" style="font-size:11px">إعادة ${c.returnCount}/2</span>` : ''}</div>
       <div class="dp-body">
+        ${reassignHtml}
         <div class="fgrp" style="margin-bottom:12px">
           <label class="flbl">ملاحظة <span class="req">*</span></label>
           <textarea class="fc" rows="3" data-action-note data-required="true" placeholder="اكتب الملاحظة والإجراء المتخذ..." style="resize:vertical"></textarea>
@@ -1312,17 +1568,43 @@ function _buildComplaintActionPanel(role, c) {
           <div class="dz-box" style="padding:14px;min-height:auto">
             <div style="display:flex;align-items:center;gap:12px">
               <div style="font-size:22px;color:var(--text3)">${ICONS.upload}</div>
-              <div style="flex:1">
-                <div style="font-size:12.5px;font-weight:600;color:var(--text2)">اسحب الملفات هنا أو انقر للرفع</div>
-                <div style="font-size:11px;color:var(--text3)">PDF, DOC, JPG — الحد الأقصى 10 MB</div>
-              </div>
+              <div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:var(--text2)">اسحب الملفات هنا أو انقر للرفع</div>
+                <div style="font-size:11px;color:var(--text3)">PDF, DOC, JPG — الحد الأقصى 10 MB</div></div>
               <button class="btn btn-secondary btn-sm" onclick="showToast('فتح نافذة الرفع','i')">اختيار ملف</button>
             </div>
           </div>
         </div>
+        ${penaltiesHtml}
         <div class="dp-acts">${actionBtnHtml}</div>
       </div>
-    </div>`;
+    </div>
+    <script>
+    function _togglePenaltiesPanel(pid) {
+      var el = document.getElementById('penalties-'+pid);
+      if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+    }
+    function _toggleSection(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+    }
+    function _togglePenaltyFields(pid) {
+      var sel = document.getElementById('penalty-type-'+pid);
+      var grp = document.getElementById('penalty-amount-grp-'+pid);
+      if (!sel || !grp) return;
+      grp.style.display = (sel.value === 'fine' || sel.value === 'both') ? '' : 'none';
+    }
+    function _confirmReassignInline(pid, cid) {
+      var staff = document.getElementById('reassign-staff-'+pid);
+      var reason = document.getElementById('reassign-reason-'+pid);
+      var note = document.getElementById('reassign-note-'+pid);
+      if (!staff || !staff.value) { showToast('يرجى اختيار الموظف الجديد','w'); return; }
+      if (!reason || !reason.value.trim()) { showToast('يرجى إدخال سبب اختيار الموظف','w'); return; }
+      if (!note || !note.value.trim()) { showToast('يرجى إدخال سبب إعادة التخصيص','w'); return; }
+      showToast('تمت إعادة تعيين البلاغ ' + cid + ' إلى ' + staff.value + ' بنجاح', 's');
+      var sec = document.getElementById('reassign-'+pid);
+      if (sec) sec.style.display = 'none';
+    }
+    <\/script>`;
 }
 
 /* ── قائمة التظلمات ── */
@@ -1341,6 +1623,21 @@ function renderAppealsList(role) {
   if (role === 'employer') data = data.filter(a => a.submittedBy === 'employer');
   if (role === 'insured') data = data.filter(a => a.submittedBy === 'insured');
 
+  const isExtA = role === 'employer' || role === 'insured';
+  const TODAY_A = '2025-01-22';
+  function _appealSlaCell(a) {
+    if (!a.dueDate || a.status.includes('إغلاق') || a.status.includes('رفض') || a.status.includes('قبول')) return '<td>—</td>';
+    const remaining = Math.ceil((new Date(a.dueDate) - new Date(TODAY_A)) / 86400000);
+    let badge, label;
+    if (remaining > 3) { badge = 'b-approved'; label = `${remaining} يوم متبقي`; }
+    else if (remaining >= 0) { badge = 'b-session'; label = `${remaining} أيام — قريب`; }
+    else { badge = 'b-high'; label = `متأخر ${Math.abs(remaining)} يوم`; }
+    const escalateBtn = isExtA && remaining < 0
+      ? `<br><button class="btn btn-xs btn-warning" style="margin-top:4px" onclick="showToast('تم إرسال طلب التصعيد بنجاح','s')">${ICONS.escalate}تصعيد</button>`
+      : '';
+    return `<td><span class="badge ${badge}" style="font-size:11px">${label}</span>${escalateBtn}</td>`;
+  }
+
   const rows = data.map(a =>
     `<tr>
       <td><a href="#" onclick="navigateTo('appeal-details','id=${a.id}')" class="txp fw7">${a.id}</a></td>
@@ -1349,13 +1646,14 @@ function renderAppealsList(role) {
       <td>${a.employerName}</td>
       <td>${statusBadge(a.status)}</td>
       <td>${a.submitDate}</td>
+      ${_appealSlaCell(a)}
       <td><button class="btn btn-primary btn-xs" onclick="navigateTo('appeal-details','id=${a.id}')">${ICONS.eye}عرض</button></td>
     </tr>`).join('');
 
   return `<div class="pg-head"><div><h1>قائمة التظلمات</h1><p>${data.length} تظلم إجمالاً</p></div>
     <div class="pg-acts">${createBtn}<button class="btn btn-secondary btn-sm">${ICONS.download}تصدير</button></div></div>
     ${filters}
-    ${_tblWrap(['رقم التظلم','النوع','البلاغ/الزيارة المرتبطة','المنشأة','الحالة','تاريخ التقديم','إجراء'], rows || _noData())}`;
+    ${_tblWrap(['رقم التظلم','النوع','البلاغ/الزيارة المرتبطة','المنشأة','الحالة','تاريخ التقديم','الأيام المتبقية / SLA','إجراء'], rows || _noData())}`;
 }
 
 /* ── إنشاء تظلم جديد ── */
@@ -2630,35 +2928,95 @@ function renderEmployerAnalysis(role) {
 
 /* ── إعادة التخصيص (monitoring-head) ── */
 function renderReassignment(role) {
-  const preId = getParam('complaint');
-
-  /* عبء العمل لكل موظف */
+  /* موظفو قسم المتابعة والبلاغات فقط (ليس رئيس القسم) */
   const staffList = [
     { name: 'سيف خلفان الأمري',  civil: '06456789', dept: 'قسم المتابعة والبلاغات' },
-    { name: 'منى راشد البلوشي',   civil: '09123456', dept: 'الصندوق' },
+    { name: 'منى راشد البلوشي',   civil: '09123456', dept: 'قسم المتابعة والبلاغات' },
   ].map(s => ({
     ...s,
     active: INSP_DATA.complaints.filter(c => c.assignedTo === s.name && !c.status.includes('إغلاق') && !c.status.includes('قرار') && !c.status.includes('حفظ')).length
   }));
 
-  const _staffOpts = (exclude) => staffList
-    .filter(s => s.name !== exclude)
-    .map(s => `<option value="${s.name}">${s.name} — عبء العمل الحالي: ${s.active} بلاغ</option>`)
-    .join('');
+  const staffNames = staffList.map(s => s.name);
 
-  const searchPanel = `
-    <div class="card">
-      <div class="ph"><h3><span class="pico bl">${ICONS.switch}</span>البحث عن طلب لإعادة التخصيص</h3></div>
-      <div class="pb" style="max-width:520px">
-        <div class="fgrp" style="margin-bottom:16px">
-          <label class="flbl">رقم البلاغ أو التظلم <span class="req">*</span></label>
-          <div style="display:flex;gap:8px">
-            <input class="fc" id="ra-id" placeholder="مثال: 2025-01-000001" value="${preId||''}" style="flex:1">
-            <button class="btn btn-primary" onclick="_lookupForReassign()">${ICONS.eye}عرض التفاصيل</button>
+  /* حالات مرحلة المتابعة والبلاغات */
+  const monitoringStatuses = [
+    'قيد المراجعة',
+    'بانتظار اعتماد رئيس قسم المتابعة والبلاغات',
+    'تم تقديم البلاغ',
+    'تم اعادة فتح البلاغ',
+    'تم تقديم الطلب مرة أخرى',
+    'تم إعادة الطلب لاستيفاء البيانات',
+  ];
+
+  /* البلاغات النشطة في القسم المسندة لأحد الموظفين (ليس رئيس القسم ولا بدون تعيين) */
+  const activeComplaints = INSP_DATA.complaints.filter(c =>
+    monitoringStatuses.includes(c.status) && staffNames.includes(c.assignedTo)
+  );
+
+  const staffOptsJson = JSON.stringify(staffList);
+
+  const rows = activeComplaints.map((c, idx) => {
+    const assignee = c.assignedTo || 'غير معين';
+    return `
+      <tr id="ra-row-${idx}" style="height:56px">
+        <td style="padding:12px 14px"><a href="#" onclick="navigateTo('complaint-details','id=${c.id}')" class="txp fw7" style="font-size:13px">${c.id}</a></td>
+        <td style="padding:12px 14px;font-size:13px">${c.type || 'بلاغ'}</td>
+        <td style="padding:12px 14px">${statusBadge(c.status)}</td>
+        <td style="padding:12px 14px;font-size:13px;font-weight:600">${assignee}</td>
+        <td style="padding:12px 14px;font-size:13px;color:var(--text2)">${c.submitDate || c.date || '—'}</td>
+        <td style="padding:12px 14px">
+          <button class="btn btn-sm btn-outline" onclick="_openReassignRow(${idx},'${c.id}','${assignee}')">${ICONS.switch} إعادة التخصيص</button>
+        </td>
+      </tr>
+      <tr id="ra-inline-${idx}" style="display:none;background:var(--surface2)">
+        <td colspan="6" style="padding:0">
+          <div style="background:var(--surface2);border-top:2px solid var(--primary);padding:20px 24px">
+            <div class="fg fg-2" style="margin-bottom:16px;max-width:680px">
+              <div class="fgrp">
+                <label class="flbl">الموظف الجديد المكلف <span class="req">*</span></label>
+                <select class="fc" id="ra-staff-${idx}">
+                  <option value="">— اختر الموظف —</option>
+                </select>
+              </div>
+              <div class="fgrp">
+                <label class="flbl">سبب إعادة التخصيص <span class="req">*</span></label>
+                <input class="fc" id="ra-reason-${idx}" placeholder="مثال: عبء العمل، إجازة، تعارض مصالح">
+              </div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-primary" onclick="_confirmReassignRow(${idx},'${c.id}')">${ICONS.check} تأكيد إعادة التخصيص</button>
+              <button class="btn btn-ghost" onclick="_closeReassignRow(${idx})">إلغاء</button>
+            </div>
           </div>
-        </div>
-        <div id="ra-result"></div>
+        </td>
+      </tr>`;
+  }).join('');
+
+  const complaintsTable = `
+    <div class="card">
+      <div class="ph">
+        <h3><span class="pico bl">${ICONS.list}</span>بلاغات القسم قيد العمل</h3>
+        <span class="badge b-session">${activeComplaints.length} بلاغ</span>
       </div>
+      ${activeComplaints.length === 0
+        ? `<div class="pb" style="text-align:center;padding:40px;color:var(--text3)">لا توجد بلاغات قيد العمل حالياً في القسم</div>`
+        : `<div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;border-radius:0 0 var(--r) var(--r);overflow:hidden">
+              <thead>
+                <tr style="background:var(--g100);border-bottom:2px solid var(--border2)">
+                  <th style="padding:12px 14px;text-align:right;font-size:12.5px;font-weight:700;color:var(--text2);white-space:nowrap">رقم البلاغ</th>
+                  <th style="padding:12px 14px;text-align:right;font-size:12.5px;font-weight:700;color:var(--text2)">النوع</th>
+                  <th style="padding:12px 14px;text-align:right;font-size:12.5px;font-weight:700;color:var(--text2)">الحالة</th>
+                  <th style="padding:12px 14px;text-align:right;font-size:12.5px;font-weight:700;color:var(--text2)">الموظف المختص الحالي</th>
+                  <th style="padding:12px 14px;text-align:right;font-size:12.5px;font-weight:700;color:var(--text2);white-space:nowrap">تاريخ التقديم</th>
+                  <th style="padding:12px 14px;text-align:right;font-size:12.5px;font-weight:700;color:var(--text2)">إجراء</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>`
+      }
     </div>`;
 
   /* توزيع عبء العمل الحالي */
@@ -2679,55 +3037,46 @@ function renderReassignment(role) {
     </div>`;
 
   const script = `<script>
-  function _lookupForReassign() {
-    var id = document.getElementById('ra-id') ? document.getElementById('ra-id').value.trim() : '';
-    var res = document.getElementById('ra-result');
-    if (!res) return;
-    if (!id) { showToast('يرجى إدخال رقم الطلب','w'); return; }
-    var c = (INSP_DATA.complaints||[]).find(function(x){return x.id===id;})
-         || (INSP_DATA.appeals||[]).find(function(x){return x.id===id;});
-    if (!c) {
-      res.innerHTML = '<div class="alert alert-w" style="margin-top:12px">${ICONS.warn} لم يتم العثور على طلب بهذا الرقم. تحقق من الرقم وأعد المحاولة.</div>';
-      return;
+  var _raStaff = ${staffOptsJson};
+  function _openReassignRow(idx, id, currentAssignee) {
+    /* close any other open inline rows */
+    document.querySelectorAll('[id^="ra-inline-"]').forEach(function(el){ el.style.display='none'; });
+    /* populate staff dropdown excluding current assignee */
+    var sel = document.getElementById('ra-staff-'+idx);
+    if (sel && sel.options.length <= 1) {
+      _raStaff.filter(function(s){ return s.name !== currentAssignee; }).forEach(function(s){
+        var o = document.createElement('option');
+        o.value = s.name;
+        o.textContent = s.name + ' — عبء العمل الحالي: ' + s.active + ' بلاغ';
+        sel.appendChild(o);
+      });
     }
-    var currentAssignee = c.assignedTo || c.assignedToName || 'غير معين';
-    var staffOpts = ${JSON.stringify(staffList)}.filter(function(s){return s.name!==currentAssignee;}).map(function(s){
-      return '<option value="'+s.name+'">'+s.name+' — عبء العمل الحالي: '+s.active+' بلاغ</option>';
-    }).join('');
-    res.innerHTML = '<div style="margin-top:12px">'
-      + '<div class="card" style="margin-bottom:12px"><div class="ph"><h3><span class=\"pico bl\">&#x1F4CB;</span>تفاصيل الطلب</h3>'
-      + '<span class=\"badge b-session\" style=\"font-size:11px\">'+c.id+'</span></div>'
-      + '<div class=\"pb\"><div class=\"fg fg-2\">'
-      + '<div class=\"fgrp\"><label class=\"flbl\">النوع</label><div class=\"fro\">'+(c.type||'تظلم')+'</div></div>'
-      + '<div class=\"fgrp\"><label class=\"flbl\">الحالة</label><div class=\"fro\">'+statusBadge(c.status)+'</div></div>'
-      + '<div class=\"fgrp\"><label class=\"flbl\">المختص الحالي</label><div class=\"fro fw7\">'+currentAssignee+'</div></div>'
-      + '<div class=\"fgrp\"><label class=\"flbl\">المنشأة</label><div class=\"fro\">'+(c.employerName||'—')+'</div></div>'
-      + '<div class=\"fgrp\"><label class=\"flbl\">الأولوية</label><div class=\"fro\">'+(c.priority||'—')+'</div></div>'
-      + '<div class=\"fgrp\"><label class=\"flbl\">الموعد النهائي</label><div class=\"fro\">'+(c.dueDate||'—')+'</div></div>'
-      + '</div></div></div>'
-      + '<div class=\"card\"><div class=\"ph\"><h3><span class=\"pico tl\">&#x1F501;</span>اختيار الموظف الجديد</h3></div>'
-      + '<div class=\"pb\"><div class=\"fgrp\" style=\"margin-bottom:14px\">'
-      + '<label class=\"flbl\">الموظف الجديد المكلف <span class=\"req\">*</span></label>'
-      + '<select class=\"fc\" id=\"ra-new-staff\"><option value=\"\">— اختر الموظف —</option>'+staffOpts+'</select></div>'
-      + '<div class=\"fgrp\" style=\"margin-bottom:14px\">'
-      + '<label class=\"flbl\">ملاحظة (اختياري)</label>'
-      + '<textarea class=\"fc\" id=\"ra-note\" rows=\"2\" placeholder=\"سبب إعادة التخصيص...\"></textarea></div>'
-      + '<button class=\"btn btn-primary\" onclick=\"_confirmReassign(\\'' + id + '\\')\">تأكيد إعادة التخصيص</button>'
-      + '</div></div></div>';
+    document.getElementById('ra-inline-'+idx).style.display = '';
+    document.getElementById('ra-inline-'+idx).scrollIntoView({behavior:'smooth',block:'nearest'});
   }
-  function _confirmReassign(id) {
-    var sel = document.getElementById('ra-new-staff');
-    if (!sel || !sel.value) { showToast('يرجى اختيار موظف','w'); return; }
-    showToast('تمت إعادة تخصيص الطلب ' + id + ' إلى ' + sel.value, 's');
-    document.getElementById('ra-result').innerHTML = '<div class=\"alert alert-s\" style=\"margin-top:12px\">تمت إعادة التخصيص بنجاح.</div>';
+  function _closeReassignRow(idx) {
+    document.getElementById('ra-inline-'+idx).style.display='none';
   }
-  ${preId ? 'document.addEventListener("DOMContentLoaded",function(){document.getElementById("ra-id").value="'+preId+'";_lookupForReassign();});' : ''}
+  function _confirmReassignRow(idx, id) {
+    var sel   = document.getElementById('ra-staff-'+idx);
+    var rReas = document.getElementById('ra-reason-'+idx);
+    if (!sel || !sel.value)           { showToast('يرجى اختيار الموظف الجديد','w'); return; }
+    if (!rReas || !rReas.value.trim()) { showToast('يرجى إدخال سبب إعادة التخصيص','w'); return; }
+    showToast('تمت إعادة تخصيص البلاغ ' + id + ' إلى ' + sel.value, 's');
+    var row = document.getElementById('ra-row-'+idx);
+    if (row) {
+      var cells = row.querySelectorAll('td');
+      if (cells[3]) cells[3].textContent = sel.value;
+      var btn = row.querySelector('button');
+      if (btn) btn.disabled = true;
+    }
+    document.getElementById('ra-inline-'+idx).style.display='none';
+  }
   <\/script>`;
 
-  return `<div class="pg-head"><div><h1>إعادة تخصيص الطلبات</h1><p>ابحث عن طلب وحدد الموظف الجديد المكلف به</p></div></div>
-  <div class="alert alert-i" style="margin-bottom:16px">${ICONS.info} تعرض هذه الشاشة الطلب المراد نقله، المختص الحالي، عبء العمل المقارن، وسبب إعادة التخصيص قبل اعتماد النقل.</div>
-  ${searchPanel}
+  return `<div class="pg-head"><div><h1>إعادة تخصيص البلاغات</h1><p>عرض البلاغات النشطة وإعادة تخصيصها للموظفين المتاحين</p></div></div>
   ${workloadCard}
+  ${complaintsTable}
   ${script}`;
 }
 
@@ -2938,14 +3287,15 @@ function renderCorrectiveActions(role) {
 
 /* ── إعادة توزيع المفتشين (field-head) ── */
 function renderInspectorRedistribution(role) {
-  const preId = getParam('visit');
-
   const allVisits = [
     ...INSP_DATA.visits.periodic,
     ...INSP_DATA.visits.surprise,
     ...INSP_DATA.visits.scheduled
   ];
   const activeStatuses = ['مجدولة', 'قيد التنفيذ', 'بانتظار اجراء الزيارة التفتيشية'];
+  const activeVisits = allVisits.filter(v =>
+    activeStatuses.some(s => v.status && v.status.includes(s.split(' ')[0]))
+  );
 
   /* عبء العمل لكل مفتش */
   const inspectors = [
@@ -2957,6 +3307,74 @@ function renderInspectorRedistribution(role) {
     active: allVisits.filter(v => v.inspectorName === ins.name && activeStatuses.some(s => v.status && v.status.includes(s.split(' ')[0]))).length,
     total:  allVisits.filter(v => v.inspectorName === ins.name).length
   }));
+
+  const inspJson = JSON.stringify(inspectors);
+
+  const visitRows = activeVisits.map((v, idx) => {
+    const typeLabel = v.id && v.id.includes('-03-') ? 'دورية' : v.id && v.id.includes('-04-') ? 'مفاجئة' : 'مجدولة';
+    const inspector = v.inspectorName || 'غير معين';
+    return `
+      <tr id="ir-row-${idx}" style="height:56px">
+        <td style="padding:12px 14px;font-size:13px;font-weight:700">${v.id || '—'}</td>
+        <td style="padding:12px 14px;font-size:13px">${typeLabel}</td>
+        <td style="padding:12px 14px">${statusBadge(v.status)}</td>
+        <td style="padding:12px 14px;font-size:13px">${v.employerName || '—'}</td>
+        <td style="padding:12px 14px;font-size:13px;font-weight:600">${inspector}</td>
+        <td style="padding:12px 14px;font-size:13px;color:var(--text2)">${v.scheduledDate || '—'}</td>
+        <td style="padding:12px 14px">
+          <button class="btn btn-sm btn-outline" onclick="_openRedistRow(${idx},'${v.id}','${inspector}')">${ICONS.switch} إعادة التوزيع</button>
+        </td>
+      </tr>
+      <tr id="ir-inline-${idx}" style="display:none;background:var(--surface2)">
+        <td colspan="7" style="padding:0">
+          <div style="background:var(--surface2);border-top:2px solid var(--primary);padding:20px 24px">
+            <div class="fg fg-2" style="margin-bottom:16px;max-width:680px">
+              <div class="fgrp">
+                <label class="flbl">المفتش الجديد <span class="req">*</span></label>
+                <select class="fc" id="ir-insp-${idx}">
+                  <option value="">— اختر المفتش —</option>
+                </select>
+              </div>
+              <div class="fgrp">
+                <label class="flbl">سبب إعادة التوزيع <span class="req">*</span></label>
+                <input class="fc" id="ir-reason-${idx}" placeholder="مثال: تعارض مواعيد، إجازة، تحميل متوازن">
+              </div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-primary" onclick="_confirmRedistRow(${idx},'${v.id}')">${ICONS.check} تأكيد إعادة التوزيع</button>
+              <button class="btn btn-ghost" onclick="_closeRedistRow(${idx})">إلغاء</button>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+
+  const visitsTable = `
+    <div class="card">
+      <div class="ph">
+        <h3><span class="pico bl">${ICONS.list}</span>الزيارات النشطة في القسم</h3>
+        <span class="badge b-session">${activeVisits.length} زيارة نشطة</span>
+      </div>
+      ${activeVisits.length === 0
+        ? `<div class="pb" style="text-align:center;padding:40px;color:var(--text3)">لا توجد زيارات نشطة حالياً</div>`
+        : `<div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;min-width:820px">
+              <thead>
+                <tr style="background:var(--g100);border-bottom:2px solid var(--border2)">
+                  <th style="padding:12px 14px;text-align:right;font-size:12.5px;font-weight:700;color:var(--text2);white-space:nowrap">رقم الزيارة</th>
+                  <th style="padding:12px 14px;text-align:right;font-size:12.5px;font-weight:700;color:var(--text2)">النوع</th>
+                  <th style="padding:12px 14px;text-align:right;font-size:12.5px;font-weight:700;color:var(--text2)">الحالة</th>
+                  <th style="padding:12px 14px;text-align:right;font-size:12.5px;font-weight:700;color:var(--text2)">المنشأة</th>
+                  <th style="padding:12px 14px;text-align:right;font-size:12.5px;font-weight:700;color:var(--text2)">المفتش المختص الحالي</th>
+                  <th style="padding:12px 14px;text-align:right;font-size:12.5px;font-weight:700;color:var(--text2);white-space:nowrap">تاريخ الجدولة</th>
+                  <th style="padding:12px 14px;text-align:right;font-size:12.5px;font-weight:700;color:var(--text2)">إجراء</th>
+                </tr>
+              </thead>
+              <tbody>${visitRows}</tbody>
+            </table>
+          </div>`
+      }
+    </div>`;
 
   const workloadCard = `
     <div class="card">
@@ -2981,72 +3399,45 @@ function renderInspectorRedistribution(role) {
       </div>
     </div>`;
 
-  const searchPanel = `
-    <div class="card">
-      <div class="ph"><h3><span class="pico tl">${ICONS.switch}</span>البحث عن زيارة لإعادة التوزيع</h3></div>
-      <div class="pb" style="max-width:520px">
-        <div class="fgrp" style="margin-bottom:16px">
-          <label class="flbl">رقم الزيارة <span class="req">*</span></label>
-          <div style="display:flex;gap:8px">
-            <input class="fc" id="ir-id" placeholder="مثال: 2025-03-000001" value="${preId||''}" style="flex:1">
-            <button class="btn btn-primary" onclick="_lookupVisitForRedist()">${ICONS.eye}عرض التفاصيل</button>
-          </div>
-        </div>
-        <div id="ir-result"></div>
-      </div>
-    </div>`;
-
-  const inspJson = JSON.stringify(inspectors);
   const script = `<script>
-  function _lookupVisitForRedist() {
-    var id = document.getElementById('ir-id') ? document.getElementById('ir-id').value.trim() : '';
-    var res = document.getElementById('ir-result');
-    if (!res) return;
-    if (!id) { showToast('يرجى إدخال رقم الزيارة','w'); return; }
-    var allV = [].concat(INSP_DATA.visits.periodic||[], INSP_DATA.visits.surprise||[], INSP_DATA.visits.scheduled||[]);
-    var v = allV.find(function(x){return x.id===id;});
-    if (!v) {
-      res.innerHTML = '<div class="alert alert-w" style="margin-top:12px">${ICONS.warn} لم يتم العثور على زيارة بهذا الرقم.</div>';
-      return;
+  var _irInspList = ${inspJson};
+  function _openRedistRow(idx, id, currentInspector) {
+    document.querySelectorAll('[id^="ir-inline-"]').forEach(function(el){ el.style.display='none'; });
+    var sel = document.getElementById('ir-insp-'+idx);
+    if (sel && sel.options.length <= 1) {
+      _irInspList.filter(function(i){ return i.name !== currentInspector; }).forEach(function(i){
+        var o = document.createElement('option');
+        o.value = i.name;
+        o.textContent = i.name + ' — نشط: ' + i.active + ' زيارة (' + i.specialty + ')';
+        sel.appendChild(o);
+      });
     }
-    var typeLabel = v.id.includes('-03-')?'دورية':v.id.includes('-04-')?'مفاجئة':'مجدولة';
-    var insList = ${inspJson};
-    var insOpts = insList.filter(function(i){return i.name!==v.inspectorName;}).map(function(i){
-      return '<option value="'+i.name+'">'+i.name+' — نشط: '+i.active+' زيارة</option>';
-    }).join('');
-    if(!insOpts) insOpts='<option value="حاتم سالم الزدجالي (مفتش آخر)">حاتم سالم الزدجالي (إعادة تعيين) — نشط: '+insList[0].active+' زيارة</option>';
-    res.innerHTML = '<div style="margin-top:12px">'
-      + '<div class="card" style="margin-bottom:12px"><div class="ph"><h3><span class=\"pico bl\">&#x1F4CB;</span>تفاصيل الزيارة</h3>'
-      + '<span class=\"badge b-session\" style=\"font-size:11px\">'+v.id+'</span></div>'
-      + '<div class=\"pb\"><div class=\"fg fg-2\">'
-      + '<div class=\"fgrp\"><label class=\"flbl\">نوع الزيارة</label><div class=\"fro fw7\">'+typeLabel+'</div></div>'
-      + '<div class=\"fgrp\"><label class=\"flbl\">الحالة</label><div class=\"fro\">'+statusBadge(v.status)+'</div></div>'
-      + '<div class=\"fgrp\"><label class=\"flbl\">المنشأة</label><div class=\"fro fw7\">'+(v.employerName||'—')+'</div></div>'
-      + '<div class=\"fgrp\"><label class=\"flbl\">تاريخ الجدولة</label><div class=\"fro\">'+(v.scheduledDate||'—')+'</div></div>'
-      + '<div class=\"fgrp\"><label class=\"flbl\">المفتش الحالي</label><div class=\"fro fw7 txp\">'+(v.inspectorName||'غير معين')+'</div></div>'
-      + '</div></div></div>'
-      + '<div class=\"card\"><div class=\"ph\"><h3><span class=\"pico tl\">&#x1F501;</span>اختيار المفتش الجديد</h3></div>'
-      + '<div class=\"pb\">'
-      + '<div class=\"fgrp\" style=\"margin-bottom:14px\"><label class=\"flbl\">المفتش الجديد <span class=\"req\">*</span></label>'
-      + '<select class=\"fc\" id=\"ir-new-insp\"><option value=\"\">— اختر المفتش —</option>'+insOpts+'</select></div>'
-      + '<div class=\"fgrp\" style=\"margin-bottom:14px\"><label class=\"flbl\">سبب إعادة التوزيع (اختياري)</label>'
-      + '<textarea class=\"fc\" id=\"ir-note\" rows=\"2\" placeholder=\"مثل: تعارض مواعيد، مرض، تحميل متوازن...\"></textarea></div>'
-      + '<button class=\"btn btn-primary\" onclick=\"_confirmRedist(\\'' + id + '\\')\">تأكيد إعادة التوزيع</button>'
-      + '</div></div></div>';
+    document.getElementById('ir-inline-'+idx).style.display = '';
+    document.getElementById('ir-inline-'+idx).scrollIntoView({behavior:'smooth',block:'nearest'});
   }
-  function _confirmRedist(id) {
-    var sel = document.getElementById('ir-new-insp');
-    if (!sel || !sel.value) { showToast('يرجى اختيار مفتش','w'); return; }
+  function _closeRedistRow(idx) {
+    document.getElementById('ir-inline-'+idx).style.display='none';
+  }
+  function _confirmRedistRow(idx, id) {
+    var sel   = document.getElementById('ir-insp-'+idx);
+    var rReas = document.getElementById('ir-reason-'+idx);
+    if (!sel || !sel.value)            { showToast('يرجى اختيار المفتش الجديد','w'); return; }
+    if (!rReas || !rReas.value.trim()) { showToast('يرجى إدخال سبب إعادة التوزيع','w'); return; }
     showToast('تمت إعادة توزيع الزيارة ' + id + ' إلى ' + sel.value, 's');
-    document.getElementById('ir-result').innerHTML = '<div class=\"alert alert-s\" style=\"margin-top:12px\">تمت إعادة التوزيع بنجاح.</div>';
+    var row = document.getElementById('ir-row-'+idx);
+    if (row) {
+      var cells = row.querySelectorAll('td');
+      if (cells[4]) cells[4].textContent = sel.value;
+      var btn = row.querySelector('button');
+      if (btn) btn.disabled = true;
+    }
+    document.getElementById('ir-inline-'+idx).style.display='none';
   }
-  ${preId ? 'document.addEventListener("DOMContentLoaded",function(){_lookupVisitForRedist();});' : ''}
   <\/script>`;
 
-  return `<div class="pg-head"><div><h1>إعادة توزيع المفتشين</h1><p>ابحث عن زيارة وحدد المفتش الجديد المكلف بها</p></div></div>
-  <div class="alert alert-i" style="margin-bottom:16px">${ICONS.info} تعرض الشاشة الزيارة المستهدفة، المفتش الحالي، أعباء العمل المقارنة، وتخصص كل مفتش قبل اعتماد إعادة التوزيع.</div>
-  ${searchPanel}
+  return `<div class="pg-head"><div><h1>إعادة توزيع المفتشين</h1><p>عرض الزيارات النشطة وإعادة توزيعها على المفتشين المتاحين</p></div></div>
   ${workloadCard}
+  ${visitsTable}
   ${script}`;
 }
 
@@ -4477,34 +4868,46 @@ function renderTimelineScreen(role) {
   const entity = findEntityTimeline(requestId);
   const timeline = entity ? entity.timeline : [];
 
-  const entityOptions = [
-    ...INSP_DATA.complaints.map(c => ({ id: c.id, name: `${c.id} — ${c.type}` })),
-    ...INSP_DATA.appeals.map(a => ({ id: a.id, name: `${a.id} — ${a.type}` })),
-    ...[...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled].map(v => ({ id: v.id, name: `${v.id} — ${v.employerName}` }))
-  ];
-
   return `<div class="pg-head"><div><h1>السجل الزمني</h1><p>سجل جميع الأنشطة والإجراءات على النظام</p></div>
     <div class="pg-acts">
       <button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير السجلات...','i')">${ICONS.download}تصدير</button>
     </div></div>
 
     <div class="card mb12">
-      <div class="ph"><h3><span class="pico gr">${ICONS.filter}</span>اختيار الطلب</h3></div>
+      <div class="ph"><h3><span class="pico gr">${ICONS.filter}</span>البحث عن سجل طلب</h3></div>
       <div class="pb">
         <div class="fg fg-3">
           <div class="fgrp">
-            <label class="flbl">رقم الطلب</label>
-            <select id="timeline-request-select" class="fc" onchange="updateTimelineRequest()">
-              ${entityOptions.map(opt => `<option value="${opt.id}" ${opt.id === requestId ? 'selected' : ''}>${opt.name}</option>`).join('')}
+            <label class="flbl">نوع الطلب</label>
+            <select id="tl-type-select" class="fc">
+              <option value="complaint">بلاغ</option>
+              <option value="appeal">تظلم</option>
+              <option value="visit">زيارة ميدانية</option>
             </select>
           </div>
           <div class="fgrp">
-            <label class="flbl">&nbsp;</label>
-            <button class="btn btn-primary" onclick="updateTimelineRequest()">${ICONS.search}عرض السجل الزمني</button>
+            <label class="flbl">رقم المرجع</label>
+            <input class="fc" id="tl-ref-input" placeholder="مثال: 2025-01-000001" value="${requestId !== 'CMP-2025-0001' ? requestId : ''}">
+          </div>
+          <div class="fgrp" style="align-self:flex-end">
+            <button class="btn btn-primary" style="width:100%" onclick="_showTimelineByRef()">${ICONS.search}عرض السجل الزمني</button>
           </div>
         </div>
       </div>
     </div>
+    <script>
+    function _showTimelineByRef() {
+      var ref = document.getElementById('tl-ref-input') ? document.getElementById('tl-ref-input').value.trim() : '';
+      if (!ref) { showToast('يرجى إدخال رقم المرجع','w'); return; }
+      var currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set('id', ref);
+      window.location.href = currentUrl.toString();
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      var inp = document.getElementById('tl-ref-input');
+      if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') _showTimelineByRef(); });
+    });
+    <\/script>
 
     ${entity ? `
     <div class="card">
@@ -5966,19 +6369,52 @@ function _svcRulesPanel(rules) {
 }
 
 function _svcDecisionPanel(summary) {
+  const noteId = 'svc-dec-note-' + Math.random().toString(36).slice(2,7);
   if (summary.failed === 0 && summary.pending === 0) {
-    return `<div class="decision-panel read-only-panel">
-      <h3>للاطلاع فقط</h3>
-      <p>جميع شروط التحقق مستوفاة، لذلك لا توجد إجراءات متاحة لقسم المتابعة والبلاغات على هذا الطلب.</p>
+    return `<div class="card">
+      <div class="ph"><h3><span class="pico tl">${ICONS.check}</span>نتيجة الاطلاع</h3>
+        <span class="badge b-approved">جميع الشروط مستوفاة</span></div>
+      <div class="pb">
+        <div class="alert alert-s" style="margin-bottom:16px">${ICONS.check} اجتاز الطلب جميع شروط التحقق. يظهر في التفتيش للاطلاع دون إمكانية اتخاذ إجراءات.</div>
+        <div class="fgrp" style="margin-bottom:14px">
+          <label class="flbl">ملاحظات (اختياري)</label>
+          <textarea class="fc" id="${noteId}" rows="3" placeholder="أضف أي ملاحظات أو توجيهات ختامية..."></textarea>
+        </div>
+        <div class="dz-box" style="padding:12px;min-height:auto;margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="font-size:20px;color:var(--text3)">${ICONS.upload}</div>
+            <div style="flex:1"><div style="font-size:12px;font-weight:600">إرفاق وثيقة داعمة (اختياري)</div>
+              <div style="font-size:11px;color:var(--text3)">PDF, JPG, PNG — الحد الأقصى 10 MB</div></div>
+            <button class="btn btn-secondary btn-sm" onclick="showToast('فتح نافذة الرفع','i')">اختيار ملف</button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="showToast('تم تسجيل الاطلاع وحفظ الملاحظات','s')">${ICONS.check}تأكيد الاطلاع</button>
+      </div>
     </div>`;
   }
-  return `<div class="decision-panel">
-    <h3>قرار قسم المتابعة والبلاغات</h3>
-    <p>الموظف المسؤول: سيف خلفان السيابي. يرجى اختيار الإجراء بعد مراجعة الشروط غير المستوفاة والمستندات الداعمة.</p>
-    <div class="decision-actions">
-      <button class="btn btn-primary btn-sm" onclick="showToast('تمت الموافقة على تمرير الطلب','s')">${ICONS.check}الموافقة على تمرير الطلب</button>
-      <button class="btn btn-warning btn-sm" onclick="showToast('تم تعليق الطلب لحين استيفاء البيانات','w')">${ICONS.clock}تعليق لحين استيفاء بيانات</button>
-      <button class="btn btn-secondary btn-sm" onclick="showToast('تم طلب زيارة أو تحقق إضافي','i')">${ICONS.search}طلب تحقق إضافي</button>
+  return `<div class="card">
+    <div class="ph"><h3><span class="pico bl">${ICONS.pen}</span>قرار قسم المتابعة والبلاغات</h3>
+      <span class="badge b-high">${summary.failed} شرط غير مستوفٍ</span></div>
+    <div class="pb">
+      <div class="alert alert-w" style="margin-bottom:16px">${ICONS.warn} يرجى مراجعة الشروط غير المستوفاة والمستندات الداعمة قبل اتخاذ القرار.</div>
+      <div class="fgrp" style="margin-bottom:14px">
+        <label class="flbl">ملاحظات القرار <span class="req">*</span></label>
+        <textarea class="fc" id="${noteId}" rows="4" placeholder="أدخل مبررات القرار، التوجيهات، أو الإجراءات المطلوبة من الجهات الأخرى..."></textarea>
+      </div>
+      <div class="dz-box" style="padding:12px;min-height:auto;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:20px;color:var(--text3)">${ICONS.upload}</div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:600">إرفاق وثيقة داعمة للقرار (اختياري)</div>
+            <div style="font-size:11px;color:var(--text3)">PDF, JPG, DOC — الحد الأقصى 10 MB</div></div>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('فتح نافذة الرفع','i')">اختيار ملف</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        <button class="btn btn-primary btn-sm" onclick="(function(){var n=document.getElementById('${noteId}');if(!n||!n.value.trim()){showToast('يرجى إدخال ملاحظات القرار','w');return;}showToast('تمت الموافقة على تمرير الطلب','s');})()">${ICONS.check}الموافقة على تمرير الطلب</button>
+        <button class="btn btn-warning btn-sm" onclick="(function(){var n=document.getElementById('${noteId}');if(!n||!n.value.trim()){showToast('يرجى إدخال ملاحظات القرار','w');return;}showToast('تم تعليق الطلب لحين استيفاء البيانات','w');})()">${ICONS.clock}تعليق لحين استيفاء بيانات</button>
+        <button class="btn btn-secondary btn-sm" onclick="(function(){var n=document.getElementById('${noteId}');if(!n||!n.value.trim()){showToast('يرجى إدخال ملاحظات القرار','w');return;}showToast('تم طلب زيارة أو تحقق إضافي','i');})()">${ICONS.search}طلب تحقق إضافي</button>
+        <button class="btn btn-danger btn-sm" onclick="(function(){var n=document.getElementById('${noteId}');if(!n||!n.value.trim()){showToast('يرجى إدخال مبرر الرفض','w');return;}showToast('تم رفض الطلب وإشعار مقدم الطلب','s');})()">${ICONS.x}رفض الطلب</button>
+      </div>
     </div>
   </div>`;
 }

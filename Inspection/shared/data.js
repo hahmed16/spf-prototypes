@@ -227,6 +227,41 @@ const INSP_DATA = {
         { month: 'نوفمبر 2024',  status: 'غير مدفوع',   amount: '45 ر.ع', paidDate: null },
         { month: 'ديسمبر 2024',  status: 'غير مدفوع',   amount: '45 ر.ع', paidDate: null }
       ]
+    },
+    {
+      id: 'WRK-004',
+      name: 'أسماء محمد الحارثي',
+      civil: '07345678',
+      nationality: 'عُماني',
+      gender: 'أنثى',
+      dob: '1997-08-20',
+      phone: '96892034567',
+      email: 'asmaa.h@gmail.com',
+      employer: 'مصنع الإنتاج الغذائي الخليجي',
+      employerId: 'EMP-002',
+      position: 'مشغّلة ماكينات',
+      department: 'قسم التعبئة والتغليف',
+      contractType: 'عقد سنوي متجدد',
+      insuredFrom: '2021-03-01',
+      joinDate: '2021-03-01',
+      employmentStatus: 'على رأس العمل',
+      resignDate: null,
+      salary: 320,
+      riskLevel: 'متوسط',
+      wageProtection: 'منتظم',
+      healthInsurance: 'نشط — شركة تكافل للتأمين',
+      riskIndicators: [],
+      employmentHistory: [
+        { employer: 'مصنع الإنتاج الغذائي الخليجي', position: 'مشغّلة ماكينات', from: '2021-03', to: 'الآن', reason: null, status: 'نشط' }
+      ],
+      insuranceHistory: [
+        { month: 'يوليو 2024',    status: 'مدفوع', amount: '32 ر.ع', paidDate: '2024-07-01' },
+        { month: 'أغسطس 2024',   status: 'مدفوع', amount: '32 ر.ع', paidDate: '2024-08-01' },
+        { month: 'سبتمبر 2024',  status: 'مدفوع', amount: '32 ر.ع', paidDate: '2024-09-01' },
+        { month: 'أكتوبر 2024',  status: 'مدفوع', amount: '32 ر.ع', paidDate: '2024-10-01' },
+        { month: 'نوفمبر 2024',  status: 'مدفوع', amount: '32 ر.ع', paidDate: '2024-11-01' },
+        { month: 'ديسمبر 2024',  status: 'مدفوع', amount: '32 ر.ع', paidDate: '2024-12-01' }
+      ]
     }
   ],
 

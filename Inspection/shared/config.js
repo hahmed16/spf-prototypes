@@ -28,7 +28,6 @@ const INSP_CONFIG = {
       sidebar: [
         { label: 'قائمة البلاغات', page: 'complaints-list', icon: 'inbox', badge: 'complaints' },
         { label: 'إنشاء بلاغ جديد', page: 'complaint-new', icon: 'plus', badge: null },
-        { label: 'حالة التوفر', page: 'staff-availability', icon: 'user', badge: null },
       ]
     },
 
@@ -81,7 +80,6 @@ const INSP_CONFIG = {
         { label: 'المنشآت المتوقفة عن السداد', page: '../services/companies-stopped-payment-list', icon: 'building', badge: null },
         { label: 'تحليل بيانات العامل', page: 'worker-analysis', icon: 'chart', badge: null },
         { label: 'تحليل بيانات صاحب العمل', page: 'employer-analysis', icon: 'building', badge: null },
-        { label: 'حالة التوفر', page: 'staff-availability', icon: 'user', badge: null },
         { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
@@ -133,7 +131,6 @@ const INSP_CONFIG = {
         { label: 'المنشآت المتوقفة عن السداد', page: '../services/companies-stopped-payment-list', icon: 'building', badge: null },
         { label: 'تحليل بيانات العامل', page: 'worker-analysis', icon: 'chart', badge: null },
         { label: 'تحليل بيانات صاحب العمل', page: 'employer-analysis', icon: 'building', badge: null },
-        { label: 'حالة التوفر', page: 'staff-availability', icon: 'user', badge: null },
         { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
@@ -219,7 +216,6 @@ const INSP_CONFIG = {
         { label: 'تحليل بيانات العمال', page: 'worker-analysis', icon: 'user', badge: null },
         { label: 'تحليل بيانات أصحاب العمل', page: 'employer-analysis', icon: 'building', badge: null },
         { label: 'إعداد خطة التفتيش الدوري', page: 'inspection-plan-draft', icon: 'pen', badge: null },
-        { label: 'حالة التوفر', page: 'staff-availability', icon: 'user', badge: null },
         { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
