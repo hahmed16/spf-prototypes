@@ -62,6 +62,117 @@ function _summaryBar(items) {
   ).join('');
   return `<div class="dsb">${cells}</div>`;
 }
+function _sampleAttachment(name, date, size, type) {
+  return {
+    name: name || 'مرفق داعم.pdf',
+    date: date || '2025-01-22',
+    size: size || '420 KB',
+    type: type || 'pdf'
+  };
+}
+function _withSampleAttachments(item, context) {
+  if (item && Array.isArray(item.attachments) && item.attachments.length) return item.attachments;
+  const labelMap = {
+    complaint: 'مرفق البلاغ',
+    appeal: 'مرفق التظلم',
+    visit: 'مرفق الزيارة',
+    ban: 'مرفق قرار الحظر',
+    report: 'مرفق التقرير',
+    plan: 'مرفق خطة التفتيش'
+  };
+  const label = labelMap[context] || 'مرفق داعم';
+  const id = item && item.id ? item.id : 'SAMPLE';
+  return [
+    _sampleAttachment(`${label} — ${id}.pdf`, (item && (item.submitDate || item.issuedDate || item.createdDate || item.scheduledDate || item.date)) || '2025-01-22', '540 KB', 'pdf'),
+    _sampleAttachment(`مستندات مساندة — ${id}.zip`, (item && (item.submitDate || item.issuedDate || item.createdDate || item.scheduledDate || item.date)) || '2025-01-22', '1.3 MB', 'oth')
+  ];
+}
+function _withSampleNotes(item, context) {
+  if (item && Array.isArray(item.notes) && item.notes.length) return item.notes;
+  if (item && typeof item.notes === 'string' && item.notes.trim()) return item.notes;
+  const roleMap = {
+    complaint: 'monitoring-employee',
+    appeal: 'monitoring-head',
+    visit: 'field-inspector',
+    ban: 'inspection-director',
+    report: 'ops-analyst',
+    plan: 'ops-analyst'
+  };
+  const authorMap = {
+    complaint: 'سيف خلفان الأمري',
+    appeal: 'نجلاء عبدالله القاسمي',
+    visit: 'حاتم سالم الزدجالي',
+    ban: 'عبدالعزيز هلال الراشدي',
+    report: 'شيماء وليد البريكي',
+    plan: 'شيماء وليد البريكي'
+  };
+  const textMap = {
+    complaint: 'تم استكمال ملف البلاغ بعينة توضيحية من المرفقات والملاحظات لضمان جاهزية العرض والمراجعة خلال الجلسة.',
+    appeal: 'تم تجهيز ملف التظلم بعناصر دعم توضيحية حتى تظهر جميع الأقسام مكتملة أثناء العرض.',
+    visit: 'تم تدوين ملاحظة تشغيلية نموذجية لضمان ظهور مسار الزيارة والمحضر والمرفقات بشكل مكتمل لرئيس القسم.',
+    ban: 'تم استكمال ملف حالة الحظر بملاحظة إيضاحية تدعم العرض الرقابي أثناء الاجتماع.',
+    report: 'تم تجهيز هذا التقرير ببيانات ومرفقات توضيحية ليظهر بشكل مكتمل في النماذج الاستعراضية.',
+    plan: 'تمت إضافة ملاحظة تشغيلية توضح أساس الخطة وحالة المتابعة لضمان وضوح العرض.'
+  };
+  return [{
+    text: textMap[context] || 'تمت إضافة ملاحظة نموذجية لأغراض العرض.',
+    author: authorMap[context] || 'النظام',
+    date: (item && (item.submitDate || item.issuedDate || item.createdDate || item.scheduledDate || item.date)) || '2025-01-22',
+    role: roleMap[context] || 'system'
+  }];
+}
+function _buildVisitReport(v, typeLabel) {
+  const visitDate = v.actualDate || v.scheduledDate || '2025-01-22';
+  const violations = v.findings && v.findings.violations && v.findings.violations.length
+    ? v.findings.violations
+    : ['لا توجد مخالفات نهائية مسجلة بعد، والزيارة ما زالت ضمن المسار التشغيلي الجاري.'];
+  const correctiveActions = v.findings && v.findings.correctiveActions && v.findings.correctiveActions.length
+    ? v.findings.correctiveActions
+    : ['استكمال الزيارة وفق الموعد المعتمد ورفع المحضر مع الأدلة والمستندات الداعمة.'];
+  const statusSummary = v.findings && v.findings.summary
+    ? v.findings.summary
+    : (v.status === 'مجدولة'
+      ? 'الزيارة مجدولة، وتم تجهيز ملفها الاستباقي بالمستندات المرجعية ونقاط الفحص المطلوبة.'
+      : 'تم تجهيز محضر نموذجي واضح للعرض والمراجعة حتى قبل اكتمال دورة الاعتماد.');
+  return {
+    submittedBy: v.inspectorName || 'حاتم سالم الزدجالي',
+    submittedDate: visitDate,
+    visitEvaluation: v.findings ? 'مرتفعة الأهمية وتستوجب متابعة تنفيذية' : 'جاهزة للتنفيذ مع ملف تحضيري مكتمل',
+    complaintImpact: v.reason ? 'مرتبطة مباشرة ببلاغ أو مؤشر رقابي ذي أثر على الامتثال وحقوق المؤمن عليهم.' : 'أثرها رقابي استباقي على الامتثال والجاهزية.',
+    summary: statusSummary,
+    fieldNarrative: v.findings
+      ? 'وثق المفتش الميداني المشاهدات، وقارنها مع السجلات، وأثبت الفجوات مع توصية بالإجراء التالي.'
+      : 'تم تجهيز نطاق الزيارة ونقاط المراجعة والسجلات المطلوب طلبها من المنشأة قبل التنفيذ.',
+    attendees: [
+      v.inspectorName || 'حاتم سالم الزدجالي',
+      'ممثل المنشأة / الموارد البشرية',
+      'مشرف الموقع أو المسؤول التشغيلي'
+    ],
+    evidencePoints: [
+      'مطابقة السجلات المقدمة مع حالة الاشتراكات والبلاغات المرتبطة.',
+      'توثيق صور ومستندات داعمة وإثباتات ميدانية ضمن ملف الزيارة.',
+      'ربط النتيجة بالتصحيح المطلوب أو القرار الرقابي التالي.'
+    ],
+    violations,
+    correctiveActions,
+    reviewChecklist: [
+      'وضوح وصف الوقائع وزمن الزيارة ومكانها.',
+      'وجود أدلة ومرفقات تدعم النتيجة الميدانية.',
+      'ربط المخالفات بالإجراء التصحيحي أو القرار المقترح.',
+      'جاهزية المحضر للرفع أو الإعادة أو الاعتماد.'
+    ],
+    attachments: _withSampleAttachments({
+      id: v.id,
+      scheduledDate: visitDate,
+      attachments: v.report && v.report.attachments
+    }, 'visit'),
+    notes: _withSampleNotes({
+      id: v.id,
+      scheduledDate: visitDate,
+      notes: v.report && v.report.notes
+    }, 'visit')
+  };
+}
 
 /* ── لوحة البيانات ── */
 function renderDashboard(role) {
@@ -665,6 +776,8 @@ function renderComplaintDetails(role, defaultId) {
 
   const isExternal = role === 'employer' || role === 'insured';
   const isInternal = !isExternal;
+  const complaintAttachments = _withSampleAttachments(c, 'complaint');
+  const complaintNotes = _withSampleNotes(c, 'complaint');
   const internalWorkflowRoles = ['monitoring-employee', 'monitoring-head', 'field-inspector', 'field-head', 'inspection-director'];
   const showWorkflowPanels = internalWorkflowRoles.includes(role);
   const isDraft = c.status === 'مسودة' && isExternal;
@@ -877,9 +990,9 @@ function renderComplaintDetails(role, defaultId) {
 
   /* ── المرفقات ── */
   const attachmentsPanel = `
-    <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.upload}</span>المرفقات (${(c.attachments||[]).length})</h3>
+    <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.upload}</span>المرفقات (${complaintAttachments.length})</h3>
       ${(isDraft || isReturned) ? `<button class="btn btn-secondary btn-sm" onclick="showToast('فتح نافذة الرفع','i')">${ICONS.plus}إضافة</button>` : ''}</div>
-    <div class="pb">${(c.attachments||[]).length ? c.attachments.map(a => attRow(a)).join('') : '<div class="tx3 fs11">لا توجد مرفقات</div>'}</div></div>`;
+    <div class="pb">${complaintAttachments.map(a => attRow(a)).join('')}</div></div>`;
 
   /* ── السجل الزمني ── */
   const timelinePanel = `
@@ -952,7 +1065,7 @@ function renderComplaintDetails(role, defaultId) {
     return pgHead + summaryBar + _tabView(tid, tabs, defaultTab);
   }
 
-  const notesPanel = showWorkflowPanels ? renderNotes(c.notes, c.id) : '';
+  const notesPanel = showWorkflowPanels ? renderNotes(complaintNotes, c.id) : '';
   const historyContent = timelinePanel + correspondencePanel + initScript;
   const verifyContent = (dataComparePanel || '') + (verPanel || '') + (docsPanel || '');
   const actionContent = (rolePanels || '') + (actionPanel || '');
@@ -1468,6 +1581,8 @@ function renderAppealDetails(role) {
   const id = getParam('id') || '2025-02-000001';
   const a = INSP_DATA.appeals.find(x => x.id === id) || INSP_DATA.appeals[0];
   const isExternal = role === 'employer' || role === 'insured';
+  const appealAttachments = _withSampleAttachments(a, 'appeal');
+  const appealNotes = _withSampleNotes(a, 'appeal');
   const allVisits = [...(INSP_DATA.visits.periodic||[]), ...(INSP_DATA.visits.surprise||[]), ...(INSP_DATA.visits.scheduled||[])];
   const relatedBan = a.relatedType === 'قرار حظر' ? (INSP_DATA.banCases || []).find(x => x.id === a.relatedId) : null;
 
@@ -1638,8 +1753,8 @@ function renderAppealDetails(role) {
     <div class="fgrp span-full"><label class="flbl">أسباب التظلم</label><div class="fro" style="min-height:70px;white-space:pre-wrap">${a.reasons}</div></div>
   </div></div></div>`;
 
-  const attachmentsCard = `<div class="card"><div class="ph"><h3><span class="pico or">${ICONS.upload}</span>المرفقات (${(a.attachments||[]).length})</h3></div>
-  <div class="pb">${(a.attachments||[]).length ? a.attachments.map(f => attRow(f)).join('') : '<div class="tx3 fs11">لا توجد مرفقات</div>'}</div></div>`;
+  const attachmentsCard = `<div class="card"><div class="ph"><h3><span class="pico or">${ICONS.upload}</span>المرفقات (${appealAttachments.length})</h3></div>
+  <div class="pb">${appealAttachments.map(f => attRow(f)).join('')}</div></div>`;
 
   const timelineCard = `<div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>السجل الزمني</h3></div>
   <div class="pb">${renderTimeline(a.timeline)}</div></div>`;
@@ -1672,7 +1787,7 @@ function renderAppealDetails(role) {
     { label: 'بيانات التظلم', content: appealDataCard + submitterPanel },
     { label: 'البيانات المرتبطة', content: relatedPanel || '<p class="tx3 fs11" style="padding:16px">لا توجد بيانات مرتبطة</p>' },
     { label: 'القرار والإجراءات', content: (decisionHtml || '') + (actionPanel || '<p class="tx3 fs11" style="padding:16px">لا توجد إجراءات متاحة في الوضع الحالي</p>'), badge: hasAction ? '!' : '' },
-    { label: 'المرفقات والملاحظات', content: attachmentsCard + renderNotes(a.notes, a.id) },
+    { label: 'المرفقات والملاحظات', content: attachmentsCard + renderNotes(appealNotes, a.id) },
     { label: 'السجل والمراسلات', content: timelineCard + correspondenceCard },
   ];
   return pgHead + summaryBar + _tabView(tid, tabs, hasAction ? 2 : 0) + initScript;
@@ -1771,6 +1886,7 @@ function renderVisitDetails(role, type) {
   const listPage = { periodic: 'visits-periodic-list', surprise: 'visits-surprise-list', scheduled: 'visits-scheduled-list' }[type];
   const typeLabel = { periodic: 'زيارة دورية', surprise: 'زيارة مفاجئة', scheduled: 'زيارة مجدولة' }[type];
   const isExternal = role === 'employer' || role === 'insured';
+  const visitReport = _buildVisitReport(v, typeLabel);
 
   /* External users: show basic info + approved findings only */
   if (isExternal) {
@@ -1830,15 +1946,50 @@ function renderVisitDetails(role, type) {
         </ul></div>` : ''}
     </div></div>` : '';
 
+  const visitReportCard = `
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.file}</span>محضر وتقرير المفتش</h3>
+      <span class="badge b-session" style="font-size:11px">${visitReport.submittedDate}</span></div>
+    <div class="pb">
+      <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} هذا القسم يعرض المحضر الميداني كما يرفعه المفتش، ويُستخدم مباشرة من رئيس القسم للمراجعة والاعتماد أو الإعادة.</div>
+      <div class="fg fg-2">
+        <div class="fgrp"><label class="flbl">أعد التقرير</label><div class="fro fw7">${visitReport.submittedBy}</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ الرفع</label><div class="fro">${visitReport.submittedDate}</div></div>
+        <div class="fgrp"><label class="flbl">تقييم الزيارة</label><div class="fro">${visitReport.visitEvaluation}</div></div>
+        <div class="fgrp"><label class="flbl">أثر البلاغ / الأثر الرقابي</label><div class="fro">${visitReport.complaintImpact}</div></div>
+        <div class="fgrp span-full"><label class="flbl">الملخص التنفيذي للمحضر</label><div class="fro" style="min-height:64px;white-space:pre-wrap">${visitReport.summary}</div></div>
+        <div class="fgrp span-full"><label class="flbl">السرد الميداني</label><div class="fro" style="min-height:64px;white-space:pre-wrap">${visitReport.fieldNarrative}</div></div>
+        <div class="fgrp span-full"><label class="flbl">الحضور أثناء الزيارة</label><div class="fro">${visitReport.attendees.map(x => `<div style="padding:4px 0;border-bottom:1px solid var(--border)">${x}</div>`).join('')}</div></div>
+        <div class="fgrp span-full"><label class="flbl">أدلة ومشاهدات التحقق</label><div class="fro">${visitReport.evidencePoints.map(x => `<div style="padding:4px 0;border-bottom:1px solid var(--border)">${x}</div>`).join('')}</div></div>
+      </div>
+    </div></div>`;
+
+  const visitAttachmentsCard = `<div class="card"><div class="ph"><h3><span class="pico or">${ICONS.upload}</span>مرفقات المحضر (${visitReport.attachments.length})</h3></div>
+    <div class="pb">${visitReport.attachments.map(f => attRow(f)).join('')}</div></div>`;
+
   let actionPanel = '';
   if (role === 'field-inspector' && v.status === 'مجدولة') {
-    actionPanel = _dpanel('تنفيذ الزيارة', ['بدء الزيارة'], `<p class="fs11 tx3">ابدأ الزيارة الميدانية وقم بتعبئة قائمة التحقق أدناه.</p>`);
+    actionPanel = _dpanel('تنفيذ الزيارة', ['بدء الزيارة'], `
+      <div class="alert alert-i" style="margin-bottom:12px">${ICONS.info} بمجرد بدء الزيارة سيتمكن المفتش من استكمال المحضر وإرفاق الأدلة ورفع التقرير لرئيس القسم.</div>
+      <div class="fgrp"><label class="flbl">هدف الزيارة</label><textarea class="fc" rows="3" placeholder="أدخل الهدف التشغيلي للزيارة ونطاق الفحص المتوقع...">${v.purpose || v.reason || ''}</textarea></div>`);
   } else if (role === 'field-inspector' && v.status === 'جارية') {
-    actionPanel = _dpanel('رفع المحضر', ['رفع المحضر'],
-      `<div class="fgrp"><label class="flbl">ملاحظات المحضر</label><textarea class="fc" rows="4" placeholder="أدخل ملخص المحضر والنتائج..."></textarea></div>`);
+    actionPanel = _dpanel('رفع المحضر', ['رفع المحضر'], `
+      <div class="fgrp"><label class="flbl">ملخص المحضر <span class="req">*</span></label><textarea class="fc" rows="3" placeholder="أدخل ملخصاً واضحاً للزيارة...">${visitReport.summary}</textarea></div>
+      <div class="fgrp"><label class="flbl">المخالفات أو النتائج الرئيسية</label><textarea class="fc" rows="4" placeholder="دوّن المخالفات أو نتائج الفحص...">${visitReport.violations.join('\n')}</textarea></div>
+      <div class="fgrp"><label class="flbl">الإجراءات المقترحة</label><textarea class="fc" rows="3" placeholder="دوّن الإجراءات التصحيحية أو التوصيات...">${visitReport.correctiveActions.join('\n')}</textarea></div>
+      <div class="fgrp"><label class="flbl">تقييم الزيارة</label><input class="fc" value="${visitReport.visitEvaluation}"></div>
+      <div class="fgrp"><label class="flbl">أثر البلاغ / أثر النتيجة</label><input class="fc" value="${visitReport.complaintImpact}"></div>
+      <div class="dz-box" style="padding:12px;min-height:auto;margin-top:12px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:20px;color:var(--text3)">${ICONS.upload}</div>
+          <div style="flex:1"><div style="font-size:12.5px;font-weight:600">إرفاق الأدلة والمرفقات</div><div style="font-size:11px;color:var(--text3)">صور، محضر، كشف، أو أي مستند داعم</div></div>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('فتح نافذة الرفع','i')">اختيار</button>
+        </div>
+      </div>`);
   } else if (role === 'field-head' && v.status === 'بانتظار مراجعة المحضر') {
-    actionPanel = _dpanel('مراجعة المحضر واعتماده', ['اعتماد المحضر','إعادة المحضر للمراجعة','إصدار أمر تصحيحي'],
-      `<div class="fgrp"><label class="flbl">ملاحظات المراجعة</label><textarea class="fc" rows="3" placeholder="أدخل ملاحظاتك على المحضر..."></textarea></div>`);
+    actionPanel = _dpanel('مراجعة المحضر واعتماده', ['اعتماد المحضر','إعادة المحضر للمراجعة','إصدار أمر تصحيحي'], `
+      <div class="alert alert-w" style="margin-bottom:12px">${ICONS.warn} راجع محضر المفتش والمرفقات والأثر المقترح قبل الاعتماد أو الإعادة.</div>
+      <div class="fgrp"><label class="flbl">قائمة مراجعة رئيس القسم</label><div class="fro">${visitReport.reviewChecklist.map(x => `<div style="padding:4px 0;border-bottom:1px solid var(--border)">${x}</div>`).join('')}</div></div>
+      <div class="fgrp"><label class="flbl">خلاصة المراجعة</label><textarea class="fc" rows="3" placeholder="أدخل ملاحظاتك على المحضر...">المحضر واضح ويعرض الوقائع والمرفقات والأثر المقترح بصورة مناسبة للمراجعة.</textarea></div>`);
   }
 
   const pgHead = `<div class="pg-head"><div><h1>${v.id}</h1><p>${typeLabel} — ${v.employerName}</p></div>
@@ -1899,7 +2050,7 @@ function renderVisitDetails(role, type) {
   const tabs = [
     { label: 'معلومات الزيارة', content: visitInfoCard },
     { label: 'قائمة التحقق', content: checklistCard },
-    { label: 'النتائج', content: findingsHtml || '<p class="tx3 fs11" style="padding:16px">لا توجد نتائج مرصودة بعد</p>' },
+    { label: 'النتائج والمحضر', content: (findingsHtml || '<p class="tx3 fs11" style="padding:16px">لا توجد نتائج مرصودة بعد</p>') + visitReportCard + visitAttachmentsCard + renderNotes(visitReport.notes, v.id) },
     { label: 'الإجراءات', content: actionPanel || '<p class="tx3 fs11" style="padding:16px">لا توجد إجراءات متاحة في الوضع الحالي</p>', badge: hasAction ? '!' : '' },
     { label: 'السجل والمراسلات', content: historyContent },
   ];
@@ -2933,6 +3084,8 @@ function renderInspectionPlansList(role) {
 function renderInspectionPlanDetails(role) {
   const id = getParam('id') || '2025-07-000001';
   const p = INSP_DATA.inspectionPlans.find(x => x.id === id) || INSP_DATA.inspectionPlans[0];
+  const planAttachments = _withSampleAttachments(p, 'plan');
+  const planNotes = _withSampleNotes(p, 'plan');
   const relatedVisits = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled]
     .filter(v => v.planId === p.id);
   const pct = p.targetCount ? Math.round(p.completedCount / p.targetCount * 100) : 0;
@@ -3002,6 +3155,9 @@ function renderInspectionPlanDetails(role) {
     </div></div>
   <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>مسار الإعداد والاعتماد</h3></div>
     <div class="pb">${renderTimeline(planTimeline)}</div></div>
+  <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.upload}</span>مرفقات الخطة (${planAttachments.length})</h3></div>
+    <div class="pb">${planAttachments.map(f => attRow(f)).join('')}</div></div>
+  ${renderNotes(planNotes, p.id)}
   <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.pen}</span>لوحة المدير</h3></div>
     <div class="pb">
       <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} تعرض هذه اللوحة ما يحتاجه مدير الدائرة لاعتماد الخطة أو إعادتها أو متابعة تنفيذ الزيارات التابعة لها.</div>
@@ -3102,6 +3258,8 @@ function renderBanCasesList(role) {
 function renderBanCaseDetails(role) {
   const id = getParam('id') || '2025-06-000001';
   const b = INSP_DATA.banCases.find(x => x.id === id) || INSP_DATA.banCases[0];
+  const banAttachments = _withSampleAttachments(b, 'ban');
+  const banNotes = _withSampleNotes(b, 'ban');
   const relatedVisit = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled].find(v => v.id === b.relatedVisitId);
   const relatedEmployer = (INSP_DATA.employers || []).find(e => e.id === b.employerId);
   const relatedAppeals = (INSP_DATA.appeals || []).filter(a => a.relatedId === b.id);
@@ -3157,6 +3315,8 @@ function renderBanCaseDetails(role) {
 
   const timelineCard = `<div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>سجل الأحداث</h3></div>
     <div class="pb">${renderTimeline(b.timeline || [])}</div></div>`;
+  const attachmentsCard = `<div class="card"><div class="ph"><h3><span class="pico or">${ICONS.upload}</span>مرفقات القرار (${banAttachments.length})</h3></div>
+    <div class="pb">${banAttachments.map(f => attRow(f)).join('')}</div></div>`;
 
   const hasAction = banActionPanel.length > 0;
   const tid = 'bdt-' + b.id.replace(/[^a-z0-9]/gi, '-');
@@ -3164,6 +3324,7 @@ function renderBanCaseDetails(role) {
     { label: 'تفاصيل الحظر', content: banDetailsCard },
     { label: 'الأصل المرتبط', content: linkedCaseCard + relatedAppealsCard },
     { label: 'الإجراءات', content: banActionPanel || '<p class="tx3 fs11" style="padding:16px">لا توجد إجراءات متاحة — الحظر مرفوع أو منتهي</p>', badge: hasAction ? '!' : '' },
+    { label: 'المرفقات والملاحظات', content: attachmentsCard + renderNotes(banNotes, b.id) },
     { label: 'سجل الأحداث', content: timelineCard },
   ];
   return pgHead + summaryBar + _tabView(tid, tabs, hasAction ? 2 : 0);
@@ -3919,6 +4080,8 @@ function renderReportDetails(role) {
       { title: 'التوصيات', body: 'يُوصى بمراجعة آلية تعيين المختصين تلقائياً للحد من التأخير في البلاغات ذات الأولوية العالية.' },
     ]
   };
+  const reportAttachments = _withSampleAttachments(r, 'report');
+  const reportNotes = _withSampleNotes(r, 'report');
 
   return `<div class="pg-head"><div><h1>${r.id}</h1><p>${r.title}</p></div>
     <div class="pg-acts"><button class="btn btn-secondary btn-sm" onclick="navigateTo('reports-list')">${ICONS.arrow_right}رجوع</button>
@@ -3930,10 +4093,14 @@ function renderReportDetails(role) {
     <div class="fgrp"><label class="flbl">الفترة المشمولة</label><div class="fro">${r.period}</div></div>
     <div class="fgrp"><label class="flbl">النوع</label><div class="fro">${r.type}</div></div>
     <div class="fgrp"><label class="flbl">أعدّه</label><div class="fro">${r.preparedBy}</div></div>
+    <div class="fgrp"><label class="flbl">حالة التقرير</label><div class="fro"><span class="badge b-approved">جاهز للمراجعة والعرض</span></div></div>
     <div class="fgrp span-full"><label class="flbl">الملخص التنفيذي</label><div class="fro" style="min-height:60px">${r.summary}</div></div>
   </div></div></div>
   ${r.sections.map(s=>`<div class="card"><div class="ph"><h3>${s.title}</h3></div>
-    <div class="pb"><p style="font-size:13px;color:var(--text2);line-height:1.8">${s.body}</p></div></div>`).join('')}`;
+    <div class="pb"><p style="font-size:13px;color:var(--text2);line-height:1.8">${s.body}</p></div></div>`).join('')}
+  <div class="card"><div class="ph"><h3><span class="pico or">${ICONS.upload}</span>مرفقات التقرير (${reportAttachments.length})</h3></div>
+    <div class="pb">${reportAttachments.map(f => attRow(f)).join('')}</div></div>
+  ${renderNotes(reportNotes, r.id)}`;
 }
 
 /* ── زيارات جهة العمل / المؤمن عليه ── */
