@@ -1204,7 +1204,91 @@ function renderComplaintDetails(role, defaultId) {
   /* ── محضر الزيارة (field-inspector & field-head only) ── */
   const showVisitMinutes = role === 'field-inspector' || role === 'field-head';
   const minutesVid = 'vm-' + c.id.replace(/[^a-z0-9]/gi, '-');
-  const visitMinutesPanel = showVisitMinutes ? `
+
+  /* field-head: read-only review panel showing submitted minutes */
+  function _buildVisitMinutesReadOnly(complaint) {
+    const attendees = (complaint.visitAttendees || []).map(function(a) {
+      return '<tr>'
+        + '<td style="padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border1)">' + a.name + '</td>'
+        + '<td style="padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border1);color:var(--text2)">' + a.role + '</td>'
+        + '</tr>';
+    }).join('');
+
+    const attachments = (complaint.visitAttachments || []).map(function(f) {
+      var icon = ICONS.file;
+      return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border1)">'
+        + '<span style="display:inline-flex;width:16px;height:16px;flex-shrink:0;color:var(--primary)">' + icon + '</span>'
+        + '<span style="flex:1;font-size:13px">' + f.name + '</span>'
+        + '<span style="font-size:11px;color:var(--text3)">' + f.size + '</span>'
+        + '<button class="btn btn-sm btn-outline" onclick="showToast(\'فتح: ' + f.name + '\',\'i\')" style="font-size:11.5px">عرض</button>'
+        + '</div>';
+    }).join('');
+
+    const visitDateFmt = complaint.visitDate
+      ? new Date(complaint.visitDate).toLocaleDateString('ar-OM', { year: 'numeric', month: 'long', day: 'numeric' })
+      : '—';
+
+    return '<div class="card">'
+      + '<div class="ph"><h3><span class="pico tl">' + ICONS.clipboard + '</span>محضر الزيارة التفتيشية</h3>'
+      + '<span class="badge b-approved" style="font-size:11px">تم رفعه من المفتش — للمراجعة</span></div>'
+      + '<div class="pb">'
+      + '<div class="alert alert-i" style="margin-bottom:18px">' + ICONS.info + ' هذا المحضر مُقدَّم من المفتش الميداني. المراجعة للاطلاع فقط — الإجراء من لوحة الإجراءات.</div>'
+
+      /* meta row */
+      + '<div class="fg fg-3" style="margin-bottom:18px">'
+      + '<div class="fro"><span class="flbl">تاريخ الزيارة</span><span class="fval">' + visitDateFmt + '</span></div>'
+      + '<div class="fro"><span class="flbl">المفتش المنفذ</span><span class="fval">' + (complaint.assignedInspector || '—') + '</span></div>'
+      + '<div class="fro"><span class="flbl">المنشأة</span><span class="fval">' + (complaint.employerName || '—') + '</span></div>'
+      + '</div>'
+
+      /* details */
+      + '<div style="margin-bottom:18px">'
+      + '<div class="flbl" style="margin-bottom:8px">تفاصيل المحضر الميداني</div>'
+      + '<div style="background:var(--g50);border:1px solid var(--border1);border-radius:8px;padding:16px;font-size:13px;line-height:2;white-space:pre-wrap;color:var(--text1)">'
+      + (complaint.visitMinutes || '<span style="color:var(--text3);font-style:italic">لم يتم إدخال تفاصيل المحضر</span>')
+      + '</div></div>'
+
+      /* summary */
+      + '<div style="margin-bottom:18px">'
+      + '<div class="flbl" style="margin-bottom:8px">ملخص المحضر</div>'
+      + '<div style="background:var(--g50);border:1px solid var(--border1);border-radius:8px;padding:14px;font-size:13px;line-height:1.9;color:var(--text1)">'
+      + (complaint.visitSummary || '<span style="color:var(--text3);font-style:italic">لا يوجد ملخص</span>')
+      + '</div></div>'
+
+      /* attendees */
+      + '<div style="margin-bottom:18px">'
+      + '<div class="flbl" style="margin-bottom:8px">المفتشين القائمين بالزيارة</div>'
+      + (attendees.length
+          ? '<table style="width:100%;border-collapse:collapse;border:1px solid var(--border1);border-radius:8px;overflow:hidden">'
+            + '<thead><tr>'
+            + '<th style="padding:10px 14px;font-size:12px;font-weight:700;background:var(--g100);text-align:right;border-bottom:2px solid var(--border2)">اسم المفتش</th>'
+            + '<th style="padding:10px 14px;font-size:12px;font-weight:700;background:var(--g100);text-align:right;border-bottom:2px solid var(--border2)">المسمى الوظيفي</th>'
+            + '</tr></thead><tbody>' + attendees + '</tbody></table>'
+          : '<p style="color:var(--text3);font-size:12.5px">لا يوجد سجل مفتشين</p>')
+      + '</div>'
+
+      /* attachments */
+      + '<div style="margin-bottom:20px">'
+      + '<div class="flbl" style="margin-bottom:8px">مرفقات المحضر</div>'
+      + (attachments.length
+          ? '<div style="border:1px solid var(--border1);border-radius:8px;overflow:hidden">' + attachments + '</div>'
+          : '<p style="color:var(--text3);font-size:12.5px">لا توجد مرفقات</p>')
+      + '</div>'
+
+      /* reviewer notes + action */
+      + '<div style="border-top:2px solid var(--border2);padding-top:18px;margin-top:4px">'
+      + '<div class="flbl" style="margin-bottom:6px">ملاحظات رئيس قسم التفتيش</div>'
+      + '<textarea class="fc" id="vm-head-notes-' + complaint.id.replace(/[^a-z0-9]/gi,'-') + '" rows="3" placeholder="أدخل ملاحظاتك على المحضر الميداني..." style="resize:vertical;margin-bottom:12px"></textarea>'
+      + '<div style="display:flex;gap:10px;flex-wrap:wrap">'
+      + '<button class="btn btn-primary" onclick="showToast(\'تم اعتماد المحضر الميداني بنجاح\',\'s\')">' + ICONS.check + 'اعتماد المحضر</button>'
+      + '<button class="btn btn-warning" onclick="showToast(\'تم إعادة المحضر للمفتش للتعديل\',\'w\')">' + ICONS.edit + 'إعادة للمفتش</button>'
+      + '</div></div>'
+
+      + '</div></div>';
+  }
+
+  /* field-inspector: editable minutes form */
+  const _visitMinutesEditable = `
     <div class="card">
       <div class="ph"><h3><span class="pico tl">${ICONS.clipboard}</span>محضر الزيارة التفتيشية</h3>
         <span class="badge b-invest" style="font-size:11px">يُحفظ باستقلالية عن حالة البلاغ</span></div>
@@ -1220,21 +1304,20 @@ function renderComplaintDetails(role, defaultId) {
         </div>
         <div style="margin-bottom:14px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-            <label class="flbl" style="margin:0">الحضور أثناء الزيارة</label>
-            <button class="btn btn-sm btn-outline" type="button" onclick="_addAttendeeRow('${minutesVid}')">${ICONS.plus} إضافة حاضر</button>
+            <label class="flbl" style="margin:0">المفتشين القائمين بالزيارة</label>
+            <button class="btn btn-sm btn-outline" type="button" onclick="_addAttendeeRow('${minutesVid}')">${ICONS.plus} إضافة مفتش</button>
           </div>
-          <table class="tbl" id="${minutesVid}-att-table" style="margin-bottom:4px">
-            <thead><tr><th>الاسم</th><th>الجهة / الدور</th><th style="width:48px"></th></tr></thead>
+          <table style="width:100%;border-collapse:collapse;border:1px solid var(--border1);border-radius:8px;overflow:hidden;margin-bottom:4px" id="${minutesVid}-att-table">
+            <thead><tr>
+              <th style="padding:10px 14px;font-size:12px;font-weight:700;background:var(--g100);text-align:right;border-bottom:2px solid var(--border2)">اسم المفتش</th>
+              <th style="padding:10px 14px;font-size:12px;font-weight:700;background:var(--g100);text-align:right;border-bottom:2px solid var(--border2)">المسمى الوظيفي</th>
+              <th style="padding:10px 14px;font-size:12px;font-weight:700;background:var(--g100);border-bottom:2px solid var(--border2);width:48px"></th>
+            </tr></thead>
             <tbody id="${minutesVid}-att-body">
-              <tr id="${minutesVid}-att-0">
-                <td><input class="fc" style="margin:0;padding:6px 8px" placeholder="الاسم الكامل" value="حاتم سالم الزدجالي"></td>
-                <td><input class="fc" style="margin:0;padding:6px 8px" placeholder="المفتش الميداني" value="مفتش ميداني"></td>
-                <td><button class="btn btn-sm btn-ghost" style="color:var(--danger)" type="button" onclick="_removeAttendeeRow('${minutesVid}-att-0')">✕</button></td>
-              </tr>
-              <tr id="${minutesVid}-att-1">
-                <td><input class="fc" style="margin:0;padding:6px 8px" placeholder="الاسم الكامل" value="ممثل المنشأة"></td>
-                <td><input class="fc" style="margin:0;padding:6px 8px" placeholder="المسمى الوظيفي" value="مسؤول الموارد البشرية"></td>
-                <td><button class="btn btn-sm btn-ghost" style="color:var(--danger)" type="button" onclick="_removeAttendeeRow('${minutesVid}-att-1')">✕</button></td>
+              <tr id="${minutesVid}-att-0" style="border-bottom:1px solid var(--border1)">
+                <td style="padding:8px 10px"><input class="fc" style="margin:0;padding:6px 10px;font-size:13px" placeholder="الاسم الكامل" value="حاتم سالم الزدجالي"></td>
+                <td style="padding:8px 10px"><input class="fc" style="margin:0;padding:6px 10px;font-size:13px" placeholder="المسمى الوظيفي" value="مفتش ميداني"></td>
+                <td style="padding:8px 10px;text-align:center"><button class="btn btn-sm btn-ghost" style="color:var(--danger)" type="button" onclick="_removeAttendeeRow('${minutesVid}-att-0')">✕</button></td>
               </tr>
             </tbody>
           </table>
@@ -1247,9 +1330,10 @@ function renderComplaintDetails(role, defaultId) {
             if (!tbody) return;
             var tr = document.createElement('tr');
             tr.id = rowId;
-            tr.innerHTML = '<td><input class="fc" style="margin:0;padding:6px 8px" placeholder="الاسم الكامل"></td>'
-              + '<td><input class="fc" style="margin:0;padding:6px 8px" placeholder="الجهة / الدور"></td>'
-              + '<td><button class="btn btn-sm btn-ghost" style="color:var(--danger)" type="button" onclick="_removeAttendeeRow(\\'' + rowId + '\\')">✕</button></td>';
+            tr.style.borderBottom = '1px solid var(--border1)';
+            tr.innerHTML = '<td style="padding:8px 10px"><input class="fc" style="margin:0;padding:6px 10px;font-size:13px" placeholder="الاسم الكامل"></td>'
+              + '<td style="padding:8px 10px"><input class="fc" style="margin:0;padding:6px 10px;font-size:13px" placeholder="المسمى الوظيفي"></td>'
+              + '<td style="padding:8px 10px;text-align:center"><button class="btn btn-sm btn-ghost" style="color:var(--danger)" type="button" onclick="_removeAttendeeRow(\\'' + rowId + '\\')">✕</button></td>';
             tbody.appendChild(tr);
           }
           function _removeAttendeeRow(rowId) {
@@ -1273,7 +1357,11 @@ function renderComplaintDetails(role, defaultId) {
           ${ICONS.check}حفظ محضر الزيارة
         </button>
       </div>
-    </div>` : '';
+    </div>`;
+
+  const visitMinutesPanel = showVisitMinutes
+    ? (role === 'field-head' ? _buildVisitMinutesReadOnly(c) : _visitMinutesEditable)
+    : '';
 
   const tabs = [
     { label: 'البيانات الأساسية', content: requestPanel + submitterPanel + employerPanel + workerPanel },
