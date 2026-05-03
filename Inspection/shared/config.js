@@ -28,6 +28,7 @@ const INSP_CONFIG = {
       sidebar: [
         { label: 'قائمة البلاغات', page: 'complaints-list', icon: 'inbox', badge: 'complaints' },
         { label: 'إنشاء بلاغ جديد', page: 'complaint-new', icon: 'plus', badge: null },
+        { label: 'طلبات الحظر وفك الحظر', page: 'ban-cases-list', icon: 'lock', badge: null },
       ]
     },
 
@@ -81,6 +82,7 @@ const INSP_CONFIG = {
         { label: 'تحليل بيانات العامل', page: 'worker-analysis', icon: 'chart', badge: null },
         { label: 'تحليل بيانات صاحب العمل', page: 'employer-analysis', icon: 'building', badge: null },
         { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
+        { label: 'طلبات الحظر وفك الحظر', page: 'ban-cases-list', icon: 'lock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
     },
@@ -132,6 +134,7 @@ const INSP_CONFIG = {
         { label: 'تحليل بيانات العامل', page: 'worker-analysis', icon: 'chart', badge: null },
         { label: 'تحليل بيانات صاحب العمل', page: 'employer-analysis', icon: 'building', badge: null },
         { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
+        { label: 'طلبات الحظر وفك الحظر', page: 'ban-cases-list', icon: 'lock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
     },
@@ -161,6 +164,7 @@ const INSP_CONFIG = {
         { label: 'تحليل بيانات العامل', page: 'worker-analysis', icon: 'chart', badge: null },
         { label: 'تحليل بيانات صاحب العمل', page: 'employer-analysis', icon: 'building', badge: null },
         { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
+        { label: 'طلبات الحظر وفك الحظر', page: 'ban-cases-list', icon: 'lock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
     },
@@ -189,6 +193,7 @@ const INSP_CONFIG = {
         { label: 'تحليل بيانات العامل', page: 'worker-analysis', icon: 'chart', badge: null },
         { label: 'تحليل بيانات صاحب العمل', page: 'employer-analysis', icon: 'building', badge: null },
         { label: 'السجل الزمني', page: 'timeline', icon: 'clock', badge: null },
+        { label: 'طلبات الحظر وفك الحظر', page: 'ban-cases-list', icon: 'lock', badge: null },
         { label: 'قائمة التقارير', page: 'reports-list', icon: 'file', badge: null },
       ]
     },
@@ -239,6 +244,9 @@ const INSP_CONFIG = {
     'بانتظار اعتماد رئيس قسم التفتيش':                              'b-phead',
     'انتظار اعتماد مدير الدائرة':                                   'b-phead',
     'تم اغلاق البلاغ':                                              'b-closed',
+    'طلب حظر — بانتظار الاعتماد':                                   'b-phead',
+    'طلب فك حظر — بانتظار الاعتماد':                                'b-phead',
+    'سارٍ — حظر مؤقت':                                              'b-session',
     'تم حفظ البلاغ':                                                'b-draft',
     /* حالات الخدمات */
     'قيد المعالجة':                                                 'b-invest',
@@ -322,6 +330,8 @@ const INSP_CONFIG = {
     'اغلاق البلاغ':                            'btn-ghost btn-sm',
     'حفظ البلاغ':                              'btn-ghost btn-sm',
     'توجيه لقسم التفتيش':                      'btn-primary btn-sm',
+    'تأكيد تعديل أجر العامل':                  'btn-accent btn-sm',
+    'تأكيد تسجيل العامل':                      'btn-accent btn-sm',
     /* field-head */
     'رفض اجراء التفتيش على البلاغ':            'btn-danger btn-sm',
     /* inspection-director */
