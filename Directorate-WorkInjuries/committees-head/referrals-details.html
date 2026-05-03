@@ -76,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     <!-- بيانات مقدم الطلب والمؤمن عليه (مدمجة) -->
+    ${renderInsuredSummaryCards(req.insured?.civil || req.applicant?.civil, req.id)}
     ${isSamePerson ? `
     <div class="card">
       <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب والمؤمن عليه <span style="font-size:10px;color:var(--text3)">(نفس الشخص)</span></h3></div>
@@ -449,5 +450,4 @@ function headReferralDecision(type) {
 </script>
 </body>
 </html>
-
 

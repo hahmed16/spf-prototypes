@@ -1790,12 +1790,22 @@ select.fc {
   border-right: 2px solid var(--border2)
 }
 
+.tl-status,
 .tl-states {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-top: 6px;
   font-size: 11px;
+  color: var(--text3);
+  flex-wrap: wrap
+}
+
+.tl-status svg,
+.tl-states svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
   color: var(--text3)
 }
 
@@ -2788,8 +2798,42 @@ select.fc {
 }
 
 /* ── Workflow visualization ── */
+.workflow-card {
+  border-color: #d7e5dc;
+  box-shadow: 0 10px 28px rgba(10, 92, 54, 0.08);
+}
+
+.workflow-card .card-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  background: linear-gradient(180deg, #fbfdfc 0%, #f3f8f5 100%);
+  border-bottom: 1px solid #dce8e0;
+}
+
+.workflow-card .card-hd h3 {
+  font-size: 13px;
+  font-weight: 800;
+  color: #173a2a;
+}
+
 .workflow-card .card-b {
-  padding-top: 10px;
+  padding: 14px 16px 12px;
+}
+
+.workflow-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #e9f6ef;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+  border: 1px solid #cfe6d9;
 }
 
 .workflow-strip {
@@ -2806,33 +2850,34 @@ select.fc {
   align-items: flex-start;
   gap: 10px;
   padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--r);
+  border: 1px solid #d7e5dc;
+  border-radius: 14px;
   background: #fff;
   min-width: 210px;
   flex: 0 0 210px;
   position: relative;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .workflow-stage.done {
-  border-color: rgba(18, 168, 101, 0.24);
-  background: #f3fcf8;
+  border-color: #b8dfc9;
+  background: linear-gradient(180deg, #f7fcf9 0%, #eef8f2 100%);
 }
 
 .workflow-stage.current {
   border-color: var(--primary);
-  box-shadow: 0 8px 18px rgba(18, 168, 101, 0.12);
-  background: linear-gradient(180deg, rgba(18, 168, 101, 0.06), #fff);
+  box-shadow: 0 10px 24px rgba(18, 168, 101, 0.14);
+  background: linear-gradient(180deg, rgba(18, 168, 101, 0.08), #fff);
 }
 
 .workflow-stage:not(:last-child)::before {
   content: '';
   position: absolute;
-  top: 27px;
+  top: 25px;
   left: -12px;
   width: 12px;
   height: 2px;
-  background: var(--border);
+  background: #cbd9d1;
 }
 
 .workflow-stage.done:not(:last-child)::before,
@@ -2848,8 +2893,8 @@ select.fc {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--g100);
-  color: var(--text2);
+  background: #edf4ef;
+  color: #66796e;
   font-size: 12px;
   font-weight: 700;
 }

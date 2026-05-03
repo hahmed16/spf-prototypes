@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     ${renderWorkflowPath(req, 'allowances')}
+    ${renderInsuredSummaryCards(req.insured?.civil || req.applicant?.civil, req.id)}
 
     ${isSamePerson ? `
     <!-- بيانات المؤمن عليه / المستفيد (نفس الشخص) -->
@@ -342,6 +343,5 @@ function headDecision(type) {
 </script>
 </body>
 </html>
-
 
 

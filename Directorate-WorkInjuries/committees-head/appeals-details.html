@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     ${renderWorkflowPath(appeal, 'appeals')}
+    ${renderInsuredSummaryCards(appeal.insured?.civil || appeal.applicant?.civil, appeal.originalRequestId || appeal.id)}
 
     ${isSamePerson ? `
     <!-- بيانات المؤمن عليه / المستفيد (نفس الشخص) -->
@@ -284,6 +285,5 @@ function appealsDecision(type) {
 </script>
 </body>
 </html>
-
 
 

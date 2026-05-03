@@ -944,38 +944,131 @@ function renderInsuredSummaryCards(civil, currentId = '') {
   const appeals = WI_DATA.appeals.filter((item) => item.applicant?.civil === civil || item.insured?.civil === civil || item.originalRequestId === currentId);
   const referrals = WI_DATA.referrals.filter((item) => item.applicant?.civil === civil || item.insured?.civil === civil);
   const cards = [
-    { label: 'طلبات منفعة الإعاقة النشطة', items: activeBenefits },
-    { label: 'المنافع المصروفة حالياً', items: activePaidBenefits },
-    { label: 'طلبات بدل الانقطاع', items: allowanceRequests },
-    { label: 'التظلمات', items: appeals },
-    { label: 'طلبات العرض المباشر', items: referrals },
+    { key: 'disability-active', label: 'طلبات منفعة الإعاقة النشطة', items: activeBenefits, icon: ICONS.shield },
+    { key: 'disability-paid', label: 'المنافع المصروفة حالياً', items: activePaidBenefits, icon: ICONS.check },
+    { key: 'allowances', label: 'طلبات بدل الانقطاع', items: allowanceRequests, icon: ICONS.medical },
+    { key: 'appeals', label: 'التظلمات', items: appeals, icon: ICONS.note },
+    { key: 'referrals', label: 'طلبات العرض المباشر', items: referrals, icon: ICONS.building },
   ];
 
   return `
     <div class="card">
       <div class="ph"><h3><div class="pico bl">${ICONS.chart}</div>ملخص طلبات المؤمن عليه المرتبطة</h3></div>
       <div class="pb">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px">
           ${cards.map((card) => `
-            <div style="border:1px solid var(--border);border-radius:12px;padding:14px;background:#fff">
-              <div style="font-size:12px;color:var(--text3);margin-bottom:6px">${card.label}</div>
-              <div style="font-size:26px;font-weight:800;color:var(--primary);margin-bottom:10px">${card.items.length}</div>
-              <div class="tbl-wrap" style="max-height:190px;overflow:auto">
-                <table class="dtbl">
-                  <thead><tr><th>الرقم</th><th>الحالة</th></tr></thead>
-                  <tbody>
-                    ${card.items.length ? card.items.slice(0, 4).map((item) => `
-                      <tr>
-                        <td style="font-family:monospace">${item.id}</td>
-                        <td>${statusBadge(item.status)}</td>
-                      </tr>`).join('') : '<tr><td colspan="2" style="text-align:center;color:var(--text3)">لا توجد بيانات</td></tr>'}
-                  </tbody>
-                </table>
+            <button
+              type="button"
+              onclick="openInsuredSummaryModal('${card.key}', '${civil}', '${currentId}')"
+              style="border:1px solid var(--border);border-radius:16px;padding:16px;background:linear-gradient(180deg,#fff,rgba(18,168,101,.03));text-align:right;cursor:pointer;display:grid;gap:10px;box-shadow:0 10px 24px rgba(15,23,42,.04)"
+            >
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+                <div style="font-size:12px;color:var(--text3);line-height:1.8">${card.label}</div>
+                <div style="width:38px;height:38px;border-radius:12px;background:rgba(18,168,101,.1);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0">${card.icon}</div>
               </div>
-            </div>`).join('')}
+              <div style="display:flex;align-items:end;justify-content:space-between;gap:10px">
+                <div style="font-size:30px;font-weight:800;color:var(--primary);line-height:1">${card.items.length}</div>
+                <div style="font-size:11px;color:var(--text2)">عرض السجلات</div>
+              </div>
+            </button>`).join('')}
         </div>
       </div>
     </div>`;
+}
+
+function getInsuredSummaryCardsData(civil, currentId = '') {
+  if (!civil) return [];
+
+  const activeBenefits = WI_DATA.disability.filter((item) => item.applicant?.civil === civil && !item.status.includes('إيقاف'));
+  const activePaidBenefits = WI_DATA.disability.filter((item) => item.applicant?.civil === civil && item.disbursement?.approved);
+  const allowanceRequests = WI_DATA.allowances.filter((item) => item.applicant?.civil === civil || item.insured?.civil === civil);
+  const appeals = WI_DATA.appeals.filter((item) => item.applicant?.civil === civil || item.insured?.civil === civil || item.originalRequestId === currentId);
+  const referrals = WI_DATA.referrals.filter((item) => item.applicant?.civil === civil || item.insured?.civil === civil);
+
+  return [
+    { key: 'disability-active', label: 'طلبات منفعة الإعاقة النشطة', items: activeBenefits, columns: ['رقم الطلب', 'المؤمن عليه', 'الحالة', 'تاريخ التقديم'] },
+    { key: 'disability-paid', label: 'المنافع المصروفة حالياً', items: activePaidBenefits, columns: ['رقم الطلب', 'المؤمن عليه', 'حالة الصرف', 'آخر صرف'] },
+    { key: 'allowances', label: 'طلبات بدل الانقطاع', items: allowanceRequests, columns: ['رقم الطلب', 'نوع الحالة', 'الحالة', 'تاريخ التقديم'] },
+    { key: 'appeals', label: 'التظلمات', items: appeals, columns: ['رقم التظلم', 'الطلب الأصلي', 'الحالة', 'تاريخ التقديم'] },
+    { key: 'referrals', label: 'طلبات العرض المباشر', items: referrals, columns: ['رقم الطلب', 'المؤمن عليه', 'الحالة', 'تاريخ التقديم'] },
+  ];
+}
+
+function openInsuredSummaryModal(cardKey, civil, currentId = '') {
+  const card = getInsuredSummaryCardsData(civil, currentId).find((item) => item.key === cardKey);
+  if (!card) return;
+
+  openModal({
+    title: card.label,
+    size: 'md-lg',
+    body: `
+      <div style="display:grid;gap:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border:1px solid var(--border);border-radius:14px;background:var(--g50)">
+          <div>
+            <div style="font-size:12px;color:var(--text3)">عدد السجلات المرتبطة</div>
+            <div style="font-size:28px;font-weight:800;color:var(--primary)">${card.items.length}</div>
+          </div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.8">يعرض الجدول أدناه سجلات تجريبية مرتبطة بالمؤمن عليه نفسه لتمكين المراجعة السريعة.</div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr>${card.columns.map((label) => `<th>${label}</th>`).join('')}</tr></thead>
+            <tbody>
+              ${card.items.length ? card.items.map((item) => renderInsuredSummaryModalRow(card.key, item)).join('') : `<tr><td colspan="${card.columns.length}" style="text-align:center;color:var(--text3)">لا توجد سجلات مرتبطة</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      </div>`,
+    footer: `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>`,
+  });
+}
+
+function renderInsuredSummaryModalRow(cardKey, item) {
+  if (cardKey === 'disability-active' || cardKey === 'disability-paid') {
+    return `
+      <tr>
+        <td style="font-family:monospace">${item.id || '—'}</td>
+        <td>${item.insured?.name || item.applicant?.name || '—'}</td>
+        <td>${cardKey === 'disability-paid' ? statusBadge(item.disbursement?.status || 'مصروفة') : statusBadge(item.status)}</td>
+        <td>${cardKey === 'disability-paid' ? formatDate(item.disbursement?.lastDisbursement) : formatDate(item.submitDate)}</td>
+      </tr>`;
+  }
+
+  if (cardKey === 'allowances') {
+    return `
+      <tr>
+        <td style="font-family:monospace">${item.id || '—'}</td>
+        <td>${item.type || item.injury?.caseType || '—'}</td>
+        <td>${statusBadge(item.status)}</td>
+        <td>${formatDate(item.submitDate)}</td>
+      </tr>`;
+  }
+
+  if (cardKey === 'appeals') {
+    return `
+      <tr>
+        <td style="font-family:monospace">${item.id || '—'}</td>
+        <td style="font-family:monospace">${item.originalRequestId || '—'}</td>
+        <td>${statusBadge(item.status)}</td>
+        <td>${formatDate(item.submitDate || item.date)}</td>
+      </tr>`;
+  }
+
+  if (cardKey === 'referrals') {
+    return `
+      <tr>
+        <td style="font-family:monospace">${item.id || '—'}</td>
+        <td>${item.insured?.name || item.applicant?.name || '—'}</td>
+        <td>${statusBadge(item.status)}</td>
+        <td>${formatDate(item.submitDate)}</td>
+      </tr>`;
+  }
+
+  return `
+    <tr>
+      <td style="font-family:monospace">${item.id || '—'}</td>
+      <td>${statusBadge(item.status || '—')}</td>
+    </tr>`;
 }
 
 function renderDirectReferralSummaryCard(req, { variant = 'internal' } = {}) {

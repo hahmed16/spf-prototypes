@@ -786,14 +786,15 @@ function inferWorkflowStageId(requestType, status, record = {}) {
 }
 
 function renderWorkflowPath(record, requestType) {
-  const workflowStages = window.getWorkflowStages ? getWorkflowStages(requestType) : [];
-  if (!workflowStages.length || !record) return '';
+  const workflowConfig = getWorkflowPathConfig(record, requestType);
+  if (!workflowConfig.stages.length || !record) return '';
 
-  const currentStageId = inferWorkflowStageId(requestType, record.status, record);
+  const { stages: workflowStages, currentStageId, metaLabel = '' } = workflowConfig;
   return `
     <div class="card workflow-card">
       <div class="card-hd">
         <h3>مسار العمل المتوقع</h3>
+        ${metaLabel ? `<span class="workflow-meta">${metaLabel}</span>` : ''}
       </div>
       <div class="card-b">
         <div class="workflow-strip">
@@ -812,6 +813,88 @@ function renderWorkflowPath(record, requestType) {
         </div>
       </div>
     </div>`;
+}
+
+function getWorkflowPathConfig(record, requestType) {
+  if (!record) return { stages: [], currentStageId: '' };
+
+  if (requestType === 'allowances') {
+    const stages = getAllowanceBusinessStages();
+    const currentStageId = inferAllowanceBusinessStageId(record);
+    return {
+      stages,
+      currentStageId,
+      metaLabel: `يعرض المراحل الرئيسية فقط (${stages.length} مراحل)`,
+    };
+  }
+
+  const workflowStages = window.getWorkflowStages ? getWorkflowStages(requestType) : [];
+  const currentStageId = inferWorkflowStageId(requestType, record.status, record);
+  return { stages: workflowStages, currentStageId };
+}
+
+function getAllowanceBusinessStages() {
+  return [
+    {
+      id: 'followup_review',
+      name: 'المراجعة والتحقق من قسم المتابعة والبلاغات',
+      description: 'استلام الطلب والتحقق الأولي من اكتمال البيانات والمرفقات.',
+    },
+    {
+      id: 'followup_approval',
+      name: 'اعتماد قسم المتابعة والبلاغات',
+      description: 'اعتماد الإحالة الداخلية بعد استيفاء المتطلبات الأولية.',
+    },
+    {
+      id: 'inspection_review',
+      name: 'مراجعة وتحقق قسم التفتيش',
+      description: 'فحص الحالة والتحقق الموضوعي وإعداد التوصية.',
+    },
+    {
+      id: 'inspection_approval',
+      name: 'اعتماد قسم التفتيش',
+      description: 'مراجعة واعتماد نتيجة التحقق من قبل رئيس القسم المختص.',
+    },
+    {
+      id: 'director_approval',
+      name: 'اعتماد مدير الدائرة',
+      description: 'الاعتماد النهائي قبل استكمال بقية الإجراءات التنفيذية.',
+    },
+  ];
+}
+
+function inferAllowanceBusinessStageId(record) {
+  const statusText = resolveAllowanceStageStatus(record).toLowerCase();
+
+  if (!statusText) return 'followup_review';
+  if (statusText.includes('معتمد') || statusText.includes('قيد المراجعة من موظف قسم الإجازات') || statusText.includes('بانتظار رأي لجنة')) {
+    return 'director_approval';
+  }
+  if (statusText.includes('بانتظار اعتماد رئيس قسم')) {
+    return 'inspection_approval';
+  }
+  if (statusText.includes('قيد التحقيق')) {
+    return 'inspection_review';
+  }
+  if (statusText.includes('تم تعيين المحقق')) {
+    return 'followup_approval';
+  }
+  if (statusText.includes('تم تقديم الطلب') || statusText.includes('بانتظار تعيين')) {
+    return 'followup_review';
+  }
+
+  return 'followup_review';
+}
+
+function resolveAllowanceStageStatus(record) {
+  const currentStatus = String(record?.status || '');
+  if (!currentStatus || (!currentStatus.includes('استيفاء') && !currentStatus.includes('معلق'))) {
+    return currentStatus;
+  }
+
+  const timeline = Array.isArray(record?.timeline) ? [...record.timeline].reverse() : [];
+  const fallbackEvent = timeline.find((event) => event?.fromStatus && !String(event.fromStatus).includes('استيفاء') && !String(event.fromStatus).includes('معلق'));
+  return fallbackEvent?.fromStatus || currentStatus;
 }
 
 function renderTimelineList(timeline) {
@@ -858,6 +941,9 @@ function enhanceRequestSummaryPanels() {
 
     const cells = Array.from(grid.children || []);
     let lastUpdateCell = null;
+    let lastUpdatedByCell = null;
+    let expectedClosureCell = null;
+    let remainingDaysCell = null;
     cells.forEach((cell) => {
       const label = cell.querySelector('.flbl');
       if (!label) return;
@@ -867,6 +953,38 @@ function enhanceRequestSummaryPanels() {
         const valueNode = label.nextElementSibling;
         if (valueNode) valueNode.textContent = meta.lastUpdatedAtText;
         lastUpdateCell = cell;
+        return;
+      }
+
+      if (labelText === 'آخر تحديث بواسطة') {
+        const valueNode = label.nextElementSibling;
+        if (valueNode) valueNode.textContent = meta.lastUpdatedByText;
+        lastUpdatedByCell = cell;
+        return;
+      }
+
+      if (labelText === 'تاريخ الإغلاق المتوقع' || labelText === 'تاريخ الإغلاق المتوقع للطلب') {
+        label.textContent = 'تاريخ الإغلاق المتوقع للطلب';
+        const valueNode = label.nextElementSibling;
+        if (valueNode) valueNode.textContent = meta.expectedClosureDateText;
+        if (expectedClosureCell) {
+          cell.remove();
+        } else {
+          expectedClosureCell = cell;
+        }
+        return;
+      }
+
+      if (labelText === 'الأيام المتبقية حتى الإغلاق' || labelText === 'الأيام المتبقية حتى إغلاق الطلب') {
+        label.textContent = 'الأيام المتبقية حتى إغلاق الطلب';
+        const valueNode = label.nextElementSibling;
+        if (valueNode) valueNode.innerHTML = '';
+        cell.classList.add('sla-cell');
+        if (remainingDaysCell) {
+          cell.remove();
+        } else {
+          remainingDaysCell = cell;
+        }
       }
     });
 
@@ -878,9 +996,20 @@ function enhanceRequestSummaryPanels() {
     const remainingDaysLabel = getRemainingDaysLabel(meta.remainingDays);
     const remainingHtml = `<span class="sla-days ${remainingDaysClass}">${remainingDaysLabel}</span>`;
 
-    grid.insertAdjacentHTML('beforeend', createSummaryCell('آخر تحديث بواسطة', meta.lastUpdatedByText));
-    grid.insertAdjacentHTML('beforeend', createSummaryCell('تاريخ الإغلاق المتوقع للطلب', meta.expectedClosureDateText));
-    grid.insertAdjacentHTML('beforeend', createSummaryCell('الأيام المتبقية حتى إغلاق الطلب', remainingHtml, 'sla-cell'));
+    if (!lastUpdatedByCell) {
+      grid.insertAdjacentHTML('beforeend', createSummaryCell('آخر تحديث بواسطة', meta.lastUpdatedByText));
+    }
+
+    if (!expectedClosureCell) {
+      grid.insertAdjacentHTML('beforeend', createSummaryCell('تاريخ الإغلاق المتوقع للطلب', meta.expectedClosureDateText));
+    }
+
+    if (remainingDaysCell) {
+      const valueNode = remainingDaysCell.querySelector('.flbl')?.nextElementSibling;
+      if (valueNode) valueNode.innerHTML = remainingHtml;
+    } else {
+      grid.insertAdjacentHTML('beforeend', createSummaryCell('الأيام المتبقية حتى إغلاق الطلب', remainingHtml, 'sla-cell'));
+    }
 
     grid.dataset.slaEnhanced = '1';
   });
