@@ -568,9 +568,14 @@ const INSP_DATA = {
 إلزام المنشأة بتوفير معدات الحماية خلال أسبوعين، وإجراء دورة تدريب طارئة خلال 30 يوماً، مع فرض غرامة رادعة لا تقل عن 500 ريال عُماني.`,
       visitSummary: 'ثبتت المخالفات الميدانية بشكل واضح؛ غياب معدات السلامة، ونقص بروتوكولات المواد الكيميائية، وانقطاع التدريب السنوي. بيانات الأجر مطابقة للنظام. التوصية: غرامة + إلزام بالتصحيح.',
       visitDate: '2024-11-25',
+      visitLocation: 'المنطقة الصناعية بصحار — خط التعبئة رقم 2',
       visitAttendees: [
         { name: 'حاتم سالم الزدجالي', role: 'مفتش ميداني' },
         { name: 'أحمد ناصر الجابري',  role: 'مفتش ميداني مساعد' }
+      ],
+      metPeople: [
+        { name: 'أحمد سعيد', title: 'مدير الموارد البشرية', phone: '98765432' },
+        { name: 'محمود سالم', title: 'مشرف خط الإنتاج', phone: '92345678' }
       ],
       visitAttachments: [
         { name: 'صور خط التعبئة رقم 2.zip',          type: 'zip', size: '6.2 MB', date: '2024-11-25' },
@@ -1323,6 +1328,11 @@ const INSP_DATA = {
         actualDate: '2024-11-25',
         status: 'تم اعتماد المحضر',
         purpose: 'متابعة بلاغ ظروف العمل غير الآمنة',
+        visitLocation: 'المنطقة الصناعية بصحار — خط التعبئة رقم 2',
+        metPeople: [
+          { name: 'أحمد سعيد', title: 'مدير الموارد البشرية', phone: '98765432' },
+          { name: 'محمود سالم', title: 'مشرف خط الإنتاج', phone: '92345678' }
+        ],
         checklistItems: [
           { item: 'التحقق من توفر معدات الحماية',                done: true },
           { item: 'فحص بروتوكولات السلامة',                      done: true },
@@ -1404,6 +1414,8 @@ const INSP_DATA = {
   banCases: [
     {
       id: '2025-06-000001',
+      requestType: 'قرار حظر',
+      targetType: 'employer',
       type: 'حظر توظيف جديد',
       employerId: 'EMP-003',
       employerName: 'مؤسسة البناء والتشييد المتكاملة',
@@ -1421,6 +1433,8 @@ const INSP_DATA = {
     },
     {
       id: '2024-06-000045',
+      requestType: 'قرار رفع حظر',
+      targetType: 'employer',
       type: 'حظر استقدام عمالة',
       employerId: 'EMP-002',
       employerName: 'مصنع الإنتاج الغذائي الخليجي',
@@ -1438,6 +1452,118 @@ const INSP_DATA = {
         { date: '2024-09-15', action: 'إصدار قرار الحظر',          actor: 'عبدالعزيز هلال الراشدي', actorRole: 'inspection-director' },
         { date: '2024-11-10', action: 'رفع الحظر بعد إثبات الامتثال', actor: 'عبدالعزيز هلال الراشدي', actorRole: 'inspection-director' }
       ]
+    },
+    {
+      id: '2025-06-000102',
+      requestType: 'طلب حظر',
+      targetType: 'employer',
+      type: 'حظر صاحب العمل',
+      employerId: 'EMP-001',
+      employerName: 'شركة التقنية الوطنية',
+      lookupType: 'crn',
+      lookupValue: '1234567890',
+      reason: 'طلب حظر بسبب عدم الرد على استيفاء البيانات ضمن المهلة المحددة.',
+      status: 'طلب حظر — بانتظار الاعتماد',
+      issuedDate: '2025-01-23',
+      requestedBy: 'منى راشد البلوشي',
+      requestedByRole: 'fund-staff',
+      relatedComplaintId: '2025-01-000012',
+      attachments: [{ name: 'مذكرة طلب الحظر.pdf', size: '420 KB', date: '2025-01-23', type: 'pdf' }],
+      timeline: [
+        { date: '2025-01-23', action: 'تقديم طلب حظر', actor: 'منى راشد البلوشي', actorRole: 'fund-staff' }
+      ],
+      liftedDate: null,
+      liftedBy: null
+    },
+    {
+      id: '2025-06-000103',
+      requestType: 'طلب فك حظر',
+      targetType: 'employer',
+      type: 'فك حظر صاحب العمل',
+      employerId: 'EMP-003',
+      employerName: 'مؤسسة البناء والتشييد المتكاملة',
+      lookupType: 'crn',
+      lookupValue: '4567891230',
+      selectedBanId: '2025-06-000001',
+      reason: 'اختيار سجل الحظر النشط المطلوب رفعه بعد استلام طلب فك الحظر.',
+      status: 'طلب فك حظر — بانتظار الاعتماد',
+      issuedDate: '2025-01-24',
+      requestedBy: 'سيف خلفان الأمري',
+      requestedByRole: 'monitoring-employee',
+      timeline: [
+        { date: '2025-01-24', action: 'تقديم طلب فك حظر', actor: 'سيف خلفان الأمري', actorRole: 'monitoring-employee' }
+      ],
+      liftedDate: null,
+      liftedBy: null
+    },
+    {
+      id: '2025-06-000104',
+      requestType: 'طلب حظر',
+      targetType: 'worker',
+      type: 'حظر العامل',
+      workerId: 'WRK-003',
+      workerName: 'خالد ناصر البلوشي',
+      workerCivil: '05789012',
+      lookupType: 'civil',
+      lookupValue: '05789012',
+      reason: 'طلب حظر العامل لحين استكمال التحقق الميداني في البلاغ المرتبط.',
+      status: 'طلب حظر — بانتظار الاعتماد',
+      issuedDate: '2025-01-25',
+      requestedBy: 'حاتم سالم الزدجالي',
+      requestedByRole: 'field-inspector',
+      relatedComplaintId: '2025-01-000012',
+      attachments: [{ name: 'إفادة الزيارة الميدانية.pdf', size: '510 KB', date: '2025-01-25', type: 'pdf' }],
+      timeline: [
+        { date: '2025-01-25', action: 'تقديم طلب حظر عامل', actor: 'حاتم سالم الزدجالي', actorRole: 'field-inspector' }
+      ],
+      liftedDate: null,
+      liftedBy: null
+    },
+    {
+      id: '2025-06-000105',
+      requestType: 'حظر مؤقت',
+      targetType: 'worker',
+      type: 'حظر العامل مؤقتاً',
+      workerId: 'WRK-003',
+      workerName: 'خالد ناصر البلوشي',
+      workerCivil: '05789012',
+      lookupType: 'civil',
+      lookupValue: '05789012',
+      reason: 'تم حظر العامل مؤقتاً لحين البت في البلاغ المرتبط به.',
+      relatedComplaintId: '2025-01-000012',
+      status: 'سارٍ — حظر مؤقت',
+      issuedDate: '2025-01-22',
+      issuedBy: 'النظام',
+      timeline: [
+        { date: '2025-01-22', action: 'تفعيل الحظر المؤقت للعامل عند تسجيل البلاغ', actor: 'النظام', actorRole: 'system' }
+      ],
+      liftedDate: null,
+      liftedBy: null
+    },
+    {
+      id: '2025-06-000106',
+      requestType: 'قرار حظر',
+      targetType: 'worker',
+      type: 'حظر الاستفادة من المنافع مؤقتاً',
+      workerId: 'WRK-004',
+      workerName: 'أسماء محمد الحارثي',
+      workerCivil: '07345678',
+      employerId: 'EMP-002',
+      employerName: 'مصنع الإنتاج الغذائي الخليجي',
+      lookupType: 'civil',
+      lookupValue: '07345678',
+      reason: 'تعليق الاستفادة من بعض المنافع إلى حين استكمال التحقق في البلاغ المرتبط بتعديل بيانات الأجر.',
+      relatedComplaintId: '2025-01-000003',
+      status: 'سارٍ — حظر مؤقت',
+      issuedDate: '2025-01-18',
+      issuedBy: 'نجلاء عبدالله القاسمي',
+      duration: '30 يوماً',
+      expiryDate: '2025-02-17',
+      timeline: [
+        { date: '2025-01-18', action: 'إقرار الحظر المؤقت على المؤمن عليه لحين استكمال التحقق', actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
+      ],
+      liftedDate: null,
+      liftedBy: null
     }
   ],
 

@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>طلبات الحظر وفك الحظر — نظام إدارة التفتيش</title>
+<title>قرارات الحظر — نظام إدارة التفتيش</title>
 <link rel="stylesheet" href="../shared/style.css">
 </head>
 <body>
@@ -12,11 +12,11 @@
 <script src="../shared/components.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  initLayout({ role: 'field-head', activePage: 'ban-cases-list', breadcrumb: [
+  initLayout({ role: 'employer', activePage: 'ban-cases-list', breadcrumb: [
     { label: 'الرئيسية', onclick: 'goHome()' },
-    { label: 'طلبات الحظر وفك الحظر' }
+    { label: 'قرارات الحظر' }
   ]});
-  renderContent(renderBanCasesList('field-head'));
+  renderContent(renderBanCasesList('employer'));
 });
 </script>
 </body>

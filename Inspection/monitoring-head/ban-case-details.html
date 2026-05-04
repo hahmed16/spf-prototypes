@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>تفاصيل حالة الحظر — نظام إدارة التفتيش</title>
+<title>تفاصيل طلب الحظر أو فك الحظر — نظام إدارة التفتيش</title>
 <link rel="stylesheet" href="../shared/style.css">
 </head>
 <body>
@@ -14,8 +14,8 @@
 document.addEventListener('DOMContentLoaded', function() {
   initLayout({ role: 'monitoring-head', activePage: 'ban-case-details', breadcrumb: [
     { label: 'الرئيسية', onclick: 'goHome()' },
-    { label: 'حالات الحظر', onclick: "navigateTo('ban-cases-list')" },
-    { label: 'تفاصيل حالة الحظر' }
+    { label: 'طلبات الحظر وفك الحظر', onclick: "navigateTo('ban-cases-list')" },
+    { label: 'تفاصيل الطلب' }
   ]});
   renderContent(renderBanCaseDetails('monitoring-head'));
 });

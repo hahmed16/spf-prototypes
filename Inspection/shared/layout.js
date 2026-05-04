@@ -72,6 +72,8 @@ function initLayout({ role, activePage, breadcrumb = [] }) {
 
   if (breadcrumb && breadcrumb.length) setBreadcrumb(breadcrumb);
   bindHeaderEvents();
+
+  if (typeof _injectGlobalIcons === 'function') _injectGlobalIcons();
 }
 
 function buildHeader(roleConfig, userData) {
@@ -145,9 +147,9 @@ function getAvailabilitySampleState(role) {
 function availabilityStatusClass(status) {
   return status === 'متاح' ? 'b-approved'
     : status === 'غير متاح' ? 'b-away'
-    : status === 'في مهمة' ? 'b-break'
-    : status === 'في اجتماع' ? 'b-meeting'
-    : 'b-draft';
+      : status === 'في مهمة' ? 'b-break'
+        : status === 'في اجتماع' ? 'b-meeting'
+          : 'b-draft';
 }
 
 function buildAvailabilityBadge(roleConfig) {
@@ -277,9 +279,9 @@ function openAvailabilitySwitcher() {
       <div class="alert alert-i" style="margin-bottom:12px">${ICONS.info}<span>تبديل سريع من الهيدر — نموذج استرشادي.</span></div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:8px">الحالة الحالية: <span class="badge ${availabilityStatusClass(current.status)}">${current.status}</span></div>
       <div class="availability-switcher-grid">
-        ${options.map(function(option) {
-          return `<button class="availability-switcher-option" onclick="applyAvailabilitySample('${option}')">${option}</button>`;
-        }).join('')}
+        ${options.map(function (option) {
+      return `<button class="availability-switcher-option" onclick="applyAvailabilitySample('${option}')">${option}</button>`;
+    }).join('')}
       </div>
       <div class="fgrp" style="margin-top:12px">
         <label class="flbl">ملاحظة مختصرة</label>
@@ -516,8 +518,8 @@ function renderNotes(notes, id) {
   const noteItems = Array.isArray(notes)
     ? notes
     : (typeof notes === 'string' && notes.trim()
-        ? [{ text: notes, author: 'النظام', date: '—' }]
-        : []);
+      ? [{ text: notes, author: 'النظام', date: '—' }]
+      : []);
   notes = noteItems;
   return `
     <div class="op-notes-card card mb0" id="notes-card">
@@ -558,7 +560,7 @@ function renderChecklist(items) {
         <span style="font-size:12px;font-weight:700;color:var(--primary)">${done}/${items.length}</span>
       </div>
       <div style="height:6px;background:var(--g200);border-radius:999px;overflow:hidden;margin-bottom:12px">
-        <div style="height:100%;width:${Math.round((done/items.length)*100)}%;background:var(--primary);border-radius:999px"></div>
+        <div style="height:100%;width:${Math.round((done / items.length) * 100)}%;background:var(--primary);border-radius:999px"></div>
       </div>
     </div>
     ${items.map(item => `
@@ -577,7 +579,7 @@ function barChart(data, colorVar = '--primary') {
     <div class="chart-bar-row">
       <div class="chart-bar-meta"><span>${d.label}</span><strong>${d.value}</strong></div>
       <div class="chart-bar-track">
-        <div class="chart-bar-fill" style="width:${Math.round((d.value/max)*100)}%;background:var(${colorVar})"></div>
+        <div class="chart-bar-fill" style="width:${Math.round((d.value / max) * 100)}%;background:var(${colorVar})"></div>
       </div>
     </div>`).join('');
 }
@@ -665,4 +667,146 @@ function getCaseTypeBadgeClass(caseType) {
     'تصفية': 'b-phead'
   };
   return caseTypeClasses[caseType] || 'b-draft';
+}
+
+/* ── Global UI Enhancements (AI & Voice) ── */
+const _GLOBAL_EXTRA_ICONS = {
+  sparkles: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5z"/></svg>`,
+  mic: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`
+};
+
+function _injectGlobalIcons() {
+  const observer = new MutationObserver(mutations => {
+    // 1. Voice Note for textareas
+    document.querySelectorAll('textarea:not(.has-voice-icon)').forEach(ta => {
+      if (ta.readOnly || ta.disabled) return;
+      ta.classList.add('has-voice-icon');
+      const wrap = document.createElement('div');
+      wrap.style.position = 'relative';
+      wrap.style.display = 'block';
+      wrap.style.width = '100%';
+      ta.parentNode.insertBefore(wrap, ta);
+      wrap.appendChild(ta);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-ghost btn-xs voice-note-btn';
+      btn.style.position = 'absolute';
+      btn.style.left = '8px';
+      btn.style.bottom = '8px';
+      btn.style.padding = '6px';
+      btn.style.background = 'var(--g50)';
+      btn.style.border = '1px solid var(--primary)';
+      btn.style.borderRadius = '50%';
+      btn.style.color = 'var(--primary)';
+      btn.style.cursor = 'pointer';
+      btn.title = "محاكاة التسجيل الصوتي";
+      btn.innerHTML = _GLOBAL_EXTRA_ICONS.mic;
+      btn.onclick = (e) => {
+        e.preventDefault();
+        showToast('محاكاة: جارٍ التسجيل وتفريغ الصوت...', 'i');
+        btn.style.background = '#ffdcdc';
+        btn.style.borderColor = 'red';
+        btn.style.color = 'red';
+        setTimeout(() => {
+          btn.style.background = 'var(--g50)';
+          btn.style.borderColor = 'var(--primary)';
+          btn.style.color = 'var(--primary)';
+          ta.value += (ta.value ? '\\n' : '') + 'هذا النص تم تفريغه آلياً كرسالة صوتية تجريبية.';
+          showToast('تم تفريغ الملاحظة الصوتية بنجاح', 's');
+        }, 1500);
+      };
+      wrap.appendChild(btn);
+    });
+
+    // 2. AI icon for attachment rows
+    document.querySelectorAll('.att-row .att-acts:not(.has-ai-icon)').forEach(acts => {
+      acts.classList.add('has-ai-icon');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ibtn';
+      btn.title = "تحليل AI";
+      btn.style.color = '#8b5cf6';
+      btn.innerHTML = _GLOBAL_EXTRA_ICONS.sparkles;
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        _simulateAIAnalysis();
+      };
+      acts.prepend(btn);
+    });
+
+    // 3. AI icon for generic required document items (that have 📋 or 📎)
+    document.querySelectorAll('div[style*="padding:9px 12px"], div[style*="padding:9px 14px"]').forEach(row => {
+      if (row.classList.contains('has-ai-icon') || (!row.innerHTML.includes('📋') && !row.innerHTML.includes('📎'))) return;
+      row.classList.add('has-ai-icon');
+      const rightSide = row.lastElementChild;
+      if (rightSide) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-xs btn-ghost ai-btn-hover';
+        btn.style.color = '#8b5cf6';
+        btn.style.padding = '2px';
+        btn.style.marginLeft = '8px';
+        btn.title = "تحليل المستند (AI)";
+        btn.innerHTML = '<span style="display:inline-flex">' + _GLOBAL_EXTRA_ICONS.sparkles + '</span>';
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          _simulateAIAnalysis();
+        };
+
+        if (rightSide.style && rightSide.style.display === 'flex') {
+          rightSide.prepend(btn);
+        } else {
+          const wrap = document.createElement('div');
+          wrap.style.display = 'flex';
+          wrap.style.alignItems = 'center';
+          wrap.style.gap = '8px';
+          row.insertBefore(wrap, rightSide);
+          wrap.appendChild(btn);
+          wrap.appendChild(rightSide);
+        }
+      }
+    });
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+}
+
+function _simulateAIAnalysis() {
+  openModal({
+    title: '<span style="color:#8b5cf6;display:flex;align-items:center;gap:8px">' + _GLOBAL_EXTRA_ICONS.sparkles + ' تحليل المستند ذكياً</span>',
+    body: `
+      <div style="text-align:center;padding:26px" id="ai-loading">
+        <div class="spinner" style="margin:0 auto 16px;border:3px solid var(--border);border-top:3px solid #8b5cf6;border-radius:50%;width:34px;height:34px;animation:spin 1s linear infinite;"></div>
+        <div style="font-size:14px;color:var(--text2);font-weight:600">جارٍ قراءة وفهم محتوى المرفق...</div>
+      </div>
+      <div id="ai-result" style="display:none">
+         <div class="alert" style="background:#f3e8ff;border-color:#d8b4fe;color:#6b21a8;margin-bottom:16px;">
+            <strong>النتيجة الفورية:</strong> تطابق ممتاز بنسبة 98% مع نماذج العقود المعتمدة.
+         </div>
+         <div style="display:flex;flex-direction:column;gap:12px;font-size:13px">
+            <div style="display:flex;justify-content:space-between;border-bottom:1px dotted var(--border);padding-bottom:8px">
+              <span style="color:var(--text2)">نوع المستند المعطى</span><strong style="color:var(--text)">عقد عمل موحد / تجاري</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;border-bottom:1px dotted var(--border);padding-bottom:8px">
+              <span style="color:var(--text2)">أطراف العقد</span><strong style="color:var(--text)">مؤسسة البناء، الموظف المدعي</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;border-bottom:1px dotted var(--border);padding-bottom:8px">
+              <span style="color:var(--text2)">تاريخ التوقيع / الإصدار</span><strong style="color:var(--text)">2023-05-12</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between">
+              <span style="color:var(--text2)">مستوى الموثوقية (AI Confidence)</span><strong style="color:var(--success)">موثوق وعالي الجودة</strong>
+            </div>
+         </div>
+      </div>
+      <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+    `,
+    footer: '<button class="btn btn-primary btn-sm" onclick="closeModal()">إغلاق ومتابعة</button>'
+  });
+
+  setTimeout(() => {
+    const loading = document.getElementById('ai-loading');
+    const result = document.getElementById('ai-result');
+    if (loading) loading.style.display = 'none';
+    if (result) result.style.display = 'block';
+  }, 1800);
 }

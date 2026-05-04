@@ -20,6 +20,10 @@ const contactLogData = {
   appeals: [
     { id: 1, date: '2025-02-05', time: '12:00', method: 'هاتف', party: 'مقدم التظلم — صاحب العمل', action: 'إبلاغه بقيد التظلم وتوقع البت فيه خلال 15 يوم عمل. تأكيد استلام جميع المستندات المطلوبة.', recordedBy: 'سيف الأمري' },
   ],
+  services: [
+    { id: 1, date: '2025-01-21', time: '09:20', method: 'بريد إلكتروني', party: 'مقدم الطلب — خدمة الأمان الوظيفي', action: 'إشعار مقدم الطلب باستلام الطلب وتحويله للمراجعة الأولية في قسم المتابعة.', recordedBy: 'سيف الأمري' },
+    { id: 2, date: '2025-01-22', time: '13:10', method: 'هاتف', party: 'جهة العمل المرتبطة بالطلب', action: 'طلب استكمال بيانات داعمة حول حالة الخدمة وتأكيد جهة الاتصال داخل المنشأة.', recordedBy: 'نجلاء عبدالله القاسمي' }
+  ],
 };
 
 function renderCorrespondenceDocumentation(entityType, entityId, userRole) {
