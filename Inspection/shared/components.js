@@ -25,6 +25,8 @@ function _receiveComplaint(btn, id) {
 }
 
 /* ── مساعدات داخلية ── */
+const TODAY_STR = '2025-01-22';
+
 function _priClass(p) {
   return p === 'عاجل' ? 'b-high' : p === 'مرتفع' ? 'b-invest' : p === 'متوسط' ? 'b-medium' : 'b-low';
 }
@@ -60,6 +62,35 @@ function _noData() {
 }
 
 /* ── Tab view helpers ── */
+function _visitDetailPageById(visitId) {
+  if (!visitId) return null;
+  return visitId.includes('-04-') ? 'visit-surprise-details'
+    : visitId.includes('-05-') ? 'visit-scheduled-details'
+      : 'visit-periodic-details';
+}
+function _visitNavTarget(role, visitId) {
+  if (!visitId) return null;
+  const directVisitRoles = ['employer', 'insured', 'field-inspector', 'field-head', 'inspection-director', 'ops-analyst'];
+  if (directVisitRoles.includes(role)) {
+    return { page: _visitDetailPageById(visitId), query: `id=${visitId}` };
+  }
+  if (role === 'monitoring-employee' || role === 'monitoring-head') {
+    return { page: 'timeline', query: `id=${visitId}&lookup=complaint` };
+  }
+  return null;
+}
+function _visitAnchor(role, visitId, className, styleText) {
+  const target = _visitNavTarget(role, visitId);
+  const cls = className ? ` class="${className}"` : '';
+  const style = styleText ? ` style="${styleText}"` : '';
+  if (!target) return `<span${cls}${style}>${visitId || 'â€”'}</span>`;
+  return `<a href="#"${cls}${style} onclick="navigateTo('${target.page}','${target.query}')">${visitId}</a>`;
+}
+function _visitButton(role, visitId, label, btnClass) {
+  const target = _visitNavTarget(role, visitId);
+  if (!target) return '';
+  return `<button class="btn ${btnClass || 'btn-secondary btn-sm'}" onclick="navigateTo('${target.page}','${target.query}')">${label}</button>`;
+}
 function _tabView(tabId, tabs, defaultIdx) {
   if (!defaultIdx) defaultIdx = 0;
   const nav = tabs.map((t, i) => {
@@ -199,6 +230,76 @@ function _buildVisitReport(v, typeLabel) {
   };
 }
 
+function _getCorrectiveActionsData() {
+  return [
+    {
+      visit: '2025-03-000002',
+      employer: 'مصنع الإنتاج الغذائي',
+      action: 'توفير معدات الحماية',
+      deadline: '2025-01-19',
+      status: 'معلق',
+      owner: 'صاحب العمل',
+      evidence: 'صور ومرفقات السلامة',
+      source: 'محضر الزيارة الدوري',
+      assignedInspector: 'حاتم سالم الزدجالي',
+      nextStep: 'مراجعة صور الالتزام وإقرار الشراء',
+      followupMode: 'مستندي'
+    },
+    {
+      visit: '2025-03-000002',
+      employer: 'مصنع الإنتاج الغذائي',
+      action: 'تسجيل العمال غير المسجلين',
+      deadline: '2025-01-13',
+      status: 'منجز',
+      owner: 'صاحب العمل',
+      evidence: 'تحديث بيانات الاشتراك',
+      source: 'محضر الزيارة الدوري',
+      assignedInspector: 'حاتم سالم الزدجالي',
+      nextStep: 'إقفال البند بعد التحقق من السجل',
+      followupMode: 'مستندي'
+    },
+    {
+      visit: '2025-04-000001',
+      employer: 'مصنع الإنتاج الغذائي',
+      action: 'سداد الاشتراكات المتأخرة',
+      deadline: '2025-01-26',
+      status: 'جارٍ',
+      owner: 'الإدارة المالية بالمنشأة',
+      evidence: 'إشعار السداد',
+      source: 'زيارة مفاجئة',
+      assignedInspector: 'حاتم سالم الزدجالي',
+      nextStep: 'مطابقة إشعار السداد مع بيانات النظام',
+      followupMode: 'اتصال ومطابقة'
+    },
+    {
+      visit: '2024-03-000095',
+      employer: 'مؤسسة البناء والتشييد',
+      action: 'صرف الرواتب المتأخرة',
+      deadline: '2024-12-15',
+      status: 'منجز',
+      owner: 'إدارة الموارد البشرية',
+      evidence: 'كشوفات بنكية',
+      source: 'إعادة فحص ميداني',
+      assignedInspector: 'حاتم سالم الزدجالي',
+      nextStep: 'اعتماد الإنجاز وإقفال الأثر',
+      followupMode: 'ميداني'
+    },
+    {
+      visit: '2025-05-000004',
+      employer: 'شركة التقنية الوطنية',
+      action: 'تصحيح جداول الدوام والإجازات',
+      deadline: '2025-02-02',
+      status: 'معلق',
+      owner: 'إدارة شؤون الموظفين',
+      evidence: 'سجلات الدوام المحدثة',
+      source: 'زيارة مجدولة',
+      assignedInspector: 'حاتم سالم الزدجالي',
+      nextStep: 'إعادة زيارة قصيرة للتأكد من التطبيق الفعلي',
+      followupMode: 'ميداني'
+    }
+  ];
+}
+
 /* ── لوحة البيانات ── */
 function renderDashboard(role) {
   const kpis = {
@@ -274,6 +375,7 @@ function renderDashboard(role) {
     </div>`).join('');
 
   const recent = _recentItems(role);
+  const roleQueue = _dashboardRoleQueue(role);
 
   const chartHtml = role !== 'employer' && role !== 'insured' ? `
     <div class="dashboard-insights">
@@ -307,7 +409,8 @@ function renderDashboard(role) {
     <div class="pg-acts"><button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تحديث البيانات…','i')">${ICONS.switch}تحديث</button></div></div>
     <div class="stats-grid">${cards}</div>
     ${chartHtml}
-    ${recent}`;
+    ${recent}
+    ${roleQueue}`;
 }
 
 function _recentItems(role) {
@@ -336,6 +439,170 @@ function _recentItems(role) {
      <td><button class="btn btn-primary btn-xs" onclick="navigateTo('complaint-details','id=${c.id}')">عرض</button></td></tr>`).join('');
   return `<div class="card dashboard-current-work"><div class="ph"><h3>${ICONS.inbox} آخر البلاغات</h3></div>
     <div class="tbl-wrap"><table class="dtbl"><thead><tr><th>الرقم</th><th>النوع</th><th>الحالة</th><th>تاريخ تقديم الطلب</th><th>إجراء</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+
+function _dashboardRoleQueue(role) {
+  if (role === 'monitoring-employee') {
+    const complaintQueue = (INSP_DATA.complaints || [])
+      .filter(c => ['تم تقديم', 'قيد المراجعة', 'قيد الدراسة', 'تم إعادة الطلب'].some(s => (c.status || '').includes(s)))
+      .slice(0, 4);
+    const svcQueue = [
+      ...(INSP_DATA.jobSecurityRequests || []).map(r => ({ id: r.id, label: 'الأمان الوظيفي', page: '../services/job-security-request-details', request: r, key: 'job' })),
+      ...(INSP_DATA.familyBenefitRequests || []).map(r => ({ id: r.id, label: 'منافع دخل الأسرة', page: '../services/family-benefits-request-details', request: r, key: 'family' })),
+      ...(INSP_DATA.maternityLeaveRequests || []).map(r => ({ id: r.id, label: 'إجازة الأمومة', page: '../services/maternity-leave-request-details', request: r, key: 'maternity' }))
+    ].filter(item => {
+      const summary = _svcSummary(item.key, item.request);
+      return summary.failed > 0 || summary.pending > 0;
+    }).slice(0, 3);
+    const overdueCount = (INSP_DATA.complaints || []).filter(c => c.dueDate && c.dueDate < TODAY_STR && !(c.status || '').includes('إغلاق')).length;
+    const rows = [
+      ...complaintQueue.map(c => `<tr>
+        <td><a href="#" onclick="navigateTo('complaint-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
+        <td>بلاغ</td>
+        <td>${c.type}</td>
+        <td>${statusBadge(c.status)}</td>
+        <td><button class="btn btn-primary btn-xs" onclick="navigateTo('complaint-details','id=${c.id}')">${ICONS.eye}بحث</button></td>
+      </tr>`),
+      ...svcQueue.map(item => {
+        const summary = _svcSummary(item.key, item.request);
+        return `<tr>
+          <td><a href="#" onclick="navigateTo('${item.page}','id=${item.id}')" class="txp fw7">${item.id}</a></td>
+          <td>خدمة</td>
+          <td>${item.label}</td>
+          <td><span class="badge b-returned">${summary.failed} غير مستوفاة / ${summary.pending} قيد التحقق</span></td>
+          <td><button class="btn btn-primary btn-xs" onclick="navigateTo('${item.page}','id=${item.id}')">${ICONS.eye}استكمال</button></td>
+        </tr>`;
+      })
+    ].join('');
+    return `<div class="card" style="margin-top:16px">
+      <div class="ph"><h3><span class="pico or">${ICONS.clock}</span>بانتظار إجراء مني الآن</h3></div>
+      <div class="pb">
+        <div class="stats-grid" style="margin-bottom:14px">
+          <div class="scard p"><div class="sc-lbl">ملفات بحث مفتوحة</div><div class="sc-val">${complaintQueue.length}</div><div class="sc-sub">بلاغات تحتاج دراسة</div></div>
+          <div class="scard w"><div class="sc-lbl">طلبات خدمات متعثرة</div><div class="sc-val">${svcQueue.length}</div><div class="sc-sub">تستلزم استيفاء أو تحقق</div></div>
+          <div class="scard d"><div class="sc-lbl">طلبات متأخرة</div><div class="sc-val">${overdueCount}</div><div class="sc-sub">تجاوزت الموعد التشغيلي</div></div>
+        </div>
+        <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} هذا القسم يحول اللوحة إلى طابور عمل تشغيلي يبرز ما ينتظر إجراءك حالياً، وليس مجرد مؤشرات عامة.</div>
+        ${_tblWrap(['المرجع', 'النوع', 'الوصف', 'الحالة', 'إجراء'], rows || _noData())}
+      </div>
+    </div>`;
+  }
+
+  if (role === 'monitoring-head') {
+    const complaintApprovals = (INSP_DATA.complaints || []).filter(c => (c.status || '').includes('بانتظار اعتماد')).slice(0, 3);
+    const appealApprovals = (INSP_DATA.appeals || []).filter(a => (a.status || '').includes('بانتظار اعتماد')).slice(0, 3);
+    const overdue = (INSP_DATA.complaints || []).filter(c => c.dueDate && c.dueDate < TODAY_STR && !(c.status || '').includes('إغلاق'));
+    const rows = [
+      ...complaintApprovals.map(c => `<tr>
+        <td><a href="#" onclick="navigateTo('complaint-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
+        <td>بلاغ</td>
+        <td>${c.type}</td>
+        <td>${statusBadge(c.status)}</td>
+        <td><button class="btn btn-warning btn-xs" onclick="navigateTo('complaint-details','id=${c.id}')">قرار الرئيس</button></td>
+      </tr>`),
+      ...appealApprovals.map(a => `<tr>
+        <td><a href="#" onclick="navigateTo('appeal-details','id=${a.id}')" class="txp fw7">${a.id}</a></td>
+        <td>تظلم</td>
+        <td>${a.type || 'مراجعة قرار'}</td>
+        <td>${statusBadge(a.status)}</td>
+        <td><button class="btn btn-warning btn-xs" onclick="navigateTo('appeal-details','id=${a.id}')">اعتماد / إعادة</button></td>
+      </tr>`)
+    ].join('');
+    return `<div class="card" style="margin-top:16px">
+      <div class="ph"><h3><span class="pico rd">${ICONS.pen}</span>طابور قرارات الرئيس</h3></div>
+      <div class="pb">
+        <div class="stats-grid" style="margin-bottom:14px">
+          <div class="scard d"><div class="sc-lbl">بانتظار قراري</div><div class="sc-val">${complaintApprovals.length + appealApprovals.length}</div><div class="sc-sub">بلاغات وتظلمات</div></div>
+          <div class="scard w"><div class="sc-lbl">حالات متأخرة</div><div class="sc-val">${overdue.length}</div><div class="sc-sub">تحتاج تصعيداً أو إعادة توجيه</div></div>
+          <div class="scard i"><div class="sc-lbl">متابعة تشغيلية</div><div class="sc-val">${(INSP_DATA.appeals || []).filter(a => (a.status || '').includes('قيد الدراسة')).length}</div><div class="sc-sub">تظلمات ما زالت تحت الدراسة</div></div>
+        </div>
+        <div class="df ac g8" style="margin-bottom:14px;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm" onclick="navigateTo('overdue-tracking')">${ICONS.clock}متابعة الأعمال المتأخرة</button>
+          <button class="btn btn-secondary btn-sm" onclick="navigateTo('workload-monitoring')">${ICONS.chart}مراقبة الأحمال</button>
+        </div>
+        ${_tblWrap(['المرجع', 'المسار', 'الوصف', 'الحالة', 'إجراء'], rows || _noData())}
+      </div>
+    </div>`;
+  }
+
+  if (role === 'fund-staff') {
+    const ownComplaints = (INSP_DATA.complaints || []).filter(c => c.submittedBy === 'fund-staff').slice(0, 4);
+    const ownBanRequests = (INSP_DATA.banCases || []).filter(b => b.requestedByRole === 'fund-staff').slice(0, 3);
+    const rows = [
+      ...ownComplaints.map(c => `<tr>
+        <td><a href="#" onclick="navigateTo('complaint-details','id=${c.id}')" class="txp fw7">${c.id}</a></td>
+        <td>بلاغ</td>
+        <td>${c.type}</td>
+        <td>${statusBadge(c.status)}</td>
+        <td><button class="btn btn-primary btn-xs" onclick="navigateTo('complaint-details','id=${c.id}')">${ICONS.eye}متابعة</button></td>
+      </tr>`),
+      ...ownBanRequests.map(b => `<tr>
+        <td><a href="#" onclick="navigateTo('ban-case-details','id=${b.id}')" class="txp fw7">${b.id}</a></td>
+        <td>طلب حظر</td>
+        <td>${_banTargetLabel(b)}</td>
+        <td>${statusBadge(b.status)}</td>
+        <td><button class="btn btn-primary btn-xs" onclick="navigateTo('ban-case-details','id=${b.id}')">${ICONS.eye}عرض</button></td>
+      </tr>`)
+    ].join('');
+    return `<div class="card" style="margin-top:16px">
+      <div class="ph"><h3><span class="pico bl">${ICONS.file}</span>رحلاتي التشغيلية المفتوحة</h3></div>
+      <div class="pb">
+        <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} يفصل هذا العرض بين دورك كنقطة إدخال أولي للبلاغات وبين رفع طلبات الحظر وفك الحظر كمسار رقابي مستقل.</div>
+        ${_tblWrap(['المرجع', 'المسار', 'الوصف', 'الحالة', 'إجراء'], rows || _noData())}
+      </div>
+    </div>`;
+  }
+
+  if (role === 'field-inspector') {
+    const myActions = _getCorrectiveActionsData().filter(a => a.status !== 'منجز').slice(0, 4);
+    const myVisits = [...(INSP_DATA.visits.periodic || []), ...(INSP_DATA.visits.surprise || []), ...(INSP_DATA.visits.scheduled || [])]
+      .filter(v => v.inspectorName === 'حاتم سالم الزدجالي' && ['مجدولة', 'جارية', 'بانتظار مراجعة'].some(s => (v.status || '').includes(s)))
+      .slice(0, 3);
+    const rows = [
+      ...myActions.map(a => `<tr>
+        <td class="txp fw7">${a.visit}</td>
+        <td>${a.employer}</td>
+        <td>${a.action}</td>
+        <td>${statusBadge(a.status === 'جارٍ' ? 'جارية' : 'بانتظار إجراء تصحيحي')}</td>
+        <td><button class="btn btn-secondary btn-xs" onclick="navigateTo('corrective-actions')">${ICONS.eye}تحديث</button></td>
+      </tr>`),
+      ...myVisits.map(v => {
+        const page = v.id.includes('-04-') ? 'visit-surprise-details' : v.id.includes('-05-') ? 'visit-scheduled-details' : 'visit-periodic-details';
+        return `<tr>
+          <td class="txp fw7">${v.id}</td>
+          <td>${v.employerName}</td>
+          <td>زيارة</td>
+          <td>${statusBadge(v.status)}</td>
+          <td><button class="btn btn-primary btn-xs" onclick="navigateTo('${page}','id=${v.id}')">${ICONS.eye}متابعة</button></td>
+        </tr>`;
+      })
+    ].join('');
+    return `<div class="card" style="margin-top:16px">
+      <div class="ph"><h3><span class="pico tl">${ICONS.check}</span>تنفيذ ميداني ومتابعة تصحيحية</h3></div>
+      <div class="pb">
+        <div class="df ac g8" style="margin-bottom:14px;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm" onclick="navigateTo('corrective-actions')">${ICONS.check}الإجراءات التصحيحية</button>
+          <button class="btn btn-secondary btn-sm" onclick="navigateTo('appeals-list')">${ICONS.file}التظلمات المحالة لي</button>
+        </div>
+        ${_tblWrap(['المرجع', 'المنشأة', 'المسار', 'الحالة', 'إجراء'], rows || _noData())}
+      </div>
+    </div>`;
+  }
+
+  return '';
+}
+
+function _complaintOtherPartyName(c, role, byWorkerId) {
+  const worker = (c.workerId && byWorkerId[c.workerId]) || null;
+  if (role === 'employer') return (worker && worker.name) || c.workerName || '—';
+  if (role === 'insured') return c.employerName || '—';
+  return c.submittedByName || '—';
+}
+
+function _complaintOtherPartyHeader(role) {
+  if (role === 'employer') return 'العامل / المؤمن عليه';
+  if (role === 'insured') return 'جهة العمل';
+  return 'مقدم البلاغ';
 }
 
 /* ── قائمة البلاغات ── */
@@ -505,7 +772,9 @@ function renderComplaintsList(role) {
     /* Row class */
     const rowClass = isFullMask ? 'masked-row' : (ml === 'partial' ? 'masked-row-partial' : '');
 
-    const extraCols = isExt ? '' : `<td>${ml === 'none' ? (c.assignedTo || '<span class="tx3">غير معين</span>') : maskedText(ml, c.assignedTo, true)}</td>`;
+    const extraCols = isExt
+      ? `<td>${maskedText(ml, _complaintOtherPartyName(c, role, byWorkerId), false)}</td>`
+      : `<td>${ml === 'none' ? (c.assignedTo || '<span class="tx3">غير معين</span>') : maskedText(ml, c.assignedTo, true)}</td>`;
 
     const idCell = isFullMask
       ? `<span class="masked-field">${ICONS.lock}<span class="masked-dots">••••••••</span></span>`
@@ -516,9 +785,10 @@ function renderComplaintsList(role) {
       <td>${c.type}</td>
       ${isExt ? '' : `<td>${maskedText(ml, c.submittedByName, true)}</td>`}
       <td>${maskedText(ml, c.employerName, false)}</td>
+      ${isExt ? extraCols : ''}
       <td>${statusBadge(c.status)}</td>
       ${isExt ? '' : `<td><span class="badge ${_priClass(c.priority)}">${c.priority}</span></td>`}
-      ${extraCols}
+      ${isExt ? '' : extraCols}
       <td>${c.submitDate || '—'}</td>
       ${isFullMask ? '<td>—</td>' : _slaCell(c, isExt)}
       <td><div class="df ac g8">
@@ -531,7 +801,7 @@ function renderComplaintsList(role) {
   }).join('');
 
   const headers = isExt
-    ? ['رقم البلاغ', 'النوع', 'المنشأة', 'الحالة', 'تاريخ تقديم الطلب', 'الأيام المتبقية / SLA', 'إجراء']
+    ? ['رقم البلاغ', 'النوع', 'المنشأة', _complaintOtherPartyHeader(role), 'الحالة', 'تاريخ تقديم الطلب', 'الأيام المتبقية / SLA', 'إجراء']
     : ['رقم البلاغ', 'النوع', 'مقدم البلاغ', 'المنشأة', 'الحالة', 'الأولوية', 'الموظف المختص', 'تاريخ تقديم الطلب', 'الأيام المتبقية / SLA', 'إجراء'];
 
   /* Masking legend banner for internal roles */
@@ -674,6 +944,56 @@ function renderComplaintNew(role) {
     }
     document.addEventListener('DOMContentLoaded', function(){ _insuredLookup(); });
     <\/script>`;
+    }
+    if (isEmployer && myEmp) {
+      const employerWorkers = (INSP_DATA.workers || []).filter(w => w.employerId === myEmp.id);
+      return `
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.user}</span>العامل المعني بالبلاغ</h3>
+      <span style="font-size:11.5px;color:var(--text3)">يمكن البحث بالرقم المدني أو الاختيار من عمال المنشأة</span></div>
+    <div class="pb">
+      <div class="fg fg-2 mb12">
+        <div class="fgrp"><label class="flbl">الرقم المدني للعامل <span class="req">*</span></label>
+          <div style="display:flex;gap:8px">
+            <input class="fc" id="worker-civil-input" placeholder="مثال: 0912345001">
+            <button class="btn btn-secondary btn-sm" onclick="_lookupWorker()">بحث</button>
+          </div></div>
+        <div class="fgrp"><label class="flbl">اختيار مباشر من عمال المنشأة</label>
+          <select class="fc" onchange="_selectEmployerWorker(this.value)">
+            <option value="">— اختر العامل —</option>
+            ${employerWorkers.map(w => `<option value="${w.civil}">${w.name} — ${w.civil}</option>`).join('')}
+          </select></div>
+      </div>
+      <div class="tbl-wrap" style="margin-bottom:14px">
+        <table class="dtbl">
+          <thead><tr><th>الاسم</th><th>الرقم المدني</th><th>المسمى</th><th>الأجر المسجل</th><th>إجراء</th></tr></thead>
+          <tbody>${employerWorkers.map(w => `<tr>
+            <td>${w.name}</td>
+            <td>${w.civil}</td>
+            <td>${w.position}</td>
+            <td>${w.salary} ر.ع</td>
+            <td><button class="btn btn-secondary btn-xs" type="button" onclick="_selectEmployerWorker('${w.civil}')">اختيار</button></td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+      <div id="worker-data-panel" style="display:none">
+        <div class="alert alert-s mb12" style="margin-bottom:12px">${ICONS.check} <span>تم العثور على بيانات العامل في سجلات الصندوق</span></div>
+        <div class="fg fg-2">
+          <div class="fgrp"><label class="flbl">اسم العامل</label><div class="fro fw7" id="w-name"></div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" id="w-civil"></div></div>
+          <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro" id="w-nationality"></div></div>
+          <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro" id="w-position"></div></div>
+          <div class="fgrp"><label class="flbl">نوع العقد</label><div class="fro" id="w-contract"></div></div>
+          <div class="fgrp"><label class="flbl">القسم</label><div class="fro" id="w-dept"></div></div>
+          <div class="fgrp"><label class="flbl">الأجر الأساسي المسجّل</label><div class="fro fw7 txp" id="w-salary"></div></div>
+          <div class="fgrp"><label class="flbl">الاشتراكات المسجلة</label><div class="fro" id="w-contributions"></div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الالتحاق</label><div class="fro" id="w-joindate"></div></div>
+          <div class="fgrp"><label class="flbl">حالة العامل</label><div class="fro" id="w-status"></div></div>
+          <div class="fgrp" id="w-resign-grp" style="display:none"><label class="flbl">تاريخ انتهاء الخدمة</label><div class="fro" id="w-resigndate"></div></div>
+          <div class="fgrp"><label class="flbl">هاتف العامل</label><div class="fro" id="w-phone"></div></div>
+          <div class="fgrp"><label class="flbl">رقم هاتف آخر للتواصل مع العامل عند تقديم البلاغ</label><input type="tel" class="fc" id="w-extra-phone" placeholder="أدخل رقم هاتف العامل"></div>
+        </div>
+      </div>
+    </div></div>`;
     }
     return `
     <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.user}</span>بيانات العامل</h3>
@@ -862,6 +1182,11 @@ function renderComplaintNew(role) {
     } else {
       resignGrp.style.display = 'none';
     }
+  }
+  function _selectEmployerWorker(civil) {
+    var input = document.getElementById('worker-civil-input');
+    if (input) input.value = civil || '';
+    if (civil) _lookupWorker();
   }
   function _lookupEmployer() {
     const crn = document.getElementById('emp-crn-input') ? document.getElementById('emp-crn-input').value.trim() : '';
@@ -1660,6 +1985,27 @@ function executeComplaintAction(action, complaintId, panelId) {
   const closeTypeText = closeTypeEl && closeTypeEl.value
     ? ` — إجراء الإغلاق: ${closeTypeEl.options[closeTypeEl.selectedIndex].text}`
     : '';
+  if (action === 'اغلاق البلاغ' && closeTypeEl && closeTypeEl.value) {
+    let closeMessage = `تم تنفيذ: ${action}${reasonText}${closeTypeText}`;
+    if (closeTypeEl.value === 'wage-confirmation') {
+      const decidedWage = document.getElementById('wage-decided-' + panelId);
+      closeMessage = `تم إغلاق البلاغ مع تأكيد تعديل أجر العامل${decidedWage && decidedWage.value ? ' إلى ' + decidedWage.value + ' ر.ع' : ''}${reasonText}`;
+    } else if (closeTypeEl.value === 'registration-confirmation') {
+      const decidedJoinDate = document.getElementById('join-decided-' + panelId);
+      closeMessage = `تم إغلاق البلاغ مع تأكيد تسجيل العامل${decidedJoinDate && decidedJoinDate.value ? ' بتاريخ ' + decidedJoinDate.value : ''}${reasonText}`;
+    } else if (closeTypeEl.value === 'ban') {
+      closeMessage = `تم إغلاق البلاغ مع تثبيت إجراء حظر على جهة العمل${reasonText}`;
+    } else if (closeTypeEl.value === 'both') {
+      closeMessage = `تم إغلاق البلاغ مع تطبيق غرامة مالية وإجراء حظر${reasonText}`;
+    } else if (closeTypeEl.value === 'fine') {
+      const penaltyAmount = document.getElementById('penalty-amount-' + panelId);
+      closeMessage = `تم إغلاق البلاغ مع تطبيق غرامة${penaltyAmount && penaltyAmount.value ? ' بمبلغ ' + penaltyAmount.value + ' ر.ع' : ''}${reasonText}`;
+    } else if (closeTypeEl.value === 'none') {
+      closeMessage = `تم إغلاق البلاغ بدون عقوبة${reasonText}`;
+    }
+    showToast(closeMessage, 's');
+    return;
+  }
   showToast(`تم تنفيذ: ${action}${reasonText}${noReplyText}${closeTypeText}`, 's');
 }
 
@@ -1768,31 +2114,31 @@ function _buildComplaintActionPanel(role, c) {
           <input class="fc" value="حظر صاحب العمل" readonly>
         </div>
         <div class="fgrp" id="wage-current-grp-${panelId}" style="display:none">
-          <label class="flbl">Current</label>
+          <label class="flbl">الأجر المسجل حالياً</label>
           <input class="fc" type="number" id="wage-current-${panelId}" value="${(c.registeredData && c.registeredData.salary) || ''}" placeholder="الأجر الحالي">
         </div>
         <div class="fgrp" id="wage-proven-grp-${panelId}" style="display:none">
-          <label class="flbl">Proven</label>
+          <label class="flbl">الأجر المثبت في البلاغ</label>
           <input class="fc" type="number" id="wage-proven-${panelId}" value="${c.correctWage || (c.requestedData && c.requestedData.actualSalary) || ''}" placeholder="الأجر المثبت في البلاغ">
         </div>
         <div class="fgrp" id="wage-researched-grp-${panelId}" style="display:none">
-          <label class="flbl">Researched</label>
+          <label class="flbl">الأجر بعد بحث الموظف</label>
           <input class="fc" type="number" id="wage-researched-${panelId}" placeholder="الأجر الناتج عن بحث الموظف">
         </div>
         <div class="fgrp" id="wage-decided-grp-${panelId}" style="display:none">
-          <label class="flbl">Decided</label>
+          <label class="flbl">الأجر المعتمد للإغلاق</label>
           <input class="fc" type="number" id="wage-decided-${panelId}" placeholder="الأجر الذي يقره رئيس القسم أو المدير">
         </div>
         <div class="fgrp" id="join-reported-grp-${panelId}" style="display:none">
-          <label class="flbl">Reported Date</label>
+          <label class="flbl">تاريخ الالتحاق المبلغ عنه</label>
           <input class="fc" type="date" id="join-reported-${panelId}" value="${c.actualJoinDate || (c.requestedData && c.requestedData.actualJoinDate) || ''}">
         </div>
         <div class="fgrp" id="join-researched-grp-${panelId}" style="display:none">
-          <label class="flbl">Researched Date</label>
+          <label class="flbl">تاريخ الالتحاق بعد البحث</label>
           <input class="fc" type="date" id="join-researched-${panelId}">
         </div>
         <div class="fgrp" id="join-decided-grp-${panelId}" style="display:none">
-          <label class="flbl">Decided Date</label>
+          <label class="flbl">تاريخ الالتحاق المعتمد</label>
           <input class="fc" type="date" id="join-decided-${panelId}">
         </div>
         <div class="fgrp span-full"><label class="flbl">ملاحظات العقوبة</label>
@@ -1895,7 +2241,66 @@ function _buildComplaintActionPanel(role, c) {
         var el = document.getElementById(prefix + pid);
         if (el) el.style.display = sel.value === 'registration-confirmation' ? '' : 'none';
       });
+      _updatePenaltySummary(pid);
     }
+    function _updatePenaltySummary(pid) {
+      var labels = {
+        'wage-current-grp-': 'الأجر المسجل حالياً',
+        'wage-proven-grp-': 'الأجر المثبت في البلاغ',
+        'wage-researched-grp-': 'الأجر بعد بحث الموظف',
+        'wage-decided-grp-': 'الأجر المعتمد للإغلاق',
+        'join-reported-grp-': 'تاريخ الالتحاق المبلغ عنه',
+        'join-researched-grp-': 'تاريخ الالتحاق بعد البحث',
+        'join-decided-grp-': 'تاريخ الالتحاق المعتمد'
+      };
+      Object.keys(labels).forEach(function(prefix) {
+        var grp = document.getElementById(prefix + pid);
+        if (!grp) return;
+        var lbl = grp.querySelector('.flbl');
+        if (lbl) lbl.textContent = labels[prefix];
+      });
+      var container = document.getElementById('penalties-' + pid);
+      if (!container) return;
+      var summary = document.getElementById('penalty-summary-' + pid);
+      if (!summary) {
+        summary = document.createElement('div');
+        summary.id = 'penalty-summary-' + pid;
+        summary.className = 'alert alert-i';
+        summary.style.marginTop = '12px';
+        container.appendChild(summary);
+      }
+      var sel = document.getElementById('penalty-type-' + pid);
+      if (!sel) return;
+      if (sel.value === 'wage-confirmation') {
+        var current = document.getElementById('wage-current-' + pid);
+        var researched = document.getElementById('wage-researched-' + pid);
+        var decided = document.getElementById('wage-decided-' + pid);
+        summary.innerHTML = '<strong>مسار إغلاق بتأكيد تعديل الأجر:</strong> سيتم اعتماد الأجر النهائي ' + (decided && decided.value ? decided.value : '...') + ' ر.ع مع توثيق قيمة البحث ' + (researched && researched.value ? researched.value : '...') + ' ومقارنته بالأجر المسجل ' + (current && current.value ? current.value : '...') + '.';
+      } else if (sel.value === 'registration-confirmation') {
+        var reported = document.getElementById('join-reported-' + pid);
+        var researchedDate = document.getElementById('join-researched-' + pid);
+        var decidedDate = document.getElementById('join-decided-' + pid);
+        summary.innerHTML = '<strong>مسار إغلاق بتأكيد تسجيل العامل:</strong> سيتم اعتماد تاريخ الالتحاق النهائي ' + (decidedDate && decidedDate.value ? decidedDate.value : '...') + ' بعد مقارنة تاريخ البلاغ ' + (reported && reported.value ? reported.value : '...') + ' بنتيجة البحث ' + (researchedDate && researchedDate.value ? researchedDate.value : '...') + '.';
+      } else if (sel.value === 'ban' || sel.value === 'both') {
+        summary.innerHTML = '<strong>مسار إغلاق مع حظر:</strong> سيغلق البلاغ مع إصدار أو تأكيد حظر على جهة العمل وتوثيق ذلك في السجل الزمني.';
+      } else if (sel.value === 'fine') {
+        summary.innerHTML = '<strong>مسار إغلاق مع غرامة:</strong> سيغلق البلاغ مع ربط الغرامة المالية بنتيجة المعالجة النهائية.';
+      } else if (sel.value === 'none') {
+        summary.innerHTML = '<strong>إغلاق بدون عقوبة:</strong> سيغلق البلاغ مع توثيق سبب الإغلاق دون جزاء إضافي.';
+      } else {
+        summary.innerHTML = 'اختر نوع إجراء الإغلاق لعرض أثر القرار النهائي على البلاغ.';
+      }
+    }
+    function _initPenaltySummary(pid) {
+      ['penalty-type-', 'wage-current-', 'wage-proven-', 'wage-researched-', 'wage-decided-', 'join-reported-', 'join-researched-', 'join-decided-'].forEach(function(prefix) {
+        var el = document.getElementById(prefix + pid);
+        if (!el) return;
+        if (prefix === 'penalty-type-') el.onchange = function() { _togglePenaltyFields(pid); };
+        else el.oninput = function() { _updatePenaltySummary(pid); };
+      });
+      _updatePenaltySummary(pid);
+    }
+    setTimeout(function() { _initPenaltySummary('${panelId}'); }, 0);
     function _confirmReassignInline(pid, cid) {
       var staff = document.getElementById('reassign-staff-'+pid);
       var reason = document.getElementById('reassign-reason-'+pid);
@@ -1911,6 +2316,66 @@ function _buildComplaintActionPanel(role, c) {
 }
 
 /* ── قائمة التظلمات ── */
+function _appealRelatedComplaint(appeal) {
+  if (!appeal || !appeal.relatedId) return null;
+  return (INSP_DATA.complaints || []).find(function (c) { return c.id === appeal.relatedId; }) || null;
+}
+function _appealRelatedVisit(appeal) {
+  if (!appeal || !appeal.relatedId) return null;
+  var visits = []
+    .concat((INSP_DATA.visits && INSP_DATA.visits.periodic) || [])
+    .concat((INSP_DATA.visits && INSP_DATA.visits.surprise) || [])
+    .concat((INSP_DATA.visits && INSP_DATA.visits.scheduled) || []);
+  return visits.find(function (v) { return v.id === appeal.relatedId; }) || null;
+}
+function _appealRelatedBan(appeal) {
+  if (!appeal || !appeal.relatedId) return null;
+  return (INSP_DATA.banCases || []).find(function (b) { return b.id === appeal.relatedId; }) || null;
+}
+function _appealOtherPartyName(appeal, role) {
+  var complaint = _appealRelatedComplaint(appeal);
+  var visit = _appealRelatedVisit(appeal);
+  var ban = _appealRelatedBan(appeal);
+  var complaintFromVisit = visit && visit.relatedType === 'بلاغ' && visit.relatedId
+    ? (INSP_DATA.complaints || []).find(function (c) { return c.id === visit.relatedId; }) || null
+    : null;
+  var complaintFromBanVisit = ban && ban.relatedVisitId
+    ? (function () {
+        var linkedVisit = []
+          .concat((INSP_DATA.visits && INSP_DATA.visits.periodic) || [])
+          .concat((INSP_DATA.visits && INSP_DATA.visits.surprise) || [])
+          .concat((INSP_DATA.visits && INSP_DATA.visits.scheduled) || [])
+          .find(function (v) { return v.id === ban.relatedVisitId; });
+        if (!linkedVisit || linkedVisit.relatedType !== 'بلاغ' || !linkedVisit.relatedId) return null;
+        return (INSP_DATA.complaints || []).find(function (c) { return c.id === linkedVisit.relatedId; }) || null;
+      })()
+    : null;
+  var complaintForWorker = complaint || complaintFromVisit || complaintFromBanVisit;
+  var worker = complaint && complaint.workerId
+    ? (INSP_DATA.workers || []).find(function (w) { return w.id === complaint.workerId; })
+    : null;
+  if (!worker && complaintForWorker && complaintForWorker.workerId) {
+    worker = (INSP_DATA.workers || []).find(function (w) { return w.id === complaintForWorker.workerId; }) || null;
+  }
+  if (role === 'employer') {
+    if (worker && worker.name) return worker.name;
+    if (ban && ban.targetType === 'worker' && ban.workerName) return ban.workerName;
+    return '—';
+  }
+  if (role === 'insured') {
+    if (appeal.employerName) return appeal.employerName;
+    if (complaint && complaint.employerName) return complaint.employerName;
+    if (visit && visit.employerName) return visit.employerName;
+    if (ban && ban.employerName) return ban.employerName;
+    return '—';
+  }
+  return appeal.submittedByName || '—';
+}
+function _appealPartyHeader(role) {
+  if (role === 'employer') return 'العامل / المؤمن عليه';
+  if (role === 'insured') return 'جهة العمل';
+  return 'مقدم التظلم';
+}
 function renderAppealsList(role) {
   const canCreate = role === 'employer' || role === 'insured';
   const createBtn = canCreate ? `<button class="btn btn-primary" onclick="navigateTo('appeal-new')">${ICONS.plus}تظلم جديد</button>` : '';
@@ -1946,7 +2411,7 @@ function renderAppealsList(role) {
       <td><a href="#" onclick="navigateTo('appeal-details','id=${a.id}')" class="txp fw7">${a.id}</a></td>
       <td>${a.type}</td>
       <td class="fw7">${a.relatedId}</td>
-      <td>${a.employerName}</td>
+      <td>${_appealOtherPartyName(a, role)}</td>
       <td>${statusBadge(a.status)}</td>
       <td>${a.submitDate}</td>
       ${_appealSlaCell(a)}
@@ -1956,7 +2421,7 @@ function renderAppealsList(role) {
   return `<div class="pg-head"><div><h1>قائمة التظلمات</h1><p>${data.length} تظلم إجمالاً</p></div>
     <div class="pg-acts">${createBtn}<button class="btn btn-secondary btn-sm">${ICONS.download}تصدير</button></div></div>
     ${filters}
-    ${_tblWrap(['رقم التظلم', 'النوع', 'البلاغ/الزيارة المرتبطة', 'المنشأة', 'الحالة', 'تاريخ التقديم', 'الأيام المتبقية / SLA', 'إجراء'], rows || _noData())}`;
+    ${_tblWrap(['رقم التظلم', 'النوع', 'البلاغ/الزيارة المرتبطة', _appealPartyHeader(role), 'الحالة', 'تاريخ التقديم', 'الأيام المتبقية / SLA', 'إجراء'], rows || _noData())}`;
 }
 
 /* ── إنشاء تظلم جديد ── */
@@ -2009,11 +2474,15 @@ function renderAppealNew(role) {
 
   const eligibleBans = role === 'employer'
     ? allBans.filter(b => !!currentEmployerId && b.employerId === currentEmployerId)
-    : [];
+    : role === 'insured'
+      ? allBans.filter(b => !!currentInsuredCivil && b.targetType === 'worker' && b.workerCivil === currentInsuredCivil)
+      : [];
 
   const availableAppealTypes = role === 'insured'
-    ? ['complaint']
+    ? ['complaint', 'ban']
     : ['complaint', 'visit', 'ban'];
+  const preselectedAppealType = getParam('type') || '';
+  const preselectedRelatedId = getParam('related') || '';
 
   const complaintOpts = eligibleComplaints.length
     ? eligibleComplaints.map(c => `<option value="${c.id}">${c.id} — ${c.type} (${c.status})</option>`).join('')
@@ -2127,8 +2596,10 @@ function renderAppealNew(role) {
 
   <script>
   var _appealAvailableTypes = ${JSON.stringify(availableAppealTypes)};
-  var _appealComplaintsData = ${JSON.stringify(eligibleComplaints.map(c => ({ id: c.id, type: c.type, status: c.status, employerName: c.employerName, submitDate: c.submitDate })))};
-  var _appealVisitsData = ${JSON.stringify(eligibleVisits.map(v => ({ id: v.id, employerName: v.employerName, status: v.status, scheduledDate: v.scheduledDate || v.actualDate })))};
+  var _appealPreselectedType = ${JSON.stringify(preselectedAppealType)};
+  var _appealPreselectedRelatedId = ${JSON.stringify(preselectedRelatedId)};
+  var _appealComplaintsData = ${JSON.stringify(eligibleComplaints.map(c => ({ id: c.id, type: c.type, status: c.status, employerName: c.employerName, submitDate: c.submitDate })))};  
+  var _appealVisitsData = ${JSON.stringify(eligibleVisits.map(v => ({ id: v.id, employerName: v.employerName, status: v.status, scheduledDate: v.scheduledDate || v.actualDate })))};  
   var _appealTypeLabels = { complaint:'تظلم على قرار بلاغ', visit:'تظلم على محضر زيارة', ban:'تظلم على قرار حظر' };
   function _selectAppealType(type) {
     if(_appealAvailableTypes.indexOf(type) === -1) return;
@@ -2146,6 +2617,10 @@ function renderAppealNew(role) {
     var inp = document.getElementById('appeal-type-input');
     if(inp){ inp.value = _appealTypeLabels[type]||type; }
     document.getElementById('related-preview').style.display='none';
+    if (type === 'ban' && _appealPreselectedRelatedId) {
+      var banSel = document.querySelector('#ban-selector select');
+      if (banSel) banSel.value = _appealPreselectedRelatedId;
+    }
     document.getElementById('appeal-form-section').scrollIntoView({behavior:'smooth',block:'nearest'});
   }
   function _previewRelated(kind, id) {
@@ -2174,6 +2649,19 @@ function renderAppealNew(role) {
     content.innerHTML = html;
     preview.style.display='';
   }
+  document.addEventListener('DOMContentLoaded', function(){
+    if (_appealPreselectedType && _appealAvailableTypes.indexOf(_appealPreselectedType) !== -1) {
+      _selectAppealType(_appealPreselectedType);
+      if (_appealPreselectedType === 'complaint' && _appealPreselectedRelatedId) {
+        var csel = document.getElementById('related-complaint-select');
+        if (csel) { csel.value = _appealPreselectedRelatedId; _previewRelated('complaint', _appealPreselectedRelatedId); }
+      }
+      if (_appealPreselectedType === 'visit' && _appealPreselectedRelatedId) {
+        var vsel = document.getElementById('related-visit-select');
+        if (vsel) { vsel.value = _appealPreselectedRelatedId; _previewRelated('visit', _appealPreselectedRelatedId); }
+      }
+    }
+  });
   </script>`;
 }
 
@@ -2281,6 +2769,56 @@ function renderAppealDetails(role) {
           <button class="btn btn-danger btn-sm" onclick="(function(){var n=document.getElementById('appeal-decision-note');if(!n||!n.value.trim()){showToast('يرجى كتابة مبرر الرفض','w');return;}showToast('تم رفض التظلم','s');})()">${ICONS.x}رفض التظلم</button>
         </div>
       </div></div>`;
+  } else if (role === 'field-inspector') {
+    actionPanel = `
+      <div class="card">
+        <div class="ph"><h3><span class="pico tl">${ICONS.search}</span>لوحة المفتش</h3></div>
+        <div class="pb">
+          <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} يُستخدم هذا الجزء عندما تتم إحالة التظلم أو القرار المرتبط به للمفتش للاطلاع أو لإعادة الفحص الميداني.</div>
+          <div class="fg fg-2">
+            <div class="fgrp"><label class="flbl">نوع المشاركة المطلوبة</label><div class="fro">${a.relatedType === 'زيارة ميدانية' ? 'مراجعة محضر / إعادة فحص' : 'اطلاع ميداني داعم'}</div></div>
+            <div class="fgrp"><label class="flbl">القرار الحالي</label><div class="fro">${statusBadge(a.status)}</div></div>
+          </div>
+          <div class="fgrp" style="margin-top:12px"><label class="flbl">إفادة المفتش</label>
+            <textarea class="fc" rows="4" placeholder="سجل هنا نتيجة الاطلاع أو ما يلزم للتحقق الميداني الإضافي..."></textarea></div>
+          <div class="df ac g8" style="flex-wrap:wrap;margin-top:14px">
+            <button class="btn btn-primary btn-sm" onclick="showToast('تم رفع إفادة المفتش على التظلم','s')">${ICONS.check}رفع الإفادة</button>
+            <button class="btn btn-secondary btn-sm" onclick="showToast('تم حفظ الملاحظات الميدانية','i')">${ICONS.file}حفظ كملاحظة</button>
+          </div>
+        </div>
+      </div>`;
+  } else if (role === 'field-head') {
+    actionPanel = `
+      <div class="card">
+        <div class="ph"><h3><span class="pico bl">${ICONS.pen}</span>لوحة رئيس قسم التفتيش</h3></div>
+        <div class="pb">
+          <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} لا يتم هنا اعتماد قرار نهائي عام للتظلم، بل إدارة الجزء الميداني منه: إعادة فحص، إعادة للمفتش، أو رفع توصية.</div>
+          <div class="fg fg-2">
+            <div class="fgrp"><label class="flbl">المسار الأنسب</label><div class="fro">${a.relatedType === 'زيارة ميدانية' ? 'إعادة تقييم محضر الزيارة' : 'مراجعة أثر القرار الميداني'}</div></div>
+            <div class="fgrp"><label class="flbl">الملف المرتبط</label><div class="fro">${a.relatedId}</div></div>
+          </div>
+          <div class="fgrp" style="margin-top:12px"><label class="flbl">توجيه رئيس القسم</label>
+            <textarea class="fc" rows="4" placeholder="اكتب التوجيه المطلوب للمفتش أو التوصية المرفوعة لبقية المسار..."></textarea></div>
+          <div class="df ac g8" style="flex-wrap:wrap;margin-top:14px">
+            <button class="btn btn-warning btn-sm" onclick="showToast('تمت إعادة الإحالة إلى المفتش لإعادة الفحص','w')">${ICONS.switch}إعادة للمفتش</button>
+            <button class="btn btn-secondary btn-sm" onclick="showToast('تمت إعادة الإحالة إلى قسم المتابعة','i')">${ICONS.arrow_right}إعادة للمتابعة</button>
+            <button class="btn btn-primary btn-sm" onclick="showToast('تم رفع توصية رئيس قسم التفتيش','s')">${ICONS.check}رفع التوصية</button>
+          </div>
+        </div>
+      </div>`;
+  } else if (role === 'ops-analyst') {
+    actionPanel = `
+      <div class="card">
+        <div class="ph"><h3><span class="pico gy">${ICONS.chart}</span>المنظور التحليلي</h3></div>
+        <div class="pb">
+          <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} هذا الدور يطّلع على التظلمات لدعم التحليل واستخلاص الأنماط، دون تنفيذ قرارات تشغيلية مباشرة.</div>
+          <div class="fg fg-2">
+            <div class="fgrp"><label class="flbl">سبب الإحالة التحليلية</label><div class="fro">${a.relatedType === 'قرار حظر' ? 'قياس أثر الحظر والتظلم على الامتثال' : a.relatedType === 'زيارة ميدانية' ? 'تحليل أنماط إعادة الفحص والزيارات' : 'تحليل أنماط الاعتراض على القرارات'}</div></div>
+            <div class="fgrp"><label class="flbl">نتيجة القرار الحالية</label><div class="fro">${a.decision ? (a.decision.outcome || 'صدر قرار') : 'لا يوجد قرار نهائي بعد'}</div></div>
+            <div class="fgrp span-full"><label class="flbl">ملاحظات تحليلية</label><div class="fro" style="min-height:58px">يمكن ربط هذا التظلم لاحقاً بتحليل المخاطر أو كشف الأنماط أو تحسين الخطة الدورية دون التأثير على المسار التشغيلي الحالي.</div></div>
+          </div>
+        </div>
+      </div>`;
   } else if (role === 'inspection-director') {
     const visitLinkedToAppeal = allVisits.find(v => v.id === a.relatedId)
       || (relatedBan && relatedBan.relatedVisitId ? allVisits.find(v => v.id === relatedBan.relatedVisitId) : null);
@@ -2911,13 +3449,13 @@ function renderWorkerAnalysis(role) {
       <thead><tr><th>رقم الزيارة</th><th>النوع</th><th>المفتش</th><th>الحالة</th><th>التاريخ المجدول</th><th>المخالفات</th><th>إجراء</th></tr></thead>
       <tbody>${empVisits.map(v => `
         <tr>
-          <td><a href="#" onclick="navigateTo('${_vpg(v.id)}','id=${v.id}')" class="txp fw7">${v.id}</a></td>
+          <td>${_visitAnchor(role, v.id, 'txp fw7')}</td>
           <td>${v.id.includes('-04-') ? 'مفاجئة' : v.id.includes('-05-') ? 'مجدولة' : 'دورية'}</td>
           <td>${v.inspectorName}</td>
           <td>${statusBadge(v.status)}</td>
           <td>${v.scheduledDate}</td>
           <td>${v.findings ? `<span class="badge b-returned">${v.findings.violations.length} مخالفة</span>` : '<span class="badge b-approved">لا مخالفات</span>'}</td>
-          <td><button class="btn btn-primary btn-xs" onclick="navigateTo('${_vpg(v.id)}','id=${v.id}')">${ICONS.eye}عرض</button></td>
+          <td>${_visitButton(role, v.id, `${ICONS.eye}عرض`, 'btn-primary btn-xs')}</td>
         </tr>`).join('')}
       </tbody></table></div></div>` : '';
 
@@ -3127,7 +3665,7 @@ function renderEmployerAnalysis(role) {
           <td>${v.date}</td>
           <td>${v.type}</td>
           <td><span class="badge ${_vBadge(v.severity)}">${v.severity}</span></td>
-          <td><a href="#" onclick="navigateTo('${_vpg(v.visit)}','id=${v.visit}')" class="txp fw7">${v.visit}</a></td>
+          <td>${_visitAnchor(role, v.visit, 'txp fw7')}</td>
           <td><span class="badge ${v.status === 'منجز' ? 'b-approved' : v.status === 'معلق' ? 'b-rejected' : 'b-returned'}">${v.status}</span></td>
         </tr>`).join('')}
       </tbody></table></div></div>` : '';
@@ -3171,14 +3709,14 @@ function renderEmployerAnalysis(role) {
       <thead><tr><th>رقم الزيارة</th><th>النوع</th><th>المفتش</th><th>الحالة</th><th>التاريخ</th><th>المخالفات</th><th>المحضر</th><th>إجراء</th></tr></thead>
       <tbody>${eVisits.map(v => `
         <tr>
-          <td><a href="#" onclick="navigateTo('${_vpg(v.id)}','id=${v.id}')" class="txp fw7">${v.id}</a></td>
+          <td>${_visitAnchor(role, v.id, 'txp fw7')}</td>
           <td>${v.id.includes('-04-') ? 'مفاجئة' : v.id.includes('-05-') ? 'مجدولة' : 'دورية'}</td>
           <td>${v.inspectorName}</td>
           <td>${statusBadge(v.status)}</td>
           <td>${v.actualDate || v.scheduledDate}</td>
           <td>${v.findings ? `<span class="badge b-returned">${v.findings.violations.length}</span>` : '<span class="badge b-approved">0</span>'}</td>
           <td>${v.report?.approved ? '<span class="badge b-approved">معتمد</span>' : '<span class="badge b-draft">—</span>'}</td>
-          <td><button class="btn btn-primary btn-xs" onclick="navigateTo('${_vpg(v.id)}','id=${v.id}')">${ICONS.eye}عرض</button></td>
+          <td>${_visitButton(role, v.id, `${ICONS.eye}عرض`, 'btn-primary btn-xs')}</td>
         </tr>`).join('')}
       </tbody></table></div></div>` : '';
 
@@ -3592,6 +4130,100 @@ function renderStaffAvailability(role) {
     </div>`}`;
 }
 
+function renderFinancialImpact(role) {
+  const employers = INSP_DATA.employers || [];
+  const allVisits = []
+    .concat((INSP_DATA.visits && INSP_DATA.visits.periodic) || [])
+    .concat((INSP_DATA.visits && INSP_DATA.visits.surprise) || [])
+    .concat((INSP_DATA.visits && INSP_DATA.visits.scheduled) || []);
+  const activeBans = (INSP_DATA.banCases || []).filter(b => (b.status || '').includes('سارٍ'));
+  const liquidationCases = INSP_DATA.liquidationBankruptcy || [];
+  const stoppedCases = INSP_DATA.companiesStoppedPayment || [];
+  const arrearsRecoveredPotential = employers.reduce((sum, e) => sum + (((e.contributions || {}).arrears) || 0), 0);
+  const finesEstimate = allVisits.reduce((sum, v) => sum + ((((v.findings || {}).violations) || []).length * 350), 0);
+  const liquidationExposure = liquidationCases.reduce((sum, item) => sum + Math.max((item.totalLiabilities || 0) - (item.totalAssets || 0), 0), 0);
+  const protectedInsured = stoppedCases.reduce((sum, item) => sum + (item.insuredCount || 0), 0) + liquidationCases.reduce((sum, item) => sum + (item.insuredCount || 0), 0);
+  const quarterly = [
+    { label: 'الربع 1 / 2024', recovered: 18200, fines: 5400, compliance: 71 },
+    { label: 'الربع 1 / 2025', recovered: 26400, fines: 8300, compliance: 79 },
+    { label: 'الربع 2 / 2025', recovered: 30100, fines: 9200, compliance: 83 }
+  ];
+  const sourceRows = [
+    ['البلاغات', `${(INSP_DATA.complaints || []).length} بلاغ`, `${Math.round(finesEstimate * 0.35).toLocaleString()} ر.ع`, 'غرامات وتعديلات على الأجر والتسجيل'],
+    ['الزيارات التفتيشية', `${allVisits.length} زيارة`, `${Math.round(finesEstimate * 0.45).toLocaleString()} ر.ع`, 'مخالفات ميدانية وإجراءات تصحيحية'],
+    ['التصفية والإفلاس', `${liquidationCases.length} حالة`, `${Math.max(liquidationExposure, 0).toLocaleString()} ر.ع`, 'حصر التعرض المالي وحقوق المؤمن عليهم'],
+    ['المنشآت المتوقفة عن السداد', `${stoppedCases.length} منشأة`, `${arrearsRecoveredPotential.toLocaleString()} ر.ع`, 'اشتراكات متأخرة وخطط سداد'],
+    ['الحظر وفك الحظر', `${activeBans.length} سجل نشط`, `${(activeBans.length * 1800).toLocaleString()} ر.ع`, 'أثر رقابي وتحفيز على الامتثال']
+  ];
+
+  return `<div class="pg-head"><div><h1>الأثر المالي للتفتيش</h1><p>شاشة موحدة لقياس الأثر المالي الناتج عن البلاغات والزيارات والتصفية والإفلاس والمنشآت المتوقفة عن السداد</p></div>
+    <div class="pg-acts"><button class="btn btn-secondary btn-sm" onclick="showToast('جارٍ تصدير مؤشرات الأثر المالي...','i')">${ICONS.download}تصدير</button></div></div>
+    ${_filterBar([
+      { label: 'الفترة', type: 'select', opts: ['الربع الحالي', 'السنة الحالية', 'الربع 1', 'الربع 2', 'الربع 3', 'الربع 4'] },
+      { label: 'سنة المقارنة', type: 'select', opts: ['2025', '2024', '2023'] },
+      { label: 'مصدر الأثر', type: 'select', opts: ['الكل', 'البلاغات', 'الزيارات', 'التصفية والإفلاس', 'المنشآت المتوقفة عن السداد'] },
+      { label: 'من تاريخ', type: 'date' },
+      { label: 'إلى تاريخ', type: 'date' }
+    ])}
+    <div class="stats-grid">
+      <div class="scard s"><div class="sc-lbl">التحصيل أو الأثر المتوقع</div><div class="sc-val">${(arrearsRecoveredPotential + finesEstimate).toLocaleString()}</div><div class="sc-sub">ر.ع عبر المسارات الرقابية</div></div>
+      <div class="scard d"><div class="sc-lbl">تقدير الغرامات</div><div class="sc-val">${finesEstimate.toLocaleString()}</div><div class="sc-sub">ر.ع حسب نتائج الزيارات والمخالفات</div></div>
+      <div class="scard w"><div class="sc-lbl">تعرض التصفية والإفلاس</div><div class="sc-val">${Math.max(liquidationExposure, 0).toLocaleString()}</div><div class="sc-sub">ر.ع تتطلب متابعة مالية</div></div>
+      <div class="scard i"><div class="sc-lbl">المؤمن عليهم المتأثرون</div><div class="sc-val">${protectedInsured}</div><div class="sc-sub">مؤمن عليهم في الملفات ذات الأثر المالي</div></div>
+    </div>
+    <div class="card"><div class="ph"><h3><span class="pico gr">${ICONS.chart}</span>مقارنة ربع سنوية</h3></div>
+      <div class="pb">${quarterly.map(item => `
+        <div style="margin-bottom:18px">
+          <div class="df ac g8" style="justify-content:space-between;margin-bottom:8px">
+            <span class="fw7">${item.label}</span>
+            <span class="badge b-approved">${item.compliance}% امتثال</span>
+          </div>
+          <div class="m-row">
+            <span class="m-item">${ICONS.download} الأثر/التحصيل: <strong>${item.recovered.toLocaleString()} ر.ع</strong></span>
+            <span class="m-item">${ICONS.alert} الغرامات: <strong>${item.fines.toLocaleString()} ر.ع</strong></span>
+          </div>
+          <div class="progress-bar-wrap" style="margin-top:10px"><div class="progress-bar-fill" style="width:${item.compliance}%;background:${_compColor(item.compliance)}"></div></div>
+        </div>`).join('')}</div></div>
+    ${_tblWrap(['مصدر الأثر', 'الحجم التشغيلي', 'القيمة التقديرية', 'وصف مختصر'], sourceRows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join(''))}`;
+}
+
+function renderDirectorApprovals(role) {
+  const items = [
+    ['بلاغ', '2025-01-000012', 'اعتماد قرار نهائي على البلاغ', 'رئيس قسم المتابعة', 'مرتفع'],
+    ['زيارة', '2025-03-000002', 'اعتماد نتيجة المحضر الميداني', 'رئيس قسم التفتيش', 'مرتفع'],
+    ['خدمة', 'JSR-2025-0001', 'طلب يحتاج قراراً إدارياً نهائياً', 'قسم المتابعة', 'متوسط'],
+    ['حظر', '2025-06-000102', 'طلب حظر بانتظار قرار المدير', 'قسم المتابعة', 'مرتفع'],
+    ['خطة دورية', '2025-07-000001', 'اعتماد خطة التفتيش الدوري', 'محلل العمليات', 'متوسط']
+  ];
+  return `<div class="pg-head"><div><h1>اعتمادات المدير</h1><p>صندوق مركزي يجمع كل ما يحتاج قرار مدير دائرة التفتيش من مكان واحد</p></div></div>
+    <div class="stats-grid">
+      <div class="scard d"><div class="sc-lbl">بانتظار قرار نهائي</div><div class="sc-val">${items.length}</div></div>
+      <div class="scard w"><div class="sc-lbl">أولوية مرتفعة</div><div class="sc-val">${items.filter(i => i[4] === 'مرتفع').length}</div></div>
+      <div class="scard s"><div class="sc-lbl">ممكن اعتمادها اليوم</div><div class="sc-val">3</div></div>
+    </div>
+    ${_tblWrap(['النوع', 'المرجع', 'سبب الظهور', 'الجهة الراهنة', 'الأولوية', 'إجراء'], items.map(i => `<tr>
+      <td>${i[0]}</td><td class="fw7">${i[1]}</td><td>${i[2]}</td><td>${i[3]}</td><td><span class="badge ${i[4] === 'مرتفع' ? 'b-high' : 'b-medium'}">${i[4]}</span></td>
+      <td><div class="df ac g8"><button class="btn btn-primary btn-xs" onclick="showToast('تم فتح الملف للاعتماد','i')">${ICONS.eye}فتح</button><button class="btn btn-secondary btn-xs" onclick="showToast('تمت إضافة ملاحظة المدير','s')">${ICONS.note}ملاحظة</button></div></td>
+    </tr>`).join(''))}`;
+}
+
+function renderStaffPerformance(role) {
+  const rows = [
+    ['سيف خلفان الأمري', 'قسم المتابعة', 18, 0, 5.2, '63 ساعة', '11 ساعة', '87%'],
+    ['حاتم سالم الزدجالي', 'قسم التفتيش', 0, 12, 4.8, '42 ساعة', '6 ساعات', '91%'],
+    ['ريما يوسف النبهانية', 'رئيس قسم التفتيش', 0, 7, 3.9, '38 ساعة', '14 ساعة', '94%'],
+    ['نجلاء عبدالله القاسمي', 'رئيس قسم المتابعة', 14, 0, 4.4, '36 ساعة', '16 ساعة', '89%']
+  ];
+  return `<div class="pg-head"><div><h1>تقرير أداء الموظفين</h1><p>قياس عدد البلاغات والزيارات ومتوسط الوقت المستغرق وحالة التوفر خلال الفترة المحددة</p></div></div>
+    ${_filterBar([
+      { label: 'الفترة', type: 'select', opts: ['هذا الشهر', 'الربع الحالي', 'السنة الحالية'] },
+      { label: 'القسم', type: 'select', opts: ['الكل', 'قسم المتابعة والبلاغات', 'قسم التفتيش الميداني'] },
+      { label: 'من تاريخ', type: 'date' },
+      { label: 'إلى تاريخ', type: 'date' }
+    ])}
+    ${_tblWrap(['اسم الموظف', 'القسم', 'عدد البلاغات', 'عدد الزيارات', 'متوسط المعالجة (يوم)', 'وقت متاح', 'وقت اجتماعات/عدم توفر', 'نسبة الإنجاز'], rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join(''))}`;
+}
+
 /* ── مراجعة المحاضر (field-head) ── */
 function renderRecordsReview(role) {
   const pending = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled]
@@ -3621,30 +4253,48 @@ function renderRecordsReview(role) {
 
 /* ── الإجراءات التصحيحية (field-head) ── */
 function renderCorrectiveActions(role) {
-  const actions = [
-    { visit: '2025-03-000002', employer: 'مصنع الإنتاج الغذائي', action: 'توفير معدات الحماية', deadline: '2025-01-19', status: 'معلق', owner: 'صاحب العمل', evidence: 'صور ومرفقات السلامة', source: 'محضر الزيارة الدوري' },
-    { visit: '2025-03-000002', employer: 'مصنع الإنتاج الغذائي', action: 'تسجيل العمال غير المسجلين', deadline: '2025-01-13', status: 'منجز', owner: 'صاحب العمل', evidence: 'تحديث بيانات الاشتراك', source: 'محضر الزيارة الدوري' },
-    { visit: '2025-04-000001', employer: 'مصنع الإنتاج الغذائي', action: 'سداد الاشتراكات المتأخرة', deadline: '2025-01-26', status: 'جارٍ', owner: 'الإدارة المالية بالمنشأة', evidence: 'إشعار السداد', source: 'زيارة مفاجئة' },
-    { visit: '2024-03-000095', employer: 'مؤسسة البناء والتشييد', action: 'صرف الرواتب المتأخرة', deadline: '2024-12-15', status: 'منجز', owner: 'إدارة الموارد البشرية', evidence: 'كشوفات بنكية', source: 'إعادة فحص ميداني' },
-  ];
-  const overdueCount = actions.filter(a => a.status !== 'منجز' && a.deadline < '2025-01-22').length;
-  return `<div class="pg-head"><div><h1>متابعة الإجراءات التصحيحية</h1><p>رصد تنفيذ الإجراءات التصحيحية من قبل المنشآت</p></div>
+  const actions = _getCorrectiveActionsData();
+  const isInspector = role === 'field-inspector';
+  const visibleActions = isInspector
+    ? actions.filter(a => a.assignedInspector === 'حاتم سالم الزدجالي')
+    : actions;
+  const overdueCount = visibleActions.filter(a => a.status !== 'منجز' && a.deadline < TODAY_STR).length;
+  const inProgressCount = visibleActions.filter(a => a.status === 'جارٍ').length;
+  const completedCount = visibleActions.filter(a => a.status === 'منجز').length;
+  const pendingFieldFollowup = visibleActions.filter(a => a.followupMode === 'ميداني' && a.status !== 'منجز').length;
+  const title = isInspector ? 'متابعة الإجراءات التصحيحية الميدانية' : 'متابعة الإجراءات التصحيحية';
+  const desc = isInspector
+    ? 'عرض البنود التصحيحية المكلف بمتابعتها ميدانياً أو مستندياً بعد الزيارة'
+    : 'رصد تنفيذ الإجراءات التصحيحية من قبل المنشآت واعتماد ما يثبت الإنجاز';
+  const headers = isInspector
+    ? ['رقم الزيارة', 'المنشأة', 'الإجراء المكلف به', 'أسلوب المتابعة', 'الموعد النهائي', 'الحالة', 'إجراء']
+    : ['رقم الزيارة', 'المنشأة', 'الإجراء التصحيحي المطلوب', 'المسؤول', 'الموعد النهائي', 'الحالة', 'إجراء'];
+  const rows = visibleActions.map(a => `<tr>
+      <td class="txp fw7">${a.visit}</td>
+      <td>${a.employer}<div class="fs11 tx3">${a.source}</div></td>
+      <td>${a.action}<div class="fs11 tx3">${isInspector ? a.nextStep : a.evidence}</div></td>
+      <td>${isInspector ? a.followupMode : a.owner}</td>
+      <td>${a.deadline}</td>
+      <td>${statusBadge(a.status === 'منجز' ? 'تم اعتماد المحضر' : a.status === 'جارٍ' ? 'جارية' : 'بانتظار إجراء تصحيحي')}</td>
+      <td><div class="df ac g8">
+        ${a.status === 'منجز'
+          ? '<span class="badge b-approved">مكتمل</span>'
+          : isInspector
+            ? `<button class="btn btn-primary btn-xs" onclick="showToast('تم رفع تحديث ميداني على الإجراء التصحيحي','s')">${ICONS.check}تحديث ميداني</button>
+               <button class="btn btn-secondary btn-xs" onclick="showToast('تم طلب إعادة زيارة قصيرة للتحقق من التنفيذ','i')">${ICONS.calendar}إعادة زيارة</button>`
+            : `<button class="btn btn-accent btn-xs" onclick="showToast('تم تسجيل الإنجاز','s')">تسجيل إنجاز</button>`
+        }
+      </div></td>
+    </tr>`).join('');
+  return `<div class="pg-head"><div><h1>${title}</h1><p>${desc}</p></div>
     <div class="pg-acts"><button class="btn btn-secondary btn-sm">${ICONS.download}تصدير</button></div></div>
     <div class="stats-grid">
-      <div class="scard p"><div class="sc-lbl">إجمالي الإجراءات</div><div class="sc-val">${actions.length}</div><div class="sc-sub">ضمن المتابعة</div></div>
-      <div class="scard s"><div class="sc-lbl">منجزة</div><div class="sc-val">${actions.filter(a => a.status === 'منجز').length}</div><div class="sc-sub">تم التحقق منها</div></div>
-      <div class="scard w"><div class="sc-lbl">قيد التنفيذ</div><div class="sc-val">${actions.filter(a => a.status === 'جارٍ').length}</div><div class="sc-sub">بانتظار استكمال</div></div>
-      <div class="scard d"><div class="sc-lbl">متأخرة</div><div class="sc-val">${overdueCount}</div><div class="sc-sub">تحتاج تصعيد</div></div>
+      <div class="scard p"><div class="sc-lbl">إجمالي البنود</div><div class="sc-val">${visibleActions.length}</div><div class="sc-sub">${isInspector ? 'مكلف بمتابعتها' : 'ضمن المتابعة'}</div></div>
+      <div class="scard s"><div class="sc-lbl">منجزة</div><div class="sc-val">${completedCount}</div><div class="sc-sub">${isInspector ? 'تم التحقق منها' : 'تم اعتمادها'}</div></div>
+      <div class="scard w"><div class="sc-lbl">${isInspector ? 'متابعة ميدانية' : 'قيد التنفيذ'}</div><div class="sc-val">${isInspector ? pendingFieldFollowup : inProgressCount}</div><div class="sc-sub">${isInspector ? 'تتطلب زيارة أو تحققاً' : 'بانتظار استكمال'}</div></div>
+      <div class="scard d"><div class="sc-lbl">متأخرة</div><div class="sc-val">${overdueCount}</div><div class="sc-sub">${isInspector ? 'تحتاج تصعيداً لرئيس القسم' : 'تحتاج تصعيد'}</div></div>
     </div>
-    ${_tblWrap(['رقم الزيارة', 'المنشأة', 'الإجراء التصحيحي المطلوب', 'المسؤول', 'الموعد النهائي', 'الحالة', 'إجراء'],
-    actions.map(a => `<tr>
-        <td class="txp fw7">${a.visit}</td><td>${a.employer}<div class="fs11 tx3">${a.source}</div></td><td>${a.action}<div class="fs11 tx3">${a.evidence}</div></td>
-        <td>${a.owner}</td>
-        <td>${a.deadline}</td>
-        <td>${statusBadge(a.status === 'منجز' ? 'تم اعتماد المحضر' : a.status === 'جارٍ' ? 'جارية' : 'بانتظار إجراء تصحيحي')}</td>
-        <td><div class="df ac g8">
-          ${a.status !== 'منجز' ? `<button class="btn btn-accent btn-xs" onclick="showToast('تم تسجيل الإنجاز','s')">تسجيل إنجاز</button>` : '<span class="badge b-approved">مكتمل</span>'}
-        </div></td></tr>`).join(''))}`;
+    ${_tblWrap(headers, rows || _noData())}`;
 }
 
 /* ── إعادة توزيع المفتشين (field-head) ── */
@@ -3943,10 +4593,428 @@ function _banSourceLink(b) {
     return `<a href="#" class="txp" onclick="navigateTo('complaint-details','id=${b.relatedComplaintId}')">${b.relatedComplaintId}</a>`;
   }
   if (b.relatedVisitId) {
-    const page = b.relatedVisitId.includes('-04-') ? 'visit-surprise-details' : b.relatedVisitId.includes('-05-') ? 'visit-scheduled-details' : 'visit-periodic-details';
-    return `<a href="#" class="txp" onclick="navigateTo('${page}','id=${b.relatedVisitId}')">${b.relatedVisitId}</a>`;
+    return _visitAnchor(CURRENT_ROLE, b.relatedVisitId, 'txp');
   }
   return '—';
+}
+
+function _getCurrentEmployerRoleContext() {
+  const currentUser = INSP_DATA.users.employer || {};
+  const employer = (INSP_DATA.employers || []).find(function (e) { return e.name === currentUser.dept; }) || (INSP_DATA.employers || [])[0] || null;
+  return employer ? { employerId: employer.id, employerName: employer.name } : { employerId: null, employerName: null };
+}
+
+function _getCurrentInsuredRoleContext() {
+  const currentUser = INSP_DATA.users.insured || {};
+  return { civil: currentUser.civil || null, name: currentUser.name || null };
+}
+
+function _isBanVisibleForRole(b, role) {
+  if (role === 'employer') {
+    const ctx = _getCurrentEmployerRoleContext();
+    return !!ctx.employerId && (b.employerId === ctx.employerId || b.targetType === 'employer' && b.employerId === ctx.employerId);
+  }
+  if (role === 'insured') {
+    const ctx = _getCurrentInsuredRoleContext();
+    return !!ctx.civil && b.targetType === 'worker' && b.workerCivil === ctx.civil;
+  }
+  return true;
+}
+
+function _banEmployerCrn(b) {
+  if (!b) return '';
+  if (b.lookupType === 'crn' && b.lookupValue) return String(b.lookupValue);
+  if (b.employerCRN) return String(b.employerCRN);
+  if (b.employerId) {
+    var employer = (INSP_DATA.employers || []).find(function (e) { return e.id === b.employerId; }) || null;
+    if (employer && employer.crn) return String(employer.crn);
+  }
+  return '';
+}
+
+function _banCivilId(b) {
+  if (!b) return '';
+  if (b.lookupType === 'civil' && b.lookupValue) return String(b.lookupValue);
+  if (b.workerCivil) return String(b.workerCivil);
+  return '';
+}
+
+function _banFilterState(b) {
+  return (b && String(b.status || '').includes('سار')) ? 'active' : 'inactive';
+}
+
+function _banListFiltersFromQuery() {
+  return {
+    banId: String(getParam('banId') || '').trim(),
+    crn: String(getParam('crn') || '').trim(),
+    civil: String(getParam('civil') || '').trim(),
+    from: String(getParam('from') || '').trim(),
+    to: String(getParam('to') || '').trim(),
+    status: String(getParam('status') || '').trim()
+  };
+}
+
+function _filterBanCases(cases, filters) {
+  filters = filters || {};
+  return (cases || []).filter(function (b) {
+    var issuedDate = String(b.issuedDate || '');
+
+    if (filters.banId && !String(b.id || '').includes(filters.banId)) return false;
+    if (filters.crn && !_banEmployerCrn(b).includes(filters.crn)) return false;
+    if (filters.civil && !_banCivilId(b).includes(filters.civil)) return false;
+    if (filters.from && issuedDate && issuedDate < filters.from) return false;
+    if (filters.to && issuedDate && issuedDate > filters.to) return false;
+    if (filters.status && _banFilterState(b) !== filters.status) return false;
+    return true;
+  });
+}
+
+function _applyBanListSearch() {
+  var params = new URLSearchParams(window.location.search);
+  var fields = {
+    banId: 'ban-filter-id',
+    crn: 'ban-filter-crn',
+    civil: 'ban-filter-civil',
+    from: 'ban-filter-from',
+    to: 'ban-filter-to',
+    status: 'ban-filter-status'
+  };
+
+  Object.keys(fields).forEach(function (key) {
+    var el = document.getElementById(fields[key]);
+    var value = el ? String(el.value || '').trim() : '';
+    if (value) params.set(key, value);
+    else params.delete(key);
+  });
+
+  params.delete('id');
+  navigateTo('ban-cases-list', params.toString());
+}
+
+function _clearBanListSearch() {
+  navigateTo('ban-cases-list');
+}
+
+function _banRequesterMeta(role) {
+  const map = {
+    'fund-staff': {
+      label: 'مستخدم الصندوق',
+      hint: 'يُستخدم هذا المسار لتسجيل طلبات الحظر أو فك الحظر التي تبدأ من الصندوق أو من الإحالات الواردة إليه.',
+      sourceLabel: 'مرجع الطلب'
+    },
+    'monitoring-employee': {
+      label: 'موظف قسم المتابعة والبلاغات',
+      hint: 'يُستخدم هذا المسار عندما تنتهي المراجعة أو الاستيفاء إلى توصية تشغيلية بحظر جهة العمل أو العامل أو رفع الحظر.',
+      sourceLabel: 'مرجع التوصية'
+    },
+    'field-inspector': {
+      label: 'المفتش الميداني',
+      hint: 'يُستخدم هذا المسار عند ثبوت المخالفة ميدانياً أو عند استيفاء الشروط التي تسمح بالتوصية بفك الحظر بعد الزيارة والمتابعة التصحيحية.',
+      sourceLabel: 'مرجع الزيارة أو البلاغ'
+    }
+  };
+  if (role === 'monitoring-head') {
+    return {
+      label: 'رئيس قسم المتابعة والبلاغات',
+      hint: 'يُستخدم هذا المسار لتسجيل قرار أو توصية بحظر جهة العمل أو العامل بعد اكتمال المراجعة التشغيلية واعتماد مبررات الحظر.',
+      sourceLabel: 'مرجع القرار أو التوصية'
+    };
+  }
+  if (role === 'field-head') {
+    return {
+      label: 'رئيس قسم التفتيش الميداني',
+      hint: 'يُستخدم هذا المسار لإضافة سجل حظر جديد استناداً إلى نتائج الزيارات الميدانية أو عدم استيفاء الإجراءات التصحيحية.',
+      sourceLabel: 'مرجع الزيارة أو المحضر'
+    };
+  }
+  if (role === 'inspection-director') {
+    return {
+      label: 'مدير دائرة التفتيش',
+      hint: 'يُستخدم هذا المسار لإصدار سجل حظر إداري جديد وربطه بالمرجع التشغيلي قبل اعتماده ضمن السجل المركزي.',
+      sourceLabel: 'المرجع التشغيلي'
+    };
+  }
+  return map[role] || null;
+}
+
+function _banRequestSourceOptions(role) {
+  if (role === 'field-inspector') {
+    return [...(INSP_DATA.visits.periodic || []), ...(INSP_DATA.visits.surprise || []), ...(INSP_DATA.visits.scheduled || [])]
+      .filter(function (v) { return v.inspectorName && v.inspectorName.includes('حاتم'); })
+      .slice(0, 6)
+      .map(function (v) {
+        return {
+          value: v.id,
+          label: v.id + ' — ' + v.employerName,
+          note: v.reason || v.purpose || v.source || 'مرجع ميداني'
+        };
+      });
+  }
+
+  if (role === 'monitoring-employee') {
+    return (INSP_DATA.complaints || [])
+      .filter(function (c) { return c.assignedToRole === 'monitoring-employee'; })
+      .slice(0, 6)
+      .map(function (c) {
+        return {
+          value: c.id,
+          label: c.id + ' — ' + c.type,
+          note: c.employerName
+        };
+      });
+  }
+
+  if (role === 'monitoring-head') {
+    return (INSP_DATA.complaints || [])
+      .filter(function (c) {
+        return c.assignedToRole === 'monitoring-employee' || String(c.status || '').includes('بانتظار اعتماد رئيس قسم المتابعة');
+      })
+      .slice(0, 6)
+      .map(function (c) {
+        return {
+          value: c.id,
+          label: c.id + ' â€” ' + c.type,
+          note: c.employerName || 'مرجع تشغيلي'
+        };
+      });
+  }
+
+  if (role === 'field-head') {
+    return [...(INSP_DATA.visits.periodic || []), ...(INSP_DATA.visits.surprise || []), ...(INSP_DATA.visits.scheduled || [])]
+      .slice(0, 6)
+      .map(function (v) {
+        return {
+          value: v.id,
+          label: v.id + ' â€” ' + (v.employerName || 'زيارة ميدانية'),
+          note: v.reason || v.purpose || v.source || 'محضر أو زيارة ميدانية'
+        };
+      });
+  }
+
+  if (role === 'inspection-director') {
+    var complaintRefs = (INSP_DATA.complaints || []).slice(0, 3).map(function (c) {
+      return {
+        value: c.id,
+        label: c.id + ' â€” ' + c.type,
+        note: c.employerName || 'بلاغ'
+      };
+    });
+    var visitRefs = [...(INSP_DATA.visits.periodic || []), ...(INSP_DATA.visits.surprise || []), ...(INSP_DATA.visits.scheduled || [])]
+      .slice(0, 3)
+      .map(function (v) {
+        return {
+          value: v.id,
+          label: v.id + ' â€” ' + (v.employerName || 'زيارة'),
+          note: v.reason || v.purpose || 'مرجع ميداني'
+        };
+      });
+    return complaintRefs.concat(visitRefs);
+  }
+
+  return (INSP_DATA.complaints || [])
+    .filter(function (c) { return c.submittedBy === 'fund-staff' || c.channel === 'إحالة رسمية خارجية'; })
+    .slice(0, 6)
+    .map(function (c) {
+      return {
+        value: c.id,
+        label: c.id + ' — ' + c.type,
+        note: c.employerName
+      };
+    });
+}
+
+function _lookupBanTargetForForm(panelId) {
+  var typeEl = document.getElementById('ban-target-type-' + panelId);
+  var queryEl = document.getElementById('ban-target-id-' + panelId);
+  var nameEl = document.getElementById('ban-target-name-' + panelId);
+  if (!typeEl || !queryEl || !nameEl) return;
+  var query = String(queryEl.value || '').trim();
+  if (!query) {
+    showToast('يرجى إدخال السجل التجاري أو الرقم المدني أولاً.', 'w');
+    return;
+  }
+
+  var record = null;
+  if (typeEl.value === 'employer') {
+    record = (INSP_DATA.employers || []).find(function (e) {
+      return e.crn === query || (e.name || '').includes(query);
+    }) || null;
+    if (record) {
+      queryEl.value = record.crn || query;
+      nameEl.value = record.name || '';
+      showToast('تم جلب بيانات جهة العمل المرتبطة بالسجل التجاري.', 's');
+      return;
+    }
+  } else {
+    record = (INSP_DATA.workers || []).find(function (w) {
+      return w.civil === query || (w.name || '').includes(query);
+    }) || null;
+    if (record) {
+      queryEl.value = record.civil || query;
+      nameEl.value = record.name || '';
+      showToast('تم جلب بيانات العامل المرتبطة بالرقم المدني.', 's');
+      return;
+    }
+  }
+
+  nameEl.value = '';
+  showToast('لم يتم العثور على سجل مطابق. يمكنك تعديل المُدخل أو المتابعة يدوياً في النموذج التجريبي.', 'w');
+}
+
+function _submitBanRequestForm(panelId, role, mode, draft) {
+  var meta = _banRequesterMeta(role) || { label: role };
+  var sourceEl = document.getElementById('ban-source-' + panelId);
+  var refEl = document.getElementById('ban-ref-' + panelId);
+  var targetIdEl = document.getElementById('ban-target-id-' + panelId);
+  var targetNameEl = document.getElementById('ban-target-name-' + panelId);
+  var requestTypeEl = document.getElementById('ban-request-type-' + panelId);
+  var durationEl = document.getElementById('ban-duration-' + panelId);
+  var selectedBanEl = document.getElementById('ban-selected-ban-' + panelId);
+  var reasonEl = document.getElementById('ban-reason-' + panelId);
+  var isLift = mode === 'lift';
+
+  if (!draft) {
+    if (isLift && (!selectedBanEl || !selectedBanEl.value)) {
+      showToast('يرجى اختيار سجل الحظر المطلوب فك الحظر عنه قبل المتابعة.', 'w');
+      return;
+    }
+    if (!targetIdEl || !String(targetIdEl.value || '').trim()) {
+      showToast('يرجى إدخال معرف الجهة المستهدفة قبل المتابعة.', 'w');
+      return;
+    }
+    if (!reasonEl || !String(reasonEl.value || '').trim()) {
+      showToast('يرجى إدخال مبرر الطلب قبل المتابعة.', 'w');
+      return;
+    }
+    if (!isLift && requestTypeEl && requestTypeEl.value === 'temporary' && durationEl && !String(durationEl.value || '').trim()) {
+      showToast('يرجى تحديد مدة الحظر المؤقت قبل رفع الطلب.', 'w');
+      return;
+    }
+  }
+
+  var sourceText = sourceEl && sourceEl.selectedIndex > 0 ? sourceEl.options[sourceEl.selectedIndex].text : ((refEl && refEl.value) ? refEl.value : 'بدون مرجع محدد');
+  var targetText = targetNameEl && targetNameEl.value ? targetNameEl.value : (targetIdEl ? targetIdEl.value : 'الجهة المحددة');
+  var typeText = requestTypeEl && requestTypeEl.value && requestTypeEl.options[requestTypeEl.selectedIndex]
+    ? requestTypeEl.options[requestTypeEl.selectedIndex].text
+    : (isLift ? 'فك الحظر' : 'حظر');
+  var selectedBanText = selectedBanEl && selectedBanEl.value ? ' — السجل المحدد: ' + selectedBanEl.value : '';
+  var stateText = draft ? 'حفظ مسودة' : 'رفع';
+  var requestLabel = isLift ? 'طلب فك الحظر' : 'طلب الحظر';
+
+  showToast(stateText + ' ' + requestLabel + ' بواسطة ' + meta.label + ' على ' + targetText + ' — ' + typeText + ' — المرجع: ' + sourceText + selectedBanText, draft ? 'i' : 's');
+}
+
+function renderBanRequestForm(role, mode) {
+  var meta = _banRequesterMeta(role);
+  if (!meta) {
+    return `<div class="card"><div class="pb" style="padding:18px">هذا المسار متاح فقط للأدوار المخولة بطلب الحظر أو فك الحظر.</div></div>`;
+  }
+
+  var panelId = role + '-' + mode + '-form';
+  var isLift = mode === 'lift';
+  var sourceOptions = _banRequestSourceOptions(role);
+  var relatedRef = getParam('related') || '';
+  var activeCases = (INSP_DATA.banCases || []).filter(function (b) {
+    return _isBanVisibleForRole(b, role) && (b.status || '').includes('سار');
+  });
+
+  var requestTypeOptions = isLift
+    ? `
+      <option value="full">فك حظر كامل</option>
+      <option value="conditional">فك حظر مشروط</option>
+      <option value="temporary-lift">فك حظر مؤقت لمهلة معالجة</option>`
+    : `
+      <option value="temporary">حظر مؤقت</option>
+      <option value="permanent">حظر حتى استكمال المعالجة</option>
+      <option value="partial">حظر جزئي مرتبط بخدمة أو التزام محدد</option>`;
+
+  return `<div class="pg-head"><div><h1>${isLift ? 'طلب فك الحظر' : 'طلب حظر جديد'}</h1><p>${isLift ? 'مسار مستقل لرفع طلب فك الحظر وربطه بالسجل الساري وشروط المعالجة.' : 'مسار مستقل لرفع طلب الحظر وربطه بالمرجع الداعم قبل الإحالة للاعتماد.'}</p></div>
+    <div class="pg-acts"><button class="btn btn-secondary btn-sm" onclick="navigateTo('ban-cases-list')">${ICONS.arrow_right}العودة إلى القائمة</button></div></div>
+
+    <div class="alert alert-i" style="margin-bottom:16px">${ICONS.info} <strong>${meta.label}</strong>: ${meta.hint}</div>
+
+    <div class="card">
+      <div class="ph"><h3><span class="pico rd">${isLift ? ICONS.unlock : ICONS.lock}</span>${isLift ? 'طلب فك الحظر' : 'طلب الحظر'}</h3></div>
+      <div class="pb">
+        <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} تم فصل هذا المسار عن شاشة القائمة حتى يمكن مراجعته بشكل مستقل بدون تغيير سلوك الأدوار الأخرى.</div>
+        <div class="fg fg-2">
+          <div class="fgrp">
+            <label class="flbl">${meta.sourceLabel}</label>
+            <select class="fc" id="ban-source-${panelId}">
+              <option value="">— اختر المرجع —</option>
+              ${sourceOptions.map(function (opt) {
+                return `<option value="${opt.value}" ${relatedRef === opt.value ? 'selected' : ''}>${opt.label}</option>`;
+              }).join('')}
+            </select>
+          </div>
+          <div class="fgrp">
+            <label class="flbl">الرقم المرجعي</label>
+            <input class="fc" id="ban-ref-${panelId}" value="${relatedRef}" placeholder="يمكن إدخال رقم البلاغ أو الزيارة أو الطلب">
+          </div>
+          ${isLift ? `<div class="fgrp span-full">
+            <label class="flbl">سجل الحظر المطلوب فك الحظر عنه <span class="req">*</span></label>
+            <select class="fc" id="ban-selected-ban-${panelId}">
+              <option value="">— اختر سجل الحظر الساري —</option>
+              ${activeCases.map(function (b) {
+                return `<option value="${b.id}">${b.id} — ${_banTargetLabel(b)} — ${b.requestType || b.type}</option>`;
+              }).join('')}
+            </select>
+          </div>` : ''}
+          <div class="fgrp">
+            <label class="flbl">نوع الجهة المستهدفة</label>
+            <select class="fc" id="ban-target-type-${panelId}">
+              <option value="employer">جهة العمل</option>
+              <option value="worker">العامل</option>
+            </select>
+          </div>
+          <div class="fgrp">
+            <label class="flbl">السجل التجاري / الرقم المدني <span class="req">*</span></label>
+            <div style="display:flex;gap:8px">
+              <input class="fc" id="ban-target-id-${panelId}" placeholder="أدخل السجل التجاري أو الرقم المدني" style="flex:1">
+              <button class="btn btn-secondary" type="button" onclick="_lookupBanTargetForForm('${panelId}')">${ICONS.search}بحث</button>
+            </div>
+          </div>
+          <div class="fgrp">
+            <label class="flbl">الاسم المسترجع</label>
+            <input class="fc" id="ban-target-name-${panelId}" placeholder="سيتم تعبئة الاسم بعد البحث" readonly>
+          </div>
+          <div class="fgrp">
+            <label class="flbl">نوع الطلب</label>
+            <select class="fc" id="ban-request-type-${panelId}">
+              ${requestTypeOptions}
+            </select>
+          </div>
+          ${isLift ? '' : `<div class="fgrp">
+            <label class="flbl">المدة أو الشرط الزمني</label>
+            <input class="fc" id="ban-duration-${panelId}" placeholder="مثال: 30 يوماً أو حتى استكمال التسجيل">
+          </div>`}
+          <div class="fgrp span-full">
+            <label class="flbl">مبرر ${isLift ? 'فك الحظر' : 'الحظر'} <span class="req">*</span></label>
+            <textarea class="fc" id="ban-reason-${panelId}" rows="4" placeholder="${isLift ? 'اشرح ما تم استيفاؤه أو ما يبرر رفع الحظر...' : 'اشرح أسباب التوصية بالحظر والوقائع الداعمة...'}"></textarea>
+          </div>
+          <div class="fgrp span-full">
+            <label class="flbl">المخرجات المتوقعة بعد الاعتماد</label>
+            <div class="fro">${isLift ? 'رفع القيد أو تحويله إلى رفع مشروط مع توثيق الالتزامات المستوفاة.' : 'إصدار قرار حظر وربطه بالسجل الزمني والمرجع التشغيلي ذي الصلة.'}</div>
+          </div>
+        </div>
+        <div style="margin-top:14px">
+          <label class="flbl">مرفقات داعمة</label>
+          <div class="dz-box" style="padding:14px;min-height:auto">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="font-size:22px;color:var(--text3)">${ICONS.upload}</div>
+              <div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:var(--text2)">إرفاق المستندات المؤيدة للتوصية</div>
+                <div style="font-size:11px;color:var(--text3)">محاضر، خطابات، إثباتات معالجة، أو مكاتبات تشغيلية</div></div>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('فتح نافذة الرفع','i')">اختيار ملف</button>
+            </div>
+          </div>
+        </div>
+        <div class="dp-acts" style="margin-top:16px">
+          <button class="btn btn-primary" onclick="_submitBanRequestForm('${panelId}','${role}','${mode}',false)">${ICONS.check}${isLift ? ' طلب فك الحظر' : ' طلب الحظر'}</button>
+          <button class="btn btn-secondary" onclick="_submitBanRequestForm('${panelId}','${role}','${mode}',true)">حفظ كمسودة</button>
+          <button class="btn btn-ghost" onclick="navigateTo('ban-cases-list')">إلغاء</button>
+        </div>
+      </div>
+    </div>`;
 }
 
 function renderBanCasesList(role) {
@@ -3954,9 +5022,24 @@ function renderBanCasesList(role) {
   const approverRoles = ['field-head', 'monitoring-head', 'inspection-director'];
   const canRequest = requesterRoles.includes(role);
   const canApprove = approverRoles.includes(role);
-  const allCases = INSP_DATA.banCases || [];
+  const isExternal = role === 'employer' || role === 'insured';
+  const allCases = (INSP_DATA.banCases || []).filter(b => _isBanVisibleForRole(b, role));
+  const filters = _banListFiltersFromQuery();
+  const filteredCases = _filterBanCases(allCases, filters);
+  const hasFilters = Object.keys(filters).some(function (key) { return !!filters[key]; });
   const pendingCount = allCases.filter(b => (b.status || '').includes('بانتظار')).length;
   const activeCount = allCases.filter(b => (b.status || '').includes('سارٍ')).length;
+  const visiblePendingCount = filteredCases.filter(b => (b.status || '').includes('بانتظار')).length;
+  const visibleActiveCount = filteredCases.filter(b => (b.status || '').includes('سارٍ')).length;
+  const filteredRows = filteredCases.length ? filteredCases.map(b => `<tr>
+      <td><a href="#" onclick="navigateTo('ban-case-details','id=${b.id}')" class="txp fw7">${b.id}</a></td>
+      <td>${b.requestType || b.type}</td>
+      <td class="fw7">${_banTargetLabel(b)}</td>
+      <td>${_banSourceLink(b)}</td>
+      <td>${statusBadge(b.status)}</td>
+      <td>${b.issuedDate || '—'}</td>
+      <td><button class="btn btn-primary btn-xs" onclick="navigateTo('ban-case-details','id=${b.id}')">${ICONS.eye}عرض</button></td>
+    </tr>`).join('') : `<tr><td colspan="7" class="tac" style="padding:18px;color:var(--text3)">لا توجد سجلات حظر مطابقة لمعايير البحث الحالية.</td></tr>`;
 
   const rows = allCases.map(b => `<tr>
       <td><a href="#" onclick="navigateTo('ban-case-details','id=${b.id}')" class="txp fw7">${b.id}</a></td>
@@ -4003,24 +5086,93 @@ function renderBanCasesList(role) {
       </div>
     </div>` : '';
 
-  const approvalHint = canApprove ? `<div class="alert alert-i" style="margin-bottom:16px">${ICONS.info} يمكن اعتماد أو رفض طلبات الحظر وفك الحظر من شاشة التفاصيل.</div>` : '';
+  const standaloneRequestPanels = canRequest ? `
+    <div class="card" style="margin-bottom:16px">
+      <div class="ph"><h3><span class="pico rd">${ICONS.lock}</span>طلبات جديدة</h3></div>
+      <div class="pb">
+        <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} تم فصل مسارات <strong>طلب الحظر</strong> و<strong>طلب فك الحظر</strong> في صفحات مستقلة حتى يمكن مراجعتها كرحلات منفصلة دون تغيير شاشة القائمة المشتركة.</div>
+        <div class="fg fg-2">
+          <div class="card" style="margin:0;border:1px dashed var(--danger)">
+            <div class="pb">
+              <div style="font-size:13px;font-weight:700;margin-bottom:6px">بدء طلب حظر جديد</div>
+              <div style="font-size:11.5px;color:var(--text3);margin-bottom:12px">اربط الطلب بمرجع البلاغ أو الزيارة ثم ارفع التوصية للاعتماد.</div>
+              <button class="btn btn-danger btn-sm" onclick="navigateTo('ban-request-new')">${ICONS.lock}فتح نموذج طلب الحظر</button>
+            </div>
+          </div>
+          <div class="card" style="margin:0;border:1px dashed var(--accent)">
+            <div class="pb">
+              <div style="font-size:13px;font-weight:700;margin-bottom:6px">بدء طلب فك حظر</div>
+              <div style="font-size:11.5px;color:var(--text3);margin-bottom:12px">اختر سجلاً سارياً واربط طلب الفك بالمستندات أو المعالجة التي استكملت.</div>
+              <button class="btn btn-accent btn-sm" onclick="navigateTo('lift-ban-request-new')">${ICONS.unlock}فتح نموذج فك الحظر</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>` : requestPanels;
 
-  return `<div class="pg-head"><div><h1>طلبات الحظر وفك الحظر</h1><p>إعادة استخدام شاشة الحظر الحالية ضمن مسار طلب الحظر وطلب فك الحظر</p></div></div>
-    ${requestPanels}
+  const addBanPanel = canApprove ? `
+    <div class="card" style="margin-bottom:16px">
+      <div class="ph"><h3><span class="pico rd">${ICONS.plus}</span>إضافة سجل حظر</h3></div>
+      <div class="pb">
+        <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} استخدم هذا المسار لإضافة سجل حظر جديد مباشرةً من قبل رئيس القسم أو مدير الدائرة مع ربطه بالمرجع التشغيلي المناسب.</div>
+        <div class="card" style="margin:0;border:1px dashed var(--danger)">
+          <div class="pb">
+            <div style="font-size:13px;font-weight:700;margin-bottom:6px">بدء إضافة سجل حظر جديد</div>
+            <div style="font-size:11.5px;color:var(--text3);margin-bottom:12px">سجّل بيانات الجهة المستهدفة واربط القرار ببلاغ أو زيارة أو مرجع تشغيلي قبل الحفظ أو الرفع.</div>
+            <button class="btn btn-danger btn-sm" onclick="navigateTo('ban-request-new')">${ICONS.plus}فتح نموذج إضافة السجل</button>
+          </div>
+        </div>
+      </div>
+    </div>` : '';
+
+  const approvalHint = canApprove
+    ? `<div class="alert alert-i" style="margin-bottom:16px">${ICONS.info} يمكن اعتماد أو رفض طلبات الحظر وفك الحظر من شاشة التفاصيل.</div>`
+    : isExternal
+      ? `<div class="alert alert-i" style="margin-bottom:16px">${ICONS.info} تعرض هذه الشاشة قرارات الحظر أو الطلبات المرتبطة بك. من شاشة التفاصيل يمكن تقديم تظلم على القرار عند الحاجة.</div>`
+      : '';
+
+  return `<div class="pg-head"><div><h1>${isExternal ? 'قرارات الحظر' : 'طلبات الحظر وفك الحظر'}</h1><p>${isExternal ? 'جميع قرارات أو طلبات الحظر المرتبطة بك' : 'إعادة استخدام شاشة الحظر الحالية ضمن مسار طلب الحظر وطلب فك الحظر'}</p></div></div>
+    ${standaloneRequestPanels}
+    ${addBanPanel}
     ${approvalHint}
-    <div class="stats-grid">
-      <div class="scard d"><div class="sc-lbl">طلبات بانتظار الاعتماد</div><div class="sc-val">${pendingCount}</div></div>
-      <div class="scard w"><div class="sc-lbl">حظر نشط</div><div class="sc-val">${activeCount}</div></div>
-      <div class="scard i"><div class="sc-lbl">إجمالي السجلات</div><div class="sc-val">${allCases.length}</div></div>
-      <div class="scard s"><div class="sc-lbl">حظر مؤقت للعامل</div><div class="sc-val">${allCases.filter(b => b.requestType === 'حظر مؤقت').length}</div></div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="ph"><h3><span class="pico gy">${ICONS.search}</span>البحث عن سجل حظر</h3></div>
+      <div class="pb">
+        <div class="fg fg-3">
+          <div class="fgrp"><label class="flbl">رقم سجل الحظر</label><input class="fc" id="ban-filter-id" value="${filters.banId}" placeholder="مثال: 2025-06-000102"></div>
+          <div class="fgrp"><label class="flbl">السجل التجاري</label><input class="fc" id="ban-filter-crn" value="${filters.crn}" placeholder="أدخل رقم السجل التجاري"></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><input class="fc" id="ban-filter-civil" value="${filters.civil}" placeholder="أدخل الرقم المدني"></div>
+          <div class="fgrp"><label class="flbl">من تاريخ</label><input class="fc" type="date" id="ban-filter-from" value="${filters.from}"></div>
+          <div class="fgrp"><label class="flbl">إلى تاريخ</label><input class="fc" type="date" id="ban-filter-to" value="${filters.to}"></div>
+          <div class="fgrp"><label class="flbl">الحالة</label>
+            <select class="fc" id="ban-filter-status">
+              <option value="">الكل</option>
+              <option value="active" ${filters.status === 'active' ? 'selected' : ''}>نشط</option>
+              <option value="inactive" ${filters.status === 'inactive' ? 'selected' : ''}>غير نشط</option>
+            </select>
+          </div>
+        </div>
+        <div class="df ac g8" style="margin-top:14px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" type="button" onclick="_applyBanListSearch()">${ICONS.search}بحث</button>
+          <button class="btn btn-secondary btn-sm" type="button" onclick="_clearBanListSearch()">${ICONS.x}مسح</button>
+          <div style="font-size:12px;color:var(--text3)">${hasFilters ? ('تم العثور على <strong>' + filteredCases.length + '</strong> سجل من أصل <strong>' + allCases.length + '</strong>.') : ('إجمالي السجلات المتاحة: <strong>' + allCases.length + '</strong>.')}</div>
+        </div>
+      </div>
     </div>
-    ${_tblWrap(['الرقم', 'النوع', 'المستهدف', 'المرجع', 'الحالة', 'التاريخ', 'إجراء'], rows)}`;
+    <div class="stats-grid">
+      <div class="scard d"><div class="sc-lbl">طلبات بانتظار الاعتماد</div><div class="sc-val">${visiblePendingCount}</div></div>
+      <div class="scard w"><div class="sc-lbl">حظر نشط</div><div class="sc-val">${visibleActiveCount}</div></div>
+      <div class="scard i"><div class="sc-lbl">إجمالي السجلات</div><div class="sc-val">${filteredCases.length}</div></div>
+      <div class="scard s"><div class="sc-lbl">حظر مؤقت للعامل</div><div class="sc-val">${filteredCases.filter(b => b.requestType === 'حظر مؤقت').length}</div></div>
+    </div>
+    ${_tblWrap(['الرقم', 'النوع', 'المستهدف', 'المرجع', 'الحالة', 'التاريخ', 'إجراء'], filteredRows)}`;
 }
 
 function renderBanCaseDetails(role) {
   const approverRoles = ['field-head', 'monitoring-head', 'inspection-director'];
   const id = getParam('id') || '2025-06-000001';
-  const b = INSP_DATA.banCases.find(x => x.id === id) || INSP_DATA.banCases[0];
+  const visibleCases = (INSP_DATA.banCases || []).filter(x => _isBanVisibleForRole(x, role));
+  const b = visibleCases.find(x => x.id === id) || visibleCases[0] || (INSP_DATA.banCases || [])[0];
   const banAttachments = _withSampleAttachments(b, 'ban');
   const banNotes = _withSampleNotes(b, 'ban');
   const relatedVisit = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled].find(v => v.id === b.relatedVisitId);
@@ -4065,7 +5217,7 @@ function renderBanCaseDetails(role) {
     </div>
     <div class="df ac g8" style="margin-top:14px;flex-wrap:wrap">
       ${relatedComplaint ? `<button class="btn btn-secondary btn-sm" onclick="navigateTo('complaint-details','id=${relatedComplaint.id}')">${ICONS.eye}عرض البلاغ</button>` : ''}
-      ${relatedVisit ? `<button class="btn btn-secondary btn-sm" onclick="navigateTo('${relatedVisit.id.includes('-04-') ? 'visit-surprise-details' : relatedVisit.id.includes('-05-') ? 'visit-scheduled-details' : 'visit-periodic-details'}','id=${relatedVisit.id}')">${ICONS.eye}عرض الزيارة</button>` : ''}
+      ${relatedVisit ? _visitButton(role, relatedVisit.id, `${ICONS.eye}عرض الزيارة`, 'btn-secondary btn-sm') : ''}
       ${selectedBan ? `<button class="btn btn-secondary btn-sm" onclick="navigateTo('ban-case-details','id=${selectedBan.id}')">${ICONS.eye}عرض السجل المحدد</button>` : ''}
     </div></div></div>`;
 
@@ -4079,6 +5231,16 @@ function renderBanCaseDetails(role) {
       </div>
     </div>` : '';
 
+  const externalAppealPanel = (role === 'employer' || role === 'insured') ? `
+    <div class="dp"><div class="ph"><h3><span class="pico or">${ICONS.file}</span>التظلم على القرار</h3></div>
+      <div class="dp-body">
+        <div class="alert alert-i" style="margin-bottom:12px">${ICONS.info} يمكنك من هنا بدء رحلة التظلم على قرار الحظر أو الطلب المرتبط به مع تعبئة النموذج تلقائياً.</div>
+        <div class="dp-acts">
+          <button class="btn btn-warning btn-sm" onclick="navigateTo('appeal-new','type=ban&related=${b.id}')">${ICONS.file}تقديم تظلم</button>
+        </div>
+      </div>
+    </div>` : '';
+
   const activePanel = role === 'inspection-director' && (b.status || '').includes('سارٍ') && b.requestType !== 'حظر مؤقت' ? `
     <div class="dp"><div class="ph"><h3><span class="pico tl">${ICONS.unlock}</span>إجراء على الحظر</h3></div>
       <div class="dp-body"><div class="dp-acts"><button class="btn btn-accent btn-sm" onclick="showToast('تم رفع الحظر','s')">${ICONS.unlock}رفع الحظر</button></div></div>
@@ -4086,7 +5248,7 @@ function renderBanCaseDetails(role) {
 
   const timelineCard = `<div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>سجل الأحداث</h3></div><div class="pb">${renderTimeline(b.timeline || [])}</div></div>`;
   const attachmentsCard = `<div class="card"><div class="ph"><h3><span class="pico or">${ICONS.upload}</span>المرفقات (${banAttachments.length})</h3></div><div class="pb">${banAttachments.map(f => attRow(f)).join('')}</div></div>`;
-  const actionPanel = approvalPanel || activePanel;
+  const actionPanel = approvalPanel || activePanel || externalAppealPanel;
   const tid = 'bdt-' + b.id.replace(/[^a-z0-9]/gi, '-');
   const tabs = [
     { label: 'التفاصيل', content: detailsCard },
@@ -4099,6 +5261,43 @@ function renderBanCaseDetails(role) {
 }
 
 /* ── تحليل المخاطر (ops-analyst) ── */
+function _opsPlanningBridgePanel(context) {
+  const highRiskEmployers = (INSP_DATA.employers || []).filter(function (e) { return e.riskLevel === 'مرتفع'; });
+  const activeBans = (INSP_DATA.banCases || []).filter(function (b) { return (b.status || '').includes('سار'); });
+  const openComplaints = (INSP_DATA.complaints || []).filter(function (c) {
+    return !(c.status || '').includes('إغلاق') && !(c.status || '').includes('قرار');
+  });
+  const patternDrivers = (INSP_DATA.employers || []).filter(function (e) {
+    return (e.violations || []).length >= 2 || (e.contributions && e.contributions.arrears > 0);
+  });
+  const topEmployers = highRiskEmployers.slice(0, 4).map(function (e) {
+    return `<button class="btn btn-secondary btn-xs" onclick="navigateTo('employer-analysis','employer=${e.id}')">${e.name.split(' ').slice(0, 3).join(' ')}</button>`;
+  }).join('');
+
+  const cta = context === 'plan'
+    ? `<button class="btn btn-primary btn-sm" onclick="document.getElementById('plan-emp-table').scrollIntoView({behavior:'smooth',block:'start'})">${ICONS.arrow_right}مراجعة قائمة المرشحين</button>`
+    : `<button class="btn btn-primary btn-sm" onclick="navigateTo('inspection-plan-draft','new=true')">${ICONS.pen}بناء خطة من المخرجات الحالية</button>`;
+
+  return `<div class="card" style="margin-bottom:16px;border:1px solid var(--border2)">
+    <div class="ph"><h3><span class="pico bl">${ICONS.file}</span>جسر التحليل إلى التخطيط</h3></div>
+    <div class="pb">
+      <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} هذه اللوحة تربط بين مخرجات تحليل المخاطر وكشف الأنماط وبين المدخلات المستخدمة في إعداد خطة التفتيش الدوري التالية.</div>
+      <div class="stats-grid">
+        <div class="scard d"><div class="sc-lbl">منشآت عالية الخطورة</div><div class="sc-val">${highRiskEmployers.length}</div></div>
+        <div class="scard w"><div class="sc-lbl">محركات نمط متكررة</div><div class="sc-val">${patternDrivers.length}</div></div>
+        <div class="scard p"><div class="sc-lbl">بلاغات مفتوحة</div><div class="sc-val">${openComplaints.length}</div></div>
+        <div class="scard i"><div class="sc-lbl">حظر ساري</div><div class="sc-val">${activeBans.length}</div></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">${topEmployers || '<span class="tx3 fs11">لا توجد منشآت عالية الخطورة في العينة الحالية.</span>'}</div>
+      <div class="dp-acts" style="margin-top:14px">
+        ${cta}
+        <button class="btn btn-secondary btn-sm" onclick="navigateTo('risk-analysis')">${ICONS.shield}تحليل المخاطر</button>
+        <button class="btn btn-secondary btn-sm" onclick="navigateTo('pattern-detection')">${ICONS.search}كشف الأنماط</button>
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderRiskAnalysis(role) {
   const _score = e => {
     let s = 0;
@@ -4207,6 +5406,7 @@ function renderRiskAnalysis(role) {
   return `<div class="pg-head"><div><h1>تحليل المخاطر</h1><p>تقييم متكامل لمستويات مخاطر المنشآت والعمال مع التوصيات الاستباقية</p></div>
     <div class="pg-acts"><button class="btn btn-primary btn-sm" onclick="showToast('جارٍ تصدير تقرير المخاطر...','i')">${ICONS.download}تصدير تقرير المخاطر</button></div></div>
     ${summaryKpis}
+    ${_opsPlanningBridgePanel('analysis')}
     ${charts}
     ${detailTable}
     ${workersRiskTable}`;
@@ -4364,6 +5564,7 @@ function renderPatternDetection(role) {
     <div class="scard p"><div class="sc-lbl">منشآت تحت المراقبة</div><div class="sc-val">${new Set(patterns.flatMap(p => p.entities.filter(e => e.type === 'employer').map(e => e.id))).size}</div></div>
     <div class="scard i"><div class="sc-lbl">عمال في دائرة المخاطر</div><div class="sc-val">${new Set(patterns.flatMap(p => p.entities.filter(e => e.type === 'worker').map(e => e.id))).size}</div></div>
   </div>
+  ${_opsPlanningBridgePanel('pattern')}
   ${patterns.map(_patternCard).join('')}`;
 }
 
@@ -5207,8 +6408,10 @@ function renderGeographicAnalysisScreen(role) {
 
 /* ── شاشة السجل الزمني ── */
 function renderTimelineScreen(role) {
-  const defaultRequestId = 'CMP-2025-0001';
+  const defaultRequestId = '2025-01-000001';
   const requestId = getParam('id') || defaultRequestId;
+  const lookupType = getParam('lookup') || 'complaint';
+  const allVisits = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled];
 
   const findEntityTimeline = (id) => {
     let queryId = id;
@@ -5234,7 +6437,7 @@ function renderTimelineScreen(role) {
       };
     }
 
-    const visit = [...INSP_DATA.visits.periodic, ...INSP_DATA.visits.surprise, ...INSP_DATA.visits.scheduled].find(v => v.id === id);
+    const visit = allVisits.find(v => v.id === id);
     if (visit && visit.timeline) {
       return {
         type: 'visit',
@@ -5257,7 +6460,78 @@ function renderTimelineScreen(role) {
     return null;
   };
 
-  const entity = findEntityTimeline(requestId);
+  const findAggregateTimeline = (id, mode) => {
+    const timelineSortValue = function (value) { return Date.parse(String(value || '').replace(' ', 'T')) || 0; };
+    const buildRows = function (items, sourceType) {
+      return items.flatMap(function (record) {
+        return (record.timeline || []).map(function (item) {
+          return {
+            date: item.date,
+            step: item.step,
+            action: item.action,
+            actor: item.actor,
+            actorRole: item.actorRole,
+            sourceType: sourceType,
+            sourceId: record.id
+          };
+        });
+      });
+    };
+    const worker = mode === 'civil' ? INSP_DATA.workers.find(function (w) { return w.civil === id; }) : null;
+    const employer = mode === 'crn' ? INSP_DATA.employers.find(function (e) { return e.crn === id; }) : null;
+    const complaints = (INSP_DATA.complaints || []).filter(function (c) {
+      return mode === 'civil'
+        ? (c.workerCivil === id || (worker && c.workerId === worker.id))
+        : (c.employerCRN === id || (employer && c.employerId === employer.id));
+    });
+    const bans = (INSP_DATA.banCases || []).filter(function (b) {
+      return mode === 'civil'
+        ? (b.targetType === 'worker' && b.workerCivil === id)
+        : (b.employerCRN === id || (employer && b.employerId === employer.id));
+    });
+    const complaintIds = complaints.map(function (c) { return c.id; });
+    const banIds = bans.map(function (b) { return b.id; });
+    const appeals = (INSP_DATA.appeals || []).filter(function (a) {
+      return complaintIds.includes(a.relatedId) || banIds.includes(a.relatedId);
+    });
+    const employerIds = Array.from(new Set(complaints.map(function (c) { return c.employerId; }).concat(worker && worker.employerId ? [worker.employerId] : []).concat(employer ? [employer.id] : [])));
+    const visits = allVisits.filter(function (v) { return employerIds.includes(v.employerId); });
+    const merged = []
+      .concat(buildRows(complaints, 'complaint'))
+      .concat(buildRows(bans, 'ban'))
+      .concat(buildRows(appeals, 'appeal'))
+      .concat(buildRows(visits, 'visit'))
+      .sort(function (a, b) { return timelineSortValue(b.date) - timelineSortValue(a.date); });
+    if (!merged.length) return null;
+    const linkList = function (items, page) {
+      return items.slice(0, 6).map(function (item) {
+        return `<a href="#" class="txp fw7" style="font-size:11px;margin-left:8px" onclick="navigateTo('${page}','id=${item.id}')">${item.id}</a>`;
+      }).join('') || '—';
+    };
+    return {
+      type: 'aggregate',
+      id: id,
+      name: mode === 'civil' ? ((worker && worker.name) || 'العامل المرتبط') : ((employer && employer.name) || 'جهة العمل المرتبطة'),
+      timeline: merged,
+      relatedHtml: `<div class="card" style="margin-bottom:12px">
+        <div class="ph"><h3><span class="pico bl">${ICONS.file}</span>السجلات المرتبطة</h3></div>
+        <div class="pb">
+          <div class="fg fg-2">
+            <div class="fgrp"><label class="flbl">${mode === 'civil' ? 'العامل' : 'جهة العمل'}</label><div class="fro fw7">${mode === 'civil' ? ((worker && worker.name) || id) : ((employer && employer.name) || id)}</div></div>
+            <div class="fgrp"><label class="flbl">${mode === 'civil' ? 'الرقم المدني' : 'السجل التجاري'}</label><div class="fro">${id}</div></div>
+            <div class="fgrp span-full"><label class="flbl">البلاغات المرتبطة</label><div class="fro">${linkList(complaints, 'complaint-details')}</div></div>
+            <div class="fgrp span-full"><label class="flbl">قرارات الحظر المرتبطة</label><div class="fro">${linkList(bans, 'ban-case-details')}</div></div>
+            <div class="fgrp span-full"><label class="flbl">التظلمات المرتبطة</label><div class="fro">${linkList(appeals, 'appeal-details')}</div></div>
+            <div class="fgrp span-full"><label class="flbl">الزيارات المرتبطة</label><div class="fro">${visits.slice(0, 6).map(function (visit) { return _visitAnchor(role, visit.id, 'txp fw7', 'font-size:11px;margin-left:8px'); }).join('') || '—'}</div></div>
+          </div>
+        </div>
+      </div>`
+    };
+  };
+
+  const entity = lookupType === 'civil' || lookupType === 'crn'
+    ? findAggregateTimeline(requestId, lookupType)
+    : (findEntityTimeline(requestId) || (/^[0-9]+$/.test(requestId) ? (findAggregateTimeline(requestId, 'civil') || findAggregateTimeline(requestId, 'crn')) : null));
   const timeline = entity ? entity.timeline : [];
 
   return `<div class="pg-head"><div><h1>السجل الزمني</h1><p>سجل جميع الأنشطة والإجراءات على النظام</p></div>
@@ -5272,9 +6546,9 @@ function renderTimelineScreen(role) {
           <div class="fgrp">
             <label class="flbl">البحث بواسطة</label>
             <select id="tl-type-select" class="fc">
-              <option value="complaint">رقم البلاغ / الطلب</option>
-              <option value="civil">الرقم المدني للعامل</option>
-              <option value="crn">السجل التجاري للمنشأة</option>
+              <option value="complaint" ${lookupType === 'complaint' ? 'selected' : ''}>رقم البلاغ / الطلب</option>
+              <option value="civil" ${lookupType === 'civil' ? 'selected' : ''}>الرقم المدني للعامل</option>
+              <option value="crn" ${lookupType === 'crn' ? 'selected' : ''}>السجل التجاري للمنشأة</option>
             </select>
           </div>
           <div class="fgrp">
@@ -5290,9 +6564,11 @@ function renderTimelineScreen(role) {
     <script>
     function _showTimelineByRef() {
       var ref = document.getElementById('tl-ref-input') ? document.getElementById('tl-ref-input').value.trim() : '';
+      var type = document.getElementById('tl-type-select') ? document.getElementById('tl-type-select').value : 'complaint';
       if (!ref) { showToast('يرجى إدخال رقم المرجع','w'); return; }
       var currentUrl = new URL(window.location.href);
       currentUrl.searchParams.set('id', ref);
+      currentUrl.searchParams.set('lookup', type);
       window.location.href = currentUrl.toString();
     }
     document.addEventListener('DOMContentLoaded', function() {
@@ -5302,6 +6578,7 @@ function renderTimelineScreen(role) {
     <\/script>
 
     ${entity ? `
+    ${entity.relatedHtml || ''}
     <div class="card">
       <div class="ph">
         <h3><span class="pico bl">${ICONS.clock}</span>سجل الأنشطة — ${entity.id}</h3>
@@ -6760,8 +8037,136 @@ function _svcRulesPanel(rules) {
   </div>`;
 }
 
-function _svcDecisionPanel(summary) {
+function _svcCorrespondenceOpsTab(serviceKey, request, role) {
+  const corrHtml = typeof renderCorrespondenceDocumentation === 'function'
+    ? renderCorrespondenceDocumentation('services', request.id, role)
+    : '<p class="tx3 fs11" style="padding:16px">يلزم تحميل المكون المحسن لإظهار المراسلات.</p>';
+  return `
+    <div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.mail}</span>المراسلات</h3></div><div class="pb">${corrHtml}</div></div>
+    ${renderNotes(request.notes, request.id)}
+    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>السجل التشغيلي</h3></div><div class="pb">${renderTimeline(request.timeline)}</div></div>`;
+}
+
+function _svcDecisionPanel(summary, context) {
+  context = context || {};
+  const role = context.role || '';
+  const request = context.request || {};
   const noteId = 'svc-dec-note-' + Math.random().toString(36).slice(2, 7);
+  if (role === 'monitoring-employee') {
+    return `<div class="card">
+      <div class="ph"><h3><span class="pico bl">${ICONS.pen}</span>قرار موظف المتابعة</h3></div>
+      <div class="pb">
+        <div class="alert alert-w" style="margin-bottom:14px">${ICONS.warn} تستخدم هذه اللوحة لاستيفاء البيانات أو إعادة الطلب مع تحديد المهلة والقرار الافتراضي عند عدم الرد ضمن الفترة المحددة.</div>
+        <div class="fg fg-2" style="margin-bottom:14px">
+          <div class="fgrp"><label class="flbl">الطرف المطلوب منه الاستيفاء</label>
+            <select class="fc">
+              <option>صاحب العمل</option>
+              <option>المؤمن عليه</option>
+              <option>كلا الطرفين</option>
+            </select></div>
+          <div class="fgrp"><label class="flbl">المهلة المحددة للرد</label>
+            <select class="fc">
+              <option>3 أيام عمل</option>
+              <option>5 أيام عمل</option>
+              <option>7 أيام عمل</option>
+            </select></div>
+          <div class="fgrp"><label class="flbl">القرار في حال عدم الرد</label>
+            <select class="fc">
+              <option>لا يوجد إجراء</option>
+              <option>حظر صاحب العمل</option>
+              <option>حظر العامل</option>
+            </select></div>
+          <div class="fgrp"><label class="flbl">مسار المتابعة التالي</label>
+            <select class="fc">
+              <option>استكمال من مقدم الطلب</option>
+              <option>إحالة لرئيس القسم</option>
+              <option>إحالة للتفتيش للتحقق الإضافي</option>
+            </select></div>
+        </div>
+        <div class="fgrp" style="margin-bottom:14px"><label class="flbl">ملاحظات القرار <span class="req">*</span></label><textarea class="fc" id="${noteId}" rows="4" placeholder="وضح البيانات المطلوبة، المهلة، وأثر عدم الرد على الطلب..."></textarea></div>
+        <div class="df ac g8" style="flex-wrap:wrap">
+          <button class="btn btn-warning btn-sm" onclick="(function(){var n=document.getElementById('${noteId}');if(!n||!n.value.trim()){showToast('يرجى إدخال ملاحظات القرار','w');return;}showToast('تمت إعادة الطلب للاستيفاء مع تسجيل المهلة والقرار الافتراضي','s');})()">${ICONS.clock}إعادة للاستيفاء</button>
+          <button class="btn btn-secondary btn-sm" onclick="(function(){var n=document.getElementById('${noteId}');if(!n||!n.value.trim()){showToast('يرجى إدخال ملاحظات القرار','w');return;}showToast('تم طلب تحقق إضافي وتحويل الطلب للمسار الرقابي المناسب','i');})()">${ICONS.search}طلب تحقق إضافي</button>
+          <button class="btn btn-primary btn-sm" onclick="(function(){var n=document.getElementById('${noteId}');if(!n||!n.value.trim()){showToast('يرجى إدخال ملاحظات القرار','w');return;}showToast('تم رفع التوصية والملف لرئيس القسم','s');})()">${ICONS.arrow_right}رفع للرئيس</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (role === 'ops-analyst') {
+    return `<div class="card">
+      <div class="ph"><h3><span class="pico gy">${ICONS.chart}</span>منظور تحليلي</h3></div>
+      <div class="pb">
+        <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} يعرض هذا القسم أثر نتيجة التحقق على التحليل وكشف الأنماط والتخطيط الدوري دون تنفيذ قرار تشغيلي مباشر.</div>
+        <div class="svc-info-grid">
+          <div class="svc-info-card"><h4>قراءة تحليلية</h4>${_svcField('الشروط غير المستوفاة', `${summary.failed}`)}${_svcField('الشروط قيد التحقق', `${summary.pending}`)}${_svcField('الأثر المتوقع', summary.failed ? 'رفع أولوية المتابعة والتحليل' : 'إدراجها ضمن الملفات المستوفية')} </div>
+          <div class="svc-info-card"><h4>ربط بالخطة</h4>${_svcField('انعكاس على تحليل المخاطر', summary.failed ? 'إشارة رقابية قابلة للتجميع' : 'بيانات مستقرة للمقارنة')}${_svcField('ربط بالخطة الدورية', 'يؤخذ في الاعتبار عند إعداد الخطة القادمة')}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (role === 'field-inspector') {
+    return `<div class="card">
+      <div class="ph"><h3><span class="pico tl">${ICONS.search}</span>اطلاع / تحقق ميداني</h3></div>
+      <div class="pb">
+        <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} يبرز هنا دور المفتش عند إحالة الطلب للتحقق الميداني أو الاطلاع على النتائج ضمن المسار الرقابي.</div>
+        <div class="fgrp" style="margin-bottom:14px"><label class="flbl">إفادة المفتش</label><textarea class="fc" rows="4" placeholder="سجل نتيجة الاطلاع الميداني أو ما يلزم للتحقق الإضافي..."></textarea></div>
+        <div class="df ac g8" style="flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="showToast('تم رفع إفادة المفتش على الطلب','s')">${ICONS.check}رفع الإفادة</button>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('تم حفظ الملاحظة الميدانية','i')">${ICONS.file}حفظ كملاحظة</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (role === 'field-head') {
+    return `<div class="card">
+      <div class="ph"><h3><span class="pico bl">${ICONS.pen}</span>قرار رئيس قسم التفتيش</h3></div>
+      <div class="pb">
+        <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} يستخدم هذا الجزء لإدارة الإحالة الميدانية، اعتماد نتيجة التحقق، أو إعادة الطلب إلى المفتش أو المتابعة.</div>
+        <div class="fgrp" style="margin-bottom:14px"><label class="flbl">توجيه رئيس القسم</label><textarea class="fc" rows="4" placeholder="اكتب التوجيه المطلوب أو خلاصة قرار القسم..."></textarea></div>
+        <div class="df ac g8" style="flex-wrap:wrap">
+          <button class="btn btn-warning btn-sm" onclick="showToast('تمت إعادة الإحالة إلى المفتش','w')">${ICONS.switch}إعادة للمفتش</button>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('تمت إعادة الإحالة إلى قسم المتابعة','i')">${ICONS.arrow_right}إعادة للمتابعة</button>
+          <button class="btn btn-primary btn-sm" onclick="showToast('تم اعتماد نتيجة التحقق الميداني','s')">${ICONS.check}اعتماد النتيجة</button>
+          <button class="btn btn-accent btn-sm" onclick="showToast('تم تسجيل توصية تصعيد للمدير عند الحاجة','i')">${ICONS.file}توصية تصعيد</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (role === 'monitoring-head') {
+    return `<div class="card">
+      <div class="ph"><h3><span class="pico bl">${ICONS.pen}</span>قرار رئيس قسم المتابعة</h3></div>
+      <div class="pb">
+        <div class="alert alert-w" style="margin-bottom:14px">${ICONS.warn} هذه المرحلة تعكس قرارات الرئيس: اعتماد، إعادة للموظف، طلب تحقق إضافي، أو تصعيد إداري.</div>
+        <div class="fgrp" style="margin-bottom:14px"><label class="flbl">ملاحظات القرار</label><textarea class="fc" rows="4" placeholder="أدخل قرار الرئيس ومبرراته..."></textarea></div>
+        <div class="df ac g8" style="flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="showToast('تم اعتماد قرار رئيس القسم','s')">${ICONS.check}اعتماد القرار</button>
+          <button class="btn btn-warning btn-sm" onclick="showToast('تمت إعادة الطلب إلى الموظف المختص','w')">${ICONS.arrow_right}إعادة للموظف</button>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('تم طلب تحقق إضافي من التفتيش','i')">${ICONS.search}طلب تحقق إضافي</button>
+          <button class="btn btn-accent btn-sm" onclick="showToast('تمت إضافة توصية تصعيد للمدير قبل الحسم النهائي','i')">${ICONS.file}توصية تصعيد</button>
+          <button class="btn btn-danger btn-sm" onclick="showToast('تم رفض الطلب على مستوى رئيس القسم','s')">${ICONS.x}رفض الطلب</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (role === 'inspection-director') {
+    return `<div class="card">
+      <div class="ph"><h3><span class="pico bl">${ICONS.pen}</span>قرار المدير النهائي</h3></div>
+      <div class="pb">
+        <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info} هذا الجزء يجمع ما يحتاج قرار المدير: اعتماد نهائي، إعادة للدراسة، إعادة فحص، أو إعادة فتح المسار عند الحاجة.</div>
+        <div class="svc-info-grid">
+          <div class="svc-info-card"><h4>وضع الطلب</h4>${_svcField('الحالة الحالية', request.status)}${_svcField('الشروط غير المستوفاة', `${summary.failed}`)}${_svcField('قيد التحقق', `${summary.pending}`)}</div>
+          <div class="svc-info-card"><h4>سياق القرار</h4>${_svcField('الجهة المسؤولة حالياً', 'دائرة التفتيش')}${_svcField('نوع القرار المتوقع', summary.failed || summary.pending ? 'قرار إداري / توجيهي' : 'اطلاع واعتماد مسار')}</div>
+        </div>
+        <div class="fgrp" style="margin-top:12px"><label class="flbl">توجيه المدير</label><textarea class="fc" rows="4" placeholder="يسجل هنا التوجيه النهائي أو مبرر الاعتماد أو الإعادة..."></textarea></div>
+        <div class="df ac g8" style="flex-wrap:wrap;margin-top:14px">
+          <button class="btn btn-primary btn-sm" onclick="showToast('تم اعتماد القرار النهائي على الطلب','s')">${ICONS.check}اعتماد القرار</button>
+          <button class="btn btn-warning btn-sm" onclick="showToast('تمت إعادة الطلب للدراسة','w')">${ICONS.arrow_right}إعادة للدراسة</button>
+          <button class="btn btn-accent btn-sm" onclick="showToast('تم التوجيه بإعادة الفحص','s')">${ICONS.switch}إعادة فحص</button>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('تمت إعادة فتح المسار','i')">${ICONS.file}إعادة فتح المسار</button>
+        </div>
+      </div>
+    </div>`;
+  }
   if (summary.failed === 0 && summary.pending === 0) {
     return `<div class="card">
       <div class="ph"><h3><span class="pico tl">${ICONS.check}</span>نتيجة الاطلاع</h3>
@@ -6811,7 +8216,7 @@ function _svcDecisionPanel(summary) {
   </div>`;
 }
 
-function _renderServiceRequestDetails(serviceKey) {
+function _renderServiceRequestDetails(serviceKey, role) {
   const cfg = SERVICE_CONFIGS[serviceKey];
   const requestId = getParam('id');
   const requests = INSP_DATA[cfg.dataKey] || [];
@@ -6827,7 +8232,8 @@ function _renderServiceRequestDetails(serviceKey) {
     { label: 'الملف المالي', content: _svcFinancial(cfg, request) }
   ];
   if (serviceKey === 'family') tabs.splice(3, 0, { label: 'أفراد الأسرة', content: _svcFamilyMembers(request) });
-  tabs.push({ label: summary.failed || summary.pending ? 'القرار' : 'نتيجة الاطلاع', content: _svcDecisionPanel(summary) });
+  tabs.push({ label: 'المراسلات والسجل التشغيلي', content: _svcCorrespondenceOpsTab(serviceKey, request, role) });
+  tabs.push({ label: summary.failed || summary.pending ? 'القرار' : 'نتيجة الاطلاع', content: _svcDecisionPanel(summary, { role, serviceKey, request }) });
 
   return `<div class="svc-detail">
     <div class="pg-head"><div><h1>${request.id}</h1><p>${cfg.detailTitle}</p></div>
@@ -6843,14 +8249,12 @@ function _renderServiceRequestDetails(serviceKey) {
   ])}
     ${alert}
     ${_tabView(`${cfg.key}-detail`, tabs, 0)}
-    ${renderNotes(request.notes, request.id)}
-    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>السجل الزمني</h3></div><div class="pb">${renderTimeline(request.timeline)}</div></div>
   </div>`;
 }
 
-function renderJobSecurityRequestDetails(role) { return _renderServiceRequestDetails('job'); }
-function renderFamilyBenefitRequestDetails(role) { return _renderServiceRequestDetails('family'); }
-function renderMaternityLeaveRequestDetails(role) { return _renderServiceRequestDetails('maternity'); }
+function renderJobSecurityRequestDetails(role) { return _renderServiceRequestDetails('job', role); }
+function renderFamilyBenefitRequestDetails(role) { return _renderServiceRequestDetails('family', role); }
+function renderMaternityLeaveRequestDetails(role) { return _renderServiceRequestDetails('maternity', role); }
 
 function renderCompaniesStoppedPaymentList() {
   const companies = INSP_DATA.companiesStoppedPayment || [];
@@ -6906,6 +8310,7 @@ function renderNonPaymentCompanyDetails(role) {
   const companyId = getParam('id');
   const company = (INSP_DATA.companiesStoppedPayment || []).find(c => c.id === companyId) || (INSP_DATA.companiesStoppedPayment || [])[0];
   const docs = [['إشعار التوقف عن السداد', 'PDF · صادر من النظام'], ['كشف المساهمات المتأخرة', 'XLSX · قابل للاستعراض'], ['مراسلات المنشأة', 'PDF · آخر تحديث'], ['خطة السداد المقترحة', 'PDF · قيد الدراسة']];
+  const corrOps = `<div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.mail}</span>المراسلات</h3></div><div class="pb">${typeof renderCorrespondenceDocumentation === 'function' ? renderCorrespondenceDocumentation('services', company.id, role) : '<p class="tx3 fs11">يلزم تحميل المكون المحسن لإظهار المراسلات.</p>'}</div></div>${renderNotes(company.notes, company.id)}<div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>السجل التشغيلي</h3></div><div class="pb">${renderTimeline(company.timeline)}</div></div>`;
   return `<div class="svc-detail">
     <div class="pg-head"><div><h1>${company.id}</h1><p>تفاصيل المنشأة المتوقفة عن السداد</p></div>
       <div class="pg-acts">${statusBadge(company.status)}<button class="btn btn-secondary btn-sm" onclick="navigateTo('../services/companies-stopped-payment-list')">${ICONS.arrow_right}رجوع</button></div></div>
@@ -6914,9 +8319,9 @@ function renderNonPaymentCompanyDetails(role) {
     { label: 'نظرة عامة', content: `<div class="svc-info-grid"><div class="svc-info-card"><h4>بيانات المنشأة</h4>${_svcField('اسم المنشأة', company.establishmentName)}${_svcField('الرقم التجاري', company.commercialNumber)}${_svcField('عدد المؤمن عليهم', `${company.insuredCount} مؤمن`)}${_svcField('تاريخ التوقف', formatDate(company.stopDate))}</div><div class="svc-info-card"><h4>بيانات المتأخرات</h4>${_svcField('إجمالي المستحقات', `${(company.totalDue || 0).toLocaleString()} ر.ع`)}${_svcField('مدة التأخر', `${company.monthsDue || 0} أشهر`)}${_svcField('سبب المتابعة', company.notes)}${_svcField('الحالة', statusBadge(company.status))}</div></div>` },
     { label: 'الملف المالي', content: `<div class="svc-info-grid"><div class="svc-info-card"><h4>تحليل السداد</h4>${_svcField('إجمالي المساهمات المتأخرة', `${(company.totalDue || 0).toLocaleString()} ر.ع`)}${_svcField('آخر شهر مسدد', 'مارس 2024')}${_svcField('متوسط الالتزام السابق', '83%')}${_svcField('المسار المقترح', company.riskLevel === 'عالي' ? 'تصعيد ومتابعة عاجلة' : 'خطة سداد ومراقبة')}</div><div class="svc-info-card"><h4>مؤشرات الاستمرارية</h4>${_svcField('عدد العاملين المتأثرين', `${company.insuredCount} مؤمن`)}${_svcField('المخاطر على المنافع', company.riskLevel)}${_svcField('قابلية خطة السداد', company.riskLevel === 'منخفض' ? 'مرتفعة' : 'تحتاج تحقق')}</div></div>` },
     { label: 'المستندات', content: `<div class="documents-list">${docs.map(d => `<div class="document-item" onclick="showToast('فتح ملف: ${d[0]}','i')"><div class="document-icon">${ICONS.file}</div><div class="document-info"><h4>${d[0]}</h4><p>${d[1]}</p><span class="document-action">${ICONS.eye}استعراض الملف</span></div></div>`).join('')}</div>` },
+    { label: 'المراسلات والسجل التشغيلي', content: corrOps },
     { label: 'الإجراءات', content: `<div class="decision-panel"><h3>إجراءات المتابعة</h3><p>الموظف المسؤول: مها سالم الهنائية. يتم اختيار الإجراء بناء على مستوى المخاطرة وقدرة المنشأة على السداد.</p><div class="decision-actions"><button class="btn btn-primary btn-sm" onclick="showToast('تم اعتماد خطة السداد','s')">${ICONS.check}اعتماد خطة سداد</button><button class="btn btn-warning btn-sm" onclick="showToast('تم طلب معلومات إضافية','w')">${ICONS.clock}طلب معلومات إضافية</button><button class="btn btn-danger btn-sm" onclick="showToast('تم تصعيد الحالة','d')">${ICONS.alert}تصعيد الحالة</button></div></div>` }
   ], 0)}
-    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>السجل الزمني</h3></div><div class="pb">${renderTimeline(company.timeline)}</div></div>
   </div>`;
 }
 
@@ -6924,6 +8329,7 @@ function renderLiquidationBankruptcyDetails(role) {
   const caseId = getParam('id');
   const item = (INSP_DATA.liquidationBankruptcy || []).find(c => c.id === caseId) || (INSP_DATA.liquidationBankruptcy || [])[0];
   const docs = [['قرار المحكمة', 'PDF · قابل للاستعراض'], ['تقرير المصفي القضائي', 'PDF · آخر إصدار'], ['قائمة الأصول', 'XLSX · محدثة'], ['قائمة الدائنين', 'XLSX · معتمدة']];
+  const corrOps = `<div class="card"><div class="ph"><h3><span class="pico bl">${ICONS.mail}</span>المراسلات</h3></div><div class="pb">${typeof renderCorrespondenceDocumentation === 'function' ? renderCorrespondenceDocumentation('services', item.id, role) : '<p class="tx3 fs11">يلزم تحميل المكون المحسن لإظهار المراسلات.</p>'}</div></div>${renderNotes(item.notes, item.id)}<div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>السجل التشغيلي</h3></div><div class="pb">${renderTimeline(item.timeline)}</div></div>`;
   return `<div class="svc-detail">
     <div class="pg-head"><div><h1>${item.id}</h1><p>تفاصيل حالة التصفية والإفلاس</p></div>
       <div class="pg-acts">${statusBadge(item.status)}<button class="btn btn-secondary btn-sm" onclick="navigateTo('../services/liquidation-bankruptcy-cases-list')">${ICONS.arrow_right}رجوع</button></div></div>
@@ -6932,8 +8338,8 @@ function renderLiquidationBankruptcyDetails(role) {
     { label: 'نظرة عامة', content: `<div class="svc-info-grid"><div class="svc-info-card"><h4>بيانات القضية</h4>${_svcField('رقم القضية', item.id)}${_svcField('نوع القضية', item.caseType)}${_svcField('الحالة', statusBadge(item.status))}${_svcField('عدد المؤمن عليهم', `${item.insuredCount} مؤمن`)}</div><div class="svc-info-card"><h4>بيانات المنشأة</h4>${_svcField('اسم المنشأة', item.establishmentName)}${_svcField('الرقم التجاري', item.commercialNumber)}${_svcField('تاريخ تقديم الحالة', formatDate(item.submissionDate))}${_svcField('الملاحظات', item.notes)}</div></div>` },
     { label: 'الملف المالي', content: `<div class="svc-info-grid"><div class="svc-info-card"><h4>الأصول والالتزامات</h4>${_svcField('إجمالي الأصول', `${(item.totalAssets || 0).toLocaleString()} ر.ع`)}${_svcField('إجمالي الالتزامات', `${(item.totalLiabilities || 0).toLocaleString()} ر.ع`)}${_svcField('صافي المركز', `${((item.totalAssets || 0) - (item.totalLiabilities || 0)).toLocaleString()} ر.ع`)}</div><div class="svc-info-card"><h4>حقوق المؤمن عليهم</h4>${_svcField('عدد المؤمن عليهم', `${item.insuredCount} مؤمن`)}${_svcField('أولوية المتابعة', item.caseType === 'إفلاس' ? 'عالية' : 'متوسطة')}${_svcField('الإجراء المالي', 'حصر المستحقات قبل اعتماد القرار')}</div></div>` },
     { label: 'المستندات', content: `<div class="documents-list">${docs.map(d => `<div class="document-item" onclick="showToast('فتح ملف: ${d[0]}','i')"><div class="document-icon">${ICONS.file}</div><div class="document-info"><h4>${d[0]}</h4><p>${d[1]}</p><span class="document-action">${ICONS.eye}استعراض الملف</span></div></div>`).join('')}</div>` },
+    { label: 'المراسلات والسجل التشغيلي', content: corrOps },
     { label: 'الإجراءات', content: `<div class="decision-panel"><h3>إجراءات الحالة</h3><p>الموظف المسؤول: عبدالعزيز هلال الراشدي. تتم مراجعة حقوق المؤمن عليهم قبل اعتماد أي مسار نهائي.</p><div class="decision-actions"><button class="btn btn-primary btn-sm" onclick="showToast('تمت متابعة الإجراءات','s')">${ICONS.check}متابعة الإجراءات</button><button class="btn btn-warning btn-sm" onclick="showToast('تم طلب تقرير إضافي','w')">${ICONS.clock}طلب تقرير إضافي</button><button class="btn btn-secondary btn-sm" onclick="showToast('تم حفظ الملاحظة','i')">${ICONS.file}حفظ ملاحظة</button></div></div>` }
   ], 0)}
-    <div class="card"><div class="ph"><h3><span class="pico tl">${ICONS.clock}</span>السجل الزمني</h3></div><div class="pb">${renderTimeline(item.timeline)}</div></div>
   </div>`;
 }

@@ -1539,6 +1539,31 @@ const INSP_DATA = {
       ],
       liftedDate: null,
       liftedBy: null
+    },
+    {
+      id: '2025-06-000106',
+      requestType: 'قرار حظر',
+      targetType: 'worker',
+      type: 'حظر الاستفادة من المنافع مؤقتاً',
+      workerId: 'WRK-004',
+      workerName: 'أسماء محمد الحارثي',
+      workerCivil: '07345678',
+      employerId: 'EMP-002',
+      employerName: 'مصنع الإنتاج الغذائي الخليجي',
+      lookupType: 'civil',
+      lookupValue: '07345678',
+      reason: 'تعليق الاستفادة من بعض المنافع إلى حين استكمال التحقق في البلاغ المرتبط بتعديل بيانات الأجر.',
+      relatedComplaintId: '2025-01-000003',
+      status: 'سارٍ — حظر مؤقت',
+      issuedDate: '2025-01-18',
+      issuedBy: 'نجلاء عبدالله القاسمي',
+      duration: '30 يوماً',
+      expiryDate: '2025-02-17',
+      timeline: [
+        { date: '2025-01-18', action: 'إقرار الحظر المؤقت على المؤمن عليه لحين استكمال التحقق', actor: 'نجلاء عبدالله القاسمي', actorRole: 'monitoring-head' }
+      ],
+      liftedDate: null,
+      liftedBy: null
     }
   ],
 

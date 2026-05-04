@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>متابعة الإجراءات التصحيحية</title>
+  <link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside id="sidebar"></aside>
+  <main class="main">
+    <header id="header"></header>
+    <section id="app-content" class="content"></section>
+  </main>
+</div>
+<script src="../shared/config.js"></script>
+<script src="../shared/data.js"></script>
+<script src="../shared/layout.js"></script>
+<script src="../shared/components.js"></script>
+<script>
+  initLayout({ role: 'field-inspector', activePage: 'corrective-actions', breadcrumb: [
+    { label: 'لوحة البيانات', onclick: 'goHome()' },
+    { label: 'متابعة الإجراءات التصحيحية' }
+  ]});
+  renderContent(renderCorrectiveActions('field-inspector'));
+</script>
+</body>
+</html>
