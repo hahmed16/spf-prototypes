@@ -28,6 +28,12 @@
         .callout,.note,.success{padding:14px 16px;border-radius:14px;margin:14px 0;border:1px solid transparent}
         .callout{background:var(--primary-soft);border-color:rgba(122,75,23,.2)}.note{background:#f4f7fb;border-color:#d5e0ef}.success{background:var(--accent-soft);border-color:#bfe5cc}
         .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}.card{background:#fff;border:1px solid #ece2d4;border-radius:16px;padding:16px}
+        .stack-cards{display:grid;grid-template-columns:1fr;gap:16px}
+        .stack-cards .card{width:100%}
+        .card-list{margin:10px 0 0;padding-right:18px}
+        .card-list li{margin:4px 0}
+        .section-list{margin:10px 0;padding-right:18px}
+        .section-list li{margin:6px 0}
         .process-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:18px 0}
         .process-step{position:relative;padding:18px 16px;border-radius:18px;background:linear-gradient(180deg,#ffffff,#f7fbf8);border:1px solid #d8e8dd;box-shadow:0 8px 20px rgba(20,83,45,.06)}
         .process-step strong{display:block;color:var(--primary);font-size:1.05rem;margin-bottom:6px}
