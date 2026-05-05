@@ -42,7 +42,7 @@ const WI_DATA = {
   /* ── استعلامات تقاعد الأشخاص ذوي الإعاقة ── */
   disabilityRetirement: window.DISABILITY_RETIREMENT_DATA || [],
 
-  /* ── طلبات العرض المباشر على المؤسسات الصحية المرخصة ── */
+  /* ── طلبات العرض على المؤسسات الصحية المرخصة ── */
   referrals: window.REFERRALS_DATA || [],
 
   /* ── مؤشرات لوحات البيانات ── */

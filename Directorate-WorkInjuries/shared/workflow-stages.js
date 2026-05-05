@@ -738,7 +738,7 @@ const WORKFLOW_STAGES = {
     },
   ],
 
-  /* ── مراحل طلبات العرض المباشر على المؤسسات الصحية المرخصة ── */
+  /* ── مراحل طلبات العرض على المؤسسات الصحية المرخصة ── */
   referrals: [
     {
       id: 'draft',
@@ -752,7 +752,7 @@ const WORKFLOW_STAGES = {
     {
       id: 'submitted',
       name: 'تم تقديم الطلب',
-      description: 'تم تقديم طلب العرض المباشر',
+      description: 'تم تقديم طلب العرض على المؤسسات الصحية المرخصة',
       color: 'blue',
       icon: 'send',
       nextStages: ['direct_referral_review', 'returned'],
@@ -761,7 +761,7 @@ const WORKFLOW_STAGES = {
     {
       id: 'direct_referral_review',
       name: 'مراجعة موظف العرض المباشر',
-      description: 'الطلب لدى موظف طلبات العرض المباشر',
+      description: 'الطلب لدى موظف قسم اللجان الطبية',
       color: 'purple',
       icon: 'user',
       nextStages: ['coordinator_review', 'returned', 'suspended'],
@@ -895,70 +895,34 @@ const WORKFLOW_STAGES = {
     },
   ],
 
-  /* ── مراحل طلبات العرض المباشر على المؤسسات الصحية المرخصة ── */
+  /* ── مراحل طلبات العرض على المؤسسات الصحية المرخصة ── */
   directReferral: [
     {
       id: 'submitted',
       name: 'تم تقديم الطلب',
-      description: 'تم رفع الطلب بانتظار مراجعة موظف طلبات العرض المباشر',
+      description: 'تم رفع الطلب بانتظار مراجعته من قسم اللجان الطبية',
       color: 'blue',
       icon: 'send',
-      nextStages: ['employee_review', 'returned'],
+      nextStages: ['committee_review', 'returned'],
       previousStages: [],
     },
     {
-      id: 'employee_review',
-      name: 'مراجعة موظف طلبات العرض المباشر',
-      description: 'جارٍ التحقق من الطلب قبل إحالته لمسار اللجان',
+      id: 'committee_review',
+      name: 'قسم اللجان الطبية',
+      description: 'الطلب لدى موظف أو رئيس قسم اللجان الطبية للمراجعة والاعتماد',
       color: 'purple',
       icon: 'user',
-      nextStages: ['coordinator_review', 'returned', 'suspended'],
+      nextStages: ['institution_review', 'returned', 'suspended'],
       previousStages: ['submitted'],
     },
     {
-      id: 'coordinator_review',
-      name: 'مراجعة منسق الإحالات والتحويلات',
-      description: 'الطلب لدى منسق الإحالات والتحويلات لتأكيد المسار والمتابعة',
+      id: 'institution_review',
+      name: 'العرض على المؤسسات الصحية المرخصة',
+      description: 'تمت إحالة الطلب للمؤسسة الصحية المرخصة ومتابعة الجلسة والقرار',
       color: 'teal',
-      icon: 'user',
-      nextStages: ['committee_review', 'returned', 'suspended'],
-      previousStages: ['employee_review'],
-    },
-    {
-      id: 'committee_review',
-      name: 'مراجعة قسم اللجان الطبية',
-      description: 'اختيار المؤسسة الصحية واستكمال اعتماد الإحالة',
-      color: 'yellow',
-      icon: 'shield',
-      nextStages: ['rapporteur_assignment', 'returned', 'suspended'],
-      previousStages: ['coordinator_review'],
-    },
-    {
-      id: 'rapporteur_assignment',
-      name: 'إحالة المقرر',
-      description: 'تمت الإحالة إلى مقرر المؤسسة الصحية المرخصة',
-      color: 'cyan',
-      icon: 'pen',
-      nextStages: ['institution_session'],
-      previousStages: ['committee_review'],
-    },
-    {
-      id: 'institution_session',
-      name: 'جلسة المؤسسة الصحية',
-      description: 'الحالة بانتظار انعقاد الجلسة أو استكمالها',
-      color: 'orange',
       icon: 'calendar',
-      nextStages: ['decision_received', 'suspended'],
-      previousStages: ['rapporteur_assignment'],
-    },
-    {
-      id: 'decision_received',
-      name: 'استلام القرار',
-      description: 'تم استلام قرار المؤسسة الصحية بانتظار التنفيذ',
-      color: 'green',
-      icon: 'check',
       nextStages: ['completed'],
-      previousStages: ['institution_session'],
+      previousStages: ['committee_review'],
     },
     {
       id: 'returned',
@@ -966,8 +930,8 @@ const WORKFLOW_STAGES = {
       description: 'تمت إعادة الطلب لاستيفاء البيانات',
       color: 'yellow',
       icon: 'refresh',
-      nextStages: ['submitted', 'employee_review', 'coordinator_review'],
-      previousStages: ['submitted', 'employee_review', 'coordinator_review', 'committee_review'],
+      nextStages: ['submitted', 'committee_review'],
+      previousStages: ['submitted', 'committee_review', 'institution_review'],
     },
     {
       id: 'suspended',
@@ -975,8 +939,8 @@ const WORKFLOW_STAGES = {
       description: 'الطلب معلق مؤقتاً لحين الاستئناف',
       color: 'gray',
       icon: 'pause',
-      nextStages: ['employee_review', 'coordinator_review', 'institution_session'],
-      previousStages: ['employee_review', 'coordinator_review', 'committee_review', 'institution_session'],
+      nextStages: ['committee_review', 'institution_review'],
+      previousStages: ['committee_review', 'institution_review'],
     },
     {
       id: 'completed',

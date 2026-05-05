@@ -36,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='appeals-list.html'">${ICONS.arrow_left} رجوع</button></div>
     </div>
 
-    <!-- بيانات مقدم التظلم -->
     <div class="card">
       <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم التظلم</h3></div>
       <div class="pb">
@@ -46,22 +45,28 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${u.civil}</div></div>
           <div class="fgrp"><label class="flbl">رقم الهاتف (من النظام)</label><div class="fro">${u.phone}</div></div>
           <div class="fgrp"><label class="flbl">البريد الإلكتروني (من النظام)</label><div class="fro">${u.email}</div></div>
+          <div class="fgrp"><label class="flbl">رقم التأمين</label><div class="fro" style="font-family:monospace">INS-NEW</div></div>
+          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">نشط</span></div></div>
+          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">إلزامي</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">1 مارس 2019</div></div>
           <div class="fgrp"><label class="flbl">رقم هاتف إضافي 1</label><input type="tel" class="fc" placeholder="أدخل رقم هاتف إضافي"></div>
           <div class="fgrp"><label class="flbl">رقم هاتف إضافي 2</label><input type="tel" class="fc" placeholder="أدخل رقم هاتف إضافي آخر"></div>
           <div class="fgrp"><label class="flbl">بريد إلكتروني إضافي</label><input type="email" class="fc" placeholder="example@domain.com"></div>
+          <div class="fgrp"><label class="flbl">المنطقة</label><div class="fro">${normalizeDisplay(u.region, 'محافظة مسقط')}</div></div>
+          <div class="fgrp"><label class="flbl">الولاية</label><div class="fro">${normalizeDisplay(u.wilayat, 'بوشر')}</div></div>
+          <div class="fgrp"><label class="flbl">الدولة</label><div class="fro">${normalizeDisplay(u.country, 'سلطنة عُمان')}</div></div>
         </div>
       </div>
     </div>
 
-    <!-- اختيار القرار المتظلم منه -->
     <div class="card">
       <div class="ph"><h3><div class="pico rd">${ICONS.search}</div>اختيار القرار المتظلم منه</h3></div>
       <div class="pb">
         <div class="fg fg-2" style="margin-bottom:14px">
           <div class="fgrp">
-            <label class="flbl">رقم الطلب الأصلي <span class="req">*</span></label>
+            <label class="flbl">رقم الطلب أو القرار <span class="req">*</span></label>
             <div class="inp-btn">
-              <input type="text" class="fc" id="search-req-id" placeholder="WI-YYYY-XXXXXX" value="${refId || ''}">
+              <input type="text" class="fc" id="search-req-id" placeholder="APP / REF / WI ..." value="${refId || ''}">
               <button class="btn btn-primary btn-sm" onclick="searchRequest()">بحث</button>
             </div>
           </div>
@@ -70,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    <!-- بيانات التظلم -->
     <div class="card" id="appeal-form-card" style="display:none">
       <div class="ph"><h3><div class="pico or">${ICONS.note}</div>بيانات التظلم</h3></div>
       <div class="pb">
@@ -87,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="fgrp">
             <label class="flbl">تفاصيل سبب التظلم <span class="req">*</span></label>
-            <textarea class="fc" id="appeal-details" rows="5" placeholder="اشرح سبب تظلمك بالتفصيل — الوقائع والأسباب القانونية والمستندات الداعمة..."></textarea>
+            <textarea class="fc" id="appeal-details" rows="5" placeholder="اشرح سبب تظلمك بالتفصيل..."></textarea>
           </div>
           <div class="fgrp">
             <label class="flbl">تاريخ العلم بالقرار</label>
@@ -95,70 +99,66 @@ document.addEventListener('DOMContentLoaded', () => {
             <input type="hidden" id="knowledge-date">
           </div>
           <div class="fgrp">
-            <label class="flbl">ملاحظات إضافية</label>
-            <textarea class="fc" rows="3" placeholder="أي معلومات إضافية..."></textarea>
+            <label class="flbl">الملاحظات <span class="req">*</span></label>
+            <textarea class="fc" id="appeal-notes" rows="3" placeholder="أدخل ملاحظاتك الداعمة للتظلم..."></textarea>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- المرفقات -->
     <div class="card" id="appeal-attachments-card" style="display:none">
       <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات الداعمة</h3></div>
       <div class="pb">
-        ${renderModernUploadComponent({ idPrefix: 'appeal-att', subTitle: 'يمكنك إرفاق التقارير الطبية، المراسلات، أو أي مستندات داعمة أخرى' })}
+        <div class="alert alert-i" style="margin-bottom:12px">${ICONS.info}<span>يرجى إرفاق المستندات الداعمة للتظلم.</span></div>
+        ${renderModernUploadComponent({ idPrefix: 'appeal-att', subTitle: 'يمكنك إرفاق التقارير الطبية أو أي مستندات داعمة' })}
       </div>
     </div>
 
-    <!-- الأزرار -->
     <div id="appeal-submit-btns" style="display:none;gap:10px;padding:16px 0">
       <button class="btn btn-primary btn-lg" onclick="submitAppeal()">${ICONS.check} تقديم التظلم</button>
       <button class="btn btn-secondary btn-lg" onclick="showToast('تم الحفظ كمسودة','i')">حفظ كمسودة</button>
       <button class="btn btn-ghost" onclick="window.location.href='appeals-list.html'">إلغاء</button>
     </div>`;
 
-  if (refId) searchRequest();
+  searchRequest();
 });
 
 function searchRequest() {
-  const id = document.getElementById('search-req-id').value.trim() || refId;
-  const req = WI_DATA.allowances.find(r => r.id === id);
+  const rawId = document.getElementById('search-req-id').value.trim() || refId || 'REF-2025-000121';
   const resultsEl = document.getElementById('search-results');
 
-  if (!req) {
-    resultsEl.innerHTML = `<div class="alert alert-w">${ICONS.warn}<span>لم يتم العثور على طلب بهذا الرقم.</span></div>`;
-    return;
-  }
+  selectedRequest = {
+    id: rawId,
+    type: 'طلب عرض على مؤسسة صحية مرخصة',
+    status: 'تم إرسال قرار المؤسسة الصحية المرخصة',
+    submitDate: '2025-01-25',
+  };
 
-  const decision = req.status === 'تم رفض الطلب'
-    ? { type: 'رفض', date: req.lastUpdate?.split(' ')[0], issuer: 'رئيس قسم التحقيق في إصابات العمل', details: 'تم رفض الطلب لعدم استيفاء شروط إصابة العمل.', knowledgeDate: req.lastUpdate?.split(' ')[0] }
-    : null;
-
-  if (!decision) {
-    resultsEl.innerHTML = `<div class="alert alert-w">${ICONS.warn}<span>لا توجد قرارات قابلة للتظلم على هذا الطلب. يمكن تقديم التظلم فقط على الطلبات المرفوضة أو قرارات المؤسسات الصحية.</span></div>`;
-    return;
-  }
-
-  selectedRequest = req;
-  selectedDecision = decision;
+  selectedDecision = {
+    id: `DEC-${rawId}`,
+    type: 'قرار مؤسسة صحية مرخصة',
+    date: '2025-01-29',
+    issuer: 'مؤسسة صحية مرخصة',
+    details: 'قرار تجريبي لغرض العرض على الشاشة الحالية.',
+    knowledgeDate: '2025-01-29',
+  };
 
   resultsEl.innerHTML = `
-    <div class="alert alert-s" style="margin-bottom:12px">${ICONS.check}<span>تم العثور على الطلب. يرجى اختيار القرار المتظلم منه:</span></div>
-    <div style="border:1px solid var(--border);border-radius:var(--r);padding:14px;background:var(--g50);margin-bottom:14px">
-      <div class="fg fg-3" style="margin-bottom:10px">
-        <div><div class="flbl" style="margin-bottom:3px">رقم الطلب</div><div style="font-family:monospace;font-weight:700;color:var(--primary)">${req.id}</div></div>
-        <div><div class="flbl" style="margin-bottom:3px">نوع الطلب</div><div>${req.type}</div></div>
-        <div><div class="flbl" style="margin-bottom:3px">حالة الطلب</div>${statusBadge(req.status)}</div>
-      </div>
-      <div style="border-top:1px solid var(--border);padding-top:12px">
-        <div class="flbl" style="margin-bottom:8px">القرار المتاح للتظلم:</div>
-        <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:var(--rsm)">
-          <span class="badge b-rejected">${decision.type}</span>
-          <span style="font-size:12px">${decision.issuer}</span>
-          <span style="font-size:11px;color:var(--text3)">${decision.date}</span>
-          <button class="btn btn-primary btn-xs" style="margin-right:auto" onclick="selectDecision()">اختيار هذا القرار للتظلم</button>
-        </div>
-      </div>
+    <div class="tbl-wrap">
+      <table class="dtbl">
+        <thead><tr><th>رقم الطلب</th><th>نوع الطلب</th><th>رقم القرار</th><th>جهة الإصدار</th><th>تاريخ القرار</th><th>الحالة</th><th></th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="font-family:monospace">${selectedRequest.id}</td>
+            <td>${selectedRequest.type}</td>
+            <td style="font-family:monospace">${selectedDecision.id}</td>
+            <td>${selectedDecision.issuer}</td>
+            <td>${selectedDecision.date}</td>
+            <td>${statusBadge(selectedRequest.status)}</td>
+            <td><button class="btn btn-primary btn-xs" onclick="selectDecision()">اختيار هذا القرار للتظلم</button></td>
+          </tr>
+        </tbody>
+      </table>
     </div>`;
 }
 
@@ -175,10 +175,14 @@ function selectDecision() {
 function submitAppeal() {
   const reason = document.getElementById('appeal-reason').value;
   const details = document.getElementById('appeal-details').value.trim();
+  const notes = document.getElementById('appeal-notes').value.trim();
   const date = document.getElementById('knowledge-date').value;
+  const attachmentsCount = document.querySelectorAll('#appeal-att-list .dz-item').length;
   if (!reason) { showToast('يرجى اختيار سبب التظلم', 'w'); return; }
-  if (!details) { showToast('يرجى كتابة تفاصيل التظلم', 'w'); return; }
+  if (!details) { showToast('يرجى كتابة تفاصيل سبب التظلم', 'w'); return; }
+  if (!notes) { showToast('يرجى إدخال الملاحظات', 'w'); return; }
   if (!date) { showToast('يرجى تحديد تاريخ العلم بالقرار', 'w'); return; }
+  if (!attachmentsCount) { showToast('يرجى إرفاق المستندات الداعمة للتظلم', 'w'); return; }
 
   showToast('جارٍ تقديم التظلم...', 'i');
   setTimeout(() => {

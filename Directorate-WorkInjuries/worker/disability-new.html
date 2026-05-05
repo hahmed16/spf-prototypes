@@ -34,17 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='disability-list.html'">${ICONS.arrow_left} رجوع</button></div>
     </div>
 
-    <!-- الإرشادات -->
     <div class="card card-ro">
       <div class="ph"><h3><div class="pico gy">${ICONS.info}</div>ضوابط الاستحقاق والتعليمات</h3></div>
       <div class="pb">
         <ul style="font-size:12.5px;color:var(--text2);padding-right:18px;line-height:2.2">
-          <li>يجب أن تمتلك بطاقة إعاقة سارية صادرة من وزارة التنمية الاجتماعية</li>
+          <li>يجب أن تمتلك بطاقة إعاقة سارية صادرة من وزارة التنمية الاجتماعية.</li>
         </ul>
       </div>
     </div>
 
-    <!-- بيانات مقدم الطلب + بيانات التأمين -->
     <div class="card">
       <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب والتأمين</h3></div>
       <div class="pb">
@@ -67,22 +65,45 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    <!-- بيانات بطاقة الإعاقة -->
     <div class="card card-ro">
-      <div class="ph"><h3><div class="pico pu">${ICONS.shield}</div>بيانات بطاقة الإعاقة</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً من وزارة التنمية الاجتماعية</span></div>
+      <div class="ph"><h3><div class="pico pu">${ICONS.shield}</div>بيانات بطاقة الإعاقة</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً من الجهات المختصة</span></div>
       <div class="pb">
         ${isExpired ? `<div class="alert alert-d" style="margin-bottom:14px">${ICONS.warn}<span><strong>تنبيه:</strong> بطاقة الإعاقة منتهية الصلاحية. لا يمكن تقديم الطلب حتى يتم تجديد البطاقة.</span></div>` : ''}
-        <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">حالة البطاقة</label><div class="fro"><span class="badge ${card.status==='سارية'?'b-card-valid':'b-card-expired'}">${card.status}</span></div></div>
-          <div class="fgrp"><label class="flbl">تاريخ الانتهاء</label><div class="fro" style="${isExpired?'color:var(--danger);font-weight:700':''}">${card.expiryDate}</div></div>
-          <div class="fgrp"><label class="flbl">طبيعة الإعاقة (وزارة التنمية)</label><div class="fro">${card.typeSD}</div></div>
-          <div class="fgrp"><label class="flbl">طبيعة الإعاقة (وزارة الصحة)</label><div class="fro">${card.typeMOH}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ ثبوت الإعاقة</label><div class="fro">${card.provenDate}</div></div>
+        <div class="fg fg-3" style="margin-bottom:14px">
+          <div class="fgrp"><label class="flbl">حالة البطاقة</label><div class="fro"><span class="badge ${card.status === 'سارية' ? 'b-card-valid' : 'b-card-expired'}">${card.status}</span></div></div>
+          <div class="fgrp"><label class="flbl">رقم البطاقة</label><div class="fro" style="font-family:monospace">${card.number || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الإصدار</label><div class="fro">${formatDate(card.issueDate)}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ الانتهاء</label><div class="fro">${formatDate(card.expiryDate)}</div></div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="dtbl">
+            <thead><tr><th>نوع الإعاقة</th><th>تاريخ التشخيص الطبي</th><th>تشخيص وزارة الصحة</th><th>مستوى الإعاقة من وزارة الصحة</th><th>تشخيص وزارة التنمية الاجتماعية</th><th>مستوى الإعاقة من وزارة التنمية الاجتماعية</th></tr></thead>
+            <tbody>
+              ${getWorkerDisabilityRows(card).map((item) => `
+              <tr>
+                <td>${item.name}</td>
+                <td>${item.diagnosisDate}</td>
+                <td>${item.mohDiagnosis}</td>
+                <td>${item.mohLevel}</td>
+                <td>${item.mosdDiagnosis}</td>
+                <td>${item.mosdLevel}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <!-- المرفقات -->
+    <div class="card">
+      <div class="ph"><h3><div class="pico gy">${ICONS.note}</div>ملاحظات إضافية</h3></div>
+      <div class="pb">
+        <div class="fgrp">
+          <label class="flbl">ملاحظات مقدم الطلب</label>
+          <textarea class="fc" id="disability-notes" rows="4" placeholder="أي تفاصيل إضافية ترغب في إضافتها قبل رفع المرفقات..."></textarea>
+        </div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات</h3></div>
       <div class="pb">
@@ -90,17 +111,48 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    <!-- الأزرار -->
     <div style="display:flex;gap:10px;padding:16px 0">
-      <button class="btn btn-primary btn-lg" ${isExpired?'disabled style="opacity:.5;cursor:not-allowed"':''} onclick="submitDisabilityRequest()">
-        ${ICONS.check} إرسال الطلب
-      </button>
-      <button class="btn btn-secondary btn-lg" onclick="showToast('تم حفظ الطلب كمسودة','i');setTimeout(()=>window.location.href='disability-list.html',1200)">
-        حفظ كمسودة
-      </button>
+      <button class="btn btn-primary btn-lg" ${isExpired ? 'disabled style="opacity:.5;cursor:not-allowed"' : ''} onclick="submitDisabilityRequest()">${ICONS.check} إرسال الطلب</button>
+      <button class="btn btn-secondary btn-lg" onclick="showToast('تم حفظ الطلب كمسودة','i');setTimeout(()=>window.location.href='disability-list.html',1200)">حفظ كمسودة</button>
       <button class="btn btn-ghost" onclick="window.location.href='disability-list.html'">إلغاء</button>
     </div>`;
 });
+
+function getWorkerDisabilityRows(card) {
+  const disabilities = Array.isArray(card?.disabilities) ? card.disabilities : [];
+  if (!disabilities.length) {
+    return [{
+      name: card?.typeMOH || card?.typeSD || '—',
+      diagnosisDate: formatDate(card?.provenDate),
+      mohDiagnosis: card?.typeMOH || '—',
+      mohLevel: '—',
+      mosdDiagnosis: card?.typeSD || '—',
+      mosdLevel: '—',
+    }];
+  }
+
+  const grouped = new Map();
+  disabilities.forEach((item) => {
+    const key = `${item.name || '—'}__${item.examinationDate || ''}`;
+    const row = grouped.get(key) || {
+      name: item.name || '—',
+      diagnosisDate: formatDate(item.examinationDate),
+      mohDiagnosis: '—',
+      mohLevel: '—',
+      mosdDiagnosis: '—',
+      mosdLevel: '—',
+    };
+    if (item.source === 'MOH') {
+      row.mohDiagnosis = item.name || '—';
+      row.mohLevel = item.level || '—';
+    } else if (item.source === 'MOSD') {
+      row.mosdDiagnosis = item.name || '—';
+      row.mosdLevel = item.level || '—';
+    }
+    grouped.set(key, row);
+  });
+  return Array.from(grouped.values());
+}
 
 function submitDisabilityRequest() {
   showToast('جارٍ تقديم الطلب...', 'i');
@@ -109,7 +161,6 @@ function submitDisabilityRequest() {
     setTimeout(() => window.location.href = 'disability-list.html', 2000);
   }, 1500);
 }
-
 </script>
 </body>
 </html>

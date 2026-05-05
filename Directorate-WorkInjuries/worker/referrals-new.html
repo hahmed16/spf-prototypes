@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>طلب عرض مباشر جديد — العامل</title>
+<title>طلب عرض على مؤسسة صحية مرخصة — العامل</title>
 <link rel="stylesheet" href="../shared/style.css">
 </head>
 <body>
@@ -22,69 +22,191 @@
 <script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'worker', activePage: 'referrals-list' });
-setBreadcrumb([{ label: 'طلبات العرض المباشر', page: 'referrals-list' }, { label: 'طلب جديد' }]);
+setBreadcrumb([{ label: 'طلبات العرض على المؤسسات الصحية المرخصة', page: 'referrals-list' }, { label: 'طلب جديد' }]);
+
 const u = WI_DATA.users.worker;
-const emp = u.employerHistory?.find(e => e.current) || {};
+const employerHistory = u.employerHistory || [];
 
 document.addEventListener('DOMContentLoaded', () => {
   getContent().innerHTML = `
-    <div class="pg-head"><div><h1>طلب عرض مباشر على مؤسسة صحية مرخصة</h1><p>يُستخدم هذا الطلب لطلب تقييم مباشر من مؤسسة صحية مرخصة</p></div></div>
-    <div class="card"><div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب والمؤمن عليه</h3></div>
-      <div class="pb"><div class="fg fg-2">
+    <div class="pg-head"><div><h1>طلب عرض على مؤسسة صحية مرخصة</h1><p>يستخدم هذا الطلب حالياً لسبب واحد فقط وهو تحديد نسبة العجز.</p></div></div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب والمؤمن عليه</h3></div>
+      <div class="pb"><div class="fg fg-3">
         <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${u.name}</div></div>
-        <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro">${u.civil}</div></div>
-        <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${u.phone}</div></div>
-        <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${u.email}</div></div>
+        <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${u.civil}</div></div>
+        <div class="fgrp"><label class="flbl">رقم التأمين</label><div class="fro" style="font-family:monospace">INS-NEW</div></div>
+        <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">نشط</span></div></div>
+        <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">إلزامي</div></div>
+        <div class="fgrp"><label class="flbl">تاريخ التسجيل في الصندوق</label><div class="fro">1 مارس 2019</div></div>
+        <div class="fgrp"><label class="flbl">رقم الهاتف (من النظام)</label><div class="fro">${u.phone}</div></div>
+        <div class="fgrp"><label class="flbl">البريد الإلكتروني (من النظام)</label><div class="fro">${u.email}</div></div>
+        <div class="fgrp"><label class="flbl">رقم هاتف إضافي 1</label><input type="tel" class="fc" placeholder="أدخل رقم هاتف إضافي"></div>
+        <div class="fgrp"><label class="flbl">رقم هاتف إضافي 2</label><input type="tel" class="fc" placeholder="أدخل رقم هاتف إضافي آخر"></div>
+        <div class="fgrp"><label class="flbl">بريد إلكتروني إضافي</label><input type="email" class="fc" placeholder="example@domain.com"></div>
+        <div class="fgrp"><label class="flbl">المنطقة</label><div class="fro">${normalizeDisplay(u.region, 'محافظة مسقط')}</div></div>
+        <div class="fgrp"><label class="flbl">الولاية</label><div class="fro">${normalizeDisplay(u.wilayat, 'بوشر')}</div></div>
+        <div class="fgrp"><label class="flbl">الدولة</label><div class="fro">${normalizeDisplay(u.country, 'سلطنة عُمان')}</div></div>
       </div></div>
     </div>
-    <div class="card"><div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات جهة العمل الحالية</h3></div>
-      <div class="pb"><div class="fg fg-2">
-        <div class="fgrp"><label class="flbl">اسم جهة العمل</label><div class="fro">${emp.name || '—'}</div></div>
-        <div class="fgrp"><label class="flbl">السجل التجاري</label><div class="fro">${emp.cr || '—'}</div></div>
-      </div></div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات جهة العمل</h3></div>
+      <div class="pb">
+        <div class="fgrp" style="margin-bottom:14px">
+          <label class="flbl">طريقة اختيار جهة العمل</label>
+          <select class="fc" id="employer-mode" onchange="toggleEmployerMode()">
+            <option value="history">اختيار من جهات العمل السابقة والحالية</option>
+            <option value="other">صاحب عمل آخر</option>
+          </select>
+        </div>
+
+        <div id="history-employer-block">
+          <div class="tbl-wrap">
+            <table class="dtbl">
+              <thead><tr><th></th><th>رقم السجل التجاري</th><th>اسم جهة العمل</th><th>تاريخ الالتحاق</th><th>تاريخ انتهاء الخدمة</th></tr></thead>
+              <tbody>
+                ${employerHistory.map((item, index) => `
+                <tr>
+                  <td><input type="radio" name="selected-employer" value="${index}" ${index === 0 ? 'checked' : ''} onchange="selectEmployer(${index})"></td>
+                  <td style="font-family:monospace">${item.cr}</td>
+                  <td>${item.name}</td>
+                  <td>${formatDate(item.joinDate)}</td>
+                  <td>${item.endDate ? formatDate(item.endDate) : '<span class="badge b-approved">الحالية</span>'}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="other-employer-block" style="display:none">
+          <div class="fg fg-2">
+            <div class="fgrp"><label class="flbl">رقم السجل التجاري <span class="req">*</span></label><input class="fc" id="other-employer-cr" placeholder="1234567" oninput="fillOtherEmployerName()"></div>
+            <div class="fgrp"><label class="flbl">اسم جهة العمل</label><div class="fro" id="other-employer-name">—</div></div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px" class="fg fg-2">
+          <div class="fgrp">
+            <label class="flbl">آخر فرع عمل به العامل <span class="req">*</span></label>
+            <select class="fc" id="branch-select">
+              <option value="">— اختر الفرع —</option>
+              ${((WI_DATA.users.employer_delegate && WI_DATA.users.employer_delegate.branches) || []).map((b) => `<option value="${b.id}">${b.id} — ${b.name} — ${b.state}</option>`).join('')}
+            </select>
+          </div>
+          <div class="fgrp"><label class="flbl">اسم جهة العمل المختارة</label><div class="fro" id="selected-employer-name">${employerHistory[0]?.name || '—'}</div></div>
+        </div>
+      </div>
     </div>
-    <div class="card"><div class="ph"><h3><div class="pico or">${ICONS.note}</div>بيانات الطلب</h3></div>
+
+    <div class="card">
+      <div class="ph"><h3><div class="pico or">${ICONS.note}</div>بيانات الطلب</h3></div>
       <div class="pb">
         <div class="fg fg-2">
-          <div class="fgrp"><label class="flbl">نوع الحالة <span class="req">*</span></label><select class="fc" id="request-category"><option>إصابة عمل</option><option>مرض مهني</option><option>إعاقة</option><option>أمراض مستديمة</option></select></div>
-          <div class="fgrp"><label class="flbl">المؤسسة الصحية المفضلة</label><input class="fc" id="preferred-institution" placeholder="مثال: مستشفى النور التخصصي"></div>
-          <div class="fgrp span-full"><label class="flbl">سبب طلب العرض المباشر <span class="req">*</span></label><textarea class="fc" id="referral-reason" rows="3" placeholder="اذكر سبب طلب العرض المباشر..."></textarea></div>
-          <div class="fgrp span-full"><label class="flbl">ملاحظات إضافية</label><textarea class="fc" id="referral-notes" rows="3" placeholder="أي معلومات إضافية تدعم الطلب"></textarea></div>
+          <div class="fgrp">
+            <label class="flbl">سبب الطلب <span class="req">*</span></label>
+            <select class="fc" id="request-reason">
+              <option>تحديد نسبة العجز</option>
+            </select>
+          </div>
+          <div class="fgrp span-full">
+            <label class="flbl">ملاحظات إضافية</label>
+            <textarea class="fc" id="referral-notes" rows="4" placeholder="أي ملاحظات إضافية تدعم الطلب"></textarea>
+          </div>
         </div>
         ${renderModernUploadComponent({ idPrefix: 'referral-worker', title: 'المرفقات' })}
       </div>
     </div>
-    <div class="form-actions"><button class="btn btn-primary" onclick="submitReferral()">${ICONS.check} إرسال الطلب</button><button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.x} إلغاء</button></div>`;
+
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="saveReferralDraft()">${ICONS.note} حفظ كمسودة</button>
+      <button class="btn btn-primary" onclick="submitReferral()">${ICONS.check} إرسال الطلب</button>
+      <button class="btn btn-ghost" onclick="window.location.href='referrals-list.html'">${ICONS.x} إلغاء</button>
+    </div>`;
+
+  selectEmployer(0);
 });
 
+function toggleEmployerMode() {
+  const mode = document.getElementById('employer-mode').value;
+  document.getElementById('history-employer-block').style.display = mode === 'history' ? '' : 'none';
+  document.getElementById('other-employer-block').style.display = mode === 'other' ? '' : 'none';
+  if (mode === 'history') selectEmployer(Number(document.querySelector('input[name="selected-employer"]:checked')?.value || 0));
+  if (mode === 'other') fillOtherEmployerName();
+}
+
+function selectEmployer(index) {
+  const employer = employerHistory[index] || {};
+  const target = document.getElementById('selected-employer-name');
+  if (target) target.textContent = employer.name || '—';
+}
+
+function fillOtherEmployerName() {
+  const cr = document.getElementById('other-employer-cr')?.value?.trim() || '';
+  const name = cr ? `جهة عمل برقم سجل ${cr}` : '—';
+  const target = document.getElementById('other-employer-name');
+  const selected = document.getElementById('selected-employer-name');
+  if (target) target.textContent = name;
+  if (selected) selected.textContent = name;
+}
+
+function buildSelectedEmployer() {
+  const mode = document.getElementById('employer-mode').value;
+  if (mode === 'other') {
+    const cr = document.getElementById('other-employer-cr').value.trim();
+    return { name: cr ? `جهة عمل برقم سجل ${cr}` : '', cr, employerType: '—' };
+  }
+
+  const index = Number(document.querySelector('input[name="selected-employer"]:checked')?.value || 0);
+  return employerHistory[index] || {};
+}
+
+function saveReferralDraft() {
+  showToast('تم حفظ الطلب كمسودة', 'i');
+  setTimeout(() => window.location.href = 'referrals-list.html', 1200);
+}
+
 function submitReferral() {
-  const reason = document.getElementById('referral-reason').value.trim();
-  if (!reason) { showToast('سبب طلب العرض المباشر مطلوب', 'w'); return; }
+  const branchId = document.getElementById('branch-select').value;
+  if (!branchId) { showToast('يرجى اختيار آخر فرع عمل به العامل', 'w'); return; }
+
+  const employer = buildSelectedEmployer();
+  const branch = (WI_DATA.users.employer_delegate?.branches || []).find((item) => item.id === branchId);
   const id = `REF-2025-${String(WI_DATA.referrals.length + 121).padStart(6, '0')}`;
+  const notes = document.getElementById('referral-notes').value.trim();
+  const status = 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية';
+
   WI_DATA.referrals.unshift(createDirectReferralRequest({
     id,
     sourceChannel: 'بوابة المؤمن عليه',
     createdByRole: 'worker',
-    status: 'تم تقديم طلب العرض المباشر — بانتظار مراجعة موظف طلبات العرض المباشر',
+    status,
     submitDate: new Date().toISOString().slice(0, 10),
     lastUpdate: new Date().toISOString().slice(0, 16).replace('T', ' '),
     lastUpdatedBy: u.name,
     expectedClosureDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-    applicant: { name: u.name, civil: u.civil, role: 'العامل / المؤمن عليه / المواطن', phone: u.phone, email: u.email },
-    insured: { name: u.name, civil: u.civil, insurance: 'INS-NEW', insuranceStatus: 'نشط', subType: 'إلزامي', phone: u.phone, email: u.email },
-    employer: { name: emp.name || '', cr: emp.cr || '', jobTitle: '', employerType: 'خاص' },
+    applicant: { name: u.name, civil: u.civil, role: 'العامل / المؤمن عليه / المواطن', phone: u.phone, email: u.email, region: u.region, wilayat: u.wilayat, country: u.country },
+    insured: { name: u.name, civil: u.civil, insurance: 'INS-NEW', insuranceStatus: 'نشط', subType: 'إلزامي', phone: u.phone, email: u.email, regDate: '2019-03-01' },
+    employer: {
+      name: employer.name || '',
+      cr: employer.cr || '',
+      joinDate: employer.joinDate || '',
+      employerType: employer.employerType || '',
+      branch: branch || null,
+    },
     referral: {
-      reason,
-      notes: document.getElementById('referral-notes').value.trim(),
-      preferredInstitution: document.getElementById('preferred-institution').value.trim(),
-      requestCategory: document.getElementById('request-category').value
+      reason: 'تحديد نسبة العجز',
+      notes,
+      requestCategory: 'تحديد نسبة العجز',
     },
     attachments: [],
     timeline: [
-      { action: 'تم تقديم الطلب', actor: u.name, role: 'العامل', time: new Date().toISOString().slice(0, 16).replace('T', ' '), fromStatus: '', toStatus: 'تم تقديم طلب العرض المباشر — بانتظار مراجعة موظف طلبات العرض المباشر', note: reason, type: 'default', phone: u.phone }
+      { action: 'تم تقديم الطلب', actor: u.name, role: 'العامل', time: new Date().toISOString().slice(0, 16).replace('T', ' '), fromStatus: '', toStatus: status, note: notes || 'تحديد نسبة العجز', type: 'default', phone: u.phone }
     ],
-    assignedTo: WI_DATA.users.direct_referral_employee.name
+    assignedTo: WI_DATA.users.committees_employee.name
   }));
+
   showToast('تم إرسال الطلب بنجاح', 's');
   setTimeout(() => window.location.href = 'referrals-list.html', 1000);
 }

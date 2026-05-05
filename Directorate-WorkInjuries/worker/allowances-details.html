@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تفاصيل الطلب — العامل</title>
+<title>تفاصيل طلب بدلات الانقطاع عن العمل — العامل</title>
 <link rel="stylesheet" href="../shared/style.css">
 </head>
 <body>
@@ -30,7 +30,7 @@ currentRequestId = req.id;
 
 setBreadcrumb([
   { label: 'بدلات الانقطاع عن العمل', page: 'allowances-list' },
-  { label: `تفاصيل الطلب ${req.id}` }
+  { label: `تفاصيل طلب بدلات الانقطاع عن العمل ${req.id}` }
 ]);
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -53,13 +53,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const injury = req.injury || {};
   const isWork = req.type === 'إصابة عمل';
   const atts   = req.attachments || [];
-  const notes  = req.notes || [];
   const tl     = req.timeline || [];
 
   ct.innerHTML = `
     <div class="pg-head">
       <div>
-        <h1>تفاصيل الطلب</h1>
+        <h1>تفاصيل طلب بدلات الانقطاع عن العمل</h1>
         <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
       </div>
       <div class="pg-acts">
@@ -92,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    ${renderWorkflowPath(req, 'allowances')}
+    ${renderWorkerAllowanceWorkflow(req)}
 
     ${isSamePerson ? `
     <!-- بيانات المؤمن عليه / المستفيد (مدمجة) -->
@@ -160,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="fg fg-3">
           <div class="fgrp"><label class="flbl">اسم جهة العمل</label><div class="fro">${req.employer.name || '—'}</div></div>
           <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro" style="font-family:monospace">${req.employer.cr || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم المنشأة</label><div class="fro" style="font-family:monospace">${normalizeDisplay(req.employer.establishment)}</div></div>
           <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${req.employer.jobTitle || '—'}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ الالتحاق بالعمل</label><div class="fro">${formatDate(req.employer.joinDate)}</div></div>
           <div class="fgrp"><label class="flbl">موقع العمل / الفرع</label><div class="fro">${req.employer.location || '—'}</div></div>
@@ -197,22 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="ph"><h3><div class="pico pu">${ICONS.search}</div>تقرير التحقيق</h3><span class="stg-lbl">مرحلة التحقيق</span></div>
       <div class="pb">
         <div class="alert alert-i" style="margin-bottom:12px">${ICONS.info}<span>هذا التقرير للاطلاع فقط — يُعدّه المحقق المختص.</span></div>
-        <div class="fg" style="gap:14px">
-          <div class="fgrp"><label class="flbl">ملخص التحقيق</label><div class="fro" style="min-height:70px;align-items:flex-start;padding-top:10px">${req.investigation.summary || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">نتائج التحقق من البيانات</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${req.investigation.findings || '—'}</div></div>
-          <div class="fg fg-3">
-            <div class="fgrp"><label class="flbl">توصية الموظف</label><div class="fro">${req.investigation.employeeRecommendation ? `<span class="badge ${req.investigation.employeeRecommendation === 'موافقة' ? 'b-approved' : 'b-rejected'}">${req.investigation.employeeRecommendation}</span>` : '—'}</div></div>
-            <div class="fgrp span-2"><label class="flbl">ملاحظات الموظف</label><div class="fro">${req.investigation.employeeNotes || '—'}</div></div>
-          </div>
-          ${req.investigation.headDecision || req.investigation.headNotes ? `
-          <div style="border-top:1px dashed var(--border);padding-top:14px;margin-top:4px">
-            <div class="flbl" style="margin-bottom:10px;font-size:11px;color:var(--primary)">— قرار رئيس القسم —</div>
-            <div class="fg fg-2">
-              <div class="fgrp"><label class="flbl">قرار رئيس القسم</label><div class="fro">${req.investigation.headDecision ? `<span class="badge ${req.investigation.headDecision.includes('اعتماد') ? 'b-approved' : req.investigation.headDecision.includes('رفض') ? 'b-rejected' : 'b-phead'}">${req.investigation.headDecision}</span>` : '—'}</div></div>
-              <div class="fgrp"><label class="flbl">ملاحظات رئيس القسم</label><div class="fro">${req.investigation.headNotes || '—'}</div></div>
-            </div>
-          </div>` : ''}
-        </div>
+        <div class="fgrp"><label class="flbl">ملخص التحقيق</label><div class="fro" style="min-height:80px;align-items:flex-start;padding-top:10px">${req.investigation.summary || '—'}</div></div>
       </div>
     </div>` : ''}
 
@@ -271,7 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="fg fg-3">
           <div class="fgrp"><label class="flbl">المؤسسة الصحية المرخصة</label><div class="fro" style="font-weight:700;color:var(--primary)">${req.referral.institution || '—'}</div></div>
           <div class="fgrp"><label class="flbl">سبب الإحالة</label><div class="fro">${req.referral.reason || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الجهة المُحيلة</label><div class="fro">${req.referral.referrer || '—'}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ الإحالة</label><div class="fro">${formatDate(req.referral.date)}</div></div>
           <div class="fgrp span-2"><label class="flbl">ملاحظات الإحالة</label><div class="fro">${req.referral.notes || '—'}</div></div>
         </div>
@@ -287,14 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fgrp"><label class="flbl">رقم الجلسة</label><div class="fro" style="font-family:monospace">${req.session.id || '—'}</div></div>
           <div class="fgrp"><label class="flbl">المؤسسة الصحية</label><div class="fro">${req.session.institution || '—'}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ ووقت الجلسة</label><div class="fro">${req.session.date ? `${formatDate(req.session.date)}${req.session.time ? ` — ${req.session.time}` : ''}` : '—'}</div></div>
-          <div class="fgrp"><label class="flbl">اكتمال النصاب</label><div class="fro"><span class="badge ${req.session.quorum ? 'b-approved' : 'b-returned'}">${req.session.quorum ? 'النصاب مكتمل' : 'النصاب غير مكتمل'}</span></div></div>
         </div>
-        ${req.session.members?.length ? `
-        <div class="flbl" style="margin-bottom:8px">أعضاء اللجنة</div>
-        <div class="tbl-wrap"><table class="dtbl">
-          <thead><tr><th>الاسم</th><th>التخصص</th><th>المنصب</th><th>حالة الحضور</th></tr></thead>
-          <tbody>${req.session.members.map(m=>`<tr><td>${m.name}</td><td>${m.specialty}</td><td>${m.role}</td><td><span class="badge ${m.attendance==='حاضر'?'b-approved':m.attendance==='غائب'?'b-rejected':'b-phead'}">${m.attendance||'مجدول'}</span></td></tr>`).join('')}</tbody>
-        </table></div>` : ''}
       </div>
     </div>` : ''}
 
@@ -309,24 +284,6 @@ document.addEventListener('DOMContentLoaded', () => {
           ${req.committeeDecision.disabilityPercent ? `<div class="fgrp"><label class="flbl">نسبة العجز</label><div class="fro"><strong>${req.committeeDecision.disabilityPercent}%</strong></div></div>` : ''}
           ${req.committeeDecision.sickLeavePeriod ? `<div class="fgrp"><label class="flbl">فترة الإجازة الموصى بها</label><div class="fro">${req.committeeDecision.sickLeavePeriod}</div></div>` : ''}
           <div class="fgrp span-full"><label class="flbl">مضمون القرار التفصيلي</label><div class="fro" style="min-height:60px;align-items:flex-start;padding-top:10px">${req.committeeDecision.content||'—'}</div></div>
-          ${req.committeeDecision.signatories?.length ? `<div class="fgrp span-full"><label class="flbl">الأعضاء الموقعون</label><div class="fro">${req.committeeDecision.signatories.join('، ')}</div></div>` : ''}
-        </div>
-      </div>
-    </div>` : ''}
-
-    ${req.disbursement ? `
-    <!-- بيانات الصرف -->
-    <div class="card card-cum">
-      <div class="ph"><h3><div class="pico gr">${ICONS.chart}</div>بيانات الصرف</h3><span class="stg-lbl">مرحلة الصرف</span></div>
-      <div class="pb">
-        <div class="fg fg-4">
-          <div class="fgrp"><label class="flbl">حالة الصرف</label><div class="fro"><span class="badge ${req.disbursement.status==='تم الصرف'?'b-approved':req.disbursement.status==='موقوف'?'b-returned':'b-phead'}">${req.disbursement.status||'—'}</span></div></div>
-          <div class="fgrp"><label class="flbl">عدد الفترات المعتمدة</label><div class="fro"><strong>${req.disbursement.periods||0}</strong> فترة</div></div>
-          <div class="fgrp"><label class="flbl">إجمالي الأيام</label><div class="fro"><strong>${req.disbursement.totalDays||0}</strong> يوم</div></div>
-          <div class="fgrp"><label class="flbl">إجمالي المبلغ المستحق</label><div class="fro" style="font-weight:800;color:var(--accent);font-size:15px">${req.disbursement.totalAmount ? req.disbursement.totalAmount.toFixed(3)+' ر.ع' : '—'}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ آخر صرف</label><div class="fro">${formatDate(req.disbursement.lastDisbursement)}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ الصرف القادم</label><div class="fro">${req.disbursement.nextDisbursement ? formatDate(req.disbursement.nextDisbursement) : '—'}</div></div>
-          ${req.disbursement.stopReason ? `<div class="fgrp span-2"><label class="flbl">سبب التوقف</label><div class="fro" style="color:var(--danger)">${req.disbursement.stopReason}</div></div>` : ''}
         </div>
       </div>
     </div>` : ''}
@@ -345,24 +302,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('')}
         <div style="margin-top:10px">
           ${renderModernUploadComponent({ idPrefix: 'gen-att', subTitle: 'PDF, Word, صور, MP3, WAV, MP4 — الحجم الأقصى 20 ميغابايت' })}
-        </div>
-      </div>
-    </div>
-
-    <!-- الملاحظات التشغيلية -->
-    <div class="card op-notes-card collapsed" data-notes-init="0">
-      <div class="ph op-notes-head" onclick="toggleOperationalNotes(this.closest('.op-notes-card'))">
-        <h3><div class="pico gy">${ICONS.note}</div>الملاحظات التشغيلية <span style="font-size:11px;font-weight:400;color:var(--text3)">(لا تغيّر حالة الطلب)</span></h3>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="op-notes-chevron">${ICONS.arrow_left}</span>
-          <button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();openAddNoteModal(currentRequestId)">${ICONS.plus} إضافة ملاحظة</button>
-        </div>
-      </div>
-      <div class="pb">
-        ${notes.length === 0 ? '<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">لا توجد ملاحظات تشغيلية</div>' : notes.map(n=>`<div class="note-item"><div class="note-av">${n.author?.charAt(0)||'؟'}</div><div class="note-c"><div class="note-hd"><span class="note-auth">${n.author}</span><span class="note-role">${n.role}</span><span class="note-time">${n.time}</span></div><div class="note-txt">${n.text}</div></div></div>`).join('')}
-        <div style="margin-top:10px;display:flex;gap:8px">
-          <textarea class="fc" id="quick-note-input" placeholder="أكتب ملاحظة سريعة..." rows="2" style="flex:1"></textarea>
-          <button class="btn btn-secondary btn-sm" style="align-self:flex-end" onclick="quickAddNote()">حفظ</button>
         </div>
       </div>
     </div>
@@ -389,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- السجل الزمني -->
     <div class="card">
       <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني الكامل للطلب</h3></div>
-      <div class="pb">${renderTimelineList(tl)}</div>
+      <div class="pb">${renderTimelineList(tl, { hideActor: true, hidePhone: true })}</div>
     </div>`;
 
   if (req.status === 'تم رفض الطلب') {
@@ -401,6 +340,54 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dp) { const btn = dp.querySelector('button'); if (btn) btn.onclick = () => window.location.href = `allowances-new.html?id=${req.id}&mode=fulfill`; }
   }
 });
+
+function renderWorkerAllowanceWorkflow(req) {
+  const current = getWorkerAllowanceStage(req);
+  const stages = [
+    { key: 'submitted', name: 'تقديم الطلب', desc: 'قام المؤمن عليه أو مقدم الطلب برفع الطلب.' },
+    { key: 'investigation', name: 'التحقيق', desc: 'الطلب قيد المراجعة والتحقيق الأولي.' },
+    { key: 'sickleave', name: 'الإجازات المرضية', desc: 'مراجعة فترات الإجازات المرضية والبيانات المرتبطة بها.' },
+    { key: 'committees', name: 'اللجان الطبية', desc: 'الطلب قيد الدراسة لدى قسم اللجان الطبية.' },
+    { key: 'institution', name: 'العرض على المؤسسات الصحية المرخصة', desc: 'الطلب في مرحلة العرض أو استلام قرار المؤسسة الصحية.' },
+  ];
+  const currentIndex = stages.findIndex((stage) => stage.key === current);
+
+  return `
+    <div class="card workflow-card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.chart}</div>مسار العمل المتوقع</h3></div>
+      <div class="pb">
+        <div class="workflow-strip">
+          ${stages.map((stage, index) => {
+            const isCurrent = stage.key === current;
+            const isDone = currentIndex > index;
+            return `
+              <div class="workflow-stage ${isCurrent ? 'current' : ''} ${isDone ? 'done' : ''}">
+                <div class="workflow-stage-dot">${isDone ? ICONS.check : index + 1}</div>
+                <div class="workflow-stage-body">
+                  <div class="workflow-stage-name">${stage.name}</div>
+                  <div class="workflow-stage-desc">${stage.desc}</div>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function getWorkerAllowanceStage(req) {
+  const status = String(req?.status || '');
+  if (
+    req?.committeeDecision ||
+    req?.session ||
+    req?.referral ||
+    status.includes('المؤسسات الصحية المرخصة') ||
+    status.includes('قرار المؤسسة الصحية')
+  ) return 'institution';
+  if (status.includes('اللجان الطبية')) return 'committees';
+  if (status.includes('الإجازات المرضية') || req?.sickLeavePeriods?.length) return 'sickleave';
+  if (status.includes('تحقيق') || req?.investigation || req?.fieldVisits?.length) return 'investigation';
+  return 'submitted';
+}
 </script>
 </body>
 </html>

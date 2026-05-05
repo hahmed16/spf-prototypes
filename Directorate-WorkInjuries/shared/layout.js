@@ -122,7 +122,6 @@ function getUserData(role) {
     'appeals-rapporteur': WI_DATA.users.appeals_rapporteur,
     'supervisory-rapporteur': WI_DATA.users.supervisory_rapporteur,
     'referral-coordinator': WI_DATA.users.referral_coordinator,
-    'direct-referral-employee': WI_DATA.users.direct_referral_employee,
   };
   return map[role] || { name: 'مستخدم النظام', civil: '' };
 }
@@ -187,7 +186,7 @@ function buildHeader(roleConfig, userData) {
         <div>
           <div class="u-name">${userData.name}</div>
           <div class="u-role">${roleConfig.nameAr}</div>
-          ${userData.availability ? `
+          ${userData.availability && CURRENT_ROLE !== 'worker' ? `
           <div class="u-availability">
             <span class="avail-dot ${userData.availability.status === 'متاح' ? 'avail' : 'unavail'}"></span>
             <span class="avail-status">${userData.availability.status}</span>
@@ -305,7 +304,7 @@ function showProfile() {
 
   openModal({
     title: 'الملف الشخصي',
-    size: 'lg',
+    size: isWorker ? 'md-lg' : 'lg',
     body: `
       <div class="fg fg-2" style="gap:14px">
         <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${userData.name}</div></div>
@@ -602,7 +601,7 @@ function inferDefaultSlaDays(record) {
   const requestType = normalizeDisplay(record.requestType || record.type || record.originalRequestType, '');
 
   if (record.committeeDecision || record.activeLicense || record.institution || status.includes('التراخيص') || status.includes('اللجنة الطبية الإشرافية')) return 20;
-  if (record.referral || WI_DATA.referrals?.includes(record) || requestType.includes('عرض مباشر')) return 7;
+  if (record.referral || WI_DATA.referrals?.includes(record) || requestType.includes('المؤسسات الصحية المرخصة')) return 7;
   if (record.appealReason || WI_DATA.appeals?.includes(record) || requestType.includes('تظلم')) return 15;
   if (record.retirementDate || WI_DATA.disabilityRetirement?.includes(record)) return 5;
   if (record.card || WI_DATA.disability?.includes(record) || requestType.includes('إعاقة')) return 10;
@@ -739,14 +738,10 @@ function inferWorkflowStageId(requestType, status, record = {}) {
   }
 
   if (requestType === 'directReferral') {
-    if (text.includes('موظف طلبات العرض المباشر')) return text.includes('قيد مراجعة') ? 'employee_review' : 'submitted';
-    if (text.includes('منسق الإحالات والتحويلات')) return text.includes('قيد مراجعة') || text.includes('قيد المتابعة') ? 'coordinator_review' : 'coordinator_review';
-    if (text.includes('قسم اللجان الطبية') || text.includes('رئيس قسم اللجان الطبية')) return 'committee_review';
-    if (text.includes('إحالة المقرر')) return 'rapporteur_assignment';
-    if (text.includes('جلسة')) return 'institution_session';
-    if (text.includes('قرار المؤسسة الصحية')) return 'decision_received';
-    if (text.includes('تنفيذ') || text.includes('إغلاق')) return 'completed';
     if (text.includes('استيفاء')) return 'returned';
+    if (text.includes('موظف قسم اللجان الطبية') || text.includes('رئيس قسم اللجان الطبية') || text.includes('قيد المراجعة — قسم اللجان الطبية')) return 'committee_review';
+    if (text.includes('منسق الإحالات والتحويلات') || text.includes('إحالة المقرر') || text.includes('جلسة') || text.includes('قرار المؤسسة الصحية')) return 'institution_review';
+    if (text.includes('تنفيذ') || text.includes('إغلاق')) return 'completed';
     return 'submitted';
   }
 
@@ -897,16 +892,66 @@ function resolveAllowanceStageStatus(record) {
   return fallbackEvent?.fromStatus || currentStatus;
 }
 
-function renderTimelineList(timeline) {
+function isCurrentViewerExternal() {
+  return WI_CONFIG?.roles?.[CURRENT_ROLE]?.type === 'external';
+}
+
+function isInternalRoleLabel(roleLabel = '') {
+  const target = String(roleLabel || '').trim();
+  if (!target) return false;
+  return Object.values(WI_CONFIG?.roles || {}).some((role) => role?.type === 'internal' && role?.nameAr === target);
+}
+
+function resolveTimelineCurrentWorkerContact(timeline, record = null) {
+  const activeName = record?.checkedOutBy || record?.assignedTo || record?.lastUpdatedBy || '';
+  if (activeName) {
+    const phone = getPhoneForActor(activeName);
+    if (phone) {
+      return {
+        actor: activeName,
+        role: 'الموظف الحالي على الطلب',
+        phone,
+      };
+    }
+  }
+
+  const reversed = [...timeline].reverse();
+  const latestInternalEvent = reversed.find((event) => {
+    const phone = event?.phone || getPhoneForActor(event?.actor, event?.role);
+    return phone && isInternalRoleLabel(event?.role);
+  });
+
+  if (!latestInternalEvent) return null;
+  return {
+    actor: normalizeDisplay(latestInternalEvent.actor),
+    role: normalizeDisplay(latestInternalEvent.role),
+    phone: latestInternalEvent.phone || getPhoneForActor(latestInternalEvent.actor, latestInternalEvent.role),
+  };
+}
+
+function renderTimelineList(timeline, { hideActor = false, hidePhone = false } = {}) {
   const safeTimeline = Array.isArray(timeline) ? timeline : [];
   if (!safeTimeline.length) {
     return `<div class="empty-st" style="padding:18px 0">${ICONS.info}<p>لا يوجد سجل إجراءات حتى الآن</p></div>`;
   }
 
+  const isExternalViewer = isCurrentViewerExternal();
+  const currentRecord = resolveCurrentRequestRecord();
+  const activeContact = isExternalViewer ? null : resolveTimelineCurrentWorkerContact(safeTimeline, currentRecord);
+
   return `
-    <div class="timeline">
+    <div class="timeline-wrap">
+      ${!isExternalViewer && activeContact?.phone ? `
+      <div class="timeline-current-owner">
+        <div class="timeline-current-owner-icon">${ICONS.user}</div>
+        <div class="timeline-current-owner-body">
+          <div class="timeline-current-owner-label">رقم هاتف آخر موظف يعمل على الطلب حالياً</div>
+          <div class="timeline-current-owner-main">${activeContact.actor}${activeContact.role ? ` — ${activeContact.role}` : ''}</div>
+          <div class="timeline-current-owner-phone">${activeContact.phone}</div>
+        </div>
+      </div>` : ''}
+      <div class="timeline">
       ${safeTimeline.map((event) => {
-        const eventPhone = event.phone || getPhoneForActor(event.actor, event.role);
         return `
           <div class="tl-item ${event.type || 'default'}">
             <div class="tl-dot"></div>
@@ -915,18 +960,11 @@ function renderTimelineList(timeline) {
                 <span class="tl-action">${normalizeDisplay(event.action)}</span>
                 <span class="tl-time">${normalizeDisplay(event.time)}</span>
               </div>
-              <div class="tl-actor">${normalizeDisplay(event.actor)} — ${normalizeDisplay(event.role)}</div>
-              ${event.note ? `<div class="tl-note">${event.note}</div>` : ''}
-              ${event.fromStatus && event.toStatus ? `
-              <div class="tl-status">
-                <span class="badge b-secondary">${event.fromStatus || '—'}</span>
-                ${ICONS.arrow_left}
-                <span class="badge b-primary">${event.toStatus}</span>
-              </div>` : ''}
-              ${eventPhone ? `<div class="tl-phone"><small>رقم الهاتف: ${eventPhone}</small></div>` : ''}
+              ${isExternalViewer ? '' : `<div class="tl-actor"><span class="tl-actor-label">الموظف القائم بالإجراء</span><span class="tl-actor-value">${normalizeDisplay(event.actor)}${event.role ? ` — ${normalizeDisplay(event.role)}` : ''}</span></div>`}
             </div>
           </div>`;
       }).join('')}
+      </div>
     </div>`;
 }
 

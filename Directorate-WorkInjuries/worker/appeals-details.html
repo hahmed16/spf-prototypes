@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const origReq = WI_DATA.allowances.find(r => r.id === appeal.originalRequestId);
   const atts  = appeal.attachments || [];
-  const notes = appeal.notes || [];
   const tl    = appeal.timeline || [];
 
   getContent().innerHTML = `
@@ -238,24 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    <!-- الملاحظات التشغيلية -->
-    <div class="card op-notes-card collapsed" data-notes-init="0">
-      <div class="ph op-notes-head" onclick="toggleOperationalNotes(this.closest('.op-notes-card'))">
-        <h3><div class="pico gy">${ICONS.note}</div>الملاحظات التشغيلية <span style="font-size:11px;font-weight:400;color:var(--text3)">(لا تغيّر حالة الطلب)</span></h3>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="op-notes-chevron">${ICONS.arrow_left}</span>
-          <button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();openAddNoteModal(currentRequestId)">${ICONS.plus} إضافة ملاحظة</button>
-        </div>
-      </div>
-      <div class="pb">
-        ${notes.length === 0 ? '<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">لا توجد ملاحظات تشغيلية</div>' : notes.map(n => `<div class="note-item"><div class="note-av">${n.author?.charAt(0) || '؟'}</div><div class="note-c"><div class="note-hd"><span class="note-auth">${n.author}</span><span class="note-role">${n.role}</span><span class="note-time">${n.time}</span></div><div class="note-txt">${n.text}</div></div></div>`).join('')}
-        <div style="margin-top:10px;display:flex;gap:8px">
-          <textarea class="fc" id="quick-note-input" placeholder="أكتب ملاحظة سريعة..." rows="2" style="flex:1"></textarea>
-          <button class="btn btn-secondary btn-sm" style="align-self:flex-end" onclick="quickAddNote()">حفظ</button>
-        </div>
-      </div>
-    </div>
-
     ${workerActions.length > 0 ? `
     <!-- الإجراءات المتاحة للعامل -->
     <div class="dp">
@@ -278,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- السجل الزمني -->
     <div class="card">
       <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني الكامل للتظلم</h3></div>
-      <div class="pb">${renderTimelineList(tl)}</div>
+      <div class="pb">${renderTimelineList(tl, { hideActor: true, hidePhone: true })}</div>
     </div>`;
 });
 </script>

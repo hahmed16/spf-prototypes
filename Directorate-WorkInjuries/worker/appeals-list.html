@@ -24,12 +24,12 @@ initLayout({ role: 'worker', activePage: 'appeals-list' });
 setBreadcrumb([{ label: 'التظلمات' }, { label: 'قائمة التظلمات' }]);
 
 const u = WI_DATA.users.worker;
-const myAppeals = WI_DATA.appeals.filter(a => a.applicant.civil === u.civil);
+const myAppeals = WI_DATA.appeals.filter((a) => a.applicant.civil === u.civil).slice(0, 1);
 
 document.addEventListener('DOMContentLoaded', () => {
   getContent().innerHTML = `
     <div class="pg-head">
-      <div><h1>قائمة التظلمات</h1><p>${myAppeals.length} تظلم مقدم</p></div>
+      <div><h1>قائمة التظلمات</h1><p>${myAppeals.length} تظلم معروض</p></div>
       <div class="pg-acts">
         <button class="btn btn-primary" onclick="window.location.href='appeals-new.html'">${ICONS.plus} تقديم تظلم جديد</button>
       </div>
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <div class="alert alert-i">
       ${ICONS.info}
-      <div>يمكنك تقديم تظلم على قرارات المؤسسات الصحية المرخصة المتعلقة بطلباتك. يجب أن تقدم التظلم خلال 30 يوماً من تاريخ علمك بالقرار.</div>
+      <div>يمكنك تقديم تظلم على قرارات المؤسسات الصحية المرخصة المتعلقة بطلباتك خلال المدة النظامية.</div>
     </div>
 
     ${renderUnifiedFilterBar({ onSearch: 'noopUnifiedSearch', onToggleAll: 'noopUnifiedToggleAll', isAllVisible: false })}
@@ -48,16 +48,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="empty-st">
           ${ICONS.shield}
           <h4>لا توجد تظلمات</h4>
-          <p>لم تقدم أي تظلمات بعد</p>
+          <p>لم يتم تقديم أي تظلمات بعد</p>
         </div>` : `
         <div class="tbl-wrap">
           <table class="dtbl">
             <thead><tr><th>رقم التظلم</th><th>الطلب الأصلي</th><th>مقدم التظلم</th><th>سبب التظلم</th><th>الحالة</th><th>تاريخ التقديم</th><th>الأيام المتبقية</th><th></th></tr></thead>
             <tbody>
-              ${myAppeals.map(a=> {
+              ${myAppeals.map((a) => {
                 const meta = deriveRequestSummaryMeta(a);
-                const remainingDaysClass = getRemainingDaysClass(meta.remainingDays);
-                const remainingDaysLabel = getRemainingDaysLabel(meta.remainingDays);
                 return `
               <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${a.id}</td>
@@ -66,16 +64,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${a.appealReason}</td>
                 <td>${statusBadge(a.status)}</td>
                 <td>${a.submitDate}</td>
-                <td><span class="sla-days ${remainingDaysClass}">${remainingDaysLabel}</span></td>
+                <td><span class="sla-days ${getRemainingDaysClass(meta.remainingDays)}">${getRemainingDaysLabel(meta.remainingDays)}</span></td>
                 <td><button class="ibtn" onclick="window.location.href='appeals-details.html?id=${a.id}'">${ICONS.eye}</button></td>
               </tr>`;
-                }).join('')}
+              }).join('')}
             </tbody>
           </table>
         </div>`}
       </div>
     </div>`;
+
+  removeWorkerFilterFields(['الرقم المدني']);
 });
+
+function removeWorkerFilterFields(labels) {
+  document.querySelectorAll('.unified-filter-panel .fgrp').forEach((group) => {
+    const label = group.querySelector('.flbl')?.textContent?.trim();
+    if (labels.includes(label)) group.remove();
+  });
+}
 </script>
 </body>
 </html>

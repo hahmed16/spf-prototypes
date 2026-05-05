@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -17,128 +17,27 @@
 <script src="../shared/data-sessions.js"></script>
 <script src="../shared/data-disability-retirement.js"></script>
 <script src="../shared/data.js"></script>
-<script src="../shared/workflow-stages.js"></script>
 <script src="../shared/layout.js"></script>
 <script src="../shared/utils.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  initLayout({ role: 'worker', activePage: 'chronic-list' });
-  setBreadcrumb([{ label: 'الأمراض المستديمة', page: 'chronic-list' }, { label: 'تفاصيل الطلب' }]);
+initLayout({ role: 'worker', activePage: 'chronic-list' });
 
-  const params = new URLSearchParams(window.location.search);
-  const requestId = params.get('id') || 'CHR-2025-000156';
+const params = new URLSearchParams(window.location.search);
+const requestId = params.get('id') || 'CHR-2025-000156';
+const workerUser = WI_DATA.users?.worker || {};
+const incomingRecord = (WI_DATA.chronicIncoming || []).find((item) => item.requestId === requestId)
+  || (WI_DATA.chronicIncoming || []).find((item) => item.civil === workerUser.civil)
+  || null;
+let req = (WI_DATA.chronic || []).find((item) => item.id === requestId) || createWorkerChronicRequest(incomingRecord, requestId);
+currentRequestId = req.id;
 
-  // Get the actual chronic request from data
-  let req = (WI_DATA.chronic || []).find(c => c.id === requestId);
+setBreadcrumb([{ label: 'الأمراض المستديمة', page: 'chronic-list' }, { label: 'تفاصيل الطلب' }]);
 
-// If not found in chronic requests, try to get from incoming data
-if (!req) {
-  const incomingRecord = (WI_DATA.chronicIncoming || []).find(c => c.requestId === requestId) ||
-                         (WI_DATA.chronicIncoming || [])[0];
-
-  if (incomingRecord) {
-    // Create a request object from incoming data
-    req = {
-      id: requestId,
-      status: incomingRecord.requestStatus || 'تم تقديم طلب مرض مستديم — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة',
-      submitDate: incomingRecord.requestSubmitDate || incomingRecord.provenDate || '2025-01-05',
-      lastUpdate: incomingRecord.requestLastUpdate || '2025-01-05 14:00',
-      lastUpdatedBy: incomingRecord.assignedTo || null,
-      expectedClosureDate: null,
-      remainingDays: null,
-      applicant: {
-        name: incomingRecord.applicantName || WI_DATA.users?.worker?.name || '',
-        civil: incomingRecord.civil || WI_DATA.users?.worker?.civil || '',
-        phone: WI_DATA.users?.worker?.phone || '',
-        email: WI_DATA.users?.worker?.email || '',
-        role: 'المواطن'
-      },
-      chronic: {
-        chronicDisease: incomingRecord.chronicDisease || incomingRecord.diagnosis || '',
-        diagnosisDate: incomingRecord.provenDate || '',
-        severity: incomingRecord.severityIndex || '',
-        treatment: '',
-        medications: [],
-        complications: '',
-        lastAssessment: '',
-        nextAssessment: '',
-        path: incomingRecord.expectedPath === 'مسار مباشر' ? 'الاستحقاق المباشر' : 'المسار المؤسسات الصحية الخاصة'
-      },
-      insurance: {
-        status: 'نشط',
-        regDate: '',
-        subType: 'إلزامي',
-        otherBenefits: 'لا يوجد'
-      },
-      disbursement: null,
-      attachments: [],
-      notes: [],
-      timeline: [
-        { action: 'تم استلام التشخيص من المؤسسة الصحية المعالجة', actor: 'وزارة الصحة', role: 'آلي', time: incomingRecord.visitDateTime || '2024-11-22 08:00', fromStatus: '', toStatus: 'تم استلام التشخيص من المؤسسة الصحية المعالجة', note: '', type: 'default' },
-        { action: 'تم تقديم الطلب من قِبل المؤمن عليه', actor: incomingRecord.applicantName || WI_DATA.users?.worker?.name || 'المؤمن عليه', role: 'العامل', time: incomingRecord.requestSubmitDate || '2025-01-05 14:00', fromStatus: 'تم استلام التشخيص', toStatus: incomingRecord.requestStatus || 'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة', note: '', type: 'default' },
-      ],
-      assignedTo: incomingRecord.assignedTo || '',
-      checkedOutBy: '',
-      referral: null,
-      session: null,
-      committeeDecision: null
-    };
-  }
-}
-
-// Fallback to sample data if still no request
-if (!req) {
-  req = {
-    id: requestId,
-    status: 'تم تقديم طلب مرض مستديم — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة',
-    submitDate: '2025-01-05',
-    lastUpdate: '2025-01-05 14:00',
-    lastUpdatedBy: null,
-    expectedClosureDate: null,
-    remainingDays: null,
-    applicant: {
-      name: WI_DATA.users?.worker?.name || 'سالم بن ناصر الحارثي',
-      civil: WI_DATA.users?.worker?.civil || '9012345678',
-      phone: WI_DATA.users?.worker?.phone || '96898765432',
-      email: WI_DATA.users?.worker?.email || 'salem.h@gmail.com',
-      role: 'المواطن'
-    },
-    chronic: {
-      chronicDisease: 'داء السكري من النوع الثاني',
-      diagnosisDate: '2020-05-15',
-      severity: 'متوسط',
-      treatment: 'الأنسولين والمراقبة المستمرة لمستوى السكر',
-      medications: ['ميتفورمين', 'الأنسولين طويل المفعول'],
-      complications: 'بدون مضاعفات خطيرة',
-      lastAssessment: '2024-12-01',
-      nextAssessment: '2025-06-01',
-      path: 'الاستحقاق المباشر'
-    },
-    insurance: {
-      status: 'نشط',
-      regDate: '2018-03-01',
-      subType: 'إلزامي',
-      otherBenefits: 'لا يوجد'
-    },
-    disbursement: null,
-    attachments: [],
-    notes: [],
-    timeline: [
-      { action: 'تم تقديم الطلب', actor: WI_DATA.users?.worker?.name || 'المؤمن عليه', role: 'العامل', time: '2025-01-05 14:00', fromStatus: '', toStatus: 'تم تقديم طلب مرض مستديم', note: '', type: 'default' },
-    ],
-    assignedTo: '',
-    checkedOutBy: '',
-    referral: null,
-    session: null,
-    committeeDecision: null
-  };
-}
-
-  currentRequestId = req.id;
-
-  const atts  = req.attachments || [];
-  const notes = req.notes || [];
-  const tl    = req.timeline || [];
+document.addEventListener('DOMContentLoaded', () => {
+  const atts = req.attachments || [];
+  const tl = req.timeline || [];
+  const summary = getWorkerChronicSummary(req, incomingRecord);
+  const workerActions = getWorkerChronicActions(req.status);
 
   getContent().innerHTML = `
     <div class="pg-head">
@@ -148,88 +47,71 @@ if (!req) {
       <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='chronic-list.html'">${ICONS.arrow_left} رجوع</button></div>
     </div>
 
-    <!-- ملخص الطلب -->
     <div class="card" style="border-right:4px solid var(--primary)">
       <div class="pb-c">
         <div class="req-summary-grid">
           <div><div class="flbl" style="margin-bottom:4px">رقم الطلب</div><div style="font-size:15px;font-weight:800;color:var(--primary);font-family:monospace">${req.id}</div></div>
           <div><div class="flbl" style="margin-bottom:4px">الحالة الحالية</div>${statusBadge(req.status)}</div>
-          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div style="font-size:12.5px">${req.submitDate}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ التقديم</div><div style="font-size:12.5px">${formatDate(req.submitDate)}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">آخر تحديث</div><div style="font-size:12px;color:var(--text2)">${normalizeDisplay(req.lastUpdate)}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">مرجع وزارة الصحة</div><div style="font-size:12px;font-family:monospace">${summary.uniqueRequestId}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">المؤسسة الصحية المعالجة</div><div style="font-size:12.5px">${summary.hospital}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">تاريخ التشخيص الوارد</div><div style="font-size:12.5px">${summary.visitDateTime}</div></div>
+          <div><div class="flbl" style="margin-bottom:4px">المسار المتوقع</div><div style="font-size:12.5px">${summary.expectedPath}</div></div>
         </div>
       </div>
     </div>
 
-    ${renderWorkflowPath(req, 'chronic')}
+    ${renderWorkerChronicWorkflow(req, summary)}
 
-    <!-- بيانات مقدم الطلب / المؤمن عليه -->
     <div class="card card-ro">
       <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب / المؤمن عليه</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
       <div class="pb">
         <div class="fg fg-4">
-          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.applicant.name}</div></div>
-          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.applicant.civil}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(req.applicant.phone)}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(req.applicant.email)}</div></div>
-          <div class="fgrp"><label class="flbl">الصفة</label><div class="fro">${req.applicant.role}</div></div>
+          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant?.role || 'العامل / المؤمن عليه / المواطن'}</div></div>
+          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.applicant?.name || workerUser.name || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.applicant?.civil || workerUser.civil || '—'}</div></div>
+          <div class="fgrp"><label class="flbl">رقم الهاتف (من النظام)</label><div class="fro">${normalizeDisplay(req.applicant?.phone || workerUser.phone)}</div></div>
+          <div class="fgrp"><label class="flbl">البريد الإلكتروني (من النظام)</label><div class="fro">${normalizeDisplay(req.applicant?.email || workerUser.email)}</div></div>
+          <div class="fgrp"><label class="flbl">رقم هاتف إضافي 1</label><div class="fro">${normalizeDisplay(workerUser.phoneAlt1)}</div></div>
+          <div class="fgrp"><label class="flbl">رقم هاتف إضافي 2</label><div class="fro">${normalizeDisplay(workerUser.phoneAlt2)}</div></div>
+          <div class="fgrp"><label class="flbl">بريد إلكتروني إضافي</label><div class="fro">${normalizeDisplay(workerUser.emailAlt)}</div></div>
+          <div class="fgrp"><label class="flbl">المحافظة</label><div class="fro">${normalizeDisplay(workerUser.region, 'محافظة مسقط')}</div></div>
+          <div class="fgrp"><label class="flbl">الولاية</label><div class="fro">${normalizeDisplay(workerUser.wilayat, 'بوشر')}</div></div>
+          <div class="fgrp"><label class="flbl">الدولة</label><div class="fro">${normalizeDisplay(workerUser.country, 'سلطنة عُمان')}</div></div>
+          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${req.insurance?.status === 'نشط' ? 'b-approved' : 'b-rejected'}">${normalizeDisplay(req.insurance?.status)}</span></div></div>
+          <div class="fgrp"><label class="flbl">نوع التأمين</label><div class="fro">تأمين العاملين في القطاع الخاص</div></div>
+          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${normalizeDisplay(req.insurance?.subType)}</div></div>
+          <div class="fgrp"><label class="flbl">فئة النظام</label><div class="fro">داخل السلطنة - القطاع الخاص</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(req.insurance?.regDate)}</div></div>
+          <div class="fgrp"><label class="flbl">منافع أخرى مستحقة</label><div class="fro">${normalizeDisplay(req.insurance?.otherBenefits)}</div></div>
         </div>
       </div>
     </div>
 
-    <!-- البيانات الطبية -->
     <div class="card card-ro">
-      <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>البيانات الطبية</h3></div>
+      <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>ملخص التشخيص الوارد من وزارة الصحة</h3></div>
       <div class="pb">
+        <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info}<span>هذه البيانات مستلمة تلقائياً من وزارة الصحة للعرض فقط ولا يمكن تعديلها.</span></div>
         <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">المرض المزمن</label><div class="fro" style="font-weight:600">${req.chronic.chronicDisease}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ التشخيص</label><div class="fro">${formatDate(req.chronic.diagnosisDate)}</div></div>
-          <div class="fgrp"><label class="flbl">الشدة</label><div class="fro">${req.chronic.severity}</div></div>
-          <div class="fgrp span-full"><label class="flbl">العلاج الحالي</label><div class="fro">${req.chronic.treatment}</div></div>
-          ${req.chronic.medications && req.chronic.medications.length > 0 ? `<div class="fgrp span-full"><label class="flbl">الأدوية</label><div class="fro">${req.chronic.medications.join('، ')}</div></div>` : ''}
-          ${req.chronic.complications ? `<div class="fgrp span-full"><label class="flbl">المضاعفات</label><div class="fro">${req.chronic.complications}</div></div>` : ''}
-          <div class="fgrp"><label class="flbl">تاريخ آخر تقييم</label><div class="fro">${formatDate(req.chronic.lastAssessment)}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ التقييم القادم</label><div class="fro">${formatDate(req.chronic.nextAssessment)}</div></div>
-          <div class="fgrp"><label class="flbl">المسار</label><div class="fro"><span class="badge ${req.chronic.path === 'الاستحقاق المباشر' ? 'b-approved' : 'b-warning'}">${req.chronic.path}</span></div></div>
+          <div class="fgrp"><label class="flbl">المؤسسة الصحية المعالجة</label><div class="fro">${summary.hospital}</div></div>
+          <div class="fgrp span-full"><label class="flbl">التشخيص الطبي (تقرير وصفي مثبت)</label><div class="fro medical-report">${summary.permanentDiseaseReport}</div></div>
+          <div class="fgrp"><label class="flbl">المرض المزمن</label><div class="fro">${summary.chronicDisease}</div></div>
+          <div class="fgrp"><label class="flbl">الجهاز المتأثر</label><div class="fro">${summary.affectedSystem}</div></div>
+          <div class="fgrp"><label class="flbl">تاريخ ووقت الزيارة</label><div class="fro">${summary.visitDateTime}</div></div>
+          ${summary.firstRequestRef !== '—' ? `<div class="fgrp"><label class="flbl">رقم أول طلب مرتبط</label><div class="fro" style="font-family:monospace">${summary.firstRequestRef}</div></div>` : ''}
+          ${summary.overallCondition !== '—' ? `<div class="fgrp span-full"><label class="flbl">الحالة العامة</label><div class="fro">${summary.overallCondition}</div></div>` : ''}
         </div>
       </div>
     </div>
 
-    <!-- بيانات التأمين -->
-    <div class="card card-ro">
-      <div class="ph"><h3><div class="pico gr">${ICONS.shield}</div>بيانات التأمين</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
-      <div class="pb">
-        <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${req.insurance.status === 'نشط' ? 'b-approved' : 'b-rejected'}">${req.insurance.status}</span></div></div>
-          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${req.insurance.subType}</div></div>
-          <div class="fgrp"><label class="flbl">منافع أخرى</label><div class="fro">${req.insurance.otherBenefits}</div></div>
-          ${req.insurance.regDate ? `<div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(req.insurance.regDate)}</div></div>` : ''}
-        </div>
-      </div>
-    </div>
-
-    <!-- بيانات الصرف (إذا كانت موجودة) -->
-    ${req.disbursement ? `
-    <div class="card card-ro">
-      <div class="ph"><h3><div class="pico gr">${ICONS.wallet}</div>بيانات الصرف</h3></div>
-      <div class="pb">
-        <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">حالة الصرف</label><div class="fro"><span class="badge ${req.disbursement.status === 'الصرف جارٍ' ? 'b-approved' : 'b-draft'}">${req.disbursement.status}</span></div></div>
-          <div class="fgrp"><label class="flbl">تاريخ الاعتماد</label><div class="fro">${formatDate(req.disbursement.approvalDate)}</div></div>
-          ${req.disbursement.monthlyDay ? `<div class="fgrp"><label class="flbl">يوم الصرف الشهري</label><div class="fro">اليوم ${req.disbursement.monthlyDay}</div></div>` : ''}
-          ${req.disbursement.expiryDate ? `<div class="fgrp"><label class="flbl">تاريخ انتهاء الصرف</label><div class="fro">${formatDate(req.disbursement.expiryDate)}</div></div>` : ''}
-          ${req.disbursement.stopReason ? `<div class="fgrp span-full"><label class="flbl">سبب التوقف</label><div class="fro">${req.disbursement.stopReason}</div></div>` : ''}
-        </div>
-      </div>
-    </div>
-    ` : ''}
-
-    <!-- المرفقات -->
     <div class="card">
       <div class="ph">
         <h3><div class="pico or">${ICONS.upload}</div>المرفقات <span style="font-size:11px;font-weight:400;color:var(--text3)">(${atts.length} مرفق)</span></h3>
         <button class="btn btn-secondary btn-xs" onclick="openAddAttachmentModal()">${ICONS.plus} إضافة مرفق</button>
       </div>
       <div class="pb">
-        ${atts.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد مرفقات</div>' : atts.map(att => {
+        ${atts.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">لا توجد مرفقات</div>' : atts.map((att) => {
           const ext = att.name?.split('.').pop()?.toLowerCase() || 'oth';
           const icoMap = { pdf: 'file', doc: 'file', docx: 'file', jpg: 'img', jpeg: 'img', png: 'img' };
           return `<div class="att-row"><div class="att-ico ${icoMap[ext] || 'oth'}">${ICONS.file}</div><div class="att-info"><div class="att-name">${att.name}</div><div class="att-meta">${att.type} · رفعه: ${att.uploadedBy} (${att.role}) · ${att.uploadDate} · ${att.size || ''}</div></div><div class="att-acts"><button class="ibtn" title="تحميل" onclick="showToast('جارٍ تحميل الملف...','i')">${ICONS.download}</button></div></div>`;
@@ -240,32 +122,201 @@ if (!req) {
       </div>
     </div>
 
-    <!-- الملاحظات التشغيلية -->
-    <div class="card op-notes-card collapsed" data-notes-init="0">
-      <div class="ph op-notes-head" onclick="toggleOperationalNotes(this.closest('.op-notes-card'))">
-        <h3><div class="pico gy">${ICONS.note}</div>الملاحظات التشغيلية <span style="font-size:11px;font-weight:400;color:var(--text3)">(لا تغيّر حالة الطلب)</span></h3>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="op-notes-chevron">${ICONS.arrow_left}</span>
-          <button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();openAddNoteModal(currentRequestId)">${ICONS.plus} إضافة ملاحظة</button>
+    ${workerActions.length > 0 ? `
+    <div class="dp">
+      <div class="ph"><h3><div class="pico bl">${ICONS.pen}</div>الإجراءات المتاحة لك</h3></div>
+      <div class="dp-body">
+        <div class="fgrp">
+          <label class="flbl">ملاحظاتك <span style="font-weight:400;color:var(--text3)">(اختياري)</span></label>
+          <textarea class="fc" id="decision-notes" placeholder="أكتب ملاحظاتك هنا..." rows="3"></textarea>
+        </div>
+        <div class="fgrp">
+          <label class="flbl">إرفاق ملفات داعمة <span style="font-weight:400;color:var(--text3)">(اختياري)</span></label>
+          ${renderModernUploadComponent({ idPrefix: 'decision-att', subTitle: 'يمكن رفع عدة ملفات دفعة واحدة' })}
+        </div>
+        <div class="dp-acts">
+          ${workerActions.map((action) => `<button class="btn ${WI_CONFIG.actionStyles[action] || 'btn-secondary btn-sm'}" onclick="executeAction('${action}')">${action}</button>`).join('')}
         </div>
       </div>
-      <div class="pb">
-        ${notes.length === 0 ? '<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">لا توجد ملاحظات تشغيلية</div>' : notes.map(n => `<div class="note-item"><div class="note-av">${n.author?.charAt(0) || '؟'}</div><div class="note-c"><div class="note-hd"><span class="note-auth">${n.author}</span><span class="note-role">${n.role}</span><span class="note-time">${n.time}</span></div><div class="note-txt">${n.text}</div></div></div>`).join('')}
-        <div style="margin-top:10px;display:flex;gap:8px">
-          <textarea class="fc" id="quick-note-input" placeholder="أكتب ملاحظة سريعة..." rows="2" style="flex:1"></textarea>
-          <button class="btn btn-secondary btn-sm" style="align-self:flex-end" onclick="quickAddNote()">حفظ</button>
-        </div>
-      </div>
-    </div>
+    </div>` : ''}
 
-    <!-- السجل الزمني -->
     <div class="card">
       <div class="ph"><h3><div class="pico gy">${ICONS.clock}</div>السجل الزمني الكامل للطلب</h3></div>
-      <div class="pb">${renderTimelineList(tl)}</div>
+      <div class="pb">${renderTimelineList(tl, { hideActor: true, hidePhone: true })}</div>
     </div>`;
 });
+
+function createWorkerChronicRequest(incoming, fallbackId) {
+  if (incoming) {
+    return {
+      id: incoming.requestId || fallbackId || 'CHR-2025-000156',
+      status: incoming.requestStatus || 'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة',
+      submitDate: incoming.requestSubmitDate || incoming.provenDate || '2025-01-05',
+      lastUpdate: incoming.requestLastUpdate || incoming.visitDateTime || '2025-01-05 14:00',
+      lastUpdatedBy: incoming.assignedTo || null,
+      expectedClosureDate: null,
+      remainingDays: null,
+      applicant: {
+        name: incoming.applicantName || workerUser.name || '',
+        civil: incoming.civil || workerUser.civil || '',
+        phone: workerUser.phone || '',
+        email: workerUser.email || '',
+        role: 'العامل / المؤمن عليه / المواطن',
+      },
+      chronic: {
+        chronicDisease: incoming.chronicDisease || incoming.diagnosis || '',
+        diagnosisDate: incoming.provenDate || '',
+        severity: incoming.severityIndex || '',
+        treatment: '',
+        medications: [],
+        complications: '',
+        lastAssessment: '',
+        nextAssessment: '',
+        path: incoming.expectedPath || 'مسار اللجان الطبية',
+      },
+      insurance: {
+        status: 'نشط',
+        regDate: '',
+        subType: 'إلزامي',
+        otherBenefits: 'لا يوجد',
+      },
+      attachments: [],
+      notes: [],
+      timeline: [
+        { action: 'تم استلام التشخيص من وزارة الصحة', actor: 'وزارة الصحة', role: 'آلي', time: incoming.visitDateTime || '2025-01-01 08:00', fromStatus: '', toStatus: 'تم استلام التشخيص', note: '', type: 'default' },
+        { action: 'تم تقديم الطلب', actor: incoming.applicantName || workerUser.name || 'المؤمن عليه', role: 'العامل', time: incoming.requestSubmitDate || '2025-01-05 14:00', fromStatus: 'تم استلام التشخيص', toStatus: incoming.requestStatus || 'تم تقديم الطلب', note: '', type: 'default' },
+      ],
+      assignedTo: incoming.assignedTo || '',
+      checkedOutBy: '',
+      referral: null,
+      session: null,
+      committeeDecision: null,
+    };
+  }
+
+  return {
+    id: fallbackId || 'CHR-2025-000156',
+    status: 'تم تقديم الطلب — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة',
+    submitDate: '2025-01-05',
+    lastUpdate: '2025-01-05 14:00',
+    lastUpdatedBy: null,
+    expectedClosureDate: null,
+    remainingDays: null,
+    applicant: {
+      name: workerUser.name || '—',
+      civil: workerUser.civil || '—',
+      phone: workerUser.phone || '—',
+      email: workerUser.email || '—',
+      role: 'العامل / المؤمن عليه / المواطن',
+    },
+    chronic: {
+      chronicDisease: '—',
+      diagnosisDate: '',
+      severity: '',
+      treatment: '',
+      medications: [],
+      complications: '',
+      lastAssessment: '',
+      nextAssessment: '',
+      path: 'مسار اللجان الطبية',
+    },
+    insurance: {
+      status: 'نشط',
+      regDate: '',
+      subType: 'إلزامي',
+      otherBenefits: 'لا يوجد',
+    },
+    attachments: [],
+    notes: [],
+    timeline: [],
+    assignedTo: '',
+    checkedOutBy: '',
+    referral: null,
+    session: null,
+    committeeDecision: null,
+  };
+}
+
+function getWorkerChronicSummary(request, incoming) {
+  return {
+    hospital: normalizeDisplay(incoming?.hospital),
+    permanentDiseaseReport: normalizeDisplay(incoming?.permanentDiseaseReport || buildWorkerPermanentDiseaseReport(request)),
+    chronicDisease: normalizeDisplay(incoming?.chronicDisease || request.chronic?.chronicDisease),
+    affectedSystem: normalizeDisplay(incoming?.affectedSystem),
+    visitDateTime: normalizeDisplay(incoming?.visitDateTime || request.chronic?.diagnosisDate),
+    firstRequestRef: normalizeDisplay(incoming?.firstRequestRef),
+    overallCondition: normalizeDisplay(incoming?.overallCondition),
+    uniqueRequestId: normalizeDisplay(incoming?.uniqueRequestId),
+    expectedPath: normalizeDisplay(incoming?.expectedPath || request.chronic?.path),
+  };
+}
+
+function buildWorkerPermanentDiseaseReport(request) {
+  if (!request?.chronic?.chronicDisease) return '—';
+  const lines = [
+    `تم استلام تشخيص طبي مثبت بخصوص ${request.chronic.chronicDisease}.`,
+    request.chronic.severity ? `مستوى الشدة الحالي: ${request.chronic.severity}.` : '',
+    request.chronic.complications ? `المضاعفات أو الآثار المرتبطة بالحالة: ${request.chronic.complications}.` : '',
+    request.chronic.treatment ? `الخطة العلاجية الحالية: ${request.chronic.treatment}.` : '',
+  ].filter(Boolean);
+  return lines.join('\n');
+}
+
+function renderWorkerChronicWorkflow(request, summary) {
+  const current = getWorkerChronicStage(request, summary);
+  const stages = [
+    { key: 'submitted', name: 'تقديم الطلب', desc: 'قام المؤمن عليه بتقديم الطلب عبر البوابة.' },
+    { key: 'disability-review', name: 'بحث الطلب فى قسم الاعاقة والامراض المستديمة', desc: 'الطلب قيد الدراسة الأولية لدى القسم المختص.' },
+    { key: 'committees-review', name: 'بحث الطلب فى قسم اللجان الطبية', desc: 'الطلب قيد المراجعة والتحقق لدى قسم اللجان الطبية.' },
+    { key: 'institution', name: 'العرض على المؤسسات الصحية المرخصة', desc: 'الطلب في مرحلة العرض أو الاستكمال مع المؤسسة الصحية المرخصة.' },
+  ];
+  const currentIndex = stages.findIndex((stage) => stage.key === current);
+
+  return `
+    <div class="card workflow-card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.chart}</div>مسار العمل المتوقع</h3></div>
+      <div class="pb">
+        <div class="workflow-strip">
+          ${stages.map((stage, index) => {
+            const isCurrent = stage.key === current;
+            const isDone = currentIndex > index;
+            return `
+              <div class="workflow-stage ${isCurrent ? 'current' : ''} ${isDone ? 'done' : ''}">
+                <div class="workflow-stage-dot">${isDone ? ICONS.check : index + 1}</div>
+                <div class="workflow-stage-body">
+                  <div class="workflow-stage-name">${stage.name}</div>
+                  <div class="workflow-stage-desc">${stage.desc}</div>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function getWorkerChronicStage(request, summary) {
+  const status = String(request?.status || '');
+  const path = String(summary?.expectedPath || request?.chronic?.path || '');
+  if (
+    status.includes('المؤسسات الصحية المرخصة') ||
+    status.includes('الصرف') ||
+    status.includes('اعتماد') ||
+    request?.referral ||
+    request?.session ||
+    request?.committeeDecision ||
+    path.includes('المؤسسات')
+  ) return 'institution';
+  if (status.includes('اللجان الطبية')) return 'committees-review';
+  if (status.includes('الإعاقة') || status.includes('الأمراض المستديمة')) return 'disability-review';
+  return 'submitted';
+}
+
+function getWorkerChronicActions(status) {
+  if (status === 'مسودة') return ['إرسال الطلب', 'حذف'];
+  if (status === 'تم إعادة الطلب لاستيفاء البيانات') return ['استيفاء البيانات المطلوبة وإعادة الإرسال'];
+  if (status === 'تم رفض الطلب') return ['تقديم تظلم'];
+  return [];
+}
 </script>
 </body>
 </html>
-
-

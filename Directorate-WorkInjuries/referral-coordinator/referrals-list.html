@@ -33,7 +33,7 @@ let requestTypeFilter = 'all';
 const requestTypeOptions = [
   { value: 'ترخيص', label: 'ترخيص' },
   { value: 'تظلم', label: 'تظلم' },
-  { value: 'عرض مباشر', label: 'عرض مباشر' },
+  { value: 'عرض على المؤسسات الصحية المرخصة', label: 'عرض على المؤسسات الصحية المرخصة' },
   { value: 'إصابة عمل', label: 'إصابة عمل' },
   { value: 'مرض مهني', label: 'مرض مهني' }
 ];
@@ -186,7 +186,7 @@ function getReferrals() {
     if (req.status.includes('إحالة المقرر') || req.status.includes('المؤسسة الصحية المرخصة') || req.status.includes('جلسة') || req.status.includes('قرار') || req.status.includes('منسق الإحالات')) {
       referrals.push({
         id: req.id,
-        requestType: req.requestType || 'عرض مباشر',
+        requestType: req.requestType || 'عرض على المؤسسات الصحية المرخصة',
         beneficiaryName: req.insured.name,
         committeeType: req.assignedCommittee || 'قسم اللجان الطبية',
         referralDate: req.submitDate,

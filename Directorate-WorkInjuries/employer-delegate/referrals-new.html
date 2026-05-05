@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>طلب عرض مباشر جديد — جهة العمل</title><link rel="stylesheet" href="../shared/style.css"></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>طلب عرض على المؤسسات الصحية المرخصة جديد — جهة العمل</title><link rel="stylesheet" href="../shared/style.css"></head>
 <body>
 <script src="../shared/config.js"></script><script src="../shared/data-users.js"></script><script src="../shared/data-allowances.js"></script><script src="../shared/data-disability.js"></script><script src="../shared/data-chronic.js"></script><script src="../shared/data-appeals.js"></script><script src="../shared/data-licensing.js"></script><script src="../shared/data-sessions.js"></script><script src="../shared/data-disability-retirement.js"></script><script src="../shared/data-referrals.js"></script><script src="../shared/data.js"></script><script src="../shared/layout.js"></script><script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'employer-delegate', activePage: 'referrals-list' });
-setBreadcrumb([{ label: 'طلبات العرض المباشر', page: 'referrals-list' }, { label: 'طلب جديد' }]);
+setBreadcrumb([{ label: 'طلبات العرض على المؤسسات الصحية المرخصة', page: 'referrals-list' }, { label: 'طلب جديد' }]);
 const u = WI_DATA.users.employer_delegate;
 document.addEventListener('DOMContentLoaded', () => {
-  getContent().innerHTML = `<div class="pg-head"><div><h1>طلب عرض مباشر من جهة العمل</h1></div></div>
+  getContent().innerHTML = `<div class="pg-head"><div><h1>طلب عرض على المؤسسات الصحية المرخصة من جهة العمل</h1></div></div>
   <div class="card"><div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات المفوض والعامل</h3></div><div class="pb"><div class="fg fg-2">
   <div class="fgrp"><label class="flbl">المفوض</label><div class="fro">${u.name}</div></div>
   <div class="fgrp"><label class="flbl">جهة العمل</label><div class="fro">${u.company}</div></div>
   <div class="fgrp"><label class="flbl">اسم العامل <span class="req">*</span></label><input class="fc" id="insured-name"></div>
   <div class="fgrp"><label class="flbl">الرقم المدني للعامل <span class="req">*</span></label><input class="fc" id="insured-civil"></div>
-  <div class="fgrp span-full"><label class="flbl">سبب طلب العرض المباشر <span class="req">*</span></label><textarea class="fc" id="referral-reason" rows="3"></textarea></div>
+  <div class="fgrp span-full"><label class="flbl">سبب طلب العرض على المؤسسات الصحية المرخصة <span class="req">*</span></label><textarea class="fc" id="referral-reason" rows="3"></textarea></div>
   <div class="fgrp span-full"><label class="flbl">ملاحظات</label><textarea class="fc" id="referral-notes" rows="3"></textarea></div>
   </div>${renderModernUploadComponent({ idPrefix: 'referral-employer' })}</div></div>
   <div class="form-actions"><button class="btn btn-primary" onclick="submitReferral()">${ICONS.check} إرسال الطلب</button><button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.x} إلغاء</button></div>`;
@@ -29,7 +29,7 @@ function submitReferral() {
     id,
     sourceChannel: 'بوابة المفوض عن جهة العمل',
     createdByRole: 'employer-delegate',
-    status: 'تم تقديم طلب العرض المباشر — بانتظار مراجعة موظف طلبات العرض المباشر',
+    status: 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية',
     submitDate: new Date().toISOString().slice(0, 10),
     lastUpdate: new Date().toISOString().slice(0, 16).replace('T', ' '),
     lastUpdatedBy: u.name,
@@ -39,8 +39,8 @@ function submitReferral() {
     employer: { name: u.company, cr: u.cr, sector: u.sector, employerType: u.employerType },
     referral: { reason, notes: document.getElementById('referral-notes').value.trim(), requestCategory: 'من جهة العمل' },
     attachments: [],
-    timeline: [{ action: 'تم تقديم الطلب', actor: u.name, role: 'الشخص المفوض من جهة العمل', time: new Date().toISOString().slice(0, 16).replace('T', ' '), fromStatus: '', toStatus: 'تم تقديم طلب العرض المباشر — بانتظار مراجعة موظف طلبات العرض المباشر', note: reason, type: 'default', phone: u.phone }],
-    assignedTo: WI_DATA.users.direct_referral_employee.name
+    timeline: [{ action: 'تم تقديم الطلب', actor: u.name, role: 'الشخص المفوض من جهة العمل', time: new Date().toISOString().slice(0, 16).replace('T', ' '), fromStatus: '', toStatus: 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية', note: reason, type: 'default', phone: u.phone }],
+    assignedTo: WI_DATA.users.committees_employee.name
   }));
   showToast('تم إرسال الطلب بنجاح', 's');
   setTimeout(() => window.location.href = 'referrals-list.html', 1000);

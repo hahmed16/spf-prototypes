@@ -1,35 +1,90 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>تفاصيل طلب العرض المباشر — العامل</title><link rel="stylesheet" href="../shared/style.css"></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>تفاصيل طلب العرض — العامل</title><link rel="stylesheet" href="../shared/style.css"></head>
 <body>
-<script src="../shared/config.js"></script><script src="../shared/data-users.js"></script><script src="../shared/data-allowances.js"></script><script src="../shared/data-disability.js"></script><script src="../shared/data-chronic.js"></script><script src="../shared/data-appeals.js"></script><script src="../shared/data-licensing.js"></script><script src="../shared/data-sessions.js"></script><script src="../shared/data-disability-retirement.js"></script><script src="../shared/data-referrals.js"></script><script src="../shared/data.js"></script><script src="../shared/workflow-stages.js"></script><script src="../shared/layout.js"></script><script src="../shared/utils.js"></script>
+<script src="../shared/config.js"></script><script src="../shared/data-users.js"></script><script src="../shared/data-allowances.js"></script><script src="../shared/data-disability.js"></script><script src="../shared/data-chronic.js"></script><script src="../shared/data-appeals.js"></script><script src="../shared/data-licensing.js"></script><script src="../shared/data-sessions.js"></script><script src="../shared/data-disability-retirement.js"></script><script src="../shared/data-referrals.js"></script><script src="../shared/data.js"></script><script src="../shared/layout.js"></script><script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'worker', activePage: 'referrals-list' });
-const req = WI_DATA.referrals.find(r => r.id === new URLSearchParams(window.location.search).get('id'));
-setBreadcrumb([{ label: 'طلبات العرض المباشر', page: 'referrals-list' }, { label: req ? req.id : 'التفاصيل' }]);
+const req = WI_DATA.referrals.find((r) => r.id === new URLSearchParams(window.location.search).get('id'));
+setBreadcrumb([{ label: 'طلبات العرض على المؤسسات الصحية المرخصة', page: 'referrals-list' }, { label: req ? req.id : 'التفاصيل' }]);
+
 document.addEventListener('DOMContentLoaded', () => {
   if (!req) { renderContent('<div class="card"><div class="pb"><div class="empty-st">الطلب غير موجود</div></div></div>'); return; }
   const attachments = req.attachments || [];
   getContent().innerHTML = `
-    <div class="pg-head"><div><h1>تفاصيل طلب العرض المباشر</h1><p>${req.id}</p></div><div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.arrow_left} رجوع</button></div></div>
-    <div class="card"><div class="pb"><div class="fg fg-3">
-      <div class="fgrp"><label class="flbl">هدف الشاشة</label><div class="fro">متابعة حالة الطلب، معرفة المؤسسة الصحية المقترحة، والاطلاع على مسار المعالجة والقرار.</div></div>
-      <div class="fgrp"><label class="flbl">إجراءات هذا الدور</label><div class="fro">الاطلاع فقط على البيانات والمسار الزمني. لا توجد قرارات على العامل من هذه الشاشة.</div></div>
-      <div class="fgrp"><label class="flbl">ما الذي يظهر هنا</label><div class="fro">بيانات الطلب، المؤمن عليه، جهة العمل، سبب العرض المباشر، المرفقات، والمتابعة مع المؤسسة الصحية.</div></div>
+    <div class="pg-head"><div><h1>تفاصيل طلب العرض على المؤسسات الصحية المرخصة</h1><p>${req.id}</p></div><div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.arrow_left} رجوع</button></div></div>
+    ${renderWorkerReferralWorkflow(req)}
+    <div class="card"><div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات المؤمن عليه</h3></div><div class="pb"><div class="fg fg-3">
+      <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.insured?.name || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.insured?.civil || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">رقم التأمين</label><div class="fro" style="font-family:monospace">${req.insured?.insurance || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro">${req.insured?.insuranceStatus || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${req.insured?.subType || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">تاريخ التسجيل</label><div class="fro">${formatDate(req.insured?.regDate)}</div></div>
+      <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${req.insured?.phone || req.applicant?.phone || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${req.insured?.email || req.applicant?.email || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant?.role || '—'}</div></div>
     </div></div></div>
-    ${renderDirectReferralSummaryCard(req, { variant: 'worker' })}
-    ${renderWorkflowPath(req, 'directReferral')}
-    ${renderDirectReferralReasonCard(req)}
-    ${renderReferralInsuredCard(req.insured || {}, { extended: true })}
-    ${renderReferralEmployerCard(req.employer || {})}
-    ${renderDirectReferralFollowUpCard(req)}
+
+    <div class="card"><div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات جهة العمل</h3></div><div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">اسم جهة العمل</label><div class="fro">${req.employer?.name || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">السجل التجاري</label><div class="fro" style="font-family:monospace">${req.employer?.cr || '—'}</div></div>
+      <div class="fgrp"><label class="flbl">تاريخ الالتحاق</label><div class="fro">${formatDate(req.employer?.joinDate)}</div></div>
+      <div class="fgrp"><label class="flbl">الفرع</label><div class="fro">${req.employer?.branch ? `${req.employer.branch.id} — ${req.employer.branch.name}` : '—'}</div></div>
+    </div></div></div>
+
+    <div class="card"><div class="ph"><h3><div class="pico or">${ICONS.note}</div>بيانات الطلب</h3></div><div class="pb"><div class="fg fg-2">
+      <div class="fgrp"><label class="flbl">سبب الطلب</label><div class="fro">تحديد نسبة العجز</div></div>
+      <div class="fgrp"><label class="flbl">تاريخ تقديم الطلب</label><div class="fro">${formatDate(req.submitDate)}</div></div>
+      <div class="fgrp span-full"><label class="flbl">الملاحظات الإضافية</label><div class="fro">${req.referral?.notes || '—'}</div></div>
+    </div></div></div>
+
     <div class="card"><div class="ph"><h3><div class="pico bl">${ICONS.file}</div>المرفقات المرتبطة بالطلب</h3></div><div class="pb">
-      ${attachments.length ? `<div class="tbl-wrap"><table class="dtbl"><thead><tr><th>اسم الملف</th><th>النوع</th><th>تاريخ الرفع</th><th>الرافع</th></tr></thead><tbody>
-      ${attachments.map((att) => `<tr><td>${att.name}</td><td>${att.type || 'مستند'}</td><td style="font-size:12px">${formatDate(att.uploadDate)}</td><td style="font-size:12px">${att.uploadedBy || att.role || '—'}</td></tr>`).join('')}
+      ${attachments.length ? `<div class="tbl-wrap"><table class="dtbl"><thead><tr><th>اسم الملف</th><th>النوع</th><th>تاريخ الرفع</th><th>الرافع</th><th></th></tr></thead><tbody>
+      ${attachments.map((att) => `<tr><td>${att.name}</td><td>${att.type || 'مستند'}</td><td style="font-size:12px">${formatDate(att.uploadDate)}</td><td style="font-size:12px">${att.uploadedBy || att.role || '—'}</td><td><div style="display:flex;gap:4px"><button class="ibtn" title="استعراض" onclick="showToast('استعراض الملف: ${att.name}','i')">${ICONS.eye}</button><button class="ibtn" title="تحميل" onclick="showToast('جارٍ تحميل الملف: ${att.name}','i')">${ICONS.download}</button></div></td></tr>`).join('')}
       </tbody></table></div>` : '<div class="empty-st">لا توجد مرفقات مضافة على هذا الطلب</div>'}
     </div></div>
-    <div class="card"><div class="ph"><h3><div class="pico bl">${ICONS.clock}</div>السجل الزمني</h3></div><div class="pb">${renderTimelineList(req.timeline)}</div></div>`;
+
+    <div class="card"><div class="ph"><h3><div class="pico bl">${ICONS.clock}</div>السجل الزمني</h3></div><div class="pb">${renderTimelineList(req.timeline, { hideActor: true, hidePhone: true })}</div></div>`;
 });
+
+function renderWorkerReferralWorkflow(req) {
+  const current = getWorkerReferralStage(req);
+  const stages = [
+    { key: 'submitted', name: 'تقديم الطلب', desc: 'تم رفع الطلب من قبل المؤمن عليه أو مقدم الطلب' },
+    { key: 'committees', name: 'قسم اللجان الطبية', desc: 'الطلب تحت مراجعة قسم اللجان الطبية' },
+    { key: 'institution', name: 'العرض على المؤسسات الصحية المرخصة', desc: 'تمت إحالة الطلب إلى المؤسسة الصحية المرخصة' },
+  ];
+
+  return `
+    <div class="card workflow-card">
+      <div class="ph"><h3><div class="pico bl">${ICONS.chart}</div>مسار العمل المتوقع</h3></div>
+      <div class="pb">
+        <div class="workflow-strip">
+          ${stages.map((stage, index) => {
+            const currentIndex = stages.findIndex((item) => item.key === current);
+            const isCurrent = stage.key === current;
+            const isDone = currentIndex > index;
+            return `
+              <div class="workflow-stage ${isCurrent ? 'current' : ''} ${isDone ? 'done' : ''}">
+                <div class="workflow-stage-dot">${isDone ? ICONS.check : index + 1}</div>
+                <div class="workflow-stage-body">
+                  <div class="workflow-stage-name">${stage.name}</div>
+                  <div class="workflow-stage-desc">${stage.desc}</div>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function getWorkerReferralStage(req) {
+  const status = String(req?.status || '');
+  if (status.includes('المؤسسات الصحية المرخصة') && (req.assignedInstitution || req.committeeDecision)) return 'institution';
+  if (status.includes('اللجان الطبية') || status.includes('رئيس قسم اللجان الطبية')) return 'committees';
+  return 'submitted';
+}
 </script>
 </body>
 </html>

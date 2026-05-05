@@ -454,7 +454,7 @@ function getFilteredData({ role, data, query = '', showAll = false, requestTypeF
   });
 }
 
-function renderUnifiedFilterBar({ onSearch = 'noopUnifiedSearch', onToggleAll = 'noopUnifiedToggleAll', isAllVisible = false, includeToggle = true, requestPlaceholder = 'WI-2025-001234', includeRequestTypeFilter = false, requestTypeOptions = [] } = {}) {
+function renderUnifiedFilterBar({ onSearch = 'noopUnifiedSearch', onToggleAll = 'noopUnifiedToggleAll', isAllVisible = false, includeToggle = true, requestPlaceholder = 'WI-2025-001234', includeRequestTypeFilter = false, requestTypeOptions = [], includeCivilSearch = true, includeCommercialRegisterSearch = true } = {}) {
   const requestTypeOptionsHtml = includeRequestTypeFilter && requestTypeOptions.length > 0
     ? `
         <div class="fgrp" style="margin:0">
@@ -466,9 +466,36 @@ function renderUnifiedFilterBar({ onSearch = 'noopUnifiedSearch', onToggleAll = 
         </div>`
     : '';
 
+  const searchColumns = [
+    '1.15fr',
+    includeCivilSearch ? '1fr' : null,
+    includeCommercialRegisterSearch ? '1fr' : null,
+    includeRequestTypeFilter ? '1fr' : null,
+    '0.9fr',
+    '0.9fr',
+    '1.2fr',
+    'auto',
+  ].filter(Boolean).join(' ');
+
+  const civilSearchHtml = includeCivilSearch
+    ? `
+        <div class="fgrp" style="margin:0">
+          <label class="flbl">Ø§Ù„Ø±Ù‚Ù… Ø§Ù„Ù…Ø¯Ù†ÙŠ</label>
+          <input type="text" class="fc" placeholder="9012345678">
+        </div>`
+    : '';
+
+  const commercialRegisterSearchHtml = includeCommercialRegisterSearch
+    ? `
+        <div class="fgrp" style="margin:0">
+          <label class="flbl">Ø±Ù‚Ù… Ø§Ù„Ø³Ø¬Ù„ Ø§Ù„ØªØ¬Ø§Ø±ÙŠ</label>
+          <input type="text" class="fc" placeholder="1234567">
+        </div>`
+    : '';
+
   return `
     <div class="filters unified-filter-panel" style="margin-bottom:20px;display:flex;flex-direction:column;gap:12px;padding:16px;background:var(--g50);border:1px solid var(--border);border-radius:14px">
-      <div class="unified-filter-row" style="display:grid;grid-template-columns:${includeRequestTypeFilter ? '1fr 1fr 1fr 0.9fr 0.9fr 1.2fr auto' : '1.15fr 1fr 1fr 0.9fr 0.9fr 1.2fr auto'};gap:12px;align-items:end">
+      <div class="unified-filter-row" style="display:grid;grid-template-columns:${searchColumns};gap:12px;align-items:end">
         <div class="fgrp" style="margin:0">
           <label class="flbl">رقم الطلب</label>
           <input type="text" class="fc" id="global-search-input" placeholder="${requestPlaceholder}" oninput="handleGlobalSearch(this.value, ${onSearch})">
@@ -698,9 +725,9 @@ function getInstitutionReferralCases() {
     'تم اتخاذ القرار من المؤسسة الصحية المرخصة — بانتظار التنفيذ',
   ];
   const directReferralStatuses = [
-    'تم اعتماد طلب العرض المباشر — بانتظار مراجعة موظف قسم اللجان الطبية',
-    'تم اعتماد طلب العرض المباشر — بانتظار مراجعة رئيس قسم اللجان الطبية',
-    'تم اعتماد طلب العرض المباشر — بانتظار إحالة المقرر',
+    'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية',
+    'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة رئيس قسم اللجان الطبية',
+    'تم الموافقة على العرض على المؤسسات الصحية المرخصة — بانتظار إحالة المقرر',
     'تمت متابعة الحالة مع المؤسسة الصحية — بانتظار انعقاد الجلسة',
     'تم استلام قرار المؤسسة الصحية — بانتظار استكمال التنفيذ',
   ];
@@ -732,7 +759,7 @@ function getInstitutionReferralCases() {
     if (!directReferralStatuses.some((status) => req.status === status || String(req.status || '').includes(status))) return;
     cases.push({
       id: req.id,
-      requestType: req.requestType || 'عرض مباشر',
+      requestType: req.requestType || 'عرض على المؤسسات الصحية المرخصة',
       beneficiaryName: req.insured?.name || req.applicant?.name || '—',
       institutionName: req.assignedInstitution || req.referral?.preferredInstitution || 'مؤسسة صحية مرخصة',
       referralDate: req.referral?.date || req.lastUpdate || req.submitDate || '',
@@ -740,7 +767,7 @@ function getInstitutionReferralCases() {
       status: req.status,
       remainingDays: req.remainingDays,
       suspended: req.suspended,
-      sourceFlow: 'طلبات العرض المباشر',
+      sourceFlow: 'طلبات العرض على المؤسسات الصحية المرخصة',
       currentOwner: getInstitutionReferralOwnerLabel(req.status),
       nextStep: getInstitutionReferralNextStepLabel(req.status),
       stageKey: getInstitutionReferralStageKey(req.status),
@@ -948,7 +975,7 @@ function renderInsuredSummaryCards(civil, currentId = '') {
     { key: 'disability-paid', label: 'المنافع المصروفة حالياً', items: activePaidBenefits, icon: ICONS.check },
     { key: 'allowances', label: 'طلبات بدل الانقطاع', items: allowanceRequests, icon: ICONS.medical },
     { key: 'appeals', label: 'التظلمات', items: appeals, icon: ICONS.note },
-    { key: 'referrals', label: 'طلبات العرض المباشر', items: referrals, icon: ICONS.building },
+    { key: 'referrals', label: 'طلبات العرض على المؤسسات الصحية المرخصة', items: referrals, icon: ICONS.building },
   ];
 
   return `
@@ -990,7 +1017,7 @@ function getInsuredSummaryCardsData(civil, currentId = '') {
     { key: 'disability-paid', label: 'المنافع المصروفة حالياً', items: activePaidBenefits, columns: ['رقم الطلب', 'المؤمن عليه', 'حالة الصرف', 'آخر صرف'] },
     { key: 'allowances', label: 'طلبات بدل الانقطاع', items: allowanceRequests, columns: ['رقم الطلب', 'نوع الحالة', 'الحالة', 'تاريخ التقديم'] },
     { key: 'appeals', label: 'التظلمات', items: appeals, columns: ['رقم التظلم', 'الطلب الأصلي', 'الحالة', 'تاريخ التقديم'] },
-    { key: 'referrals', label: 'طلبات العرض المباشر', items: referrals, columns: ['رقم الطلب', 'المؤمن عليه', 'الحالة', 'تاريخ التقديم'] },
+    { key: 'referrals', label: 'طلبات العرض على المؤسسات الصحية المرخصة', items: referrals, columns: ['رقم الطلب', 'المؤمن عليه', 'الحالة', 'تاريخ التقديم'] },
   ];
 }
 
@@ -1298,7 +1325,7 @@ function getCommitteeDecisionsData() {
   (WI_DATA.referrals || []).forEach((req) => {
     pushDecision(req, {
       sourceType: 'directReferral',
-      requestType: req.requestType || req.referral?.requestCategory || 'عرض مباشر',
+      requestType: req.requestType || req.referral?.requestCategory || 'عرض على المؤسسات الصحية المرخصة',
       committeeType: 'اللجان الطبية',
       decisionPrefix: 'DEC-REF',
       beneficiaryName: req.insured?.name || req.applicant?.name || '—',
@@ -1415,10 +1442,10 @@ function initiateAppealFromDecision(decisionId) {
       type: decision.decisionType,
       date: decision.decisionDate,
       issuer: 'اللجان الطبية',
-      details: decision.details?.summary || decision.details?.details || 'قرار لجنة طبية مرتبط بطلب عرض مباشر',
+      details: decision.details?.summary || decision.details?.details || 'قرار لجنة طبية مرتبط بطلب عرض على المؤسسات الصحية المرخصة',
       knowledgeDate: new Date().toISOString().slice(0, 10),
     },
-    appealReason: 'تظلم على قرار اللجنة الطبية المرتبط بطلب العرض المباشر',
+    appealReason: 'تظلم على قرار اللجنة الطبية المرتبط بطلب العرض على المؤسسات الصحية المرخصة',
     appealDetails: 'تم إنشاء تظلم تجريبي من شاشة قرارات اللجان الطبية لربط القرار بسجل التظلمات.',
     timeline: [
       {
@@ -1502,7 +1529,6 @@ function getRoleDataset(role) {
     case 'institution-rapporteur': return { scopeLabel: 'الجلسات الطبية', entries: WI_DATA.sessions };
     case 'appeals-committee':
     case 'appeals-rapporteur':     return { scopeLabel: 'ملفات التظلمات', entries: WI_DATA.appeals };
-    case 'direct-referral-employee': return { scopeLabel: 'طلبات العرض المباشر', entries: WI_DATA.referrals };
     case 'referral-coordinator': return { scopeLabel: 'إحالات المؤسسات الصحية', entries: [...WI_DATA.referrals, ...WI_DATA.appeals] };
     default: return { scopeLabel: 'الملفات الحالية', entries: [] };
   }

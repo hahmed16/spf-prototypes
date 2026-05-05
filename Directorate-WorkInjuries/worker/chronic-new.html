@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -25,7 +25,7 @@ setBreadcrumb([{ label: 'الأمراض المستديمة', page: 'chronic-inco
 
 const params = new URLSearchParams(window.location.search);
 const refId = params.get('ref');
-const incoming = refId ? WI_DATA.chronicIncoming.find(d => d.refId === refId) : WI_DATA.chronicIncoming[0];
+const incoming = refId ? WI_DATA.chronicIncoming.find((d) => d.refId === refId) : WI_DATA.chronicIncoming[0];
 const u = WI_DATA.users.worker;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -35,21 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='chronic-incoming.html'">${ICONS.arrow_left} رجوع</button></div>
     </div>
 
-    <!-- ملخص التشخيص الوارد -->
     <div class="card card-ro">
       <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>ملخص التشخيص الوارد من وزارة الصحة</h3></div>
       <div class="pb">
         <div class="alert alert-i" style="margin-bottom:14px">${ICONS.info}<span>هذه البيانات مستلمة تلقائياً من وزارة الصحة للعرض فقط ولا يمكن تعديلها.</span></div>
         <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">رقم الطلب الفريد (وزارة الصحة)</label><div class="fro" style="font-family:monospace">${normalizeDisplay(incoming?.uniqueRequestId || incoming?.refId)}</div></div>
           <div class="fgrp"><label class="flbl">المؤسسة الصحية المعالجة</label><div class="fro">${incoming?.hospital || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الطبيب المعالج</label><div class="fro">${incoming?.doctor || '—'}</div></div>
           <div class="fgrp span-full"><label class="flbl">التشخيص الطبي (تقرير وصفي مثبت)</label><div class="fro medical-report">${normalizeDisplay(incoming?.permanentDiseaseReport || buildPermanentDiseaseReport(incoming))}</div></div>
           <div class="fgrp"><label class="flbl">المرض المزمن</label><div class="fro">${normalizeDisplay(incoming?.chronicDisease)}</div></div>
           <div class="fgrp"><label class="flbl">الجهاز المتأثر</label><div class="fro">${normalizeDisplay(incoming?.affectedSystem)}</div></div>
-          <div class="fgrp"><label class="flbl">مؤشر الشدة الطبي</label><div class="fro">${normalizeDisplay(incoming?.severityIndex)}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ ثبوت المرض</label><div class="fro">${formatDate(incoming?.provenDate)}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ شدة المرض</label><div class="fro">${formatDate(incoming?.severityDate)}</div></div>
           <div class="fgrp"><label class="flbl">تاريخ ووقت الزيارة</label><div class="fro">${normalizeDisplay(incoming?.visitDateTime)}</div></div>
           ${incoming?.firstRequestRef ? `<div class="fgrp"><label class="flbl">رقم أول طلب مرتبط</label><div class="fro" style="font-family:monospace">${incoming.firstRequestRef}</div></div>` : ''}
           ${incoming?.overallCondition ? `<div class="fgrp span-full"><label class="flbl">الحالة العامة</label><div class="fro">${incoming.overallCondition}</div></div>` : ''}
@@ -57,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    <!-- بيانات المستفيد -->
     <div class="card">
       <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب</h3></div>
       <div class="pb">
@@ -77,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    <!-- المرفقات -->
     <div class="card">
       <div class="ph"><h3><div class="pico or">${ICONS.upload}</div>المرفقات الداعمة</h3></div>
       <div class="pb">
@@ -85,7 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    <!-- ملاحظات مقدم الطلب -->
     <div class="card">
       <div class="ph"><h3><div class="pico gy">${ICONS.note}</div>ملاحظات إضافية</h3></div>
       <div class="pb">
@@ -96,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    <!-- الأزرار -->
     <div style="display:flex;gap:10px;padding:16px 0">
       <button class="btn btn-primary btn-lg" onclick="submitChronicRequest()">${ICONS.check} إرسال الطلب</button>
       <button class="btn btn-secondary btn-lg" onclick="showToast('تم الحفظ كمسودة','i')">حفظ كمسودة</button>
@@ -127,5 +117,3 @@ function confirmDecline() {
 </script>
 </body>
 </html>
-
-

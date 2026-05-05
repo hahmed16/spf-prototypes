@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>طلبات الأمراض المستديمة — العامل</title>
+<title>طلبات منفعة الأمراض المستديمة — العامل</title>
 <link rel="stylesheet" href="../shared/style.css">
 </head>
 <body>
@@ -21,10 +21,10 @@
 <script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'worker', activePage: 'chronic-list' });
-setBreadcrumb([{ label: 'منفعة الأمراض المستديمة' }, { label: 'طلباتي المقدمة' }]);
+setBreadcrumb([{ label: 'منفعة الأمراض المستديمة' }, { label: 'الطلبات المقدمة' }]);
 
 document.addEventListener('DOMContentLoaded', () => {
-  const pending = WI_DATA.chronicIncoming.filter(d => d.hasRequest);
+  const pending = WI_DATA.chronicIncoming.filter((d) => d.hasRequest);
 
   getContent().innerHTML = `
     <div class="pg-head">
@@ -40,14 +40,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="empty-st">
           ${ICONS.medical}
           <h4>لا توجد طلبات مقدمة</h4>
-          <p>لم تقدم أي طلبات منفعة أمراض مستديمة بعد</p>
+          <p>لم يتم تقديم أي طلبات منفعة أمراض مستديمة بعد</p>
           <a href="chronic-incoming.html" class="btn btn-primary" style="margin-top:12px">عرض التشخيصات الواردة</a>
         </div>` : `
         <div class="tbl-wrap">
           <table class="dtbl">
             <thead><tr><th>رقم الطلب</th><th>مقدم الطلب</th><th>التشخيص</th><th>المستشفى</th><th>الحالة</th><th>تاريخ تقديم الطلب</th><th>تاريخ ورود التشخيص الطبي</th><th>الأيام المتبقية</th><th></th></tr></thead>
             <tbody>
-              ${pending.map(d=> {
+              ${pending.map((d) => {
                 const record = {
                   id: d.requestId,
                   status: d.requestStatus,
@@ -58,8 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
                   slaDays: 10
                 };
                 const meta = deriveRequestSummaryMeta(record);
-                const remainingDaysClass = getRemainingDaysClass(meta.remainingDays);
-                const remainingDaysLabel = getRemainingDaysLabel(meta.remainingDays);
                 return `
               <tr>
                 <td style="font-family:monospace;font-weight:700;color:var(--primary)">${d.requestId}</td>
@@ -69,16 +67,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><span class="badge b-submitted">قيد المراجعة</span></td>
                 <td>${formatDate(d.requestSubmitDate || '2025-01-05')}</td>
                 <td>${formatDate((d.receivedMedicalDate || d.visitDateTime || d.provenDate || '').split(' ')[0])}</td>
-                <td><span class="sla-days ${remainingDaysClass}">${remainingDaysLabel}</span></td>
+                <td><span class="sla-days ${getRemainingDaysClass(meta.remainingDays)}">${getRemainingDaysLabel(meta.remainingDays)}</span></td>
                 <td><button class="ibtn" onclick="window.location.href='chronic-details.html?id=${d.requestId}'">${ICONS.eye}</button></td>
               </tr>`;
-                }).join('')}
+              }).join('')}
             </tbody>
           </table>
         </div>`}
       </div>
     </div>`;
+
+  removeWorkerFilterFields(['الرقم المدني', 'رقم السجل التجاري']);
 });
+
+function removeWorkerFilterFields(labels) {
+  document.querySelectorAll('.unified-filter-panel .fgrp').forEach((group) => {
+    const label = group.querySelector('.flbl')?.textContent?.trim();
+    if (labels.includes(label)) group.remove();
+  });
+}
 </script>
 </body>
 </html>

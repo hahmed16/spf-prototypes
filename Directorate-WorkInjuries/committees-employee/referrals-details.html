@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function renderDirectReferralCommitteeEmployee() {
-  const actionEligible = req.status === 'تم اعتماد طلب العرض المباشر — بانتظار مراجعة موظف قسم اللجان الطبية' || req.status === 'قيد المراجعة — قسم اللجان الطبية';
+  const actionEligible = req.status === 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية' || req.status === 'قيد المراجعة — قسم اللجان الطبية';
   const canAct = actionEligible && isCheckedOutByMe;
   const atts = req.attachments || [];
   const notes = req.notes || [];
@@ -398,7 +398,7 @@ function renderDirectReferralCommitteeEmployee() {
   getContent().innerHTML = `
     <div class="pg-head">
       <div>
-        <h1>تفاصيل طلب العرض المباشر</h1>
+        <h1>تفاصيل طلب العرض على المؤسسات الصحية المرخصة</h1>
         <p>رقم الطلب: <strong style="font-family:monospace;color:var(--primary)">${req.id}</strong></p>
       </div>
       <div class="pg-acts">
@@ -450,7 +450,7 @@ function renderDirectReferralCommitteeEmployee() {
     </div>
 
     <div class="card">
-      <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>بيانات العرض المباشر</h3></div>
+      <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>بيانات طلب العرض على المؤسسات الصحية المرخصة</h3></div>
       <div class="pb">
         <div class="fg fg-2">
           <div class="fgrp"><label class="flbl">المؤسسة المقترحة</label><div class="fro">${req.referral?.preferredInstitution || '—'}</div></div>
@@ -518,7 +518,7 @@ function renderDirectReferralCommitteeEmployee() {
 
 function doCheckout() {
   req.checkedOutBy = me;
-  if (isDirectReferral && req.status === 'تم اعتماد طلب العرض المباشر — بانتظار مراجعة موظف قسم اللجان الطبية') {
+  if (isDirectReferral && req.status === 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية') {
     req.status = 'قيد المراجعة — قسم اللجان الطبية';
   } else if (req.status === statusPending1 || req.status === statusPending2) {
     req.status = 'قيد المراجعة — قسم اللجان الطبية';
@@ -529,7 +529,7 @@ function doCheckout() {
 function doCheckin() {
   req.checkedOutBy = null;
   if (isDirectReferral && req.status === 'قيد المراجعة — قسم اللجان الطبية') {
-    req.status = 'تم اعتماد طلب العرض المباشر — بانتظار مراجعة موظف قسم اللجان الطبية';
+    req.status = 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة موظف قسم اللجان الطبية';
   }
   showToast('تم التحرير', 'i');
   setTimeout(() => window.location.href = 'referrals-list.html', 800);
@@ -547,14 +547,14 @@ function committeesDecision(type) {
       req.assignedTo = WI_DATA.users.committees_head.name;
       req.lastUpdate = now;
       req.lastUpdatedBy = me;
-      req.status = 'تم اعتماد طلب العرض المباشر — بانتظار مراجعة رئيس قسم اللجان الطبية';
-      req.timeline.push({ action: 'توجيه إلى رئيس القسم', actor: me, role: 'موظف قسم اللجان الطبية', time: now, fromStatus: 'قيد المراجعة — قسم اللجان الطبية', toStatus: req.status, note: note || 'تمت التوصية بالموافقة على الإحالة المباشرة', type: 'success', phone });
+      req.status = 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة رئيس قسم اللجان الطبية';
+      req.timeline.push({ action: 'توجيه إلى رئيس القسم', actor: me, role: 'موظف قسم اللجان الطبية', time: now, fromStatus: 'قيد المراجعة — قسم اللجان الطبية', toStatus: req.status, note: note || 'تمت التوصية بالموافقة على العرض على المؤسسات الصحية المرخصة', type: 'success', phone });
       showToast('تم توجيه الطلب لرئيس القسم', 's');
     } else if (type === 'استيفاء') {
       req.checkedOutBy = '';
       req.lastUpdate = now;
       req.lastUpdatedBy = me;
-      req.status = 'تمت إعادة طلب العرض المباشر لاستيفاء البيانات';
+      req.status = 'تمت إعادة طلب العرض على المؤسسات الصحية المرخصة لاستيفاء البيانات';
       req.timeline.push({ action: 'إعادة للاستيفاء', actor: me, role: 'موظف قسم اللجان الطبية', time: now, fromStatus: 'قيد المراجعة — قسم اللجان الطبية', toStatus: req.status, note: note || 'يرجى استكمال البيانات والمرفقات', type: 'warning', phone });
       showToast('تمت إعادة الطلب للاستيفاء', 'w');
     } else {
@@ -562,7 +562,7 @@ function committeesDecision(type) {
       req.lastUpdate = now;
       req.lastUpdatedBy = me;
       req.status = 'تم رفض الطلب';
-      req.timeline.push({ action: 'رفض الإحالة المباشرة', actor: me, role: 'موظف قسم اللجان الطبية', time: now, fromStatus: 'قيد المراجعة — قسم اللجان الطبية', toStatus: req.status, note: note || 'تمت التوصية برفض الإحالة المباشرة', type: 'danger', phone });
+      req.timeline.push({ action: 'رفض طلب العرض', actor: me, role: 'موظف قسم اللجان الطبية', time: now, fromStatus: 'قيد المراجعة — قسم اللجان الطبية', toStatus: req.status, note: note || 'تمت التوصية برفض طلب العرض على المؤسسات الصحية المرخصة', type: 'danger', phone });
       showToast('تم رفض الإحالة', 'd');
     }
     setTimeout(() => window.location.href = 'referrals-list.html', 1200);

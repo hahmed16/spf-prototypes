@@ -57,7 +57,7 @@ function renderReferralCoordinatorDetails() {
   const tl         = req.timeline || [];
 
   // Determine request type for display
-  const requestTypeDisplay = isDirectReferral ? 'عرض مباشر' :
+  const requestTypeDisplay = isDirectReferral ? 'عرض على المؤسسات الصحية المرخصة' :
                               isLicensing ? 'ترخيص' :
                               isAppeal ? 'تظلم' :
                               req.type || 'طلب';
@@ -186,7 +186,7 @@ function renderStandardReferralDetails(req, canAct, isSamePerson) {
 }
 
 function renderCoordinatorActionPanel(req) {
-  const isDirectReferral = req.requestType === 'عرض مباشر';
+  const isDirectReferral = req.requestType === 'عرض على المؤسسات الصحية المرخصة';
   const isLicensing = req.requestType === 'ترخيص';
   const isAppeal = req.originalRequestId ? true : false;
 
@@ -313,7 +313,7 @@ function returnForCompletionByCoordinator() {
   const note = prompt('اذكر سبب الإعادة للاستيفاء:');
   if (!note) return;
   const previousStatus = req.status;
-  req.status = 'تمت إعادة طلب العرض المباشر لاستيفاء البيانات';
+  req.status = 'تمت إعادة طلب العرض على المؤسسات الصحية المرخصة لاستيفاء البيانات';
   req.lastUpdate = new Date().toISOString().slice(0,16).replace('T',' ');
   req.lastUpdatedBy = me;
   req.timeline.push({
@@ -366,8 +366,8 @@ function doCheckin() {
     confirmClass: 'btn-secondary',
     onConfirm: () => {
       req.checkedOutBy = '';
-      const releaseStatus = req.requestType === 'عرض مباشر'
-        ? 'تم تقديم طلب العرض المباشر — بانتظار مراجعة منسق الإحالات والتحويلات'
+      const releaseStatus = req.requestType === 'عرض على المؤسسات الصحية المرخصة'
+        ? 'تم طلب العرض على المؤسسات الصحية المرخصة — بانتظار مراجعة منسق الإحالات والتحويلات'
         : req.status;
       req.status = releaseStatus;
       req.timeline.push({
