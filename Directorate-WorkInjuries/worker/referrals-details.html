@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>تفاصيل طلب العرض — العامل</title><link rel="stylesheet" href="../shared/style.css"></head>
 <body>
-<script src="../shared/config.js"></script><script src="../shared/data-users.js"></script><script src="../shared/data-allowances.js"></script><script src="../shared/data-disability.js"></script><script src="../shared/data-chronic.js"></script><script src="../shared/data-appeals.js"></script><script src="../shared/data-licensing.js"></script><script src="../shared/data-sessions.js"></script><script src="../shared/data-disability-retirement.js"></script><script src="../shared/data-referrals.js"></script><script src="../shared/data.js"></script><script src="../shared/layout.js"></script><script src="../shared/utils.js"></script>
+<script src="../shared/config.js"></script><script src="../shared/data-users.js"></script><script src="../shared/data-allowances.js"></script><script src="../shared/data-disability.js"></script><script src="../shared/data-chronic.js"></script><script src="../shared/data-appeals.js"></script><script src="../shared/data-licensing.js"></script><script src="../shared/data-sessions.js"></script><script src="../shared/data-disability-retirement.js"></script><script src="../shared/data-referrals.js"></script><script src="../shared/data.js"></script><script src="../shared/workflow-stages.js"></script><script src="../shared/layout.js"></script><script src="../shared/utils.js"></script>
 <script>
 initLayout({ role: 'worker', activePage: 'referrals-list' });
 const req = WI_DATA.referrals.find((r) => r.id === new URLSearchParams(window.location.search).get('id'));
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const attachments = req.attachments || [];
   getContent().innerHTML = `
     <div class="pg-head"><div><h1>تفاصيل طلب العرض على المؤسسات الصحية المرخصة</h1><p>${req.id}</p></div><div class="pg-acts"><button class="btn btn-secondary" onclick="window.location.href='referrals-list.html'">${ICONS.arrow_left} رجوع</button></div></div>
-    ${renderWorkerReferralWorkflow(req)}
+    ${renderWorkflowPath(req, 'directReferral')}
     <div class="card"><div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات المؤمن عليه</h3></div><div class="pb"><div class="fg fg-3">
       <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.insured?.name || '—'}</div></div>
       <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.insured?.civil || '—'}</div></div>
@@ -48,43 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="card"><div class="ph"><h3><div class="pico bl">${ICONS.clock}</div>السجل الزمني</h3></div><div class="pb">${renderTimelineList(req.timeline, { hideActor: true, hidePhone: true })}</div></div>`;
 });
 
-function renderWorkerReferralWorkflow(req) {
-  const current = getWorkerReferralStage(req);
-  const stages = [
-    { key: 'submitted', name: 'تقديم الطلب', desc: 'تم رفع الطلب من قبل المؤمن عليه أو مقدم الطلب' },
-    { key: 'committees', name: 'قسم اللجان الطبية', desc: 'الطلب تحت مراجعة قسم اللجان الطبية' },
-    { key: 'institution', name: 'العرض على المؤسسات الصحية المرخصة', desc: 'تمت إحالة الطلب إلى المؤسسة الصحية المرخصة' },
-  ];
-
-  return `
-    <div class="card workflow-card">
-      <div class="ph"><h3><div class="pico bl">${ICONS.chart}</div>مسار العمل المتوقع</h3></div>
-      <div class="pb">
-        <div class="workflow-strip">
-          ${stages.map((stage, index) => {
-            const currentIndex = stages.findIndex((item) => item.key === current);
-            const isCurrent = stage.key === current;
-            const isDone = currentIndex > index;
-            return `
-              <div class="workflow-stage ${isCurrent ? 'current' : ''} ${isDone ? 'done' : ''}">
-                <div class="workflow-stage-dot">${isDone ? ICONS.check : index + 1}</div>
-                <div class="workflow-stage-body">
-                  <div class="workflow-stage-name">${stage.name}</div>
-                  <div class="workflow-stage-desc">${stage.desc}</div>
-                </div>
-              </div>`;
-          }).join('')}
-        </div>
-      </div>
-    </div>`;
-}
-
-function getWorkerReferralStage(req) {
-  const status = String(req?.status || '');
-  if (status.includes('المؤسسات الصحية المرخصة') && (req.assignedInstitution || req.committeeDecision)) return 'institution';
-  if (status.includes('اللجان الطبية') || status.includes('رئيس قسم اللجان الطبية')) return 'committees';
-  return 'submitted';
-}
 </script>
 </body>
 </html>

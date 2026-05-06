@@ -1150,10 +1150,10 @@ function renderDirectReferralReasonCard(req) {
     </div></div>`;
 }
 
-function renderInfoCard({ title, icon = ICONS.info, iconClass = 'bl', columns = 'fg fg-3', fields = [] } = {}) {
+function renderInfoCard({ title, icon = ICONS.info, iconClass = 'bl', columns = 'fg fg-3', fields = [], cardClass = 'card' } = {}) {
   if (!fields.length) return '';
   return `
-    <div class="card">
+    <div class="${cardClass}">
       <div class="ph"><h3><div class="pico ${iconClass}">${icon}</div>${title}</h3></div>
       <div class="pb">
         <div class="${columns}">
@@ -1166,6 +1166,155 @@ function renderInfoCard({ title, icon = ICONS.info, iconClass = 'bl', columns = 
         </div>
       </div>
     </div>`;
+}
+
+function joinDisplayValues(values = [], separator = ' — ') {
+  const normalized = values
+    .map((value) => {
+      if (value == null) return '';
+      if (typeof value === 'string') return value.trim();
+      return String(value).trim();
+    })
+    .filter(Boolean);
+  return normalized.length ? normalized.join(separator) : '—';
+}
+
+function renderApplicantProfileCard(applicant = {}, {
+  title = 'بيانات مقدم الطلب',
+  cardClass = 'card',
+  includeRole = true,
+  includeExtraPhones = false,
+  includeIdentity = false,
+  includeLocation = true,
+  includeCountry = true,
+  includeCivilExpiry = false,
+  includeAddress = false,
+  extraFields = [],
+} = {}) {
+  const fields = [];
+
+  if (includeRole) {
+    fields.push({ label: 'صفة مقدم الطلب', value: applicant.role || '—' });
+  }
+
+  fields.push(
+    { label: 'الاسم الكامل', value: applicant.name || '—' },
+    { label: 'الرقم المدني', value: applicant.civil || '—', mono: true },
+    { label: 'رقم الهاتف', value: normalizeDisplay(applicant.phone, '96890000000') },
+    { label: 'البريد الإلكتروني', value: normalizeDisplay(applicant.email, 'noreply@spf-proto.om') },
+  );
+
+  if (includeExtraPhones) {
+    fields.push(
+      { label: 'رقم الهاتف 1', value: normalizeDisplay(applicant.phone1, normalizeDisplay(applicant.phone, '96890000000')) },
+      { label: 'رقم الهاتف 2', value: normalizeDisplay(applicant.phone2) },
+    );
+  }
+
+  if (includeIdentity) {
+    fields.push(
+      { label: 'تاريخ الميلاد', value: formatDate(applicant.dob) },
+      { label: 'الجنس', value: applicant.gender || '—' },
+      { label: 'الجنسية', value: applicant.nationality || '—' },
+    );
+  }
+
+  if (includeCivilExpiry) {
+    fields.push({ label: 'تاريخ انتهاء البطاقة الشخصية', value: formatDate(applicant.civilExpiry) });
+  }
+
+  if (includeLocation) {
+    fields.push({ label: 'المحافظة / الولاية', value: joinDisplayValues([applicant.region, applicant.wilayat]) });
+  }
+
+  if (includeCountry) {
+    fields.push({ label: 'الدولة', value: applicant.country || '—' });
+  }
+
+  if (includeAddress) {
+    fields.push({ label: 'العنوان', value: applicant.address || '—', spanFull: true });
+  }
+
+  return renderInfoCard({
+    title,
+    icon: ICONS.user,
+    iconClass: 'bl',
+    columns: 'fg fg-3',
+    cardClass,
+    fields: [...fields, ...extraFields],
+  });
+}
+
+function renderBenefitInsuranceCard(insurance = {}, {
+  title = 'بيانات التأمين',
+  cardClass = 'card card-ro',
+  applicant = {},
+  includeContact = false,
+  fixedInsuranceType = 'تأمين العاملين في القطاع الخاص',
+  fixedSchemeCategory = 'داخل السلطنة - القطاع الخاص',
+  otherBenefitsLabel = 'منافع أخرى',
+  extraFields = [],
+} = {}) {
+  const status = insurance.status || insurance.insuranceStatus || '—';
+  const statusBadgeHtml = status === '—'
+    ? '—'
+    : `<span class="badge ${status === 'نشط' ? 'b-approved' : 'b-rejected'}">${status}</span>`;
+
+  const fields = [
+    { label: 'الحالة التأمينية', value: statusBadgeHtml },
+    { label: 'نوع التأمين', value: insurance.insuranceType || fixedInsuranceType || '—' },
+    { label: 'نوع الاشتراك', value: normalizeDisplay(insurance.subType) },
+    { label: 'فئة النظام', value: insurance.schemeCategory || fixedSchemeCategory || '—' },
+    { label: 'تاريخ التسجيل فى الصندوق', value: formatDate(insurance.regDate) },
+  ];
+
+  if (includeContact) {
+    fields.push(
+      { label: 'رقم الهاتف', value: normalizeDisplay(applicant.phone, '96890000000') },
+      { label: 'البريد الإلكتروني', value: normalizeDisplay(applicant.email, 'noreply@spf-proto.om') },
+    );
+  }
+
+  fields.push({ label: otherBenefitsLabel, value: insurance.otherBenefits || '—' });
+
+  return renderInfoCard({
+    title,
+    icon: ICONS.shield,
+    iconClass: 'gr',
+    columns: 'fg fg-3',
+    cardClass,
+    fields: [...fields, ...extraFields],
+  });
+}
+
+function renderChronicBenefitCard(chronic = {}, {
+  title = 'بيانات المرض المستديم',
+  cardClass = 'card card-ro',
+  extraFields = [],
+} = {}) {
+  const medications = Array.isArray(chronic.medications)
+    ? chronic.medications.filter(Boolean).join('، ')
+    : normalizeDisplay(chronic.medications);
+
+  return renderInfoCard({
+    title,
+    icon: ICONS.medical,
+    iconClass: 'rd',
+    columns: 'fg fg-3',
+    cardClass,
+    fields: [
+      { label: 'المرض المستديم', value: chronic.chronicDisease || '—' },
+      { label: 'تاريخ التشخيص / الثبوت', value: formatDate(chronic.diagnosisDate) },
+      { label: 'المسار', value: chronic.path || '—' },
+      { label: 'درجة الشدة', value: chronic.severity || '—' },
+      { label: 'آخر تقييم', value: formatDate(chronic.lastAssessment) },
+      { label: 'التقييم القادم', value: formatDate(chronic.nextAssessment) },
+      { label: 'العلاج الحالي', value: chronic.treatment || '—', spanFull: true },
+      { label: 'الأدوية', value: medications || '—', spanFull: true },
+      { label: 'المضاعفات / الحالة العامة', value: chronic.complications || '—', spanFull: true },
+      ...extraFields,
+    ],
+  });
 }
 
 function renderReferralApplicantCard(applicant = {}) {

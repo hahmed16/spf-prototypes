@@ -68,40 +68,19 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     ${renderWorkflowPath(req, 'disability')}
-    ${renderInsuredSummaryCards(req.applicant?.civil || req.insured?.civil, req.id)}
-
-    <!-- بيانات مقدم الطلب -->
-    <div class="card">
-      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب</h3></div>
-      <div class="pb">
-        <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant.role || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.applicant.name || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.applicant.civil || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.phone || req?.insured?.phone)) || (typeof appeal !== 'undefined' && appeal?.applicant?.phone) || (typeof app !== 'undefined' && app?.phone) || (typeof dlg !== 'undefined' && dlg?.phone) || (typeof u !== 'undefined' && u?.phone)), '96890000000')}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.email || req?.insured?.email)) || (typeof appeal !== 'undefined' && appeal?.applicant?.email) || (typeof app !== 'undefined' && app?.email) || (typeof dlg !== 'undefined' && dlg?.email) || (typeof u !== 'undefined' && u?.email)), 'noreply@spf-proto.om')}</div></div>
-        </div>
-      </div>
-    </div>
+    ${renderInsuredSummaryCards(req.applicant?.civil, req.id)}
+    ${renderApplicantProfileCard(req.applicant || {}, {
+      title: 'بيانات مقدم الطلب / المستفيد',
+      includeRole: true,
+    })}
 
     ${card ? `${isCardExpired ? `<div class="alert alert-d" style="margin-bottom:12px">${ICONS.warn}<span>بطاقة الإعاقة منتهية الصلاحية — سيتوقف الصرف حتى يتم التجديد والتحقق من وزارة التنمية الاجتماعية.</span></div>` : ''}${renderWorkerDisabilityCardPanel(card)}` : ''}
 
-    <!-- بيانات التأمين -->
-    <div class="card card-ro">
-      <div class="ph"><h3><div class="pico gr">${ICONS.shield}</div>بيانات التأمين</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
-      <div class="pb">
-        <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge b-approved">${req.insurance.status}</span></div></div>
-          <div class="fgrp"><label class="flbl">نوع التأمين</label><div class="fro">تأمين العاملين في القطاع الخاص</div></div>
-          ${req.insurance.subType ? `<div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${req.insurance.subType}</div></div>` : ''}
-          <div class="fgrp"><label class="flbl">فئة النظام</label><div class="fro">داخل السلطنة - القطاع الخاص</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(req.insurance.regDate)}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.phone || req?.insured?.phone)) || (typeof appeal !== 'undefined' && appeal?.applicant?.phone) || (typeof app !== 'undefined' && app?.phone) || (typeof dlg !== 'undefined' && dlg?.phone) || (typeof u !== 'undefined' && u?.phone)), '96890000000')}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${normalizeDisplay(((typeof req !== 'undefined' && (req?.applicant?.email || req?.insured?.email)) || (typeof appeal !== 'undefined' && appeal?.applicant?.email) || (typeof app !== 'undefined' && app?.email) || (typeof dlg !== 'undefined' && dlg?.email) || (typeof u !== 'undefined' && u?.email)), 'noreply@spf-proto.om')}</div></div>
-          <div class="fgrp"><label class="flbl">منافع أخرى</label><div class="fro">${req.insurance.otherBenefits}</div></div>
-        </div>
-      </div>
-    </div>
+    ${renderBenefitInsuranceCard(req.insurance || {}, {
+      applicant: req.applicant || {},
+      includeContact: true,
+      otherBenefitsLabel: 'منافع أخرى',
+    })}
 
     ${req.disbursement ? `
     <!-- بيانات الصرف الدوري -->

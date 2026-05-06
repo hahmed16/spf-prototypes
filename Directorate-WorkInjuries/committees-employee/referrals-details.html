@@ -18,6 +18,7 @@
 <script src="../shared/data-disability-retirement.js"></script>
 <script src="../shared/data-referrals.js"></script>
 <script src="../shared/data.js"></script>
+<script src="../shared/workflow-stages.js"></script>
 <script src="../shared/layout.js"></script>
 <script src="../shared/utils.js"></script>
 <script>
@@ -90,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
+    ${renderWorkflowPath(req, 'referrals')}
     <!-- بيانات مقدم الطلب والمؤمن عليه (مدمجة) -->
     ${renderInsuredSummaryCards(req.insured?.civil || req.applicant?.civil, req.id)}
     ${isSamePerson ? `
@@ -424,6 +426,7 @@ function renderDirectReferralCommitteeEmployee() {
       </div>
     </div>
 
+    ${renderWorkflowPath(req, 'directReferral')}
     <div class="card">
       <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب والمؤمن عليه</h3></div>
       <div class="pb">

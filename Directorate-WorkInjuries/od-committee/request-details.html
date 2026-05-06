@@ -17,6 +17,7 @@
 <script src="../shared/data-sessions.js"></script>
 <script src="../shared/data-disability-retirement.js"></script>
 <script src="../shared/data.js"></script>
+<script src="../shared/workflow-stages.js"></script>
 <script src="../shared/layout.js"></script>
 <script src="../shared/utils.js"></script>
 <script>
@@ -62,6 +63,8 @@ function renderPage() {
         </div>
       </div>
     </div>
+
+    ${renderWorkflowPath(req, 'allowances')}
 
     <div class="card">
       <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات المؤمن عليه</h3></div>

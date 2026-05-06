@@ -34,7 +34,6 @@
     document.addEventListener('DOMContentLoaded', () => {
       const statusPending = 'تم تقديم طلب منفعة الأشخاص ذوي الإعاقة — بانتظار مراجعة موظف قسم الإعاقة والأمراض المستديمة';
       const canAct = (req.status === statusPending || req.status === 'قيد المراجعة — قسم الإعاقة' || req.status === 'تم إعادة الطلب لاستيفاء البيانات') && isCheckedOutByMe;
-      const isSamePerson = req.applicant?.civil && req.insured?.civil && req.applicant.civil === req.insured.civil;
 
       const card = req.card || null;
       const isExpired = card && new Date(card.expiryDate) < new Date();
@@ -81,104 +80,30 @@
     </div>
 
     ${renderWorkflowPath(req, 'disability')}
-    ${renderInsuredSummaryCards(req.applicant?.civil || req.insured?.civil, req.id)}
-    ${isSamePerson ? `
-    <!-- بيانات المؤمن عليه / المستفيد (نفس الشخص) -->
-    <div class="card card-ro">
-      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات المؤمن عليه / المستفيد</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
-      <div class="pb">
-        <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant?.role || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.insured?.name || req.applicant?.name || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.insured?.civil || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${formatDate(req.insured?.dob)}</div></div>
-          <div class="fgrp"><label class="flbl">الجنس</label><div class="fro">${req.insured?.gender || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${req.insured?.nationality || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${applicantPhonePrimary}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${applicantEmail}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ انتهاء البطاقة الشخصية</label><div class="fro">${formatDate(req.insured?.civilExpiry || req.applicant?.civilExpiry)}</div></div>
-          <div class="fgrp"><label class="flbl">المحافظة / الولاية</label><div class="fro">${normalizeDisplay(req.applicant?.region)}${req.applicant?.wilayat ? ' — ' + req.applicant?.wilayat : ''}</div></div>
-          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${req.insurance?.status === 'نشط' ? 'b-approved' : 'b-rejected'}">${req.insurance?.status || '—'}</span></div></div>
-          <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(req.insurance?.regDate)}</div></div>
-        </div>
-      </div>
-    </div>` : `
-    <!-- بيانات مقدم الطلب -->
-    <div class="card">
-      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب</h3></div>
-      <div class="pb">
-        <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant.role || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.applicant.name || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.applicant.civil || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف الأساسي</label><div class="fro">${applicantPhonePrimary}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف 1</label><div class="fro">${applicantPhone1}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف 2</label><div class="fro">${applicantPhone2}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${applicantEmail}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ انتهاء البطاقة الشخصية</label><div class="fro">${formatDate(req.applicant?.civilExpiry)}</div></div>
-          <div class="fgrp"><label class="flbl">المحافظة / الولاية</label><div class="fro">${normalizeDisplay(req.applicant?.region)}${req.applicant?.wilayat ? ` — ${req.applicant?.wilayat}` : ''}</div></div>
-          <div class="fgrp"><label class="flbl">الدولة</label><div class="fro">${normalizeDisplay(req.applicant?.country)}</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- بيانات المؤمن عليه -->
-    <div class="card card-ro">
-      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات المؤمن عليه / المستفيد</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
-      <div class="pb">
-        <div class="fg fg-4">
-          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.insured?.name || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.insured?.civil || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ الميلاد</label><div class="fro">${formatDate(req.insured?.dob)}</div></div>
-          <div class="fgrp"><label class="flbl">الجنس</label><div class="fro">${req.insured?.gender || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الجنسية</label><div class="fro">${req.insured?.nationality || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${applicantPhonePrimary}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${applicantEmail}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ انتهاء البطاقة الشخصية</label><div class="fro">${formatDate(req.insured?.civilExpiry)}</div></div>
-          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${req.insurance?.status === 'نشط' ? 'b-approved' : 'b-rejected'}">${req.insurance?.status || '—'}</span></div></div>
-          <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(req.insurance?.regDate)}</div></div>
-        </div>
-      </div>
-    </div>`}
-
-    <!-- بيانات جهة العمل -->
-    <div class="card card-ro">
-      <div class="ph"><h3><div class="pico tl">${ICONS.building}</div>بيانات جهة العمل</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
-      <div class="pb">
-        <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">اسم جهة العمل</label><div class="fro" style="font-weight:700">${req.employer?.name || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم السجل التجاري</label><div class="fro" style="font-family:monospace">${req.employer?.cr || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم المنشأة</label><div class="fro" style="font-family:monospace">${normalizeDisplay(req.employer?.establishment)}</div></div>
-          <div class="fgrp"><label class="flbl">المسمى الوظيفي</label><div class="fro">${req.employer?.jobTitle || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ الالتحاق بالعمل</label><div class="fro">${formatDate(req.employer?.joinDate)}</div></div>
-          <div class="fgrp"><label class="flbl">موقع العمل / الفرع</label><div class="fro">${req.employer?.location || '—'}</div></div>
-          ${req.employer?.phone ? `<div class="fgrp"><label class="flbl">هاتف جهة العمل</label><div class="fro">${req.employer.phone}</div></div>` : ''}
-          <div class="fgrp"><label class="flbl">القطاع</label><div class="fro">${req.employer?.sector || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">نوع جهة العمل</label><div class="fro">${req.employer?.employerType || '—'}</div></div>
-          ${req.employer?.branch ? `<div class="fgrp"><label class="flbl">الفرع</label><div class="fro">${req.employer.branch.id} — ${req.employer.branch.name} — ${req.employer.branch.state}</div></div>` : ''}
-        </div>
-      </div>
-    </div>
+    ${renderInsuredSummaryCards(req.applicant?.civil, req.id)}
+    ${renderApplicantProfileCard({
+      ...req.applicant,
+      phone: applicantPhonePrimary,
+      phone1: applicantPhone1,
+      phone2: applicantPhone2,
+      email: applicantEmail,
+    }, {
+      title: 'بيانات مقدم الطلب / المستفيد',
+      includeRole: true,
+      includeExtraPhones: true,
+      includeLocation: true,
+      includeCountry: true,
+      includeCivilExpiry: true,
+    })}
 
     <!-- بيانات بطاقة الإعاقة -->
     ${card ? `${isExpired ? `<div class="alert alert-d" style="margin-bottom:12px">${ICONS.warn}<span>بطاقة الإعاقة منتهية الصلاحية — لا يمكن الصرف حتى يتم تجديدها</span></div>` : ''}${renderDisabilityCardPanel(card)}` : ''}
 
-    <!-- بيانات التأمين -->
-    <div class="card card-ro">
-      <div class="ph"><h3><div class="pico gr">${ICONS.shield}</div>بيانات التأمين</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
-      <div class="pb">
-        <div class="fg fg-3">
-          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${req.insurance?.status === 'نشط' ? 'b-approved' : 'b-rejected'}">${req.insurance?.status || '—'}</span></div></div>
-          <div class="fgrp"><label class="flbl">نوع التأمين</label><div class="fro">تأمين العاملين في القطاع الخاص</div></div>
-          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${normalizeDisplay(req.insurance?.subType)}</div></div>
-          <div class="fgrp"><label class="flbl">فئة النظام</label><div class="fro">داخل السلطنة - القطاع الخاص</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(req.insurance?.regDate)}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف</label><div class="fro">${applicantPhonePrimary}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني</label><div class="fro">${applicantEmail}</div></div>
-          <div class="fgrp"><label class="flbl">منافع أخرى نشطة</label><div class="fro">${req.insurance?.otherBenefits || '—'}</div></div>
-        </div>
-      </div>
-    </div>
+    ${renderBenefitInsuranceCard(req.insurance || {}, {
+      applicant: { phone: applicantPhonePrimary, email: applicantEmail },
+      includeContact: true,
+      otherBenefitsLabel: 'منافع أخرى نشطة',
+    })}
 
     ${req.disbursement ? `
     <!-- بيانات الصرف -->

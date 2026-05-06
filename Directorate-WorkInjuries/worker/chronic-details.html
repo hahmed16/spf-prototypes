@@ -17,6 +17,7 @@
 <script src="../shared/data-sessions.js"></script>
 <script src="../shared/data-disability-retirement.js"></script>
 <script src="../shared/data.js"></script>
+<script src="../shared/workflow-stages.js"></script>
 <script src="../shared/layout.js"></script>
 <script src="../shared/utils.js"></script>
 <script>
@@ -62,32 +63,32 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    ${renderWorkerChronicWorkflow(req, summary)}
-
-    <div class="card card-ro">
-      <div class="ph"><h3><div class="pico bl">${ICONS.user}</div>بيانات مقدم الطلب / المؤمن عليه</h3><span style="font-size:11px;color:var(--text3)">مجلوبة تلقائياً</span></div>
-      <div class="pb">
-        <div class="fg fg-4">
-          <div class="fgrp"><label class="flbl">صفة مقدم الطلب</label><div class="fro">${req.applicant?.role || 'العامل / المؤمن عليه / المواطن'}</div></div>
-          <div class="fgrp"><label class="flbl">الاسم الكامل</label><div class="fro">${req.applicant?.name || workerUser.name || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">الرقم المدني</label><div class="fro" style="font-family:monospace">${req.applicant?.civil || workerUser.civil || '—'}</div></div>
-          <div class="fgrp"><label class="flbl">رقم الهاتف (من النظام)</label><div class="fro">${normalizeDisplay(req.applicant?.phone || workerUser.phone)}</div></div>
-          <div class="fgrp"><label class="flbl">البريد الإلكتروني (من النظام)</label><div class="fro">${normalizeDisplay(req.applicant?.email || workerUser.email)}</div></div>
-          <div class="fgrp"><label class="flbl">رقم هاتف إضافي 1</label><div class="fro">${normalizeDisplay(workerUser.phoneAlt1)}</div></div>
-          <div class="fgrp"><label class="flbl">رقم هاتف إضافي 2</label><div class="fro">${normalizeDisplay(workerUser.phoneAlt2)}</div></div>
-          <div class="fgrp"><label class="flbl">بريد إلكتروني إضافي</label><div class="fro">${normalizeDisplay(workerUser.emailAlt)}</div></div>
-          <div class="fgrp"><label class="flbl">المحافظة</label><div class="fro">${normalizeDisplay(workerUser.region, 'محافظة مسقط')}</div></div>
-          <div class="fgrp"><label class="flbl">الولاية</label><div class="fro">${normalizeDisplay(workerUser.wilayat, 'بوشر')}</div></div>
-          <div class="fgrp"><label class="flbl">الدولة</label><div class="fro">${normalizeDisplay(workerUser.country, 'سلطنة عُمان')}</div></div>
-          <div class="fgrp"><label class="flbl">الحالة التأمينية</label><div class="fro"><span class="badge ${req.insurance?.status === 'نشط' ? 'b-approved' : 'b-rejected'}">${normalizeDisplay(req.insurance?.status)}</span></div></div>
-          <div class="fgrp"><label class="flbl">نوع التأمين</label><div class="fro">تأمين العاملين في القطاع الخاص</div></div>
-          <div class="fgrp"><label class="flbl">نوع الاشتراك</label><div class="fro">${normalizeDisplay(req.insurance?.subType)}</div></div>
-          <div class="fgrp"><label class="flbl">فئة النظام</label><div class="fro">داخل السلطنة - القطاع الخاص</div></div>
-          <div class="fgrp"><label class="flbl">تاريخ التسجيل فى الصندوق</label><div class="fro">${formatDate(req.insurance?.regDate)}</div></div>
-          <div class="fgrp"><label class="flbl">منافع أخرى مستحقة</label><div class="fro">${normalizeDisplay(req.insurance?.otherBenefits)}</div></div>
-        </div>
-      </div>
-    </div>
+    ${renderWorkflowPath(req, 'chronic')}
+    ${renderApplicantProfileCard({
+      ...req.applicant,
+      phone: req.applicant?.phone || workerUser.phone,
+      phone1: workerUser.phoneAlt1,
+      phone2: workerUser.phoneAlt2,
+      email: req.applicant?.email || workerUser.email,
+      region: workerUser.region,
+      wilayat: workerUser.wilayat,
+      country: workerUser.country,
+    }, {
+      title: 'بيانات مقدم الطلب / المستفيد',
+      includeRole: true,
+      includeExtraPhones: true,
+      includeLocation: true,
+      includeCountry: true,
+    })}
+    ${renderChronicBenefitCard(req.chronic || {})}
+    ${renderBenefitInsuranceCard(req.insurance || {}, {
+      applicant: {
+        phone: req.applicant?.phone || workerUser.phone,
+        email: req.applicant?.email || workerUser.email,
+      },
+      includeContact: true,
+      otherBenefitsLabel: 'منافع أخرى مستحقة',
+    })}
 
     <div class="card card-ro">
       <div class="ph"><h3><div class="pico rd">${ICONS.medical}</div>ملخص التشخيص الوارد من وزارة الصحة</h3></div>
@@ -260,55 +261,6 @@ function buildWorkerPermanentDiseaseReport(request) {
     request.chronic.treatment ? `الخطة العلاجية الحالية: ${request.chronic.treatment}.` : '',
   ].filter(Boolean);
   return lines.join('\n');
-}
-
-function renderWorkerChronicWorkflow(request, summary) {
-  const current = getWorkerChronicStage(request, summary);
-  const stages = [
-    { key: 'submitted', name: 'تقديم الطلب', desc: 'قام المؤمن عليه بتقديم الطلب عبر البوابة.' },
-    { key: 'disability-review', name: 'بحث الطلب فى قسم الاعاقة والامراض المستديمة', desc: 'الطلب قيد الدراسة الأولية لدى القسم المختص.' },
-    { key: 'committees-review', name: 'بحث الطلب فى قسم اللجان الطبية', desc: 'الطلب قيد المراجعة والتحقق لدى قسم اللجان الطبية.' },
-    { key: 'institution', name: 'العرض على المؤسسات الصحية المرخصة', desc: 'الطلب في مرحلة العرض أو الاستكمال مع المؤسسة الصحية المرخصة.' },
-  ];
-  const currentIndex = stages.findIndex((stage) => stage.key === current);
-
-  return `
-    <div class="card workflow-card">
-      <div class="ph"><h3><div class="pico bl">${ICONS.chart}</div>مسار العمل المتوقع</h3></div>
-      <div class="pb">
-        <div class="workflow-strip">
-          ${stages.map((stage, index) => {
-            const isCurrent = stage.key === current;
-            const isDone = currentIndex > index;
-            return `
-              <div class="workflow-stage ${isCurrent ? 'current' : ''} ${isDone ? 'done' : ''}">
-                <div class="workflow-stage-dot">${isDone ? ICONS.check : index + 1}</div>
-                <div class="workflow-stage-body">
-                  <div class="workflow-stage-name">${stage.name}</div>
-                  <div class="workflow-stage-desc">${stage.desc}</div>
-                </div>
-              </div>`;
-          }).join('')}
-        </div>
-      </div>
-    </div>`;
-}
-
-function getWorkerChronicStage(request, summary) {
-  const status = String(request?.status || '');
-  const path = String(summary?.expectedPath || request?.chronic?.path || '');
-  if (
-    status.includes('المؤسسات الصحية المرخصة') ||
-    status.includes('الصرف') ||
-    status.includes('اعتماد') ||
-    request?.referral ||
-    request?.session ||
-    request?.committeeDecision ||
-    path.includes('المؤسسات')
-  ) return 'institution';
-  if (status.includes('اللجان الطبية')) return 'committees-review';
-  if (status.includes('الإعاقة') || status.includes('الأمراض المستديمة')) return 'disability-review';
-  return 'submitted';
 }
 
 function getWorkerChronicActions(status) {

@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    ${renderWorkerAllowanceWorkflow(req)}
+    ${renderWorkflowPath(req, 'allowances')}
 
     ${isSamePerson ? `
     <!-- بيانات المؤمن عليه / المستفيد (مدمجة) -->
@@ -341,53 +341,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-function renderWorkerAllowanceWorkflow(req) {
-  const current = getWorkerAllowanceStage(req);
-  const stages = [
-    { key: 'submitted', name: 'تقديم الطلب', desc: 'قام المؤمن عليه أو مقدم الطلب برفع الطلب.' },
-    { key: 'investigation', name: 'التحقيق', desc: 'الطلب قيد المراجعة والتحقيق الأولي.' },
-    { key: 'sickleave', name: 'الإجازات المرضية', desc: 'مراجعة فترات الإجازات المرضية والبيانات المرتبطة بها.' },
-    { key: 'committees', name: 'اللجان الطبية', desc: 'الطلب قيد الدراسة لدى قسم اللجان الطبية.' },
-    { key: 'institution', name: 'العرض على المؤسسات الصحية المرخصة', desc: 'الطلب في مرحلة العرض أو استلام قرار المؤسسة الصحية.' },
-  ];
-  const currentIndex = stages.findIndex((stage) => stage.key === current);
-
-  return `
-    <div class="card workflow-card">
-      <div class="ph"><h3><div class="pico bl">${ICONS.chart}</div>مسار العمل المتوقع</h3></div>
-      <div class="pb">
-        <div class="workflow-strip">
-          ${stages.map((stage, index) => {
-            const isCurrent = stage.key === current;
-            const isDone = currentIndex > index;
-            return `
-              <div class="workflow-stage ${isCurrent ? 'current' : ''} ${isDone ? 'done' : ''}">
-                <div class="workflow-stage-dot">${isDone ? ICONS.check : index + 1}</div>
-                <div class="workflow-stage-body">
-                  <div class="workflow-stage-name">${stage.name}</div>
-                  <div class="workflow-stage-desc">${stage.desc}</div>
-                </div>
-              </div>`;
-          }).join('')}
-        </div>
-      </div>
-    </div>`;
-}
-
-function getWorkerAllowanceStage(req) {
-  const status = String(req?.status || '');
-  if (
-    req?.committeeDecision ||
-    req?.session ||
-    req?.referral ||
-    status.includes('المؤسسات الصحية المرخصة') ||
-    status.includes('قرار المؤسسة الصحية')
-  ) return 'institution';
-  if (status.includes('اللجان الطبية')) return 'committees';
-  if (status.includes('الإجازات المرضية') || req?.sickLeavePeriods?.length) return 'sickleave';
-  if (status.includes('تحقيق') || req?.investigation || req?.fieldVisits?.length) return 'investigation';
-  return 'submitted';
-}
 </script>
 </body>
 </html>

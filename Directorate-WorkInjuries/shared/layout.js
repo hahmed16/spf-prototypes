@@ -810,16 +810,70 @@ function renderWorkflowPath(record, requestType) {
     </div>`;
 }
 
+const WORKFLOW_PATH_MAIN_STAGES = {
+  allowances: [
+    { id: 'submission', name: 'تقديم الطلب', description: 'استلام الطلب وتجهيزه للمعالجة.', matches: ['draft', 'submitted', 'assigned'] },
+    { id: 'investigation', name: 'التحقيق', description: 'دراسة الحالة والتحقق من الوقائع.', matches: ['investigation'] },
+    { id: 'head_review', name: 'اعتماد رئيس قسم التحقيق', description: 'مراجعة نتيجة التحقيق واتخاذ التوجيه المناسب.', matches: ['head_review'] },
+    { id: 'sickleave', name: 'الإجازات المرضية', description: 'تحديد فترات الإجازة المرضية ومراجعتها.', matches: ['sickleave_review', 'sickleave_head_review'] },
+    { id: 'closure', name: 'القرار النهائي والصرف', description: 'اعتماد النتيجة النهائية واستكمال الإغلاق أو الصرف.', matches: ['approved', 'rejected', 'appealed', 'reconsidered', 'completed'] },
+  ],
+  disability: [
+    { id: 'submission', name: 'تقديم الطلب', description: 'استلام الطلب والتحقق من بياناته الأساسية.', matches: ['draft', 'submitted'] },
+    { id: 'employee_review', name: 'مراجعة موظف القسم', description: 'فحص الطلب والمرفقات من الموظف المختص.', matches: ['employee_review'] },
+    { id: 'head_review', name: 'اعتماد رئيس القسم', description: 'اعتماد التوصية أو إعادتها للاستكمال.', matches: ['head_review'] },
+    { id: 'decision', name: 'القرار والمتابعة', description: 'إصدار القرار ثم متابعة الصرف أو إعادة التقييم.', matches: ['approved', 'rejected', 'active', 'expired', 'reassessment', 'renewal', 'appealed', 'reconsidered', 'completed'] },
+  ],
+  chronic: [
+    { id: 'intake', name: 'استلام التشخيص والطلب', description: 'ورود التشخيص ثم تسجيل الطلب للمعالجة.', matches: ['incoming', 'submitted'] },
+    { id: 'employee_review', name: 'مراجعة موظف القسم', description: 'مراجعة الحالة والوثائق من الموظف المختص.', matches: ['employee_review'] },
+    { id: 'head_review', name: 'اعتماد رئيس القسم', description: 'اتخاذ القرار النهائي على مستوى القسم.', matches: ['head_review'] },
+    { id: 'decision', name: 'القرار والصرف الدوري', description: 'اعتماد النتيجة ومتابعة الصرف أو إعادة التقييم.', matches: ['approved', 'rejected', 'active', 'reassessment', 'appealed', 'reconsidered', 'completed'] },
+  ],
+  appeals: [
+    { id: 'submission', name: 'تقديم التظلم', description: 'استلام التظلم وتسجيله للمراجعة.', matches: ['submitted'] },
+    { id: 'department_review', name: 'مراجعة قسم اللجان الطبية', description: 'فحص التظلم داخل القسم ورفعه عند الجاهزية.', matches: ['employee_review', 'head_review'] },
+    { id: 'committee_review', name: 'لجنة التظلمات', description: 'عرض التظلم على اللجنة وجدولة الجلسة.', matches: ['committee_review', 'session_scheduled'] },
+    { id: 'decision', name: 'القرار النهائي', description: 'إصدار القرار النهائي وإغلاق التظلم.', matches: ['decision', 'approved', 'rejected', 'cancelled', 'completed'] },
+  ],
+  licensing: [
+    { id: 'submission', name: 'تقديم الطلب', description: 'تسجيل طلب الترخيص أو التجديد واستكمال المتطلبات.', matches: ['draft', 'submitted'] },
+    { id: 'department_review', name: 'مراجعة قسم التراخيص', description: 'المراجعة الفنية داخل قسم التراخيص والرقابة.', matches: ['employee_review', 'head_review'] },
+    { id: 'committee_review', name: 'اللجنة الطبية الإشرافية', description: 'عرض الطلب على اللجنة وجدولة الجلسة والقرار.', matches: ['committee_review', 'session_scheduled', 'decision'] },
+    { id: 'activation', name: 'القرار النهائي وتفعيل الترخيص', description: 'تنفيذ القرار النهائي وتفعيل الترخيص أو إغلاق الطلب.', matches: ['approved', 'rejected', 'active', 'expiring', 'expired', 'renewal', 'appealed', 'reconsidered', 'completed', 'cancelled'] },
+  ],
+  referrals: [
+    { id: 'submission', name: 'تقديم الطلب', description: 'استلام طلب العرض وتجهيزه للمراجعة.', matches: ['draft', 'submitted'] },
+    { id: 'department_review', name: 'مراجعة قسم اللجان الطبية', description: 'المراجعة الداخلية وتحديد مسار الإحالة.', matches: ['direct_referral_review', 'coordinator_review', 'committee_review', 'head_committee_review'] },
+    { id: 'institution_review', name: 'العرض على المؤسسة الصحية', description: 'إحالة الطلب للمؤسسة الصحية ومتابعة الجلسة.', matches: ['rapporteur_assignment', 'session_scheduled', 'decision'] },
+    { id: 'closure', name: 'القرار النهائي والتنفيذ', description: 'اعتماد نتيجة العرض وتنفيذ الأثر وإغلاق الطلب.', matches: ['approved', 'rejected', 'appealed', 'reconsidered', 'completed', 'cancelled'] },
+  ],
+  directReferral: [
+    { id: 'submission', name: 'تقديم الطلب', description: 'استلام الطلب وتحويله لمسار اللجان الطبية.', matches: ['submitted'] },
+    { id: 'department_review', name: 'مراجعة قسم اللجان الطبية', description: 'مراجعة الطلب داخلياً واعتماد إحالته.', matches: ['committee_review'] },
+    { id: 'institution_review', name: 'العرض على المؤسسة الصحية', description: 'معاينة الحالة لدى المؤسسة الصحية المرخصة.', matches: ['institution_review'] },
+    { id: 'closure', name: 'تنفيذ القرار', description: 'استلام النتيجة وتنفيذها وإغلاق الطلب.', matches: ['completed'] },
+  ],
+  disabilityRetirement: [
+    { id: 'received', name: 'استلام الاستعلام', description: 'استلام الاستعلام الوارد من النظام المحيل.', matches: ['received'] },
+    { id: 'employee_review', name: 'مراجعة موظف القسم', description: 'فحص بيانات الاستعلام من الموظف المختص.', matches: ['employee_review'] },
+    { id: 'head_review', name: 'اعتماد رئيس القسم', description: 'مراجعة التوصية واعتماد النتيجة النهائية.', matches: ['head_review'] },
+    { id: 'closure', name: 'إغلاق النتيجة', description: 'إرسال النتيجة النهائية وإغلاق الاستعلام.', matches: ['approved', 'rejected', 'completed', 'closed_approved', 'closed_rejected'] },
+  ],
+};
+
+const WORKFLOW_PATH_TRANSIENT_STAGE_IDS = new Set(['returned', 'suspended']);
+
 function getWorkflowPathConfig(record, requestType) {
   if (!record) return { stages: [], currentStageId: '' };
 
-  if (requestType === 'allowances') {
-    const stages = getAllowanceBusinessStages();
-    const currentStageId = inferAllowanceBusinessStageId(record);
+  const mainStages = getMainWorkflowPathStages(requestType);
+  if (mainStages.length) {
+    const currentStageId = inferMainWorkflowPathStageId(record, requestType, mainStages);
     return {
-      stages,
+      stages: mainStages.map(({ id, name, description }) => ({ id, name, description })),
       currentStageId,
-      metaLabel: `يعرض المراحل الرئيسية فقط (${stages.length} مراحل)`,
+      metaLabel: `يعرض المراحل الرئيسية فقط (${mainStages.length} مراحل)`,
     };
   }
 
@@ -828,68 +882,34 @@ function getWorkflowPathConfig(record, requestType) {
   return { stages: workflowStages, currentStageId };
 }
 
-function getAllowanceBusinessStages() {
-  return [
-    {
-      id: 'followup_review',
-      name: 'المراجعة والتحقق من قسم المتابعة والبلاغات',
-      description: 'استلام الطلب والتحقق الأولي من اكتمال البيانات والمرفقات.',
-    },
-    {
-      id: 'followup_approval',
-      name: 'اعتماد قسم المتابعة والبلاغات',
-      description: 'اعتماد الإحالة الداخلية بعد استيفاء المتطلبات الأولية.',
-    },
-    {
-      id: 'inspection_review',
-      name: 'مراجعة وتحقق قسم التفتيش',
-      description: 'فحص الحالة والتحقق الموضوعي وإعداد التوصية.',
-    },
-    {
-      id: 'inspection_approval',
-      name: 'اعتماد قسم التفتيش',
-      description: 'مراجعة واعتماد نتيجة التحقق من قبل رئيس القسم المختص.',
-    },
-    {
-      id: 'director_approval',
-      name: 'اعتماد مدير الدائرة',
-      description: 'الاعتماد النهائي قبل استكمال بقية الإجراءات التنفيذية.',
-    },
-  ];
+function getMainWorkflowPathStages(requestType) {
+  return WORKFLOW_PATH_MAIN_STAGES[requestType] || [];
 }
 
-function inferAllowanceBusinessStageId(record) {
-  const statusText = resolveAllowanceStageStatus(record).toLowerCase();
-
-  if (!statusText) return 'followup_review';
-  if (statusText.includes('معتمد') || statusText.includes('قيد المراجعة من موظف قسم الإجازات') || statusText.includes('بانتظار رأي لجنة')) {
-    return 'director_approval';
-  }
-  if (statusText.includes('بانتظار اعتماد رئيس قسم')) {
-    return 'inspection_approval';
-  }
-  if (statusText.includes('قيد التحقيق')) {
-    return 'inspection_review';
-  }
-  if (statusText.includes('تم تعيين المحقق')) {
-    return 'followup_approval';
-  }
-  if (statusText.includes('تم تقديم الطلب') || statusText.includes('بانتظار تعيين')) {
-    return 'followup_review';
-  }
-
-  return 'followup_review';
+function inferMainWorkflowPathStageId(record, requestType, mainStages) {
+  const detailedStageId = inferWorkflowStageId(requestType, record?.status, record);
+  const resolvedStageId = resolveWorkflowPathDetailedStageId(record, requestType, detailedStageId);
+  const matchedStage = mainStages.find((stage) => stage.matches.includes(resolvedStageId))
+    || mainStages.find((stage) => stage.matches.includes(detailedStageId));
+  return matchedStage?.id || mainStages[0]?.id || '';
 }
 
-function resolveAllowanceStageStatus(record) {
-  const currentStatus = String(record?.status || '');
-  if (!currentStatus || (!currentStatus.includes('استيفاء') && !currentStatus.includes('معلق'))) {
-    return currentStatus;
+function resolveWorkflowPathDetailedStageId(record, requestType, detailedStageId) {
+  if (!detailedStageId || !WORKFLOW_PATH_TRANSIENT_STAGE_IDS.has(detailedStageId)) {
+    return detailedStageId;
   }
 
   const timeline = Array.isArray(record?.timeline) ? [...record.timeline].reverse() : [];
-  const fallbackEvent = timeline.find((event) => event?.fromStatus && !String(event.fromStatus).includes('استيفاء') && !String(event.fromStatus).includes('معلق'));
-  return fallbackEvent?.fromStatus || currentStatus;
+  for (const event of timeline) {
+    const candidateStatus = event?.fromStatus || event?.toStatus || '';
+    if (!candidateStatus) continue;
+    const candidateStageId = inferWorkflowStageId(requestType, candidateStatus, { ...record, suspended: false });
+    if (candidateStageId && !WORKFLOW_PATH_TRANSIENT_STAGE_IDS.has(candidateStageId)) {
+      return candidateStageId;
+    }
+  }
+
+  return detailedStageId;
 }
 
 function isCurrentViewerExternal() {
