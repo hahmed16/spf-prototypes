@@ -377,21 +377,7 @@ const WI_CONFIG = {
       ]
     },
 
-    'referral-coordinator': {
-      id: 23,
-      nameAr: 'منسق الإحالات والتحويلات',
-      type: 'internal',
-      folder: 'referral-coordinator',
-      avatarInitials: 'من',
-      canCheckout: true,
-      sidebar: [
-        { label: 'لوحة البيانات', page: 'dashboard', icon: 'home', badge: null },
-        { label: 'طلبات الإحالة الواردة', page: 'referrals-list', icon: 'inbox', badge: 'referrals' },
-        { label: 'الحالات المحالة للمؤسسات الصحية', page: 'referred-list', icon: 'list', badge: null },
-        { label: 'التظلمات', page: 'appeals-list', icon: 'list', badge: 'appeals' },
-        { label: 'استعلام التقارير الطبية', page: '../shared/medical-query', icon: 'search', badge: null },
-      ]
-    },
+    
 
   },
 
