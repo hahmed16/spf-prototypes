@@ -1,0 +1,324 @@
+ملخص نماذج البيانات والقوالب
+الموقع المرجعي: Directorate-WorkInjuries/shared
+
+النماذج المشتركة
+
+1. نموذج المؤمن عليه
+يُستخدم أساسًا في:
+- بدلات الانقطاع عن العمل
+- التظلمات
+- طلبات العرض على المؤسسات الصحية المرخصة
+
+الحقول:
+- الاسم الكامل
+- الرقم المدني
+- رقم التأمين
+- تاريخ الميلاد
+- الجنس
+- الجنسية
+- الحالة التأمينية
+- تاريخ التسجيل
+- نوع الاشتراك
+- رقم الهاتف
+- البريد الإلكتروني
+- تاريخ انتهاء البطاقة المدنية عند الحاجة
+
+2. نموذج جهة العمل
+يُستخدم أساسًا في:
+- بدلات الانقطاع عن العمل
+- التظلمات
+- طلبات العرض على المؤسسات الصحية المرخصة
+
+الحقول:
+- اسم جهة العمل
+- السجل التجاري
+- رقم المنشأة
+- المسمى الوظيفي
+- تاريخ الالتحاق
+- موقع العمل
+- القطاع
+- نوع جهة العمل
+- بيانات الفرع:
+  id
+  name
+  state
+  governorate
+- رقم الهاتف
+
+3. نموذج مقدم الطلب
+يظهر في أغلب أنواع الطلبات
+
+الحقول:
+- الاسم الكامل
+- الرقم المدني
+- الصفة أو الدور
+- رقم الهاتف
+- البريد الإلكتروني
+- المنطقة عند الحاجة
+- الولاية عند الحاجة
+- الدولة عند الحاجة
+- رقم الموظف عند الحاجة
+
+4. نموذج المستخدمين
+الملف المرجعي: data-users.js
+
+النموذج الأساسي:
+- name
+- civil
+- phone
+- availability:
+  status
+  note
+
+حقول إضافية حسب الدور:
+- email
+- employeeId
+- committeeId
+- licenseNo
+- company
+- cr
+- branches
+- employerHistory
+
+الأدوار الموجودة:
+- worker
+- employer_delegate
+- injury_investigator
+- injury_head
+- od_investigator
+- od_head
+- sickleave_employee
+- sickleave_head
+- disability_employee
+- disability_head
+- committees_employee
+- committees_head
+- licensing_employee
+- licensing_head
+- licensed_institution
+- supervisory_committee
+- appeals_committee
+- hospital_delegate
+- od_committee
+- institution_rapporteur
+- appeals_rapporteur
+- supervisory_rapporteur
+- referral_coordinator
+- direct_referral_employee
+
+=============
+
+نوع الطلب: بدلات الانقطاع عن العمل
+الملف المرجعي: data-allowances.js
+
+المكونات الرئيسية:
+- بيانات أساسية للطلب:
+  id, type, subtype, isRelapse, status, submitDate, lastUpdate, lastUpdatedBy, expectedClosureDate, remainingDays
+- بيانات مقدم الطلب
+- بيانات المؤمن عليه
+- بيانات جهة العمل
+- بيانات الإصابة أو المرض المهني:
+  caseType, description, location, bodyPart, witnesses, witnessNames, incidentDate, insuredStatus, accidentDirection, caseDescription, chemicalAgents, exposureDuration, firstSuspicion, workEnvironment
+- بيانات التحقيق:
+  summary, findings, employeeRecommendation, employeeNotes, headDecision, headNotes
+- الزيارات الميدانية
+- فترات الإجازة المرضية
+- بيانات الإحالة:
+  institution, rapporteur, referralDate, reason, referrer, notes
+- بيانات الجلسة:
+  id, institution, date, time, quorum, members
+- قرار اللجنة:
+  type, date, disabilityPercent, sickLeavePeriod, content, signatories
+- بيانات الصرف:
+  status, periods, totalDays, totalAmount, lastDisbursement, nextDisbursement, stopReason
+- المرفقات
+- الملاحظات
+- التسلسل الزمني
+- بيانات الإسناد:
+  assignedTo, checkedOutBy
+- بيانات الإيقاف والاستئناف:
+  suspended, suspensionReason, suspensionNotes, suspendedBy, suspendedDate, resumedBy, resumedDate
+- سبب الإرجاع:
+  returnReason
+
+=============
+
+نوع الطلب: التظلمات
+الملف المرجعي: data-appeals.js
+
+المكونات الرئيسية:
+- بيانات أساسية للطلب:
+  id, originalRequestId, originalRequestType, status, submitDate, lastUpdate, lastUpdatedBy, expectedClosureDate, remainingDays
+- بيانات مقدم الطلب
+- بيانات المؤمن عليه
+- بيانات جهة العمل
+- بيانات القرار الأصلي:
+  type, date, issuer, details, knowledgeDate
+- بيانات التظلم:
+  appealReason, appealDetails, additionalNotes
+- بيانات الجلسة:
+  id, institution, date, time, quorum, members
+- القرار النهائي:
+  type, date, content, signatories
+- المرفقات
+- الملاحظات
+- التسلسل الزمني
+- بيانات الإسناد:
+  assignedTo, checkedOutBy
+- بيانات الإيقاف والاستئناف:
+  suspended, suspensionReason, suspensionNotes, suspendedBy, suspendedDate, resumedBy, resumedDate
+
+=============
+
+نوع الطلب: الأمراض المستديمة
+الملف المرجعي: data-chronic.js
+
+المكونات الرئيسية:
+- بيانات أساسية للطلب:
+  id, status, submitDate, lastUpdate, lastUpdatedBy, expectedClosureDate, remainingDays
+- بيانات مقدم الطلب
+- بيانات المرض المستديم:
+  chronicDisease, diagnosisDate, severity, treatment, medications, complications, lastAssessment, nextAssessment, path
+- بيانات التأمين:
+  status, regDate, subType, otherBenefits
+- بيانات الصرف:
+  approved, approvalDate, monthlyDay, status, expiryDate, stopReason, lastCheck
+- المرفقات
+- الملاحظات
+- التسلسل الزمني
+- بيانات الإسناد:
+  assignedTo, checkedOutBy
+- الإحالة عند الحاجة
+- الجلسة عند الحاجة
+- قرار اللجنة عند الحاجة
+
+=============
+
+نوع الطلب: منفعة الإعاقة
+الملف المرجعي: data-disability.js
+
+المكونات الرئيسية:
+- بيانات أساسية للطلب:
+  id, status, submitDate, lastUpdate, lastUpdatedBy, expectedClosureDate, remainingDays
+- بيانات مقدم الطلب
+- بيانات بطاقة الإعاقة:
+  number, status, activationDate, expiryDate, issueDate, disabilities, provenDate, lastCheck
+- تفاصيل عناصر disabilities:
+  source, name, level, examinationDate
+- بيانات التأمين:
+  status, regDate, subType, otherBenefits
+- بيانات الصرف:
+  approved, approvalDate, monthlyDay, status, expiryDate, stopReason, lastCheck
+- المرفقات
+- الملاحظات
+- التسلسل الزمني
+- بيانات الإسناد:
+  assignedTo, checkedOutBy
+- بيانات الإيقاف والاستئناف:
+  suspended, suspensionReason, suspensionNotes, suspendedBy, suspendedDate, resumedBy, resumedDate
+
+=============
+
+نوع الطلب: استعلام تقاعد ذوي الإعاقة
+الملف المرجعي: data-disability-retirement.js
+
+المكونات الرئيسية:
+- بيانات أساسية للاستعلام:
+  id, status, receivedDate, lastUpdate, lastUpdatedBy, expectedClosureDate, remainingDays
+- بيانات مقدم الطلب:
+  name, civil, phone, email, dob, gender, nationality, address
+- السجل الوظيفي:
+  employmentHistory
+- بيانات بطاقة وزارة التنمية الاجتماعية:
+  mosdCard.number, mosdCard.issueDate, mosdCard.expiryDate, mosdCard.status, mosdCard.disabilities
+- ملخص الإعاقة:
+  disabilityCard, cardIssueDate, disabilityType, disabilityLevel, disabilityDetails
+- بيانات العمل الحالية:
+  currentEmployer, retirementDate, lastJobTitle
+- حالة منفعة الإعاقة النشطة:
+  hasActiveRequest, requestId, currentStatus, isDisbursed, lastDepositedMonth
+- المراجعات:
+  employeeRecommendation, headDecision, closedBy, closedDate, workflowType, slaDays
+- القرار النهائي:
+  type, date, issuer, details, retirementEligible, retirementDate, pensionAmount
+- المرفقات
+- الملاحظات
+- التسلسل الزمني
+- بيانات الإسناد:
+  assignedTo, checkedOutBy
+- بيانات الإيقاف والاستئناف:
+  suspended, suspensionReason, suspensionNotes, suspendedBy, suspendedDate, resumedBy, resumedDate
+
+=============
+
+نوع الطلب: الترخيص والتجديد
+الملف المرجعي: data-licensing.js
+
+المكونات الرئيسية:
+- بيانات أساسية للطلب:
+  id, requestType, status, submitDate, lastUpdate, lastUpdatedBy, expectedClosureDate, remainingDays
+- بيانات المفوض:
+  name, civil, role, phone, email
+- بيانات المؤسسة الصحية:
+  name, cr, crStatus, crExpiry, type, address, governorate, phone, email, currentLicenseNo
+- بيانات الأطباء:
+  doctors
+- بيانات التحقق:
+  totalDoctors, confirmedDoctors, minMet, duplicates
+- المرفقات
+- الملاحظات
+- بيانات الجلسة عند الحاجة
+- قرار اللجنة عند الحاجة
+- بيانات الترخيص الفعال عند الحاجة
+- التسلسل الزمني
+- بيانات الإسناد:
+  assignedTo, checkedOutBy
+- بيانات الإيقاف والاستئناف:
+  suspended, suspensionReason, suspensionNotes, suspendedBy, suspendedDate, resumedBy, resumedDate
+
+=============
+
+نوع الطلب: العرض على المؤسسات الصحية المرخصة
+الملف المرجعي: data-referrals.js
+
+المكونات الرئيسية:
+- بيانات أساسية للطلب:
+  id, requestType, sourceChannel, createdByRole, status, submitDate, lastUpdate, lastUpdatedBy, expectedClosureDate, remainingDays, workflowType, slaDays
+- بيانات مقدم الطلب
+- بيانات المؤمن عليه
+- بيانات جهة العمل
+- بيانات الإحالة:
+  reason, notes, preferredInstitution, institutionType, requestCategory
+- المرفقات
+- الملاحظات
+- التسلسل الزمني
+- بيانات الإسناد:
+  assignedTo, checkedOutBy, assignedInstitution, assignedCommittee
+- بيانات الجلسة والقرار:
+  sessionId, sessionDate, decisionDate, committeeDecision
+- بيانات الإيقاف والاستئناف:
+  suspended, suspensionReason, suspensionNotes, suspendedBy, suspendedDate, resumedBy, resumedDate
+
+=============
+
+نوع السجل: الجلسات الطبية
+الملف المرجعي: data-sessions.js
+
+ملاحظة:
+هذا ليس طلبًا مباشرًا من المستخدم، بل سجل داعم مرتبط باللجان والجلسات الطبية.
+
+المكونات الرئيسية:
+- بيانات أساسية للجلسة:
+  id, type, institution, date, time, status
+- إحصاءات الجلسة:
+  casesCount, completedDecisions, quorum
+- أعضاء اللجنة:
+  members
+- محضر الجلسة:
+  minutes
+- الحالات المعروضة:
+  cases
+- التواقيع:
+  signatures
+
+=============
