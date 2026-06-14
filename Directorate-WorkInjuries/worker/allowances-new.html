@@ -158,7 +158,7 @@ function renderForm() {
           </div>
           <div class="fgrp" id="subtype-group" style="display:none">
             <label class="flbl">نوع الحالة <span class="req">*</span></label>
-            <select class="fc" id="req-subtype"></select>
+            <select class="fc" id="req-subtype" onchange="onSubtypeChange()"></select>
           </div>
           <div class="fgrp">
             <label class="flbl" id="incident-date-lbl">تاريخ الإصابة <span class="req">*</span></label>
@@ -302,6 +302,15 @@ function onTypeChange() {
         <div class="fgrp"><label class="flbl">هل كانت هناك شهود؟</label>
           <select class="fc" id="wit-sel" onchange="document.getElementById('wit-table-container').style.display=this.value==='نعم'?'':'none'; if(this.value==='نعم' && document.getElementById('wit-tbody').children.length===0) addWitnessRow();"><option value="لا">لا</option><option value="نعم">نعم</option></select>
         </div>
+        <div class="fgrp" id="accident-dir-group" style="display:none">
+          <label class="flbl">اتجاه الحادث <span class="req">*</span></label>
+          <select class="fc" id="accident-dir">
+            <option value="">— اختر اتجاه الحادث —</option>
+            <option>من مقر السكن الدائم أو الثانوي إلى مقر العمل</option>
+            <option>من مقر العمل إلى مقر السكن الدائم أو الثانوي</option>
+            <option>مهمة عمل</option>
+          </select>
+        </div>
         <div class="fgrp span-full" id="wit-table-container" style="display:none">
           <label class="flbl">بيانات الشهود</label>
           <div class="tbl-wrap">
@@ -330,6 +339,7 @@ function onTypeChange() {
         <li>تقرير جهة العمل عن الحادثة (إن وُجد)</li>
         <li>صور من موقع الحادثة (اختياري)</li>
       </ul>`;
+    setTimeout(() => onSubtypeChange(), 0);
   } else {
     document.getElementById('incident-date-lbl').innerHTML = 'تاريخ تشخيص المرض <span class="req">*</span>';
     document.getElementById('sick-leave-card').style.display = '';
@@ -356,6 +366,16 @@ function onTypeChange() {
         <li>سجل الفحوصات الطبية الدورية من جهة العمل</li>
       </ul>`;
   }
+}
+
+function onSubtypeChange() {
+  const subtype = document.getElementById('req-subtype')?.value;
+  const dirGroup = document.getElementById('accident-dir-group');
+  const dirField = document.getElementById('accident-dir');
+  if (!dirGroup) return;
+  const showDirection = subtype === 'حادث طريق';
+  dirGroup.style.display = showDirection ? '' : 'none';
+  if (!showDirection && dirField) dirField.value = '';
 }
 
 function selectEmployer(idx) {
@@ -458,7 +478,12 @@ function saveDraft() {
 
 function submitRequest() {
   const type = document.getElementById('req-type').value;
+  const subtype = document.getElementById('req-subtype')?.value;
   const date = document.getElementById('incident-date').value;
+  if (type === 'إصابة عمل' && subtype === 'حادث طريق' && !document.getElementById('accident-dir')?.value) {
+    showToast('يرجى اختيار اتجاه الحادث', 'w');
+    return;
+  }
   if (!type) { showToast('يرجى اختيار نوع الطلب', 'w'); return; }
   if (!date) { showToast('يرجى تحديد تاريخ الواقعة أو الاشتباه بالمرض', 'w'); return; }
 

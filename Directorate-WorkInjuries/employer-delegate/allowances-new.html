@@ -294,11 +294,10 @@ function onTypeChange() {
         <div class="fgrp" id="accident-dir-group" style="display:none">
           <label class="flbl">اتجاه الحادث <span class="req">*</span></label>
           <select class="fc" id="accident-dir">
-            <option value="">— اختر —</option>
-            <option>مقر العمل إلى السكن الدائم</option>
-            <option>السكن الدائم إلى مقر العمل</option>
-            <option>خروج في مهمة عمل</option>
-            <option>السكن الدائم إلى السكن الثانوي</option>
+            <option value="">— اختر اتجاه الحادث —</option>
+            <option>من مقر السكن الدائم أو الثانوي إلى مقر العمل</option>
+            <option>من مقر العمل إلى مقر السكن الدائم أو الثانوي</option>
+            <option>مهمة عمل</option>
           </select>
         </div>
       </div>`;
@@ -346,7 +345,11 @@ function onTypeChange() {
 function onSubtypeChange() {
   const subtype = document.getElementById('req-subtype')?.value;
   const dirGroup = document.getElementById('accident-dir-group');
-  if (dirGroup) dirGroup.style.display = subtype === 'حادث طريق' ? '' : 'none';
+  const dirField = document.getElementById('accident-dir');
+  if (!dirGroup) return;
+  const showDirection = subtype === 'حادث طريق';
+  dirGroup.style.display = showDirection ? '' : 'none';
+  if (!showDirection && dirField) dirField.value = '';
 }
 
 function onRelapseChange() {
@@ -402,7 +405,12 @@ function saveDraft() {
 function submitRequest() {
   if (!selectedEmployee) { showToast('يرجى اختيار الموظف أولاً', 'w'); return; }
   const type = document.getElementById('req-type').value;
+  const subtype = document.getElementById('req-subtype')?.value;
   if (!type) { showToast('يرجى اختيار نوع الطلب وتعبئة البيانات', 'w'); return; }
+  if (type === 'إصابة عمل' && subtype === 'حادث طريق' && !document.getElementById('accident-dir')?.value) {
+    showToast('يرجى اختيار اتجاه الحادث', 'w');
+    return;
+  }
 
   showToast('جارٍ تقديم الطلب من قبل جهة العمل...', 'i');
   setTimeout(() => {
