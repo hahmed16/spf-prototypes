@@ -1,4 +1,8 @@
 (function(){
+  var plantUmlRenderTasks = [];
+  var urlParams = new URLSearchParams(window.location.search);
+  var isExportMode = urlParams.has('exportPdf');
+
   function getImmediateHeading(section) {
     var child = section.firstElementChild;
     while (child) {
@@ -64,8 +68,12 @@
     sections.forEach(ensureSectionStructure);
 
     sections.forEach(function(section) {
-      setSectionExpanded(section, section.id === 'executive-summary');
+      setSectionExpanded(section, isExportMode || section.id === 'executive-summary');
     });
+
+    function setAllSectionsExpanded(expanded) {
+      sections.forEach(function(section) { setSectionExpanded(section, expanded); });
+    }
 
     function expandFromHash(hash) {
       if (!hash || hash.length < 2) return;
@@ -85,25 +93,33 @@
     var expandAllBtn = document.getElementById('expand-all-sections');
     if (expandAllBtn) {
       expandAllBtn.addEventListener('click', function() {
-        sections.forEach(function(section) { setSectionExpanded(section, true); });
+        setAllSectionsExpanded(true);
       });
     }
 
     var collapseAllBtn = document.getElementById('collapse-all-sections');
     if (collapseAllBtn) {
       collapseAllBtn.addEventListener('click', function() {
-        sections.forEach(function(section) { setSectionExpanded(section, false); });
+        setAllSectionsExpanded(false);
       });
     }
+
+    window.addEventListener('beforeprint', function() {
+      setAllSectionsExpanded(true);
+    });
 
     window.addEventListener('hashchange', function() {
       expandFromHash(window.location.hash);
     });
 
     expandFromHash(window.location.hash);
+
+    return {
+      sections: sections,
+      setAllSectionsExpanded: setAllSectionsExpanded
+    };
   }
 
-  /* PlantUML ~h hex encoding — zero dependencies, 100% reliable */
   function encodePlantUML(src) {
     var bytes = new TextEncoder().encode(src);
     var hex = '';
@@ -121,10 +137,18 @@
            'PlantUML';
   }
 
-  function renderDiagram(pre) {
+  function containsArabic(src) {
+    return /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(src);
+  }
+
+  async function renderDiagram(pre) {
     var src = pre.textContent.trim();
     var encoded = encodePlantUML(src);
-    var imgUrl = 'https://www.plantuml.com/plantuml/svg/' + encoded;
+    var preferPng = containsArabic(src);
+    var format = preferPng ? 'png' : 'svg';
+    var fallbackFormat = preferPng ? 'svg' : 'png';
+    var imgUrl = 'https://www.plantuml.com/plantuml/' + format + '/' + encoded;
+    var fallbackUrl = 'https://www.plantuml.com/plantuml/' + fallbackFormat + '/' + encoded;
     var type = getType(src);
 
     /* Get title from preceding h3 */
@@ -160,19 +184,29 @@
 
     /* Load image */
     var img = new Image();
-    img.onload = function() {
-      diagramDiv.innerHTML = '';
-      diagramDiv.appendChild(img);
-    };
-    img.onerror = function() {
-      diagramDiv.innerHTML =
-        '<div class="pu-error">⚠️ تعذّر تحميل المخطط.'
-        + ' <a href="' + imgUrl + '" target="_blank">افتح في متصفح جديد ↗</a>'
-        + '</div>';
-    };
+    var imageLoaded = new Promise(function(resolve) {
+      var triedFallback = false;
+
+      img.onload = function() {
+        diagramDiv.innerHTML = '';
+        diagramDiv.appendChild(img);
+        resolve();
+      };
+      img.onerror = function() {
+        if (!triedFallback) {
+          triedFallback = true;
+          img.src = fallbackUrl;
+          return;
+        }
+        diagramDiv.innerHTML =
+          '<div class="pu-error">تعذّر تحميل المخطط.'
+          + ' <a href="' + imgUrl + '" target="_blank">افتح في متصفح جديد</a>'
+          + '</div>';
+        resolve();
+      };
+    });
     img.src = imgUrl;
     img.alt = title;
-    img.style.maxWidth = '100%';
 
     /* Toggle source */
     toolbar.querySelector('.pu-toggle-btn').addEventListener('click', function() {
@@ -182,6 +216,29 @@
 
     /* Replace pre with panel */
     pre.parentNode.replaceChild(panel, pre);
+
+    await imageLoaded;
+  }
+
+  function initExportButton(sectionApi) {
+    var exportBtn = document.getElementById('export-pdf');
+    if (!exportBtn) return;
+
+    exportBtn.addEventListener('click', async function() {
+      exportBtn.disabled = true;
+      var originalText = exportBtn.textContent;
+      exportBtn.textContent = 'Preparing...';
+
+      try {
+        sectionApi.setAllSectionsExpanded(true);
+        await Promise.allSettled(plantUmlRenderTasks);
+        await new Promise(function(resolve) { window.setTimeout(resolve, 600); });
+        window.print();
+      } finally {
+        exportBtn.disabled = false;
+        exportBtn.textContent = originalText;
+      }
+    });
   }
 
   function initBackToTop() {
@@ -217,12 +274,17 @@
 
   /* Run after DOM ready */
   function init() {
-    initCollapsibleSections();
+    var sectionApi = initCollapsibleSections();
     initBackToTop();
 
     var pres = Array.from(document.querySelectorAll('pre'));
     pres.filter(function(p){ return p.textContent.includes('@startuml'); })
-        .forEach(renderDiagram);
+        .forEach(function(pre) {
+          var task = renderDiagram(pre);
+          plantUmlRenderTasks.push(task);
+        });
+
+    initExportButton(sectionApi);
   }
 
   if (document.readyState === 'loading') {

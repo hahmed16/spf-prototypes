@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>وثيقة متطلبات العمل - نظام الادخار</title>
+    <title>وثيقة متطلبات الأعمال - نظام الادخار</title>
     <link rel='stylesheet' href='Saving-Full-BRD.css'>
 </head>
 
@@ -14,7 +14,7 @@
       <div class="hero-row">
         <img src="../SPF_logo_gold.svg" class="hero-logo" alt="Logo" />
         <div class="hero-title-wrap">
-          <h1>وثيقة متطلبات العمل<br>نظام الادخار</h1>
+          <h1>وثيقة متطلبات الأعمال<br>نظام الادخار</h1>
         </div>
       </div>
     </header>
@@ -22,6 +22,7 @@
             <div class="toc-header">
                 <h2>فهرس المحتويات</h2>
                 <div class="toc-actions">
+                    <button type="button" id="export-pdf" class="toc-btn toc-btn-primary" style="display: none;">Export PDF</button>
                     <button type="button" id="expand-all-sections" class="toc-btn">Expand All</button>
                     <button type="button" id="collapse-all-sections" class="toc-btn">Collapse All</button>
                 </div>
@@ -32,7 +33,7 @@
                 <li><a href="#business-need">حاجة العمل / بيان المشكلة</a></li>
                 <li><a href="#goals-drivers">الأهداف ومحركات العمل ومعايير النجاح</a></li>
                 <li><a href="#scope">النطاق والقيود والافتراضات</a></li>
-                <li><a href="#capability-map">خريطة القدرات الرئيسية</a></li>
+                <li><a href="#capability-map">خريطة الإمكانات الرئيسية التى يتم توفيرها عن طريق النظام</a></li>
                 <li><a href="#stakeholders">أصحاب المصلحة والأدوار</a></li>
                 <li><a href="#legal-framework">الإطار القانوني والتنظيمي</a></li>
                 <li><a href="#proposed-process">العملية المقترحة</a></li>
@@ -46,16 +47,14 @@
                 <li><a href="#data-requirements">متطلبات البيانات</a></li>
                 <li><a href="#integration-requirements">متطلبات التكامل</a></li>
                 <li><a href="#internal-integrations">التكامل مع الأنظمة الداخلية الحالية في الصندوق</a></li>
-                <li><a href="#smart-validation">التحقق من المتطلبات وفق SMART</a></li>
                 <li><a href="#kpis">مؤشرات الأداء التشغيلية</a></li>
                 <li><a href="#risks">المخاطر وخطط التخفيف</a></li>
                 <li><a href="#exception-policy">سياسات الاستثناءات والمعالجة اليدوية</a></li>
                 <li><a href="#dependencies">الاعتماديات</a></li>
                 <li><a href="#plantuml">الرسوم النصية PlantUML</a></li>
-                <li><a href="#decision-log">سجل القرارات المعتمدة</a></li>
-                 <li><a href="#glossary">المسرد والتعريفات</a></li>
-                <li><a href="#signoff">إجراءات المراجعة والاعتماد وإدارة التغيير</a></li>
                 <li><a href="#version-history">سجل النسخ</a></li>
+                <li><a href="#glossary">المسرد والتعريفات</a></li>
+                <li><a href="#final-approval">الاعتماد النهائي</a></li>
             </ul>
         </nav>
         <main>
@@ -1537,96 +1536,6 @@
                 </table>
             </section>
 
-            <section id="smart-validation">
-                <h2>التحقق من المتطلبات وفق SMART</h2>
-                <p>تمت مراجعة المتطلبات الأساسية بحيث تكون واضحة وقابلة للقياس وقابلة للتحقق وتخدم أهداف المشروع. وبما أن بعض المتطلبات مرتبطة بإطلاق النظام أو بدورات تشغيل سنوية، فقد تمت صياغتها بما يربطها بزمن الحاجة التشغيلي بدل تاريخ تقويمي محدد.</p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>البعد</th>
-                            <th>آلية التحقق داخل هذه الوثيقة</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Specific</td>
-                            <td>تمت صياغة المتطلبات بصيغة مباشرة تحدد الفاعل والوظيفة والقيد عند الحاجة.</td>
-                        </tr>
-                        <tr>
-                            <td>Measurable</td>
-                            <td>يمكن التحقق من كل متطلب عبر اختبار قبول أو تكامل أو مراجعة قواعد الأعمال أو تتبع نتيجة العملية.</td>
-                        </tr>
-                        <tr>
-                            <td>Achievable</td>
-                            <td>تم حصر التكاملات الأساسية وتقليل النطاق إلى ما هو قابل للتنفيذ ضمن الإصدار الأول مع إبقاء الاستثناءات في مسار يدوي.</td>
-                        </tr>
-                        <tr>
-                            <td>Relevant</td>
-                            <td>ترتبط المتطلبات مباشرة بأهداف الامتثال، الأتمتة، سلامة الحساب، وتحسين الخدمة.</td>
-                        </tr>
-                        <tr>
-                            <td>Time-bound</td>
-                            <td>تم ربط المتطلبات بزمن التنفيذ التشغيلي، مثل التسجيل عند الالتحاق، التحقق قبل الصرف، احتساب العوائد سنويًا، وإخطار الخروج خلال شهر.</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <h3>مصفوفة تحقق مختصرة</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>المتطلب</th>
-                            <th>Specific</th>
-                            <th>Measurable</th>
-                            <th>Achievable</th>
-                            <th>Relevant</th>
-                            <th>Time-bound</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>FR-12 السقف السنوي لكل مصدر اختياري</td>
-                            <td>نعم</td>
-                            <td>نعم عبر التحقق من القيم والتجاوز</td>
-                            <td>نعم</td>
-                            <td>نعم</td>
-                            <td>نعم عند كل إيداع</td>
-                        </tr>
-                        <tr>
-                            <td>FR-19 السداد تلقائيًا للأقدم فالأحدث</td>
-                            <td>نعم</td>
-                            <td>نعم عبر محاكاة رصيد والتزامات</td>
-                            <td>نعم</td>
-                            <td>نعم</td>
-                            <td>نعم عند كل عملية سداد</td>
-                        </tr>
-                        <tr>
-                            <td>FR-22 توزيع عوائد الاستثمار السنوية</td>
-                            <td>نعم</td>
-                            <td>نعم عبر نسبة معتمدة ومخرجات توزيع</td>
-                            <td>نعم</td>
-                            <td>نعم</td>
-                            <td>نعم في الدورة السنوية</td>
-                        </tr>
-                        <tr>
-                            <td>FR-29 إلزام تحديث بيانات التحويل قبل السفر</td>
-                            <td>نعم</td>
-                            <td>نعم عبر شرط قبول المعالجة</td>
-                            <td>نعم</td>
-                            <td>نعم</td>
-                            <td>نعم قبل الصرف بعد المغادرة</td>
-                        </tr>
-                        <tr>
-                            <td>NFR-03 سجل التدقيق</td>
-                            <td>نعم</td>
-                            <td>نعم عبر وجود أثر لكل عملية</td>
-                            <td>نعم</td>
-                            <td>نعم</td>
-                            <td>نعم أثناء التنفيذ اللحظي</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
-
             <!-- SECTION: KPIs -->
             <section id="kpis">
                 <h2>مؤشرات الأداء التشغيلية</h2>
@@ -2065,16 +1974,16 @@
                 <h3>1) رسم تسلسلي — الدخول عبر ثقة والتحقق من الهوية</h3>
                 <pre>@startuml
 title 1) Login and Identity Verification via THEQA
-actor "المستخدم" as User
-participant "منصة ثقة THEQA" as THEQA
-participant "الأحوال المدنية" as Civil
-participant "نظام الادخار" as Saving
+actor "User" as User
+participant "THEQA Platform" as THEQA
+participant "Civil Status" as Civil
+participant "Savings System" as Saving
 
-User -> THEQA : بدء تسجيل الدخول
-THEQA -> Civil : التحقق من الهوية الرقمية
-Civil --> THEQA : بيانات الهوية المعتمدة
-THEQA --> Saving : هوية موثقة + الرقم المدني + بيانات المستخدم
-Saving --> User : فتح لوحة التحكم حسب الصلاحية
+User -> THEQA : Start login
+THEQA -> Civil : Verify digital identity
+Civil --> THEQA : Verified identity data
+THEQA --> Saving : Authenticated identity + civil ID + user data
+Saving --> User : Open dashboard by role
 @enduml</pre>
 
                 <hr class="grp-sep">
@@ -2082,35 +1991,35 @@ Saving --> User : فتح لوحة التحكم حسب الصلاحية
                 <pre>@startuml
 title 2) Optional Registration and Personal Account Creation
 start
-:الدخول عبر ثقة;
-:عرض الفئات المؤهلة (المادة 136);
-:اختيار الفئة;
-:جلب بيانات المستخدم تلقائيا;
-if (الفئة غير مؤمن عليها؟) then (نعم)
-  :إدخال وسائل تواصل إضافية;
+:Login via THEQA;
+:Show eligible categories (Article 136);
+:Select category;
+:Load member data automatically;
+if (Non-insured category?) then (Yes)
+  :Enter additional contact details;
 endif
-:عرض الشروط والأحكام;
-if (الموافقة على الشروط؟) then (نعم)
-  :إدخال مبلغ الإيداع الأولي;
-  if (المبلغ >= 100 ر.ع؟) then (نعم)
-    :التحقق من وجود Virtual Account داخلي;
-    :إنشاء الحساب الشخصي وVirtual Account عند الحاجة;
-    :إصدار فاتورة الإيداع الأولي;
-    :السداد عبر قناة التحصيل;
-    if (تأكيد السداد؟) then (نعم)
-      :تخصيص المبلغ في الحساب الشخصي;
-      :تفعيل العضوية الاختيارية;
+:Show terms and conditions;
+if (Accept terms?) then (Yes)
+  :Enter initial deposit amount;
+  if (Amount >= 100 OMR?) then (Yes)
+    :Check existing internal virtual account;
+    :Create personal account and virtual account if needed;
+    :Issue initial deposit invoice;
+    :Pay through collection channel;
+    if (Payment confirmed?) then (Yes)
+      :Allocate amount to personal account;
+      :Activate optional membership;
       stop
-    else (لا)
-      :إظهار تعذر السداد وإتاحة إعادة المحاولة على الفاتورة;
+    else (No)
+      :Show payment failure and allow invoice retry;
       stop
     endif
-  else (لا)
-    :رفض الطلب لعدم استيفاء الحد الأدنى;
+  else (No)
+    :Reject request for minimum amount failure;
     stop
   endif
-else (لا)
-  :إلغاء التسجيل;
+else (No)
+  :Cancel registration;
   stop
 endif
 @enduml</pre>
@@ -2119,25 +2028,27 @@ endif
                 <h3>3) رسم تسلسلي — الإيداع الذاتي الاختياري</h3>
                 <pre>@startuml
 title 3) Voluntary Self Deposit
-actor "المدخر" as Saver
-participant "نظام الادخار" as Saving
-participant "قناة الدفع الوطنية" as Pay
-participant "الحساب الداخلي" as VA
-participant "الحساب الشخصي" as Account
+hide footbox
+skinparam ResponseMessageBelowArrow true
+actor "Saver" as Saver
+participant "Saving" as Saving
+participant "Pay" as Pay
+participant "VA" as VA
+participant "Account" as Account
 
-Saver -> Saving : طلب إنشاء فاتورة إيداع اختيارية فردية
-Saving --> Saver : عرض الرصيد الحالي وضوابط الإيداع
-Saver -> Saving : إدخال مبلغ الإيداع
-Saving -> Saving : التحقق من الحد الأدنى والسقف السنوي
-Saving -> Saving : إنشاء فاتورة فردية + التحقق من صلاحيتها
-Saver -> Pay : سداد الفاتورة عبر قناة التحصيل
-Pay --> Saving : تأكيد السداد + المرجع
-alt الدفع ناجح
-    Saving -> VA : قيد مبلغ الفاتورة
-    Saving -> Account : تخصيص مبلغ الإيداع
-    Saving --> Saver : تأكيد العملية + رقم الفاتورة + المرجع
-else الدفع فشل أو الفاتورة غير صالحة
-    Saving --> Saver : إشعار بالفشل + سبب الرفض
+Saver -> Saving : Request optional\ndeposit invoice
+Saving --> Saver : Show balance\nand deposit rules
+Saver -> Saving : Enter amount
+Saving -> Saving : Validate minimum\nand annual cap
+Saving -> Saving : Create and validate\ninvoice
+Saver -> Pay : Pay invoice
+Pay --> Saving : Payment confirmed\n+ reference
+alt payment success
+    Saving -> VA : Record invoice\namount
+    Saving -> Account : Allocate deposit\namount
+    Saving --> Saver : Confirm invoice no.\n+ reference
+else payment failed or invoice invalid
+    Saving --> Saver : Failure notice\n+ reason
 end
 @enduml</pre>
 
@@ -2145,27 +2056,27 @@ end
                 <h3>4) رسم تسلسلي — الإيداع الجماعي من جهة العمل</h3>
                 <pre>@startuml
 title 4) Employer Bulk Deposit
-actor "مفوض جهة العمل" as Emp
-participant "نظام الادخار" as Saving
-participant "قناة الدفع الوطنية" as Pay
-participant "الحسابات الداخلية" as VA
-participant "حسابات العمال" as Accounts
+actor "Employer Delegate" as Emp
+participant "Savings System" as Saving
+participant "Payment Channel" as Pay
+participant "Internal Accounts" as VA
+participant "Worker Accounts" as Accounts
 
-Emp -> Saving : اختيار العمال المستهدفين
-Emp -> Saving : تحديد آلية التوزيع (ثابت/نسبة/إجمالي/مبالغ فردية)
-Saving -> Saving : التحقق من الحد الأدنى لكل عامل (>=100)
-alt توجد مخالفة
-    Saving --> Emp : إيقاف العملية وطلب تصحيح المبالغ
-else جميع القيم صحيحة
-    Saving --> Emp : عرض ملخص العملية للاعتماد
-    Emp -> Saving : اعتماد الإيداع الجماعي
-    Saving -> Saving : إنشاء فاتورة اختيارية جماعية
-    Emp -> Pay : سداد الفاتورة كاملة
-    Pay --> Saving : تأكيد السداد الكامل
-    Saving -> VA : قيد مبلغ الفاتورة
-    Saving -> Accounts : توزيع المبالغ على حسابات العمال
-    Accounts --> Saving : تأكيد القيود
-    Saving --> Emp : رقم الفاتورة + مراجع التخصيص التفصيلية
+Emp -> Saving : Select target workers
+Emp -> Saving : Select distribution method\n(fixed/ratio/total split/individual amounts)
+Saving -> Saving : Validate minimum per worker (>=100)
+alt validation failed
+    Saving --> Emp : Stop process and request correction
+else values valid
+    Saving --> Emp : Show summary for approval
+    Emp -> Saving : Approve bulk deposit
+    Saving -> Saving : Create bulk optional invoice
+    Emp -> Pay : Pay invoice in full
+    Pay --> Saving : Full payment confirmation
+    Saving -> VA : Record invoice amount
+    Saving -> Accounts : Allocate amounts to worker accounts
+    Accounts --> Saving : Allocation confirmed
+    Saving --> Emp : Invoice no. + allocation references
 end
 @enduml</pre>
 
@@ -2173,34 +2084,34 @@ end
                 <h3>5) رسم تسلسلي — سداد الالتزامات من رصيد المدخرات</h3>
                 <pre>@startuml
 title 5) Dues Settlement from Savings
-actor "المدخر" as Saver
-participant "نظام الادخار" as Saving
-participant "نظام المستحقات" as Dues
-participant "الحساب الشخصي" as Account
+actor "Saver" as Saver
+participant "Savings System" as Saving
+participant "Dues System" as Dues
+participant "Personal Account" as Account
 
-Saver -> Saving : فتح صفحة سداد الالتزامات
-Saving -> Dues : جلب الالتزامات المستحقة
-Dues --> Saving : قائمة الالتزامات (مبلغ/تاريخ/حالة)
-Saving --> Saver : عرض الالتزامات
-Saver -> Saving : اختيار الالتزامات المراد سدادها
-Saving -> Account : التحقق من الرصيد المتاح
-alt الرصيد يغطي المبالغ المختارة
-    Saving -> Saving : بدء معاملة مالية واحدة
-    Saving -> Account : خصم المبلغ بشكل معلق
-    Saving -> Dues : تحديث حالة السداد + مرجع العملية
-    alt تم تحديث الالتزامات بنجاح
-        Dues --> Saving : تأكيد التحديث
-        Saving -> Account : تثبيت الخصم
-        Saving -> Saving : اعتماد المعاملة كاملة
-        Saving --> Saver : سداد ناجح وتحديث الرصيد
-    else تعذر تحديث الالتزامات
-        Dues --> Saving : فشل التحديث
-        Saving -> Account : إلغاء الخصم المعلق
-        Saving -> Saving : إلغاء المعاملة كاملة
-        Saving --> Saver : فشل السداد دون أي أثر مالي جزئي
+Saver -> Saving : Open dues settlement page
+Saving -> Dues : Fetch outstanding dues
+Dues --> Saving : Dues list (amount/date/status)
+Saving --> Saver : Show dues list
+Saver -> Saving : Select dues to settle
+Saving -> Account : Check available balance
+alt balance sufficient
+    Saving -> Saving : Start single financial transaction
+    Saving -> Account : Hold deduction amount
+    Saving -> Dues : Update dues status + transaction reference
+    alt dues updated successfully
+        Dues --> Saving : Update confirmed
+        Saving -> Account : Confirm deduction
+        Saving -> Saving : Commit full transaction
+        Saving --> Saver : Settlement success + balance updated
+    else dues update failed
+        Dues --> Saving : Update failed
+        Saving -> Account : Reverse held deduction
+        Saving -> Saving : Roll back full transaction
+        Saving --> Saver : Settlement failed with no partial effect
     end
-else الرصيد غير كاف
-    Saving --> Saver : رفض السداد أو طلب تعديل الاختيار
+else insufficient balance
+    Saving --> Saver : Reject settlement or request change
 end
 @enduml</pre>
 
@@ -2208,22 +2119,23 @@ end
                 <h3>6) رسم تسلسلي — اعتماد نسبة العائد السنوي (حوكمة)</h3>
                 <pre>@startuml
 title 6) Annual Return Rate Approval (Governance)
-actor "أخصائي الاستثمار" as Analyst
-actor "مدير المخاطر" as RiskMgr
-actor "لجنة الاستثمار" as Committee
-participant "نظام الادخار" as Saving
+skinparam ResponseMessageBelowArrow true
+actor "Analyst" as Analyst
+actor "Risk Mgr" as RiskMgr
+actor "Committee" as Committee
+participant "System" as Saving
 
-Analyst -> Saving : إدخال نسبة العائد المقترحة + المبررات
-Saving --> RiskMgr : إحالة للمراجعة
-RiskMgr -> Saving : قبول أو طلب تعديل
-alt طلب تعديل
-    Saving --> Analyst : إعادة العمل على المقترح
-    Analyst -> Saving : إعادة تقديم النسبة
+Analyst -> Saving : Submit proposed rate\nand justification
+Saving --> RiskMgr : Send for review
+RiskMgr -> Saving : Accept or request\nrevision
+alt revision requested
+    Saving --> Analyst : Rework proposal
+    Analyst -> Saving : Resubmit rate
 end
-Saving --> Committee : الرفع للاعتماد النهائي
-Committee -> Saving : اعتماد النسبة الرسمية
-Saving -> Saving : حفظ النسبة المعتمدة لسنة العائد
-Saving --> Analyst : إشعار باعتماد النسبة
+Saving --> Committee : Escalate for final approval
+Committee -> Saving : Approve official rate
+Saving -> Saving : Save approved rate
+Saving --> Analyst : Notify approval
 @enduml</pre>
 
                 <hr class="grp-sep">
@@ -2231,14 +2143,14 @@ Saving --> Analyst : إشعار باعتماد النسبة
                 <pre>@startuml
 title 7) Annual Investment Return Calculation and Distribution
 start
-:قراءة نسبة العائد السنوي المعتمدة;
-:قراءة طريقة الاحتساب المعتمدة;
-:تحديد فترة الاحتساب;
-:احتساب العائد لكل حساب حسب الرصيد والزمن;
-:إنشاء قيود توزيع العوائد;
-:ترحيل العوائد إلى الحسابات الشخصية;
-:تحديث كشف الحساب وسجل التدقيق;
-:إشعار المستفيدين بإتمام التوزيع;
+:Read approved annual return rate;
+:Read approved calculation method;
+:Determine calculation period;
+:Calculate return per account by balance and time;
+:Create return distribution entries;
+:Post returns to personal accounts;
+:Update statement and audit trail;
+:Notify beneficiaries of completion;
 stop
 @enduml</pre>
 
@@ -2246,14 +2158,14 @@ stop
                 <h3>8) رسم تسلسلي — تحويل فائض الاشتراكات السنوي (العمانيون)</h3>
                 <pre>@startuml
 title 8) Annual Surplus Transfer (Omani)
-participant "نظام الاشتراكات" as Subs
-participant "نظام الادخار" as Saving
-participant "الحساب الشخصي" as Account
-actor "المدخر العماني" as Saver
+participant "Contributions System" as Subs
+participant "Savings System" as Saving
+participant "Personal Account" as Account
+actor "Omani Saver" as Saver
 
-Subs -> Saving : إرسال بيانات الفائض السنوي المعتمد
-Saving -> Account : قيد الفائض كمصدر مستقل
-Saving --> Saver : إشعار بإضافة الفائض
+Subs -> Saving : Send approved annual surplus data
+Saving -> Account : Post surplus as separate source
+Saving --> Saver : Notify surplus addition
 @enduml</pre>
 
                 <hr class="grp-sep">
@@ -2261,31 +2173,31 @@ Saving --> Saver : إشعار بإضافة الفائض
                 <pre>@startuml
 title 9) Optional Disbursement Request
 start
-:تقديم طلب الصرف;
-:عرض ملخص الرصيد القابل للصرف;
-:اختيار سبب الصرف;
-if (سبب استحقاق صحيح؟) then (نعم)
-  :فحص الالتزامات المالية القائمة;
-  if (توجد التزامات؟) then (نعم)
-    :عرض خيار السداد أو الخصم قبل الصرف;
+:Submit disbursement request;
+:Show withdrawable balance summary;
+:Select disbursement reason;
+if (Valid eligibility reason?) then (Yes)
+  :Check outstanding financial dues;
+  if (Any dues?) then (Yes)
+    :Show settlement or deduction option before payout;
   endif
-  :اختيار طريقة الصرف (دفعة/تقسيط);
-  if (الصرف بالتقسيط؟) then (نعم)
-    :تحديد عدد الأقساط;
-    :احتساب قيمة القسط المتساوي;
-    :التحقق من الحد الأدنى الشهري المعتمد;
-    if (القسط >= الحد الأدنى؟) then (نعم)
-      :عرض تاريخ أول صرف في الشهر التالي للاعتماد;
-    else (لا)
-      :رفض خيار التقسيط وطلب تعديل العدد;
+  :Select payout method (lump sum/installments);
+  if (Installments selected?) then (Yes)
+    :Enter number of installments;
+    :Calculate equal installment amount;
+    :Validate configured monthly minimum;
+    if (Installment >= minimum?) then (Yes)
+      :Show first payout date in next month after approval;
+    else (No)
+      :Reject installment choice and request new count;
       stop
     endif
   endif
-  :اختيار الحساب البنكي;
-  :إرسال الطلب للمراجعة;
+  :Select bank account;
+  :Send request for review;
   stop
-else (لا)
-  :رفض الطلب مع توضيح السبب;
+else (No)
+  :Reject request with reason;
   stop
 endif
 @enduml</pre>
@@ -2294,31 +2206,31 @@ endif
                 <h3>10) رسم تسلسلي — معالجة طلب الصرف الاختياري بواسطة موظف الصندوق</h3>
                 <pre>@startuml
 title 10) Optional Disbursement Processing by Fund Officer
-actor "المدخر" as Saver
-participant "نظام الادخار" as Saving
-participant "موظف الصندوق" as Officer
-participant "نظام المستحقات" as Dues
-participant "قناة الدفع" as Pay
+actor "Saver" as Saver
+participant "Savings System" as Saving
+participant "Fund Officer" as Officer
+participant "Dues System" as Dues
+participant "Payment Channel" as Pay
 
-Saver -> Saving : تقديم طلب الصرف
-Saving -> Dues : التحقق من الالتزامات المالية
-Dues --> Saving : حالة الالتزامات
-Saving -> Officer : إحالة الطلب للمراجعة
-Officer -> Saving : اعتماد / رفض / طلب استكمال
-alt اعتماد
-    alt الصرف دفعة واحدة
-        Saving -> Pay : تنفيذ التحويل البنكي
-        Pay --> Saving : نتيجة التحويل
-        Saving --> Saver : إشعار بإتمام الصرف
-    else الصرف على أقساط
-        Saving -> Saving : تثبيت عدد الأقساط وقيمة كل قسط
-        Saving -> Saving : جدولة أول قسط من الشهر التالي للاعتماد
-        Saving --> Saver : إشعار باعتماد الطلب وجدول الأقساط
+Saver -> Saving : Submit disbursement request
+Saving -> Dues : Check financial dues
+Dues --> Saving : Dues status
+Saving -> Officer : Route request for review
+Officer -> Saving : Approve / reject / request completion
+alt approved
+    alt lump sum payout
+        Saving -> Pay : Execute bank transfer
+        Pay --> Saving : Transfer result
+        Saving --> Saver : Notify payout completion
+    else installment payout
+        Saving -> Saving : Save installment count and amount
+        Saving -> Saving : Schedule first payout next month after approval
+        Saving --> Saver : Notify approval and installment schedule
     end
-else رفض
-    Saving --> Saver : إشعار بالرفض وأسبابه
-else استكمال
-    Saving --> Saver : طلب مستندات أو بيانات إضافية
+else rejected
+    Saving --> Saver : Notify rejection and reasons
+else completion requested
+    Saving --> Saver : Request additional documents or data
 end
 @enduml</pre>
 
@@ -2327,17 +2239,17 @@ end
                 <pre>@startuml
 title 11) Mandatory Registration for Non-Omani (3 Mechanisms)
 start
-if (مصدر التسجيل؟) then (اعتماد عقد العمل)
-  :تسجيل تلقائي عند اعتماد العقد;
-elseif (أثر رجعي)
-  :تسجيل بأثر رجعي ضمن المدة النظامية;
-else (قرار النظام)
-  :تسجيل مباشر بقرار الصندوق;
+if (Registration source?) then (Contract approval)
+  :Auto-register on contract approval;
+elseif (Retroactive)
+  :Register retroactively within legal period;
+else (System decision)
+  :Direct registration by fund decision;
 endif
-:التحقق من بيانات العامل وجهة العمل;
-:إنشاء الحساب الشخصي الإلزامي;
-:ربط الحساب بمسار الاشتراكات الإلزامية;
-:إشعار العامل وجهة العمل;
+:Validate worker and employer data;
+:Create mandatory personal account;
+:Link account to mandatory contribution stream;
+:Notify worker and employer;
 stop
 @enduml</pre>
 
@@ -2345,58 +2257,60 @@ stop
                 <h3>12) رسم تسلسلي — الاشتراكات الإلزامية الشهرية والغرامات عند التأخر</h3>
                 <pre>@startuml
 title 12) Mandatory Monthly Contributions and Delay Penalties
-actor "جهة العمل" as Employer
-participant "نظام الاشتراكات" as Subs
-participant "نظام الادخار" as Saving
-participant "قناة الدفع" as Pay
+hide footbox
+skinparam ResponseMessageBelowArrow true
+actor "Employer" as Employer
+participant "Subs" as Subs
+participant "Saving" as Saving
+participant "Pay" as Pay
 
-Employer -> Subs : رفع بيانات الأجور الأساسية الشهرية
-Subs -> Subs : احتساب 9% لكل عامل غير عماني
-Subs --> Employer : إصدار فاتورة شهرية موحدة (تشمل بند 9%)
-Employer -> Pay : سداد الفاتورة (كلي/جزئي)
-Pay --> Subs : نتيجة التحصيل والتسوية
-alt سداد جزئي
-    Subs --> Employer : تحديث حالة الفاتورة إلى "مسددة جزئيًا" مع الرصيد المتبقي
+Employer -> Subs : Submit monthly\nbasic salary data
+Subs -> Subs : Calculate 9% per\nnon-Omani worker
+Subs --> Employer : Issue monthly invoice\n(includes 9% item)
+Employer -> Pay : Pay invoice\n(full/partial)
+Pay --> Subs : Collection and\nsettlement result
+alt partial payment
+    Subs --> Employer : Update invoice as\npartially paid + balance
 end
-alt سداد متأخر أو أجر غير حقيقي
-    Subs -> Subs : احتساب المبالغ الإضافية/الغرامات حسب القواعد
-    Subs --> Employer : إشعار بالمبالغ الإضافية
+alt late payment or unreal salary
+    Subs -> Subs : Calculate additional\namounts / penalties
+    Subs --> Employer : Notify additional\namounts
 end
-Subs -> Saving : ترحيل المبالغ المحصلة والمسواة فورًا إلى حسابات الادخار
-Saving --> Employer : تأكيد الترحيل
+Subs -> Saving : Transfer settled amounts\nto savings accounts
+Saving --> Employer : Confirm transfer
 @enduml</pre>
 
                 <hr class="grp-sep">
                 <h3>13) رسم تسلسلي — الاعتراض على الأجر الأساسي المسجل</h3>
                 <pre>@startuml
 title 13) Salary Objection Workflow
-actor "العامل غير العماني" as Worker
-participant "نظام الادخار" as Saving
-participant "جهة العمل" as Employer
-participant "وزارة العمل" as MOL
-participant "دائرة بيانات المشتركين" as DataDept
-participant "نظام الاشتراكات" as Subs
+actor "Non-Omani Worker" as Worker
+participant "Savings System" as Saving
+participant "Employer" as Employer
+participant "Ministry of Labour" as MOL
+participant "Subscriber Data Dept" as DataDept
+participant "Contributions System" as Subs
 
-Worker -> Saving : تقديم اعتراض خلال 90 يوما\nمع تحديد الأجر الصحيح وتاريخ بدء تقاضيه\nوإرفاق المستندات الداعمة
-Saving --> Employer : إشعار ببيانات الاعتراض
-alt جهة العمل تقبل الاعتراض خلال 30 يوما
-    Employer -> Saving : قبول الاعتراض
-    Saving -> Subs : تحديث الأجر وإعادة احتساب الاشتراكات
-    Saving -> DataDept : إحالة الغرامات إن وجدت
-    Saving --> Worker : حالة الطلب = مقبول من جهة العمل
-else جهة العمل ترفض الاعتراض
-    Employer -> Saving : رفض الاعتراض
-    Saving --> Worker : إشعار بالرفض + توجيه لمسار الشكوى العمالية
-    Worker -> MOL : تقديم شكوى عمالية\n(شكاوى عقود العمل / عدم صحة الأجر الأساسي المسجل فى العقد)
-    Worker -> Saving : تحديث الطلب بنتيجة الشكوى أو حكم المحكمة
-    Saving -> DataDept : إحالة الطلب للمراجعة
-    DataDept -> MOL : جلب بيانات الشكوى المغلقة
-    DataDept -> Saving : قرار تعديل الأجر إن لزم
-    Saving -> Subs : إعادة الاحتساب عند اعتماد التعديل
-else جهة العمل لا ترد خلال 30 يوما
-    Saving -> Subs : تحديث الأجر وإعادة احتساب الاشتراكات
-    Saving -> DataDept : إحالة الغرامات إن وجدت
-    Saving --> Worker : حالة الطلب = مقبول حكما
+Worker -> Saving : Submit objection within 90 days\nwith corrected salary, start date\nand supporting documents
+Saving --> Employer : Notify objection details
+alt employer accepts within 30 days
+    Employer -> Saving : Accept objection
+    Saving -> Subs : Update salary and recalculate contributions
+    Saving -> DataDept : Route penalties if any
+    Saving --> Worker : Request status = accepted by employer
+else employer rejects
+    Employer -> Saving : Reject objection
+    Saving --> Worker : Rejection notice + labour complaint path
+    Worker -> MOL : Submit labour complaint\n(contract complaints / invalid registered salary)
+    Worker -> Saving : Update request with complaint result or court ruling
+    Saving -> DataDept : Route request for review
+    DataDept -> MOL : Fetch closed complaint data
+    DataDept -> Saving : Salary adjustment decision if needed
+    Saving -> Subs : Recalculate after approved adjustment
+else employer does not respond within 30 days
+    Saving -> Subs : Update salary and recalculate contributions
+    Saving -> DataDept : Route penalties if any
+    Saving --> Worker : Request status = deemed accepted
 end
 @enduml</pre>
 
@@ -2404,37 +2318,37 @@ end
                 <h3>14) رسم تسلسلي — تسوية مكافأة نهاية الخدمة السابقة (المادة 138)</h3>
                 <pre>@startuml
 title 14) Prior Service Gratuity Settlement (Article 138)
-actor "جهة العمل" as Employer
-actor "العامل غير العماني" as Worker
-participant "نظام الادخار" as Saving
-participant "موظف الصندوق" as Officer
-participant "قناة الدفع" as Pay
+actor "Employer" as Employer
+actor "Non-Omani Worker" as Worker
+participant "Savings System" as Saving
+participant "Fund Officer" as Officer
+participant "Payment Channel" as Pay
 
-Saving --> Employer : إتاحة الاستعلام عن مبلغ التسوية لكل عامل
-Employer -> Saving : استعلام عن عامل محدد أو جميع العمال
-Saving --> Employer : عرض تاريخ الالتحاق + مدة الخدمة + آخر أجر أساسي مسجل + مبلغ التسوية
-Employer -> Saving : اختيار (تمت التسوية مع العامل وديا/تم ترحيلها إلى نظام الادخار) + التوثيق
-Saving --> Worker : إشعار بالخيار المختار
-alt العامل موافق
-    Worker -> Saving : إقرار الموافقة
-    Saving -> Officer : مراجعة واعتماد
-    Officer -> Saving : اعتماد التسوية
-    alt الخيار = تم ترحيلها إلى نظام الادخار
-        Employer -> Saving : إدخال مبلغ عامل محدد أو رفع ملف بالمبالغ
-        Saving --> Employer : إنشاء فاتورة التسوية
-        Employer -> Pay : سداد الفاتورة
-        Pay --> Saving : تأكيد السداد
-        Saving -> Saving : تخصيص المبالغ على حسابات العمال المعنيين
-        Saving --> Employer : تأكيد السداد والتخصيص
-        Saving --> Worker : إشعار بإضافة مبلغ التسوية إلى الحساب
-    else الخيار = تمت التسوية مع العامل وديا
-        Saving --> Employer : تأكيد الإغلاق
-        Saving --> Worker : إشعار نهائي
+Saving --> Employer : Enable inquiry for settlement amount per worker
+Employer -> Saving : Inquire for one worker or all workers
+Saving --> Employer : Show join date + service period + last basic salary + settlement amount
+Employer -> Saving : Select option (amicable settlement / transfer to savings) + document
+Saving --> Worker : Notify selected option
+alt worker agrees
+    Worker -> Saving : Submit approval
+    Saving -> Officer : Review and approve
+    Officer -> Saving : Approve settlement
+    alt option = transfer to savings
+        Employer -> Saving : Enter single worker amount or upload amount file
+        Saving --> Employer : Create settlement invoice
+        Employer -> Pay : Pay invoice
+        Pay --> Saving : Confirm payment
+        Saving -> Saving : Allocate amounts to relevant worker accounts
+        Saving --> Employer : Confirm payment and allocation
+        Saving --> Worker : Notify settlement amount added to account
+    else option = amicable settlement
+        Saving --> Employer : Confirm closure
+        Saving --> Worker : Final notification
     end
-else العامل غير موافق
-    Worker -> Saving : تسجيل اعتراض
-    Saving -> Officer : إحالة للمعالجة اليدوية
-    Officer -> Saving : إدخال القرار النهائي
+else worker disagrees
+    Worker -> Saving : Register objection
+    Saving -> Officer : Route to manual handling
+    Officer -> Saving : Record final decision
 end
 @enduml</pre>
 
@@ -2443,22 +2357,22 @@ end
                 <pre>@startuml
 title 15) Mandatory Disbursement Eligibility (Non-Omani)
 start
-:تقديم طلب الصرف;
-if (انتهاء العمل + مغادرة السلطنة؟) then (نعم)
-  :مؤهل للصرف;
-else (لا)
-  if (انتهاء العمل + مرور 3 أشهر دون عقد جديد؟) then (نعم)
-    :مؤهل للصرف;
-  else (لا)
-    if (وفاة أو عجز دائم أو 180 شهرا؟) then (نعم)
-      :مؤهل للصرف;
-    else (لا)
-      :رفض الطلب لعدم تحقق شرط الاستحقاق;
+:Submit disbursement request;
+if (Employment ended + left Oman?) then (Yes)
+  :Eligible for disbursement;
+else (No)
+  if (Employment ended + 3 months without new contract?) then (Yes)
+    :Eligible for disbursement;
+  else (No)
+    if (Death or permanent disability or 180 months?) then (Yes)
+      :Eligible for disbursement;
+    else (No)
+      :Reject request for ineligible condition;
       stop
     endif
   endif
 endif
-:الانتقال لمسار المعالجة;
+:Move to processing flow;
 stop
 @enduml</pre>
 
@@ -2466,34 +2380,36 @@ stop
                 <h3>16) رسم تسلسلي — معالجة طلب الصرف الإلزامي والتحقق من المغادرة</h3>
                 <pre>@startuml
 title 16) Mandatory Disbursement Processing and Exit Verification
-actor "المدخر غير العماني" as Worker
-participant "نظام الادخار" as Saving
-participant "وزارة العمل" as MOL
-participant "شرطة عمان السلطانية" as ROP
-participant "نظام المستحقات" as Dues
-participant "ملاءة" as Malaa
-participant "موظف الصندوق" as Officer
-participant "قناة الدفع" as Pay
+hide footbox
+skinparam ResponseMessageBelowArrow true
+actor "Saver" as Worker
+participant "Saving" as Saving
+participant "MOL" as MOL
+participant "ROP" as ROP
+participant "Dues" as Dues
+participant "Malaa" as Malaa
+participant "Officer" as Officer
+participant "Pay" as Pay
 
-Worker -> Saving : تقديم طلب الصرف
-Saving -> MOL : التحقق من حالة علاقة العمل
-MOL --> Saving : حالة العلاقة
-Saving -> ROP : التحقق من المغادرة عند الحاجة
-ROP --> Saving : حالة المغادرة
-Saving -> Dues : التحقق من الالتزامات القائمة
-Dues --> Saving : نتيجة الالتزامات
-Saving -> Malaa : جلب الحسابات البنكية المحلية
-Malaa --> Saving : الحسابات المتاحة
-Saving -> Officer : إحالة الطلب للمراجعة النهائية
-Officer -> Saving : اعتماد / رفض / إحالة يدوية
-alt اعتماد
-    Saving -> Pay : تنفيذ التحويل
-    Pay --> Saving : نتيجة التحويل
-    Saving --> Worker : إشعار بإتمام الصرف
-else رفض
-    Saving --> Worker : إشعار بالرفض
-else إحالة يدوية
-    Saving --> Worker : إشعار بتحويل الحالة للمعالجة اليدوية
+Worker -> Saving : Submit disbursement\nrequest
+Saving -> MOL : Verify employment\nrelationship status
+MOL --> Saving : Relationship\nstatus
+Saving -> ROP : Verify exit status\nwhen needed
+ROP --> Saving : Exit status
+Saving -> Dues : Check outstanding\ndues
+Dues --> Saving : Dues result
+Saving -> Malaa : Fetch local bank\naccounts
+Malaa --> Saving : Available\naccounts
+Saving -> Officer : Route request for\nfinal review
+Officer -> Saving : Approve / reject /\nmanual route
+alt approved
+    Saving -> Pay : Execute transfer
+    Pay --> Saving : Transfer result
+    Saving --> Worker : Notify disbursement\ncompletion
+else rejected
+    Saving --> Worker : Notify rejection
+else manual handling
+    Saving --> Worker : Notify manual\nprocessing route
 end
 @enduml</pre>
 
@@ -2502,75 +2418,63 @@ end
                 <pre>@startuml
 title 17) Exit Notification, Delay Consequences, and Manual Exception Path
 start
-:تسجيل واقعة الخروج أو فقدان شرط العضوية;
-if (تم الإخطار خلال شهر؟) then (نعم)
-  :استمرار المعالجة الطبيعية;
-else (لا)
-  if (التأخير ضمن السنة الأولى؟) then (نعم)
-    :تطبيق حد أدنى للعائد فقط;
-  else (لا)
-    :إيقاف احتساب العوائد على المدخرات;
+:Record exit event or loss of eligibility;
+if (Notified within one month?) then (Yes)
+  :Continue normal processing;
+else (No)
+  if (Delay within first year?) then (Yes)
+    :Apply minimum return only;
+  else (No)
+    :Stop return accrual on savings;
   endif
 endif
-:فحص اكتمال البيانات والتكاملات;
-if (تعذر الإكمال آليا؟) then (نعم)
-  :فتح حالة معالجة يدوية;
-  :تعيين موظف مسؤول وتتبع SLA;
-  :إغلاق الحالة بعد القرار التنفيذي;
-else (لا)
-  :إتمام الإجراء آليا;
+:Check data completeness and integrations;
+if (Auto-completion failed?) then (Yes)
+  :Open manual handling case;
+  :Assign responsible officer and track SLA;
+  :Close case after execution decision;
+else (No)
+  :Complete process automatically;
 endif
 stop
 @enduml</pre>
 
             </section>
 
-            <section id="decision-log">
-                <h2>سجل القرارات المعتمدة</h2>
-                <p>يجمع هذا القسم القرارات الجوهرية التي تم اعتمادها أثناء التحليل، حتى لا تبقى موزعة داخل النصوص المختلفة بهدف دعم المراجعة وإدارة التغيير لاحقًا.</p>
+             <section id="version-history">
+                <h2>سجل النسخ</h2>
+                <p>يوثق هذا القسم تاريخ إصدار الوثيقة وإعدادها.</p>
                 <table>
                     <thead>
                         <tr>
-                            <th>الموضوع</th>
-                            <th>القرار المعتمد</th>
-                            <th>الأثر</th>
+                            <th>الإصدار</th>
+                            <th>التاريخ</th>
+                            <th>الوصف</th>
+                            <th>الإعداد بواسطة</th>
+                            <th>القسم</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>الإيداع الاختياري لغير العماني</td>
-                            <td>مسموح للعامل غير العماني بالإيداع الذاتي الاختياري</td>
-                            <td>يدعم مسارًا إضافيًا ضمن الحساب الشخصي</td>
+                            <td>1.0</td>
+                            <td>2026-04-12</td>
+                            <td>النسخة الأولى من وثيقة متطلبات الأعمال</td>
+                            <td>حمدي أحمد</td>
+                            <td>قسم تحليل الأعمال</td>
                         </tr>
                         <tr>
-                            <td>السقف السنوي</td>
-                            <td>يطبق على الادخار الاختياري فقط ولكل مصدر على حدة</td>
-                            <td>يوجه منطق التحقق عند الإيداع</td>
+                            <td>1.1</td>
+                            <td>2026-04-16</td>
+                            <td>إضافة سير عمل طلبات الاعتراض على الأجر الأساسي، وإدراج النسخة الأولية من آلية احتساب وتوزيع العائد من الاستثمار لأغراض النقاش.</td>
+                            <td>حمدي أحمد</td>
+                            <td>قسم تحليل الأعمال</td>
                         </tr>
                         <tr>
-                            <td>مصدر سداد الالتزامات</td>
-                            <td>السداد من الادخار الاختياري فقط</td>
-                            <td>يقيد الرصيد القابل للاستخدام لهذه العملية</td>
-                        </tr>
-                        <tr>
-                            <td>ترتيب السداد</td>
-                            <td>من الأقدم إلى الأحدث وفق تاريخ الاستحقاق</td>
-                            <td>يحكم منطق الأتمتة والتسوية</td>
-                        </tr>
-                        <tr>
-                            <td>الحساب البنكي المحلي</td>
-                            <td>يتم جلبه من ملاءة باستخدام الرقم المدني</td>
-                            <td>يبسط تجربة الصرف والإيداع المحلي</td>
-                        </tr>
-                        <tr>
-                            <td>ما بعد المغادرة</td>
-                            <td>في حال تعذر الصرف آليًا تحول الحالة إلى معالجة يدوية</td>
-                            <td>يعرف مسار الاستثناءات التشغيلية</td>
-                        </tr>
-                        <tr>
-                            <td>نموذج الحساب</td>
-                            <td>حساب واحد متعدد المصادر مع إظهار المصدر تقريريًا</td>
-                            <td>يوجه النموذج البياناتي وواجهة الحساب</td>
+                            <td>1.2</td>
+                            <td>2026-06-16</td>
+                            <td>إضافة وتحديث آليات احتساب وتوزيع عائد الاستثمار المقترحة، وربطها بالمتطلبات والقواعد والرسومات ذات الصلة.</td>
+                            <td>حمدي أحمد</td>
+                            <td>قسم تحليل الأعمال</td>
                         </tr>
                     </tbody>
                 </table>
@@ -2605,84 +2509,22 @@ stop
                 </table>
             </section>
 
-            <section id="signoff">
-                <h2>إجراءات المراجعة والاعتماد وإدارة التغيير</h2>
-                <h3>آلية المراجعة</h3>
-                <ol>
-                    <li>مراجعة أعمال وتشغيلية داخلية على مستوى الصندوق.</li>
-                    <li>مراجعة قانونية للتحقق من اتساق المتطلبات مع النصوص التشريعية والقانونية.</li>
-                    <li>مراجعة تكاملية وتقنية للتحقق من قابلية التنفيذ واعتماد الجهات المرجعية.</li>
-                    <li>اعتماد النسخة الأساسية وفتح سجل تغيير للقرارات أو التعديلات اللاحقة.</li>
-                </ol>
-                <h3>مصفوفة الاعتماد</h3>
+            <section id="final-approval">
+                <h2>الاعتماد النهائي</h2>
                 <table>
                     <thead>
                         <tr>
-                            <th>البند</th>
-                            <th>المراجع</th>
-                            <th>المعتمد</th>
+                            <th>الإسم</th>
+                            <th>المسمي الوظيفي</th>
+                            <th>التوقيع</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>النطاق وقواعد العمل</td>
-                            <td>فريق الأعمال / التشغيل</td>
-                            <td>المديرية العامة للمستحقات</td>
-                        </tr>
-                        <tr>
-                            <td>الاتساق القانوني</td>
-                            <td>الفريق القانوني</td>
-                            <td>الدائرة القانونية</td>
-                        </tr>
-                        <tr>
-                            <td>التكاملات والجاهزية التقنية</td>
-                            <td>الفريق التقني / المعماري</td>
-                            <td>قسم التكامل</td>
-                        </tr>
-                        <tr>
-                            <td>النسخة النهائية للوثيقة</td>
-                            <td>مدير المشروع</td>
-                            <td>رئيس قسم الادخار</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <h3>إدارة التغيير</h3>
-                <ul>
-                    <li>أي تعديل على القواعد القانونية أو مصادر الإيداع أو الاستحقاق أو التكاملات الحرجة يجب أن يخضع لطلب تغيير موثق.</li>
-                    <li>يجب تقييم أثر كل تغيير على النطاق والعمليات والبيانات والتكاملات والتقارير.</li>
-                    <li>يجب تحديث هذه الوثيقة وتاريخ النسخة وسجل القرار عند اعتماد أي تغيير.</li>
-                    <li>لا يجوز إدخال تغيير جوهري في منطق السداد أو الصرف أو العوائد دون مراجعة قانونية وتشغيلية مشتركة.</li>
-                </ul>
-            </section>
-
-             <section id="version-history">
-                <h2>سجل النسخ</h2>
-                <p>يوثق هذا القسم تاريخ إصدار الوثيقة وإعدادها.</p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>الإصدار</th>
-                            <th>التاريخ</th>
-                            <th>الوصف</th>
-                            <th>الإعداد بواسطة</th>
-                            <th>القسم</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1.0</td>
-                            <td>2026-04-12</td>
-                            <td>النسخة الأولى من وثيقة متطلبات الأعمال</td>
-                            <td>حمدي أحمد</td>
-                            <td>قسم تحليل الأعمال</td>
-                        </tr>
-                        <tr>
-                            <td>1.1</td>
-                            <td>2026-04-16</td>
-                            <td>إضافة سير عمل طلبات الاعتراض على الأجر الأساسي، وإدراج النسخة الأولية من آلية احتساب وتوزيع العائد من الاستثمار لأغراض النقاش.</td>
-                            <td>حمدي أحمد</td>
-                            <td>قسم تحليل الأعمال</td>
-                        </tr>
+                        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
                     </tbody>
                 </table>
             </section>

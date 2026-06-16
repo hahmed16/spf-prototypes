@@ -15,6 +15,8 @@
         .toc-actions{display:flex;align-items:center;gap:8px}
         .toc-btn{border:1px solid var(--line);background:#fff;color:var(--primary);border-radius:10px;padding:4px 10px;font-family:inherit;font-size:.86rem;cursor:pointer}
         .toc-btn:hover{border-color:var(--primary);background:var(--primary-soft)}
+        .toc-btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}
+        .toc-btn-primary:hover{background:#0f3d2a;border-color:#0f3d2a}
         nav a{color:var(--primary);text-decoration:none;border-bottom:1px dashed transparent}nav a:hover{border-color:var(--primary)}
         main{padding:24px 48px 48px}section{margin-top:28px;padding-top:10px}
         h2{margin:0 0 12px;color:var(--primary);font-size:1.55rem;border-bottom:2px solid var(--primary-soft);padding-bottom:8px}
@@ -62,8 +64,8 @@
         .pu-toolbar-title{font-size:.88rem;color:var(--accent);font-weight:700}
         .pu-btn{cursor:pointer;background:none;border:1px solid var(--primary);color:var(--primary);border-radius:8px;padding:4px 12px;font-size:.8rem;font-family:inherit;transition:background .15s}
         .pu-btn:hover{background:var(--primary);color:#fff}
-        .pu-diagram{text-align:center;padding:18px 12px;background:#fafcfb;min-height:60px}
-        .pu-diagram img{max-width:100%;height:auto;border-radius:4px;display:block;margin:0 auto}
+        .pu-diagram{text-align:center;padding:14px 8px;background:#fafcfb;min-height:60px;overflow:auto}
+        .pu-diagram img{width:100%;max-width:1500px;height:auto;border-radius:4px;display:block;margin:0 auto}
         .pu-loader{color:var(--muted);font-size:.88rem;padding:32px;text-align:center}
         .pu-error{color:#b91c1c;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:.83rem;margin:10px}
         .pu-error a{color:#b91c1c}
@@ -75,5 +77,32 @@ margin-top:8px
         .pu-source pre{margin:0;border-radius:0;border:0;max-height:300px;overflow-y:auto;font-size:.82rem}
         .back-to-top{position:fixed;left:20px;bottom:20px;cursor:pointer;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .2s,transform .2s,visibility .2s;z-index:1200;width:50px}
         .back-to-top.is-visible{opacity:1;visibility:visible;transform:translateY(0)}
-        @media print{body{background:#fff}.page{width:100%;margin:0;border:0;box-shadow:none;border-radius:0}section,table,pre{break-inside:avoid}}
+        @page{size:A4;margin:12mm 10mm}
+        @media print{
+            html,body{background:#fff !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+            body{font-size:11pt;line-height:1.55}
+            .page{width:100% !important;margin:0 !important;border:0 !important;box-shadow:none !important;border-radius:0 !important;overflow:visible}
+            .hero{padding:18px 20px;border-radius:0}
+            .hero-logo{max-width:34%;width:280px}
+            .hero h1{font-size:22pt;line-height:1.25}
+            nav{padding:14px 20px}
+            nav ul{columns:2;column-gap:28px}
+            main{padding:18px 20px 24px}
+            .toc-actions,.toc-btn,.back-to-top,.pu-btn{display:none !important}
+            section > h2:first-of-type{cursor:default}
+            section > h2:first-of-type::after{display:none}
+            section > h2:first-of-type::before{display:none}
+            section.is-collapsed > .section-body,.section-body{display:block !important}
+            .pu-source{display:none !important}
+            .pu-panel,.card,.process-step,.callout,.note,.success,.legal-callout,table,pre{break-inside:avoid;page-break-inside:avoid}
+            img,svg,tr,td,th{break-inside:avoid;page-break-inside:avoid}
+            .pu-diagram{padding:8px 0;overflow:visible}
+            .pu-diagram img{width:100%;max-width:none}
+            table{font-size:9.5pt}
+            th,td{padding:7px 8px}
+            pre{font-size:8.5pt;line-height:1.45;white-space:pre-wrap}
+            .sec-sep{margin:22px 0 16px}
+            .grp-sep{margin:14px 0 12px}
+            a,a:visited{color:inherit;text-decoration:none}
+        }
     @media (max-width:720px){.hero,nav,main{padding-right:18px;padding-left:18px}nav ul{columns:1}.toc-header{flex-direction:column;align-items:flex-start}.hero h1{font-size:1.55rem}.hero-row{flex-direction:column;align-items:flex-start}.hero-logo{max-width:220px;width:100%}.hero-title-wrap{text-align:right;width:100%}}
