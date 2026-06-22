@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الإيداع الجماعي للعمال - تنفيذ الخدمة</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../../../assets/css/app.css">
+    <link rel="stylesheet" href="../../../assets/css/shell.css">
+    
+</head>
+<body data-root="../../../" data-user-role="employer" data-landing-href="index.html" data-service-name="الإيداع الجماعي للعمال">
+<main class="spf-main">
+<div class="page-header">
+            <div>
+                <h4>إيداع مبالغ في نظام الادخار</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="../../../index.html#employer-services">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">الإيداع</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge saver">المدخر</span>
+            </div>
+        </div>
+
+        <div class="role-section role-saver">
+            <div class="board-grid">
+                <div class="section-card">
+                    <div class="section-title">إيداع جديد للمدخر</div>
+                    <div class="detail-list mb-4">
+                        <div class="detail-item"><div class="detail-label">الرصيد الحالي</div><div class="detail-value">1,450.000 ر.ع</div></div>
+                        <div class="detail-item"><div class="detail-label">الحد الأدنى</div><div class="detail-value">100.000 ر.ع</div></div>
+                        <div class="detail-item"><div class="detail-label">آخر إيداع</div><div class="detail-value">20/02/2026</div></div>
+                    </div>
+                    <form>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-700">مبلغ الإيداع</label>
+                                <input type="number" class="form-control" id="saverDepositAmount" value="100" min="100">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-700">الغرض من الإيداع</label>
+                                <select class="form-select" id="saverDepositPurpose">
+                                    <option>إيداع اختياري دوري</option>
+                                    <option>إيداع تكميلي</option>
+                                    <option>إيداع بعد التسجيل</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-700">طريقة الدفع</label>
+                            <div class="payment-methods-grid">
+                                <label class="payment-method-card">
+                                    <input type="radio" name="paymentMethod" value="card" checked>
+                                    <div class="payment-method-icon"><i class="fas fa-credit-card"></i></div>
+                                    <span class="payment-method-label">بطاقة بنكية</span>
+                                </label>
+                                <label class="payment-method-card">
+                                    <input type="radio" name="paymentMethod" value="wallet">
+                                    <div class="payment-method-icon"><i class="fas fa-wallet"></i></div>
+                                    <span class="payment-method-label">محفظة رقمية</span>
+                                </label>
+                                <label class="payment-method-card">
+                                    <input type="radio" name="paymentMethod" value="transfer">
+                                    <div class="payment-method-icon"><i class="fas fa-university"></i></div>
+                                    <span class="payment-method-label">تحويل بنكي</span>
+                                </label>
+                                <label class="payment-method-card">
+                                    <input type="radio" name="paymentMethod" value="cheque">
+                                    <div class="payment-method-icon"><i class="fas fa-money-check"></i></div>
+                                    <span class="payment-method-label">شيك</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div id="cardDetails" class="mb-3 p-3 bg-light rounded">
+                            <div class="row g-3">
+                                <div class="col-md-6"><input type="text" class="form-control" placeholder="رقم البطاقة"></div>
+                                <div class="col-md-3"><input type="text" class="form-control" placeholder="MM/YY"></div>
+                                <div class="col-md-3"><input type="text" class="form-control" placeholder="CVV"></div>
+                            </div>
+                        </div>
+                        <div class="cheque-details-fields mb-3">
+                            <div class="row g-3">
+                                <div class="col-md-6"><input type="text" class="form-control" placeholder="اسم البنك"></div>
+                                <div class="col-md-6"><input type="text" class="form-control" placeholder="رقم الشيك"></div>
+                            </div>
+                        </div>
+                        <div id="chequeNote" class="cheque-note mb-3">
+                            <i class="fas fa-exclamation-triangle mt-1"></i>
+                            <div><strong>ملاحظة:</strong> لا يظهر الرصيد في الحساب إلا بعد التسوية المالية الناجحة للشيك.</div>
+                        </div>
+                        <div class="toolbar-inline">
+                            <button type="button" class="btn btn-spf" onclick="submitSaverDeposit()">تنفيذ الإيداع</button>
+                            <a class="btn btn-spf-outline" href="../../../services/saver/transaction-history/start.html">عرض السجل</a>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">ملخص الإيداع</div>
+                    <div class="process-rail">
+                        <div class="process-step current">
+                            <div class="process-step-title">تسجيل عملية الدفع</div>
+                            <div class="mini-note">يظهر الدفع مباشرة إذا كانت طريقة الدفع فورية، أو يبقى معلقًا حتى إتمام التسوية.</div>
+                        </div>
+                        <div class="process-step warning">
+                            <div class="process-step-title">تحديث الرصيد</div>
+                            <div class="mini-note">يتحدث الرصيد بعد تأكيد القيد المالي، وليس عند مجرد إدخال البيانات.</div>
+                        </div>
+                        <div class="process-step">
+                            <div class="process-step-title">ظهور العملية في السجل</div>
+                            <div class="mini-note">تظهر العملية في سجل المعاملات بالمبلغ والغرض والحالة.</div>
+                        </div>
+                    </div>
+                    <div class="data-note mt-4">إذا كان هذا الإيداع مرتبطًا بتسجيل جديد، فيمكن الرجوع إلى صفحة التسجيل لمتابعة حالة الحساب بعد الدفع.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="role-section role-employer d-none">
+            <div class="row g-3 mb-4">
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">عمال مختارون</div><div class="metric-value" id="selectedWorkersCount">3</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">إجمالي المبلغ</div><div class="metric-value" id="employerTotalAmount">900</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">وضع التوزيع</div><div class="metric-value" id="modeLabel">ثابت</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">طريقة الدفع</div><div class="metric-value">بطاقة</div></div></div>
+            </div>
+
+            <div class="board-grid">
+                <div class="section-card">
+                    <div class="section-title">اختيار العمال وتوزيع المبالغ</div>
+                    <div class="pill-tabs mb-3">
+                        <button class="pill-tab active" data-mode="fixed" onclick="selectMode('fixed')">مبلغ ثابت</button>
+                        <button class="pill-tab" data-mode="individual" onclick="selectMode('individual')">مبالغ فردية</button>
+                        <button class="pill-tab" data-mode="percentage" onclick="selectMode('percentage')">نسبة من الأجر</button>
+                        <button class="pill-tab" data-mode="divide" onclick="selectMode('divide')">تقسيم إجمالي</button>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4"><input type="number" id="fixedAmountInput" class="form-control" value="100" oninput="applyDistribution()"></div>
+                        <div class="col-md-4"><input type="number" id="percentInput" class="form-control" placeholder="النسبة %" oninput="applyDistribution()"></div>
+                        <div class="col-md-4"><input type="number" id="totalDivideInput" class="form-control" placeholder="الإجمالي المراد تقسيمه" oninput="applyDistribution()"></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table dense-table compact-table align-middle">
+                            <thead>
+                                <tr><th>العامل</th><th>الأجر الأساسي</th><th>المبلغ</th><th>الحالة</th></tr>
+                            </thead>
+                            <tbody id="depositWorkerRows"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">طريقة الدفع ونتيجة الإيداع</div>
+                    <div class="payment-methods-grid mb-3">
+                        <label class="payment-method-card">
+                            <input type="radio" name="paymentMethodEmployer" value="card" checked>
+                            <div class="payment-method-icon"><i class="fas fa-credit-card"></i></div>
+                            <span class="payment-method-label">بطاقة</span>
+                        </label>
+                        <label class="payment-method-card">
+                            <input type="radio" name="paymentMethodEmployer" value="transfer">
+                            <div class="payment-method-icon"><i class="fas fa-university"></i></div>
+                            <span class="payment-method-label">تحويل</span>
+                        </label>
+                        <label class="payment-method-card">
+                            <input type="radio" name="paymentMethodEmployer" value="cheque">
+                            <div class="payment-method-icon"><i class="fas fa-money-check"></i></div>
+                            <span class="payment-method-label">شيك</span>
+                        </label>
+                    </div>
+                    <div class="process-rail mb-4">
+                        <div class="process-step current">
+                            <div class="process-step-title">اعتماد الدفعة</div>
+                            <div class="mini-note">تسجل الدفعة باسم الجهة ثم تُوزع على العمال المختارين وفق الوضع الحالي.</div>
+                        </div>
+                        <div class="process-step warning">
+                            <div class="process-step-title">تحديث أرصدة العمال</div>
+                            <div class="mini-note">يختلف توقيت الظهور بين طرق الدفع الفورية والطرق المؤجلة مثل الشيك.</div>
+                        </div>
+                        <div class="process-step">
+                            <div class="process-step-title">الربط مع السجل والتقارير</div>
+                            <div class="mini-note">تظهر العملية في سجل الجهة وتدخل ضمن التقارير الإدارية.</div>
+                        </div>
+                    </div>
+                    <div class="toolbar-inline">
+                        <button type="button" class="btn btn-spf" onclick="submitEmployerDeposit()">تنفيذ الإيداع الجماعي</button>
+                        <a class="btn btn-spf-outline" href="../../../services/employer/registered-workers/start.html">العودة لقائمة العمال</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../../assets/js/prototype-core.js"></script>
+<script src="../../../assets/js/external-shell.js"></script>
+<script>
+const depositWorkers = [
+            { name: 'عمر بن خالد الهنائي', salary: 850, amount: 100 },
+            { name: 'سالم بن حمد الجابري', salary: 1200, amount: 100 },
+            { name: 'محمد أحمد', salary: 900, amount: 100 }
+        ];
+        let currentMode = 'fixed';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderDepositWorkers();
+        });
+
+        function renderDepositWorkers() {
+            const body = document.getElementById('depositWorkerRows');
+            if (!body) return;
+            body.innerHTML = depositWorkers.map((worker, index) => `
+                <tr data-salary="${worker.salary}">
+                    <td class="fw-700">${worker.name}</td>
+                    <td>${worker.salary.toFixed(3)} ر.ع</td>
+                    <td><input type="number" class="form-control worker-amount-input" value="${worker.amount}" min="100" oninput="calculateTotal()"></td>
+                    <td class="status-cell"><span class="status-chip success">جاهز</span></td>
+                </tr>
+            `).join('');
+            calculateTotal();
+        }
+
+        function selectMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.role-employer .pill-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.mode === mode);
+            });
+            document.getElementById('modeLabel').innerText = mode === 'fixed' ? 'ثابت' : mode === 'individual' ? 'فردي' : mode === 'percentage' ? 'نسبة' : 'تقسيم';
+            applyDistribution();
+        }
+
+        function applyDistribution() {
+            const amounts = document.querySelectorAll('.worker-amount-input');
+            const fixed = parseFloat(document.getElementById('fixedAmountInput')?.value) || 0;
+            const percent = parseFloat(document.getElementById('percentInput')?.value) || 0;
+            const totalDivide = parseFloat(document.getElementById('totalDivideInput')?.value) || 0;
+
+            amounts.forEach(input => {
+                const salary = parseFloat(input.closest('tr').dataset.salary);
+                if (currentMode === 'fixed') input.value = fixed || 100;
+                if (currentMode === 'percentage') input.value = ((salary * percent) / 100).toFixed(3);
+                if (currentMode === 'divide') input.value = amounts.length ? (totalDivide / amounts.length).toFixed(3) : 0;
+            });
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const amounts = document.querySelectorAll('.worker-amount-input');
+            let total = 0;
+            amounts.forEach(input => {
+                const value = parseFloat(input.value) || 0;
+                total += value;
+                const statusCell = input.closest('tr').querySelector('.status-cell');
+                if (value < 100) {
+                    statusCell.innerHTML = '<span class="status-chip danger">أقل من الحد</span>';
+                } else {
+                    statusCell.innerHTML = '<span class="status-chip success">جاهز</span>';
+                }
+            });
+            const totalField = document.getElementById('employerTotalAmount');
+            if (totalField) totalField.innerText = total.toFixed(3);
+            const countField = document.getElementById('selectedWorkersCount');
+            if (countField) countField.innerText = amounts.length;
+        }
+
+        function submitSaverDeposit() {
+            const amount = parseFloat(document.getElementById('saverDepositAmount').value) || 0;
+            if (amount < 100) {
+                spf.showError('يرجى إدخال مبلغ لا يقل عن 100 ر.ع.');
+                return;
+            }
+            spf.showSuccess('تم تسجيل الإيداع بنجاح، وستظهر العملية في الرصيد والسجل حسب طريقة الدفع المختارة.');
+        }
+
+        function submitEmployerDeposit() {
+            const invalid = Array.from(document.querySelectorAll('.worker-amount-input')).some(input => (parseFloat(input.value) || 0) < 100);
+            if (invalid) {
+                spf.showError('يوجد عامل واحد على الأقل بمبلغ أقل من الحد الأدنى المطلوب.');
+                return;
+            }
+            spf.showSuccess('تم تسجيل الإيداع الجماعي وسيتم توزيع المبالغ على العمال المختارين وربط العملية بالسجل والتقارير.');
+        }
+</script>
+</body>
+</html>

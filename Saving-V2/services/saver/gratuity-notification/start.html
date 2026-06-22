@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إشعار تسوية مكافأة الخدمة - تنفيذ الخدمة</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../../../assets/css/app.css">
+    <link rel="stylesheet" href="../../../assets/css/shell.css">
+    
+</head>
+<body data-root="../../../" data-user-role="saver" data-landing-href="index.html" data-service-name="إشعار تسوية مكافأة الخدمة">
+<main class="spf-main">
+<div class="page-header">
+            <div>
+                <h4>إشعار تسوية مكافأة نهاية الخدمة السابقة</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="../../../index.html#saver-services">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">إشعار التسوية</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge saver">المدخر</span>
+            </div>
+        </div>
+
+        <div class="section-card mb-4">
+            <div class="section-title">بيانات التسوية التقديرية</div>
+            <div class="detail-list">
+                <div class="detail-item"><div class="detail-label">الاسم</div><div class="detail-value">محمد إقبال</div></div>
+                <div class="detail-item"><div class="detail-label">الرقم المدني</div><div class="detail-value">88001123</div></div>
+                <div class="detail-item"><div class="detail-label">تاريخ الالتحاق</div><div class="detail-value">2019/01/05</div></div>
+                <div class="detail-item"><div class="detail-label">مدة الخدمة السابقة</div><div class="detail-value">5 سنوات و 5 أشهر</div></div>
+                <div class="detail-item"><div class="detail-label">آخر أجر أساسي</div><div class="detail-value">380.000 ر.ع</div></div>
+                <div class="detail-item"><div class="detail-label">مبلغ التسوية التقديري</div><div class="detail-value">2,140.000 ر.ع</div></div>
+            </div>
+        </div>
+
+        <div class="section-card mb-4">
+            <div class="section-title">قرار جهة العمل</div>
+            <div class="row g-3 align-items-stretch">
+                <div class="col-lg-8">
+                    <div class="detail-list">
+                        <div class="detail-item"><div class="detail-label">قرار جهة العمل</div><div class="detail-value">تم ترحيلها إلى نظام الادخار</div></div>
+                        <div class="detail-item"><div class="detail-label">تاريخ القرار</div><div class="detail-value">2026/06/21</div></div>
+                        <div class="detail-item"><div class="detail-label">رقم الفاتورة</div><div class="detail-value">ART138-240615</div></div>
+                        <div class="detail-item"><div class="detail-label">حالة السداد</div><div class="detail-value">بانتظار السداد</div></div>
+                        <div class="detail-item"><div class="detail-label">حالة التخصيص</div><div class="detail-value">بانتظار التخصيص</div></div>
+                        <div class="detail-item"><div class="detail-label">حالة رد العامل</div><div class="detail-value" id="responseStateText">بانتظار رد العامل</div></div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="metric-card h-100">
+                        <div class="metric-label">حالة الطلب</div>
+                        <div class="mb-3" id="responseChip"><span class="status-chip pending">بانتظار ردك</span></div>
+                        <p class="text-muted mb-0">يمكنك الاطلاع على القرار ثم تأكيد موافقتك أو تسجيل عدم الموافقة من نفس الشاشة.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card mb-4" id="actionPanel">
+            <div class="section-title">اتخاذ الإجراء</div>
+            <div class="alert-spf alert-info mb-4">
+                <i class="fas fa-circle-info"></i>
+                <span>إذا كنت موافقًا على قرار جهة العمل فقم بالتأكيد، وإذا لم تكن موافقًا فسجل ذلك ليظهر في سجل المتابعة.</span>
+            </div>
+            <div class="d-flex flex-wrap gap-3">
+                <button class="btn btn-spf px-5" onclick="setResponse('approved')">أوافق على القرار</button>
+                <button class="btn btn-spf-outline px-5" onclick="setResponse('rejected')">لا أوافق على القرار</button>
+            </div>
+            <div class="mt-4">
+                <label class="form-label">ملاحظات العامل</label>
+                <textarea class="form-control" id="employeeNotes" rows="3" placeholder="يمكنك إضافة ملاحظة مختصرة تظهر في سجل المتابعة"></textarea>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">سجل المتابعة</div>
+            <ul class="timeline-list" id="statusTimeline">
+                <li class="timeline-item">تم إنشاء إشعار قرار التسوية وإرساله إلى العامل.</li>
+                <li class="timeline-item pending" id="waitingTimeline">بانتظار رد العامل على القرار.</li>
+                <li class="timeline-item muted">إذا كان القرار هو الترحيل إلى الادخار، فستظهر نتيجة السداد والتخصيص هنا.</li>
+            </ul>
+        </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../../assets/js/prototype-core.js"></script>
+<script src="../../../assets/js/external-shell.js"></script>
+<script>
+function setResponse(type) {
+            const chip = document.getElementById('responseChip');
+            const stateText = document.getElementById('responseStateText');
+            const waitingTimeline = document.getElementById('waitingTimeline');
+            const actionPanel = document.getElementById('actionPanel');
+            const note = document.getElementById('employeeNotes').value.trim();
+
+            if (type === 'approved') {
+                chip.innerHTML = '<span class="status-chip success">تم الإقرار</span>';
+                stateText.innerText = 'أقر العامل بصحة القرار';
+                waitingTimeline.innerText = `أقر العامل بصحة القرار${note ? ` - ${note}` : ''}.`;
+            } else {
+                chip.innerHTML = '<span class="status-chip danger">تم تسجيل عدم الموافقة</span>';
+                stateText.innerText = 'سجل العامل عدم الموافقة';
+                waitingTimeline.innerText = `سجل العامل عدم الموافقة${note ? ` - ${note}` : ''}.`;
+            }
+
+            waitingTimeline.classList.remove('pending');
+            actionPanel.querySelectorAll('button').forEach(btn => btn.disabled = true);
+            document.getElementById('employeeNotes').disabled = true;
+            spf.showSuccess('تم حفظ رد العامل بنجاح.');
+        }
+</script>
+</body>
+</html>

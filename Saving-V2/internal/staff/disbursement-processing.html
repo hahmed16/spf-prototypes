@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معالجة طلبات الصرف - مساحة العمل الداخلية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../../assets/css/app.css">
+    <link rel="stylesheet" href="../../assets/css/shell.css">
+    
+</head>
+<body data-root="../../" data-user-role="staff">
+<main class="spf-main">
+<div class="page-header">
+            <div>
+                <h4>معالجة طلبات صرف المدخرات</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="../../internal/staff/index.html">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">معالجة طلبات الصرف</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge staff">موظف الصندوق</span>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3"><div class="metric-card"><div class="metric-label">قيد المراجعة</div><div class="metric-value">18</div></div></div>
+            <div class="col-md-3"><div class="metric-card"><div class="metric-label">تعذر بنكي</div><div class="metric-value">4</div></div></div>
+            <div class="col-md-3"><div class="metric-card"><div class="metric-label">حالات يدوية</div><div class="metric-value">3</div></div></div>
+            <div class="col-md-3"><div class="metric-card"><div class="metric-label">طلبات جاهزة للتحويل</div><div class="metric-value">7</div></div></div>
+        </div>
+
+        <div class="state-banner primary mb-4">
+            <div>
+                <div class="state-banner-title">قائمة تشغيل موحدة لمسارات الصرف</div>
+                <div class="state-banner-copy">تعرض هذه الصفحة الطلبات الاعتيادية، حالات تعذر جلب الحساب البنكي، الحوالات المرتجعة بعد المغادرة، والحالات القانونية التي يجب تحويلها إلى المعالجة اليدوية.</div>
+            </div>
+            <div class="toolbar-inline">
+                <a class="btn btn-spf-outline" href="../../internal/staff/manual-cases.html">عرض الحالات اليدوية</a>
+                <a class="btn btn-spf-outline" href="../../internal/staff/exit-notifications.html">عرض إشعارات الخروج</a>
+            </div>
+        </div>
+
+        <div class="filter-panel mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label">رقم الهوية</label>
+                    <input type="text" class="form-control" id="filterCivilId" placeholder="12345678">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">صاحب العمل</label>
+                    <input type="text" class="form-control" id="filterEmployer" placeholder="اسم جهة العمل">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">المسار</label>
+                    <select class="form-select" id="filterRoute">
+                        <option value="all">الكل</option>
+                        <option value="normal">اعتيادي</option>
+                        <option value="bank">تعذر بنكي</option>
+                        <option value="returned">حوالة مرتجعة</option>
+                        <option value="legal">قانوني / شرعي</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">الحالة</label>
+                    <select class="form-select" id="filterStatus">
+                        <option value="all">الكل</option>
+                        <option value="pending">قيد المراجعة</option>
+                        <option value="manual">يدوي</option>
+                        <option value="ready">جاهز للتحويل</option>
+                        <option value="docs">بانتظار مستندات</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">الفترة الزمنية</label>
+                    <div class="input-group">
+                        <input type="date" class="form-control">
+                        <input type="date" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-spf w-100" onclick="renderTable()">بحث</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="list-toolbar">
+                <div class="toolbar-group">
+                    <div class="section-title mb-0">الطلبات المفتوحة</div>
+                    <span class="status-chip info">معالجة يومية</span>
+                </div>
+                <div class="toolbar-group">
+                    <button class="btn btn-spf-outline" onclick="renderTable('manualOnly')">إظهار الحالات اليدوية فقط</button>
+                    <button class="btn btn-spf-outline" onclick="renderTable('readyOnly')">إظهار الجاهز للتحويل</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table dense-table compact-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>المدخر</th>
+                            <th>رقم الهوية</th>
+                            <th>صاحب العمل</th>
+                            <th>المبلغ</th>
+                            <th>المسار</th>
+                            <th>الحالة</th>
+                            <th>إشارة تشغيل</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestRows"></tbody>
+                </table>
+            </div>
+        </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/js/prototype-core.js"></script>
+<script src="../../assets/js/internal-shell.js"></script>
+<script>
+const requests = [
+            {
+                id: 1,
+                saver: 'راجيش كومار',
+                civilId: '88223344',
+                employer: 'شركة الخليج للخدمات',
+                amount: '1,450.000 ر.ع',
+                route: 'normal',
+                routeLabel: 'اعتيادي',
+                status: 'ready',
+                statusLabel: 'جاهز للتحويل',
+                signal: 'تم التحقق من الحساب البنكي',
+                reason: 'انتهاء علاقة العمل ومغادرة السلطنة',
+                checks: [
+                    ['تحقق الاستحقاق', 'current', 'مكتمل'],
+                    ['التحقق من المغادرة', 'current', 'مكتمل'],
+                    ['الحساب البنكي', 'current', 'تمت المطابقة']
+                ],
+                finances: [
+                    ['إجمالي الرصيد', '1,450.000 ر.ع'],
+                    ['التزامات محجوزة', '0.000 ر.ع'],
+                    ['المتاح للتحويل', '1,450.000 ر.ع']
+                ],
+                bank: [
+                    ['الحساب المعتمد', 'بنك مسقط - ****9876'],
+                    ['الآيبان', 'OM12 BMUS 0000 1234 5678 90'],
+                    ['طريقة التحويل', 'تحويل مصرفي مباشر']
+                ],
+                summary: [
+                    ['المدخر', 'راجيش كومار'],
+                    ['سبب الصرف', 'انتهاء علاقة العمل'],
+                    ['المسار', 'اعتيادي'],
+                    ['الحالة', 'جاهز للتحويل']
+                ],
+                timeline: [
+                    ['أرسل المدخر الطلب', 'اليوم 09:10 ص', ''],
+                    ['تمت مراجعة أهلية الصرف', 'اليوم 09:22 ص', ''],
+                    ['بانتظار اعتماد موظف الصرف', 'الآن', 'pending']
+                ],
+                decisionOptions: [
+                    ['approve', 'اعتماد والتحويل للبنك'],
+                    ['docs', 'طلب مستندات إضافية'],
+                    ['manual', 'تحويل يدوي احتياطي']
+                ],
+                decisionHint: 'في هذه الحالة يمكن الاعتماد مباشرة لأن جميع التحققات مكتملة.'
+            },
+            {
+                id: 2,
+                saver: 'محمد إقبال',
+                civilId: '77665544',
+                employer: 'شركة المدار اللوجستية',
+                amount: '1,450.000 ر.ع',
+                route: 'bank',
+                routeLabel: 'تعذر بنكي',
+                status: 'pending',
+                statusLabel: 'قيد التحقق البنكي',
+                signal: 'لا يوجد حساب مسترجع آليًا',
+                reason: 'انتهاء علاقة العمل ومغادرة السلطنة',
+                checks: [
+                    ['تحقق الاستحقاق', 'current', 'مكتمل'],
+                    ['الحساب البنكي', 'warning', 'تعذر الاسترجاع'],
+                    ['التحقق اليدوي', 'warning', 'بانتظار مراجعة الآيبان']
+                ],
+                finances: [
+                    ['إجمالي الرصيد', '1,450.000 ر.ع'],
+                    ['التزامات محجوزة', '0.000 ر.ع'],
+                    ['المتاح للتحويل', '1,450.000 ر.ع']
+                ],
+                bank: [
+                    ['اسم البنك المدخل', 'بنك ظفار'],
+                    ['الآيبان', 'OM55 DHOF 0000 0000 9988 77'],
+                    ['حالة المطابقة', 'قيد التحقق اليدوي']
+                ],
+                summary: [
+                    ['المدخر', 'محمد إقبال'],
+                    ['سبب الصرف', 'انتهاء علاقة العمل'],
+                    ['المسار', 'تعذر بنكي'],
+                    ['الحالة', 'قيد التحقق البنكي']
+                ],
+                timeline: [
+                    ['فشل التكامل البنكي', 'اليوم 08:41 ص', 'pending'],
+                    ['أدخل المدخر الآيبان يدويًا', 'اليوم 08:48 ص', ''],
+                    ['بانتظار قرار موظف الصرف', 'الآن', 'pending']
+                ],
+                decisionOptions: [
+                    ['docs', 'طلب مستند يثبت الحساب'],
+                    ['manual', 'تحويل إلى متابعة يدوية'],
+                    ['approve', 'اعتماد بعد المطابقة']
+                ],
+                decisionHint: 'إذا لم تكن المطابقة واضحة، يفضل طلب مستند بنكي أو تحويل الحالة إلى يدوي.'
+            },
+            {
+                id: 3,
+                saver: 'علي رضا',
+                civilId: '99887766',
+                employer: 'مجموعة السهل التجارية',
+                amount: '1,200.000 ر.ع',
+                route: 'returned',
+                routeLabel: 'حوالة مرتجعة',
+                status: 'manual',
+                statusLabel: 'مرشح للتحويل اليدوي',
+                signal: 'تم رفض الحوالة من البنك',
+                reason: 'انقضاء 3 أشهر دون عقد جديد',
+                checks: [
+                    ['تحقق شرط 3 أشهر', 'current', 'مكتمل'],
+                    ['التزامات سابقة', 'warning', '120.000 ر.ع'],
+                    ['حوالة مرتجعة', 'danger', 'أعيدت بتاريخ 2026/06/18']
+                ],
+                finances: [
+                    ['إجمالي الرصيد', '1,320.000 ر.ع'],
+                    ['التزامات محجوزة', '120.000 ر.ع'],
+                    ['المتاح بعد التسوية', '1,200.000 ر.ع']
+                ],
+                bank: [
+                    ['الحساب السابق', 'بنك خارجي - مرفوض'],
+                    ['سبب الرفض', 'عدم مطابقة الآيبان'],
+                    ['الإجراء المقترح', 'تحديث الحساب أو تحويل يدوي']
+                ],
+                summary: [
+                    ['المدخر', 'علي رضا'],
+                    ['سبب الصرف', 'بعد 3 أشهر'],
+                    ['المسار', 'حوالة مرتجعة'],
+                    ['الحالة', 'مرشح للتحويل اليدوي']
+                ],
+                timeline: [
+                    ['تم اعتماد الطلب الأول', '2026/06/09', ''],
+                    ['تمت إعادة الحوالة من البنك', '2026/06/18', 'pending'],
+                    ['أعيد فتح الطلب للمراجعة', 'اليوم', '']
+                ],
+                decisionOptions: [
+                    ['manual', 'فتح حالة يدوية وربطها بالحوالة المرتجعة'],
+                    ['docs', 'طلب تحديث بيانات الحساب'],
+                    ['reject', 'إغلاق الطلب لعدم كفاية البيانات']
+                ],
+                decisionHint: 'يفضل هنا ربط الطلب بالحالات اليدوية إذا تكرر رفض البنك أو تعذر الوصول للمستفيد.'
+            },
+            {
+                id: 4,
+                saver: 'جوزيف ماثيو',
+                civilId: '66554433',
+                employer: 'شركة النور للمقاولات',
+                amount: '1,870.000 ر.ع',
+                route: 'legal',
+                routeLabel: 'قانوني / شرعي',
+                status: 'docs',
+                statusLabel: 'بانتظار مستندات',
+                signal: 'وفاة مدخر غير عماني',
+                reason: 'وفاة المدخر',
+                checks: [
+                    ['تعليق الصرف الذاتي', 'danger', 'مفعل'],
+                    ['المطالبة الشرعية', 'warning', 'بانتظار مستندات'],
+                    ['قرار الصرف', 'warning', 'يرتبط بالمسار اليدوي']
+                ],
+                finances: [
+                    ['إجمالي الرصيد', '1,870.000 ر.ع'],
+                    ['التزامات محجوزة', '0.000 ر.ع'],
+                    ['الرصيد تحت الحجز', '1,870.000 ر.ع']
+                ],
+                bank: [
+                    ['قناة الدفع', 'غير مفعلة'],
+                    ['المستفيد الحالي', 'لم يحدد بعد'],
+                    ['المسار', 'مطالبة شرعية يدوية']
+                ],
+                summary: [
+                    ['المدخر', 'جوزيف ماثيو'],
+                    ['سبب الصرف', 'وفاة'],
+                    ['المسار', 'قانوني / شرعي'],
+                    ['الحالة', 'بانتظار مستندات']
+                ],
+                timeline: [
+                    ['أخطر النظام بحالة الوفاة', '2026/06/02', ''],
+                    ['تم فتح ملف مطالبة شرعية', '2026/06/03', 'pending'],
+                    ['بانتظار مستندات الورثة', 'الآن', 'pending']
+                ],
+                decisionOptions: [
+                    ['docs', 'طلب مستندات المطالبة الشرعية'],
+                    ['manual', 'تأكيد التحويل للمسار اليدوي'],
+                    ['reject', 'إغلاق لحين اكتمال الملف']
+                ],
+                decisionHint: 'هذه الحالة يجب أن تبقى خارج مسار التحويل البنكي حتى اكتمال المستندات القانونية.'
+            }
+        ];
+
+        let activeRequest = null;
+        const reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTable();
+        });
+
+        function renderTable(mode) {
+            const civilId = document.getElementById('filterCivilId') ? document.getElementById('filterCivilId').value.trim() : '';
+            const employer = document.getElementById('filterEmployer') ? document.getElementById('filterEmployer').value.trim() : '';
+            const route = document.getElementById('filterRoute') ? document.getElementById('filterRoute').value : 'all';
+            const status = document.getElementById('filterStatus') ? document.getElementById('filterStatus').value : 'all';
+
+            const filtered = requests.filter(item => {
+                if (mode === 'manualOnly' && item.status !== 'manual') return false;
+                if (mode === 'readyOnly' && item.status !== 'ready') return false;
+                if (civilId && !item.civilId.includes(civilId)) return false;
+                if (employer && !item.employer.includes(employer)) return false;
+                if (route !== 'all' && item.route !== route) return false;
+                if (status !== 'all' && item.status !== status) return false;
+                return true;
+            });
+
+            document.getElementById('requestRows').innerHTML = filtered.map(item => `
+                <tr>
+                    <td class="fw-700">${item.saver}</td>
+                    <td>${item.civilId}</td>
+                    <td>${item.employer}</td>
+                    <td>${item.amount}</td>
+                    <td><span class="status-chip info">${item.routeLabel}</span></td>
+                    <td><span class="status-chip ${statusTone(item.status)}">${item.statusLabel}</span></td>
+                    <td>${item.signal}</td>
+                    <td><button class="btn btn-sm btn-spf-outline" onclick="openRequest(${item.id})">مراجعة</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function statusTone(status) {
+            if (status === 'ready') return 'success';
+            if (status === 'manual') return 'danger';
+            if (status === 'docs') return 'pending';
+            return 'info';
+        }
+
+        function openRequest(id) {
+            activeRequest = requests.find(item => item.id === id);
+            if (!activeRequest) return;
+
+            const bannerTone = activeRequest.route === 'legal' ? 'danger' : activeRequest.route === 'normal' ? 'primary' : 'warning';
+            document.getElementById('modalBanner').className = `state-banner ${bannerTone} mb-4`;
+            document.getElementById('modalBanner').innerHTML = `
+                <div>
+                    <div class="state-banner-title">${activeRequest.routeLabel}</div>
+                    <div class="state-banner-copy">${activeRequest.reason} - ${activeRequest.signal}</div>
+                </div>
+                <div class="toolbar-inline">
+                    <span class="status-chip ${statusTone(activeRequest.status)}">${activeRequest.statusLabel}</span>
+                    <span class="decision-pill"><strong>المبلغ:</strong> ${activeRequest.amount}</span>
+                </div>
+            `;
+
+            document.getElementById('modalSummary').innerHTML = activeRequest.summary.map(item => `
+                <div class="detail-item">
+                    <div class="detail-label">${item[0]}</div>
+                    <div class="detail-value">${item[1]}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('financialDetails').innerHTML = activeRequest.finances.map(item => `
+                <div class="kv-row">
+                    <div class="kv-key">${item[0]}</div>
+                    <div class="kv-value">${item[1]}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('checksDetails').innerHTML = activeRequest.checks.map(item => `
+                <div class="process-step ${item[1]}">
+                    <div class="process-step-title">${item[0]}</div>
+                    <div class="mini-note">${item[2]}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('bankDetails').innerHTML = activeRequest.bank.map(item => `
+                <div class="kv-row">
+                    <div class="kv-key">${item[0]}</div>
+                    <div class="kv-value">${item[1]}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('auditTimeline').innerHTML = activeRequest.timeline.map(item => `
+                <li class="timeline-item ${item[2] || ''}">
+                    <div class="fw-700">${item[0]}</div>
+                    <div class="mini-note">${item[1]}</div>
+                </li>
+            `).join('');
+
+            document.getElementById('decisionRoute').innerHTML = activeRequest.decisionOptions.map(item => `
+                <option value="${item[0]}">${item[1]}</option>
+            `).join('');
+            document.getElementById('decisionNotes').value = '';
+            document.getElementById('decisionHint').innerText = activeRequest.decisionHint;
+            reviewModal.show();
+        }
+
+        function handleDecision(action) {
+            if (!activeRequest) return;
+
+            const selectedAction = action || document.getElementById('decisionRoute').value;
+            const notes = document.getElementById('decisionNotes').value.trim();
+
+            if (!notes && selectedAction !== 'approve') {
+                spf.showError('يرجى إدخال مبررات القرار قبل متابعة هذا الإجراء.');
+                return;
+            }
+
+            reviewModal.hide();
+
+            if (selectedAction === 'approve') {
+                spf.showSuccess('تم اعتماد الطلب وتحويله إلى خطوة التنفيذ البنكي أو الدفعة التالية حسب المسار.');
+                activeRequest.status = 'ready';
+                activeRequest.statusLabel = 'جاهز للتحويل';
+            } else if (selectedAction === 'docs') {
+                spf.showSuccess('تم إرسال طلب مستندات إضافية وتحديث الحالة إلى بانتظار مستندات.');
+                activeRequest.status = 'docs';
+                activeRequest.statusLabel = 'بانتظار مستندات';
+            } else if (selectedAction === 'manual') {
+                spf.showSuccess('تم تحويل الحالة إلى المعالجة اليدوية مع الاحتفاظ بسجل الطلب الحالي.');
+                activeRequest.status = 'manual';
+                activeRequest.statusLabel = 'مرشح للتحويل اليدوي';
+            } else if (selectedAction === 'reject') {
+                spf.showError('تم رفض الطلب وإشعار مقدم الطلب بسبب عدم اكتمال الشروط أو المستندات.');
+                activeRequest.status = 'pending';
+                activeRequest.statusLabel = 'مرفوض تشغيليًا';
+            }
+
+            renderTable();
+        }
+</script>
+</body>
+</html>

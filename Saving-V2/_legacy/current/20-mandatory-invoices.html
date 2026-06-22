@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فواتير الادخار الإلزامي - نظام الادخار V2</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-user-role="employer">
+    <div id="navbarPlaceholder"></div>
+    <div id="sidebarPlaceholder"></div>
+
+    <main class="spf-main">
+        <div class="page-header">
+            <div>
+                <h4>فواتير الادخار الإلزامي</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="01-dashboard.html">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">الفواتير الشهرية</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge employer">صاحب العمل</span>
+            </div>
+        </div>
+
+        <div class="state-banner primary mb-4">
+            <div>
+                <div class="state-banner-title">إصدار الفاتورة وربطها بالحساب الافتراضي</div>
+                <div class="state-banner-copy">لكل فاتورة شهرية رقم فاتورة مستقل وحساب افتراضي مخصص لاستقبال المدفوعات. بعد السداد يتم توزيع المبلغ على العمال النشطين وتحديث الرصيد المتبقي أو الغرامات إن وجدت.</div>
+            </div>
+        </div>
+
+        <section class="role-section role-employer">
+            <div class="row g-3 mb-4">
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">فواتير مفتوحة</div><div class="metric-value">4</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">الرصيد المتبقي</div><div class="metric-value">18,240</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">دفعات قيد التخصيص</div><div class="metric-value">2</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">غرامات شهرية</div><div class="metric-value">480</div></div></div>
+            </div>
+
+            <div class="section-card">
+                <div class="list-toolbar">
+                    <div class="toolbar-group">
+                        <div class="section-title mb-0">الفواتير الموحدة</div>
+                        <span class="status-chip info">قابلة للسداد عبر الحساب الافتراضي</span>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="btn btn-spf-outline" onclick="simulateBatchPayment()">تسجيل دفعة جزئية</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table dense-table compact-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>رقم الفاتورة</th>
+                                <th>الفترة</th>
+                                <th>الحساب الافتراضي</th>
+                                <th>عدد العمال</th>
+                                <th>إجمالي بند 9%</th>
+                                <th>الرصيد المتبقي</th>
+                                <th>الحالة</th>
+                                <th>الإجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoiceRows"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="role-section role-staff d-none">
+            <div class="row g-3 mb-4">
+                <div class="col-md-4"><div class="metric-card"><div class="metric-label">دفعات غير مخصصة</div><div class="metric-value">3</div></div></div>
+                <div class="col-md-4"><div class="metric-card"><div class="metric-label">فواتير متأخرة</div><div class="metric-value">5</div></div></div>
+                <div class="col-md-4"><div class="metric-card"><div class="metric-label">حالات تعارض تخصيص</div><div class="metric-value">2</div></div></div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">مراقبة الفواتير والمدفوعات</div>
+                <div class="table-responsive">
+                    <table class="table dense-table compact-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>جهة العمل</th>
+                                <th>رقم الفاتورة</th>
+                                <th>الحساب الافتراضي</th>
+                                <th>الحالة</th>
+                                <th>الملاحظة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>شركة الخليج للخدمات</td>
+                                <td>SUB-062026-01</td>
+                                <td>VA-700123456-062026</td>
+                                <td><span class="status-chip pending">دفعة جزئية</span></td>
+                                <td>بانتظار تخصيص الرصيد المتبقي على العمال النشطين</td>
+                            </tr>
+                            <tr>
+                                <td>شركة المدار اللوجستية</td>
+                                <td>SUB-062026-05</td>
+                                <td>VA-700778991-062026</td>
+                                <td><span class="status-chip danger">متأخرة</span></td>
+                                <td>تم احتساب غرامة إضافية ويحتاج الملف متابعة</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal fade" id="invoiceModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تفاصيل الفاتورة الشهرية</h5>
+                    <button type="button" class="btn-close ms-0 me-auto" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="invoiceBanner" class="state-banner mb-4"></div>
+                    <div id="invoiceDetails" class="detail-list mb-4"></div>
+
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <div class="section-card mb-4">
+                                <div class="section-title">بيانات السداد والحساب الافتراضي</div>
+                                <div id="paymentDetails" class="kv-list"></div>
+                            </div>
+
+                            <div class="section-card">
+                                <div class="section-title">سجل الدفعات والتخصيص</div>
+                                <ul class="timeline-list" id="allocationTimeline"></ul>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="section-card">
+                                <div class="section-title">تفصيل العمال النشطين</div>
+                                <div class="table-responsive">
+                                    <table class="table dense-table compact-table align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>العامل</th>
+                                                <th>الأجر الأساسي</th>
+                                                <th>قيمة 9%</th>
+                                                <th>الحالة</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="invoiceWorkers"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer toolbar-inline">
+                    <button class="btn btn-spf-outline" data-bs-dismiss="modal">إغلاق</button>
+                    <button class="btn btn-spf" onclick="simulatePayment()">تسجيل دفعة على الفاتورة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="common.js"></script>
+    <script>
+        const invoices = [
+            {
+                id: 1,
+                number: 'SUB-062026-01',
+                period: 'يونيو 2026',
+                virtualAccount: 'VA-700123456-062026',
+                workers: 21,
+                total: 8400,
+                remaining: 2100,
+                penalty: 0,
+                status: 'مسددة جزئيًا',
+                tone: 'pending',
+                paymentRoute: 'سداد عبر التحويل البنكي إلى الحساب الافتراضي',
+                allocationStatus: 'تم تخصيص 6,300 ر.ع ويتبقى 2,100 ر.ع',
+                workersList: [
+                    ['راجيش كومار', '420.000 ر.ع', '37.800 ر.ع', 'نشط'],
+                    ['محمد إقبال', '380.000 ر.ع', '34.200 ر.ع', 'نشط'],
+                    ['علي رضا', '510.000 ر.ع', '45.900 ر.ع', 'نشط']
+                ],
+                paymentDetails: [
+                    ['رقم الحساب الافتراضي', 'VA-700123456-062026'],
+                    ['طريقة السداد', 'تحويل بنكي / بوابة دفع'],
+                    ['آخر دفعة', '6,300.000 ر.ع بتاريخ 2026/06/19'],
+                    ['حالة التخصيص', 'تخصيص جزئي مكتمل']
+                ],
+                timeline: [
+                    ['تم إصدار الفاتورة وربطها بالحساب الافتراضي', '2026/06/01', ''],
+                    ['تم استقبال دفعة جزئية', '2026/06/19', ''],
+                    ['بانتظار الدفعة المتبقية لتخصيصها بالكامل', 'الآن', 'pending']
+                ]
+            },
+            {
+                id: 2,
+                number: 'SUB-052026-01',
+                period: 'مايو 2026',
+                virtualAccount: 'VA-700123456-052026',
+                workers: 19,
+                total: 7910,
+                remaining: 0,
+                penalty: 0,
+                status: 'مسددة',
+                tone: 'success',
+                paymentRoute: 'سداد إلى الحساب الافتراضي ثم تخصيص كامل',
+                allocationStatus: 'تمت تسوية الفاتورة وتوزيعها على جميع العمال النشطين',
+                workersList: [
+                    ['جوزيف ماثيو', '450.000 ر.ع', '40.500 ر.ع', 'نشط'],
+                    ['سالم ناصر', '390.000 ر.ع', '35.100 ر.ع', 'نشط']
+                ],
+                paymentDetails: [
+                    ['رقم الحساب الافتراضي', 'VA-700123456-052026'],
+                    ['طريقة السداد', 'تحويل بنكي'],
+                    ['آخر دفعة', '7,910.000 ر.ع بتاريخ 2026/05/28'],
+                    ['حالة التخصيص', 'مكتمل']
+                ],
+                timeline: [
+                    ['تم إصدار الفاتورة', '2026/05/01', ''],
+                    ['تم استلام كامل المبلغ', '2026/05/28', ''],
+                    ['تم تخصيص المبالغ للعمال النشطين', '2026/05/29', '']
+                ]
+            },
+            {
+                id: 3,
+                number: 'SUB-062026-05',
+                period: 'يونيو 2026',
+                virtualAccount: 'VA-700778991-062026',
+                workers: 12,
+                total: 4920,
+                remaining: 4920,
+                penalty: 480,
+                status: 'متأخرة',
+                tone: 'danger',
+                paymentRoute: 'بانتظار سداد إلى الحساب الافتراضي',
+                allocationStatus: 'لا يوجد تخصيص لأن الفاتورة لم تسدد',
+                workersList: [
+                    ['أنيل راج', '400.000 ر.ع', '36.000 ر.ع', 'نشط'],
+                    ['إبراهيم خان', '360.000 ر.ع', '32.400 ر.ع', 'نشط']
+                ],
+                paymentDetails: [
+                    ['رقم الحساب الافتراضي', 'VA-700778991-062026'],
+                    ['طريقة السداد', 'تحويل بنكي / بوابة دفع'],
+                    ['الغرامة الحالية', '480.000 ر.ع'],
+                    ['حالة التخصيص', 'لم تبدأ']
+                ],
+                timeline: [
+                    ['تم إصدار الفاتورة', '2026/06/01', ''],
+                    ['انتهت مهلة السداد', '2026/06/15', 'pending'],
+                    ['تم احتساب غرامة إضافية', '2026/06/16', 'pending']
+                ]
+            }
+        ];
+
+        let activeInvoice = null;
+        const invoiceModal = new bootstrap.Modal(document.getElementById('invoiceModal'));
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderInvoices();
+        });
+
+        function renderInvoices() {
+            document.getElementById('invoiceRows').innerHTML = invoices.map(item => `
+                <tr>
+                    <td class="fw-700">${item.number}</td>
+                    <td>${item.period}</td>
+                    <td>${item.virtualAccount}</td>
+                    <td>${item.workers}</td>
+                    <td>${item.total.toLocaleString()} ر.ع</td>
+                    <td>${item.remaining.toLocaleString()} ر.ع</td>
+                    <td><span class="status-chip ${item.tone}">${item.status}</span></td>
+                    <td><button class="btn btn-sm btn-spf-outline" onclick="openInvoice(${item.id})">عرض التفاصيل</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function openInvoice(id) {
+            activeInvoice = invoices.find(item => item.id === id);
+            if (!activeInvoice) return;
+
+            document.getElementById('invoiceBanner').className = `state-banner ${activeInvoice.tone === 'danger' ? 'danger' : activeInvoice.tone === 'pending' ? 'warning' : 'primary'} mb-4`;
+            document.getElementById('invoiceBanner').innerHTML = `
+                <div>
+                    <div class="state-banner-title">${activeInvoice.number}</div>
+                    <div class="state-banner-copy">${activeInvoice.paymentRoute} - ${activeInvoice.allocationStatus}</div>
+                </div>
+                <div class="toolbar-inline">
+                    <span class="status-chip ${activeInvoice.tone}">${activeInvoice.status}</span>
+                    <span class="decision-pill"><strong>الحساب الافتراضي:</strong> ${activeInvoice.virtualAccount}</span>
+                </div>
+            `;
+
+            document.getElementById('invoiceDetails').innerHTML = `
+                <div class="detail-item"><div class="detail-label">رقم الفاتورة</div><div class="detail-value">${activeInvoice.number}</div></div>
+                <div class="detail-item"><div class="detail-label">الفترة</div><div class="detail-value">${activeInvoice.period}</div></div>
+                <div class="detail-item"><div class="detail-label">عدد العمال</div><div class="detail-value">${activeInvoice.workers}</div></div>
+                <div class="detail-item"><div class="detail-label">إجمالي بند 9%</div><div class="detail-value">${activeInvoice.total.toLocaleString()} ر.ع</div></div>
+                <div class="detail-item"><div class="detail-label">الرصيد المتبقي</div><div class="detail-value">${activeInvoice.remaining.toLocaleString()} ر.ع</div></div>
+                <div class="detail-item"><div class="detail-label">الغرامة</div><div class="detail-value">${activeInvoice.penalty.toLocaleString()} ر.ع</div></div>
+            `;
+
+            document.getElementById('paymentDetails').innerHTML = activeInvoice.paymentDetails.map(item => `
+                <div class="kv-row">
+                    <div class="kv-key">${item[0]}</div>
+                    <div class="kv-value">${item[1]}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('allocationTimeline').innerHTML = activeInvoice.timeline.map(item => `
+                <li class="timeline-item ${item[2] || ''}">
+                    <div class="fw-700">${item[0]}</div>
+                    <div class="mini-note">${item[1]}</div>
+                </li>
+            `).join('');
+
+            document.getElementById('invoiceWorkers').innerHTML = activeInvoice.workersList.map(worker => `
+                <tr>
+                    <td>${worker[0]}</td>
+                    <td>${worker[1]}</td>
+                    <td>${worker[2]}</td>
+                    <td>${worker[3]}</td>
+                </tr>
+            `).join('');
+
+            invoiceModal.show();
+        }
+
+        function simulatePayment() {
+            if (!activeInvoice) return;
+
+            if (activeInvoice.remaining === 0) {
+                spf.showError('هذه الفاتورة مسددة بالكامل بالفعل ولا يوجد رصيد متبقٍ لتسجيله.');
+                return;
+            }
+
+            const partialAmount = Math.min(activeInvoice.remaining, 2100);
+            activeInvoice.remaining -= partialAmount;
+            activeInvoice.timeline.push([
+                `تم تسجيل دفعة بقيمة ${partialAmount.toLocaleString()} ر.ع على الحساب الافتراضي`,
+                'الآن',
+                ''
+            ]);
+
+            if (activeInvoice.remaining === 0) {
+                activeInvoice.status = 'مسددة';
+                activeInvoice.tone = 'success';
+                activeInvoice.allocationStatus = 'تمت تسوية الفاتورة بالكامل وتحديث تخصيص العمال.';
+                activeInvoice.timeline.push(['تم التخصيص الكامل للمبلغ على العمال النشطين', 'الآن', '']);
+            } else {
+                activeInvoice.status = 'مسددة جزئيًا';
+                activeInvoice.tone = 'pending';
+                activeInvoice.allocationStatus = `تم تحديث الرصيد المتبقي إلى ${activeInvoice.remaining.toLocaleString()} ر.ع.`;
+            }
+
+            renderInvoices();
+            openInvoice(activeInvoice.id);
+            spf.showSuccess('تم تسجيل الدفعة على الحساب الافتراضي وتحديث حالة الفاتورة وسجل التخصيص.');
+        }
+
+        function simulateBatchPayment() {
+            const pendingInvoice = invoices.find(item => item.remaining > 0);
+            if (!pendingInvoice) {
+                spf.showError('لا توجد فواتير مفتوحة لتسجيل دفعة جزئية عليها.');
+                return;
+            }
+            activeInvoice = pendingInvoice;
+            simulatePayment();
+        }
+    </script>
+</body>
+</html>

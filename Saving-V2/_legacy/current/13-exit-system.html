@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الخروج من النظام - نظام الادخار V2</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-user-role="saver">
+    <div id="navbarPlaceholder"></div>
+    <div id="sidebarPlaceholder"></div>
+
+    <main class="spf-main">
+        <div class="page-header">
+            <div>
+                <h4>الخروج النهائي من نظام الادخار الاختياري</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="01-dashboard.html">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">الخروج النهائي</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge saver">المدخر</span>
+            </div>
+        </div>
+
+        <div id="exitBanner" class="state-banner primary mb-4"></div>
+
+        <div class="section-card mb-4">
+            <div class="section-title">مسارات الإخطار والخروج</div>
+            <div class="scenario-grid" id="exitScenarioGrid"></div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-xl-8">
+                <div class="section-card mb-4">
+                    <div class="section-title">بيانات الإخطار النهائي</div>
+                    <form id="exitForm">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-700">سبب الخروج</label>
+                                <select class="form-select" id="exitReason">
+                                    <option value="final-exit">الخروج النهائي من النظام</option>
+                                    <option value="loss-of-condition">فقدان شرط الاستمرار</option>
+                                    <option value="employment-change">تغير حالة العمل</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-700">تاريخ تحقق السبب</label>
+                                <input type="date" class="form-control" id="triggerDate">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-700">الحساب البنكي للتسوية</label>
+                                <select class="form-select" id="settlementBank">
+                                    <option>بنك مسقط - ****9876</option>
+                                    <option>بنك ظفار - ****1142</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-700">طريقة التسوية</label>
+                                <select class="form-select" id="settlementMethod">
+                                    <option value="full">إغلاق كامل وتحويل دفعة واحدة</option>
+                                    <option value="review">إغلاق بعد مراجعة الموظف</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="lateReasonPanel" class="mb-3 d-none">
+                            <label class="form-label fw-700">سبب التأخر في الإخطار</label>
+                            <textarea class="form-control" id="lateReason" rows="3" placeholder="اشرح سبب التأخر في إشعار الصندوق عن حالة الخروج أو فقدان الشرط..."></textarea>
+                        </div>
+
+                        <div id="exitHintBox" class="signal-box warning mb-3"></div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="confirmExit">
+                            <label class="form-check-label ms-2 fw-700" for="confirmExit">أقر بصحة البيانات وأفهم أثر الخروج على إيقاف العوائد المستقبلية وإغلاق الحساب.</label>
+                        </div>
+
+                        <div class="toolbar-inline">
+                            <button type="button" class="btn btn-spf" onclick="submitExit()">تأكيد الإخطار</button>
+                            <button type="button" class="btn btn-spf-outline" onclick="window.location.href='21-exit-notification.html'">عرض مسار الإخطار التشغيلي</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">ما الذي يحدث بعد الإخطار؟</div>
+                    <div class="process-rail" id="exitProcessRail"></div>
+                </div>
+            </div>
+
+            <div class="col-xl-4">
+                <div class="stack-card">
+                    <div class="section-card">
+                        <div class="section-title">ملخص التسوية</div>
+                        <div class="detail-list mb-3">
+                            <div class="detail-item">
+                                <div class="detail-label">إجمالي الرصيد</div>
+                                <div class="detail-value" id="summaryTotal">1,450.000 ر.ع</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">عوائد حتى تاريخ الإخطار</div>
+                                <div class="detail-value" id="summaryReturns">70.000 ر.ع</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">المبلغ المتوقع للتسوية</div>
+                                <div class="detail-value" id="summaryPayout">1,450.000 ر.ع</div>
+                            </div>
+                        </div>
+                        <div class="decision-strip" id="summaryStrip"></div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-title">الأثر النظامي</div>
+                        <ul class="timeline-list" id="impactTimeline"></ul>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-title">حالة الملف</div>
+                        <div id="caseStatusBox" class="signal-box"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="common.js"></script>
+    <script>
+        const exitScenarios = {
+            onTime: {
+                key: 'onTime',
+                title: 'إخطار ضمن المهلة',
+                tag: 'المسار الطبيعي',
+                meta: 'المدخر أخطر الصندوق في الوقت المناسب ويمكن إنهاء الملف دون تأخير إضافي.',
+                bannerClass: 'primary',
+                bannerTitle: 'الإخطار ضمن المهلة النظامية',
+                bannerCopy: 'تستمر العوائد حتى تاريخ الإخطار المعتمد، ثم يقفل الحساب وتبدأ تسوية المبلغ وفق دورة المراجعة المعتادة.',
+                reason: 'final-exit',
+                showLateReason: false,
+                hintTitle: 'لا يوجد تأخير مسجل',
+                hintBody: 'يمكن تقديم الإخطار مباشرة، وسيتم إيقاف العوائد المستقبلية بعد اعتماد طلب الخروج.',
+                totals: ['1,450.000 ر.ع', '70.000 ر.ع', '1,450.000 ر.ع'],
+                strip: ['الحالة: جاهز للإخطار', 'العوائد حتى اليوم: محتسبة', 'لا توجد مراجعة استثنائية'],
+                process: [
+                    ['إرسال الإخطار من المدخر', 'current', 'يبدأ الملف من هنا.'],
+                    ['مراجعة موظف الصندوق', 'current', 'التحقق من تاريخ الإخطار والأهلية.'],
+                    ['إغلاق الحساب وتحويل التسوية', 'current', 'بعد اعتماد القرار.']
+                ],
+                timeline: [
+                    ['يستمر احتساب العوائد حتى تاريخ الإخطار المعتمد', ''],
+                    ['يتم إيقاف الإيداعات المستقبلية بعد اعتماد الخروج', ''],
+                    ['يظهر طلب التسوية في سجل المعاملات للمدخر', 'pending']
+                ],
+                caseBoxClass: '',
+                caseTitle: 'لا توجد ملاحظات استثنائية',
+                caseBody: 'يمثل هذا المسار الحالة القياسية لخروج المدخر من النظام مع إغلاق الحساب بعد التسوية.'
+            },
+            delayed: {
+                key: 'delayed',
+                title: 'إخطار متأخر',
+                tag: 'يتطلب توضيح',
+                meta: 'وقع سبب الخروج قبل فترة سابقة ويجب تسجيل سبب التأخر ومراجعة الأثر على العوائد.',
+                bannerClass: 'warning',
+                bannerTitle: 'الإخطار يحتاج تفسير سبب التأخر',
+                bannerCopy: 'في حالة التأخر عن الإخطار، يراجع الموظف تاريخ تحقق السبب وتاريخ البلاغ لتحديد أثر ذلك على الاستحقاق والعوائد أو الحاجة إلى مسار يدوي.',
+                reason: 'loss-of-condition',
+                showLateReason: true,
+                hintTitle: 'سجل سبب التأخر',
+                hintBody: 'لا يتم رفض الإخطار تلقائيًا، لكن يجب توضيح سبب التأخر لتمكين الموظف من اتخاذ القرار المناسب.',
+                totals: ['1,450.000 ر.ع', '63.500 ر.ع', '1,443.500 ر.ع'],
+                strip: ['الحالة: بانتظار تفسير', 'الأثر على العوائد: قيد المراجعة', 'قد يتحول الملف إلى يدوي'],
+                process: [
+                    ['إرسال الإخطار المتأخر', 'warning', 'مطلوب سبب التأخر.'],
+                    ['مراجعة أثر التأخر على العوائد', 'warning', 'يتم احتساب المبلغ حتى التاريخ المعتمد.'],
+                    ['قرار الموظف: اعتماد أو تحويل يدوي', 'warning', 'حسب اكتمال البيانات.']
+                ],
+                timeline: [
+                    ['تم تسجيل فقدان شرط الاستمرار قبل الإخطار', ''],
+                    ['أوقف النظام احتساب العوائد المستقبلية بعد تاريخ الاعتماد النهائي', 'pending'],
+                    ['قد يطلب الموظف مستندات إضافية أو يحول الحالة يدويًا', 'pending']
+                ],
+                caseBoxClass: 'warning',
+                caseTitle: 'الملف يحتاج مراجعة أثر التأخر',
+                caseBody: 'قد تختلف تسوية العوائد النهائية حسب ما يعتمده الموظف كتاريخ صحيح لزوال الشرط أو الخروج من النظام.'
+            },
+            manual: {
+                key: 'manual',
+                title: 'حالة تحتاج معالجة يدوية',
+                tag: 'استثناء تشغيلي',
+                meta: 'هناك تعارض أو نقص في البيانات يستدعي تعليق الإغلاق الذاتي وتحويل الملف لموظف الصندوق.',
+                bannerClass: 'danger',
+                bannerTitle: 'لا يمكن إكمال الإغلاق الذاتي حاليًا',
+                bannerCopy: 'هذه الحالة تمثل وجود تعارض في البيانات أو التزامات مفتوحة أو بلاغ متأخر جوهري، لذلك يجب تحويلها إلى مراجعة يدوية قبل تسوية الحساب.',
+                reason: 'loss-of-condition',
+                showLateReason: true,
+                hintTitle: 'المسار اليدوي هو الخطوة الصحيحة',
+                hintBody: 'يمكن للمدخر إرسال الإخطار، لكن القرار النهائي سيبقى معلقًا حتى يكمل الموظف المعالجة اليدوية.',
+                totals: ['1,450.000 ر.ع', '58.000 ر.ع', '1,330.000 ر.ع'],
+                strip: ['الحالة: مسار يدوي', 'التزامات قيد التحقق: 120.000 ر.ع', 'الصرف النهائي غير متاح الآن'],
+                process: [
+                    ['إرسال الإخطار', 'danger', 'يولد ملف متابعة يدوي.'],
+                    ['ربط الملف بالحالة التشغيلية أو المالية', 'warning', 'قد تكون التزامات أو تعارض تاريخ.'],
+                    ['قرار يدوي بإغلاق الحساب أو إرجاعه للمستفيد', 'warning', 'بعد اكتمال المراجعة.']
+                ],
+                timeline: [
+                    ['تم اكتشاف تعارض أو التزام مفتوح', ''],
+                    ['تم تعليق الإغلاق الذاتي إلى حين المراجعة', 'pending'],
+                    ['تتم متابعة الملف من خلال صفحة الحالات اليدوية', 'pending']
+                ],
+                caseBoxClass: 'danger',
+                caseTitle: 'الملف معلق قبل الإغلاق النهائي',
+                caseBody: 'سيتم حفظ الإخطار وربطه بمسار يدوي ليتمكن الموظف من استكمال المعالجة القانونية أو المالية قبل الصرف.'
+            }
+        };
+
+        let activeExitScenario = 'onTime';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const role = localStorage.getItem('spf-user-role') || 'saver';
+            if (role !== 'saver') {
+                document.body.innerHTML = '<div class="container mt-5 text-center"><div class="alert alert-warning">عذرًا، طلب الخروج النهائي مخصص للمدخرين الأفراد فقط.</div><a href="01-dashboard.html" class="btn btn-spf">العودة إلى لوحة التحكم</a></div>';
+                return;
+            }
+
+            document.getElementById('triggerDate').valueAsDate = new Date();
+            document.getElementById('settlementMethod').addEventListener('change', function() {
+                if (this.value === 'review') {
+                    selectExitScenario('manual');
+                }
+            });
+
+            renderExitScenarios();
+            selectExitScenario('onTime');
+        });
+
+        function renderExitScenarios() {
+            document.getElementById('exitScenarioGrid').innerHTML = Object.values(exitScenarios).map(item => `
+                <div class="scenario-card" data-scenario="${item.key}" onclick="selectExitScenario('${item.key}')">
+                    <div class="scenario-tag">${item.tag}</div>
+                    <div class="scenario-title">${item.title}</div>
+                    <div class="scenario-meta">${item.meta}</div>
+                </div>
+            `).join('');
+        }
+
+        function selectExitScenario(key) {
+            activeExitScenario = key;
+            const scenario = exitScenarios[key];
+
+            document.querySelectorAll('#exitScenarioGrid .scenario-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.scenario === key);
+            });
+
+            document.getElementById('exitBanner').className = `state-banner ${scenario.bannerClass} mb-4`;
+            document.getElementById('exitBanner').innerHTML = `
+                <div>
+                    <div class="state-banner-title">${scenario.bannerTitle}</div>
+                    <div class="state-banner-copy">${scenario.bannerCopy}</div>
+                </div>
+                <div class="toolbar-inline">
+                    <span class="status-chip ${scenario.bannerClass === 'danger' ? 'danger' : scenario.bannerClass === 'warning' ? 'pending' : 'success'}">${scenario.title}</span>
+                </div>
+            `;
+
+            document.getElementById('exitReason').value = scenario.reason;
+            document.getElementById('lateReasonPanel').classList.toggle('d-none', !scenario.showLateReason);
+            document.getElementById('exitHintBox').className = `signal-box ${scenario.bannerClass === 'danger' ? 'danger' : 'warning'} mb-3`;
+            document.getElementById('exitHintBox').innerHTML = `
+                <div class="signal-title">${scenario.hintTitle}</div>
+                <div>${scenario.hintBody}</div>
+            `;
+
+            document.getElementById('summaryTotal').innerText = scenario.totals[0];
+            document.getElementById('summaryReturns').innerText = scenario.totals[1];
+            document.getElementById('summaryPayout').innerText = scenario.totals[2];
+            document.getElementById('summaryStrip').innerHTML = scenario.strip.map(item => `<span class="decision-pill">${item}</span>`).join('');
+            document.getElementById('exitProcessRail').innerHTML = scenario.process.map(item => `
+                <div class="process-step ${item[1]}">
+                    <div class="process-step-title">${item[0]}</div>
+                    <div class="mini-note">${item[2]}</div>
+                </div>
+            `).join('');
+            document.getElementById('impactTimeline').innerHTML = scenario.timeline.map(item => `
+                <li class="timeline-item ${item[1] || ''}">
+                    <div class="fw-700">${item[0]}</div>
+                </li>
+            `).join('');
+
+            document.getElementById('caseStatusBox').className = `signal-box ${scenario.caseBoxClass}`.trim();
+            document.getElementById('caseStatusBox').innerHTML = `
+                <div class="signal-title">${scenario.caseTitle}</div>
+                <div>${scenario.caseBody}</div>
+            `;
+        }
+
+        function submitExit() {
+            const scenario = exitScenarios[activeExitScenario];
+            if (!document.getElementById('confirmExit').checked) {
+                spf.showError('يرجى الإقرار بفهم أثر الخروج النهائي قبل متابعة الإخطار.');
+                return;
+            }
+
+            if (scenario.showLateReason && !document.getElementById('lateReason').value.trim()) {
+                spf.showError('يرجى إدخال سبب التأخر أو سبب تحويل الحالة للمراجعة اليدوية.');
+                return;
+            }
+
+            if (activeExitScenario === 'manual') {
+                spf.showSuccess('تم تسجيل إشعار الخروج وتحويله إلى مسار مراجعة يدوية قبل إغلاق الحساب.');
+                return;
+            }
+
+            if (activeExitScenario === 'delayed') {
+                spf.showSuccess('تم تسجيل الإخطار المتأخر وإحالته إلى الموظف لمراجعة تاريخ الاستحقاق وأثره على العوائد.');
+                return;
+            }
+
+            spf.showSuccess('تم تسجيل إشعار الخروج النهائي وسيتم إغلاق الحساب بعد اكتمال المراجعة وتحويل مبلغ التسوية.');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم الداخلية - الادخار V2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../../assets/css/app.css">
+    <link rel="stylesheet" href="../../assets/css/shell.css">
+    
+</head>
+<body data-root="../../" data-user-role="staff">
+<main class="spf-main">
+<div class="page-header">
+            <div>
+                <h4>لوحة التحكم</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="index.html">نظام الادخار</a></li>
+                        <li class="breadcrumb-item active">لوحة التحكم</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge saver">المدخر</span>
+            </div>
+        </div>
+
+        <div class="role-section role-saver">
+            <section class="hero-panel mb-4">
+                <div class="hero-title">متابعة المدخرات والطلبات من شاشة واحدة</div>
+                <div class="hero-copy">تعرض هذه اللوحة حالة الرصيد، الطلبات المفتوحة، مسارات الصرف، وإشعارات الخروج أو الاعتراضات حتى لا يبقى أي جزء مهم في رحلتك مخفيًا خارج الشاشة الرئيسية.</div>
+                <div class="hero-stats">
+                    <div class="hero-stat"><div class="hero-stat-label">الرصيد القابل للصرف</div><div class="hero-stat-value">1,450.000 ر.ع</div></div>
+                    <div class="hero-stat"><div class="hero-stat-label">طلبات مفتوحة</div><div class="hero-stat-value">2</div></div>
+                    <div class="hero-stat"><div class="hero-stat-label">عوائد موزعة</div><div class="hero-stat-value">45.250 ر.ع</div></div>
+                    <div class="hero-stat"><div class="hero-stat-label">آخر إيداع</div><div class="hero-stat-value">20/02/2026</div></div>
+                </div>
+            </section>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">إجمالي الرصيد</div><div class="metric-value">1,450</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">عوائد الاستثمار</div><div class="metric-value">45.250</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">التزامات نشطة</div><div class="metric-value">1</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">إشعارات تحتاج قرار</div><div class="metric-value">2</div></div></div>
+            </div>
+
+            <div class="board-grid mb-4">
+                <div class="section-card">
+                    <div class="list-toolbar">
+                        <div class="toolbar-group">
+                            <div class="section-title mb-0">المهام ذات الأولوية</div>
+                            <span class="status-chip pending">بانتظار متابعة</span>
+                        </div>
+                        <a href="../../internal/staff/transaction-history.html" class="btn btn-spf-outline">عرض السجل</a>
+                    </div>
+                    <div class="process-rail">
+                        <div class="process-step current">
+                            <div class="process-step-title">طلب صرف مفتوح</div>
+                            <div class="mini-note">يوجد طلب صرف قيد المراجعة ويمكنك متابعة حالته أو تحديث بيانات التحويل إذا طلب منك ذلك.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf" href="../../internal/staff/disbursement-processing.html">متابعة الطلب</a>
+                                <a class="btn btn-spf-outline" href="../../internal/staff/disbursement-processing.html">عرض المسار الداخلي</a>
+                            </div>
+                        </div>
+                        <div class="process-step warning">
+                            <div class="process-step-title">إشعار تسوية مكافأة سابق</div>
+                            <div class="mini-note">يوجد قرار صادر من جهة العمل بخصوص مكافأة الخدمة السابقة ويحتاج اعتمادك أو تسجيل عدم الموافقة.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf" href="../../internal/staff/mandatory-saving-operations.html">عرض القرار</a>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="process-step-title">اعتراض أجر أو تحديث بيانات</div>
+                            <div class="mini-note">يمكنك رفع اعتراض الأجر أو متابعة ملاحظات الصندوق من نفس الشاشة دون التنقل بين صفحات فرعية.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf-outline" href="../../internal/staff/salary-objections.html">فتح الاعتراض</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">الإجراءات السريعة</div>
+                    <div class="action-stack">
+                        <a href="../../internal/staff/optional-saving-operations.html" class="action-card">
+                            <div class="action-icon"><i class="fas fa-plus-circle"></i></div>
+                            <div class="action-title">إيداع جديد</div>
+                            <div class="action-desc">إيداع ذاتي أو مراجعة قنوات الدفع.</div>
+                        </a>
+                        <a href="../../internal/staff/disbursement-processing.html" class="action-card">
+                            <div class="action-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                            <div class="action-title">صرف المدخرات</div>
+                            <div class="action-desc">المسارات الاعتيادية والاستثنائية في شاشة واحدة.</div>
+                        </a>
+                        <a href="../../internal/staff/exit-notifications.html" class="action-card">
+                            <div class="action-icon"><i class="fas fa-door-open"></i></div>
+                            <div class="action-title">الخروج النهائي</div>
+                            <div class="action-desc">معرفة أثر الخروج على العوائد والتسوية.</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="board-grid-equal">
+                <div class="section-card">
+                    <div class="section-title">آخر الحركات</div>
+                    <div class="table-responsive">
+                        <table class="table dense-table compact-table align-middle">
+                            <thead>
+                                <tr><th>التاريخ</th><th>العملية</th><th>المبلغ</th><th>الحالة</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>20/02/2026</td><td>إيداع ذاتي</td><td>100.000 ر.ع</td><td><span class="status-chip success">مكتمل</span></td></tr>
+                                <tr><td>18/02/2026</td><td>فتح طلب صرف</td><td>1,200.000 ر.ع</td><td><span class="status-chip pending">قيد المراجعة</span></td></tr>
+                                <tr><td>15/02/2026</td><td>سداد التزام</td><td>45.500 ر.ع</td><td><span class="status-chip success">مكتمل</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">توزيع مصادر الرصيد</div>
+                    <div class="mini-chart mt-2">
+                        <div class="mini-bar" style="height: 70%; background: var(--spf-green);"><span>ذاتي</span></div>
+                        <div class="mini-bar" style="height: 42%; background: var(--spf-gold);"><span>صاحب عمل</span></div>
+                        <div class="mini-bar" style="height: 18%; background: var(--spf-green-light);"><span>عوائد</span></div>
+                    </div>
+                    <div class="data-note mt-4">يمثل الرصيد الحالي مزيجًا من الإيداع الذاتي، إيداع صاحب العمل، وعوائد الاستثمار الموزعة حتى آخر دورة اعتماد.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="role-section role-employer d-none">
+            <section class="hero-panel mb-4">
+                <div class="hero-title">إدارة التسجيل والإيداع والفواتير كرحلة تشغيل واحدة</div>
+                <div class="hero-copy">تركز هذه اللوحة على ما يحتاجه صاحب العمل فعليًا: من تم تسجيله، من يحتاج تسوية أو اعتراضًا، ما قيمة الفواتير المفتوحة، وأين توجد القرارات التي تنتظر إجراءً.</div>
+                <div class="hero-stats">
+                    <div class="hero-stat"><div class="hero-stat-label">عمال نشطون</div><div class="hero-stat-value">450</div></div>
+                    <div class="hero-stat"><div class="hero-stat-label">فواتير مفتوحة</div><div class="hero-stat-value">4</div></div>
+                    <div class="hero-stat"><div class="hero-stat-label">حالات تسوية سابقة</div><div class="hero-stat-value">12</div></div>
+                    <div class="hero-stat"><div class="hero-stat-label">اعتراضات أجر</div><div class="hero-stat-value">3</div></div>
+                </div>
+            </section>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">إجمالي العمال</div><div class="metric-value">450</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">عمال غير مكتملين</div><div class="metric-value">7</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">إجمالي الفواتير</div><div class="metric-value">18,240</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">طلبات تتطلب قرارًا</div><div class="metric-value">6</div></div></div>
+            </div>
+
+            <div class="board-grid mb-4">
+                <div class="section-card">
+                    <div class="section-title">لوحة العمل اليومية</div>
+                    <div class="matrix-grid">
+                        <div class="matrix-card">
+                            <span class="status-chip pending">تسجيل</span>
+                            <div class="flow-title">إضافة عمال أو معالجة التسجيل بأثر رجعي</div>
+                            <div class="flow-copy">الوصول إلى آلية التسجيل المناسبة حسب نوع العامل أو جهة القرار.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf" href="../../internal/staff/registration-operations.html">بدء التسجيل</a>
+                            </div>
+                        </div>
+                        <div class="matrix-card">
+                            <span class="status-chip info">إيداع</span>
+                            <div class="flow-title">إيداع فردي أو جماعي</div>
+                            <div class="flow-copy">اختيار العمال، توزيع المبالغ، ثم تنفيذ الدفع عبر القنوات المعتمدة.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf" href="../../internal/staff/optional-saving-operations.html">فتح الإيداع</a>
+                            </div>
+                        </div>
+                        <div class="matrix-card">
+                            <span class="status-chip success">فواتير</span>
+                            <div class="flow-title">فواتير الادخار الإلزامي</div>
+                            <div class="flow-copy">متابعة الحساب الافتراضي، الرصيد المتبقي، والغرامات.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf" href="../../internal/staff/mandatory-invoices.html">عرض الفواتير</a>
+                            </div>
+                        </div>
+                        <div class="matrix-card">
+                            <span class="status-chip pending">قرارات</span>
+                            <div class="flow-title">تسوية مكافأة الخدمة السابقة</div>
+                            <div class="flow-copy">اتخاذ القرار لكل عامل من نفس الشاشة مع نافذة تفاصيل للقرارات السابقة.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf" href="../../internal/staff/mandatory-saving-operations.html">فتح التسويات</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">تنبيهات تحتاج تصرفًا</div>
+                    <div class="process-rail">
+                        <div class="process-step warning">
+                            <div class="process-step-title">اعتراض أجر خلال المهلة</div>
+                            <div class="mini-note">يوجد اعتراضان على الأجر الأساسي يجب الرد عليهما قبل انتهاء المدة المحددة.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf-outline" href="../../internal/staff/salary-objections.html">معالجة الاعتراضات</a>
+                            </div>
+                        </div>
+                        <div class="process-step current">
+                            <div class="process-step-title">فاتورة جزئية غير مسددة</div>
+                            <div class="mini-note">الفاتورة الشهرية الموحدة لفترة يونيو ما زال عليها رصيد متبقٍ يحتاج سدادًا أو تسوية.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf-outline" href="../../internal/staff/mandatory-invoices.html">عرض الفاتورة</a>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="process-step-title">عمال يحتاجون تحديث بيانات</div>
+                            <div class="mini-note">يظهر هذا التنبيه إذا تعذر التسجيل التلقائي أو تغيرت حالة بعض العمال.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf-outline" href="../../internal/staff/mandatory-saving-operations.html">فتح قائمة العمال</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="board-grid-equal">
+                <div class="section-card">
+                    <div class="section-title">آخر عمليات جهة العمل</div>
+                    <div class="table-responsive">
+                        <table class="table dense-table compact-table align-middle">
+                            <thead>
+                                <tr><th>العملية</th><th>التاريخ</th><th>القيمة</th><th>الحالة</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>إيداع جماعي</td><td>15/02/2026</td><td>32,000.000 ر.ع</td><td><span class="status-chip success">مكتمل</span></td></tr>
+                                <tr><td>قرار تسوية مكافأة</td><td>13/02/2026</td><td>6 حالات</td><td><span class="status-chip pending">بانتظار العامل</span></td></tr>
+                                <tr><td>رد على اعتراض أجر</td><td>12/02/2026</td><td>2 اعتراض</td><td><span class="status-chip info">مرسل</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="section-card">
+                    <div class="section-title">اتجاه الإيداعات</div>
+                    <div class="mini-chart mt-2">
+                        <div class="mini-bar" style="height: 36%; background: var(--spf-green-light);"><span>مارس</span></div>
+                        <div class="mini-bar" style="height: 58%; background: var(--spf-green);"><span>أبريل</span></div>
+                        <div class="mini-bar" style="height: 72%; background: var(--spf-gold);"><span>مايو</span></div>
+                        <div class="mini-bar" style="height: 88%; background: var(--spf-green-dark);"><span>يونيو</span></div>
+                    </div>
+                    <div class="data-note mt-4">الزيادة الحالية ناتجة عن نمو عدد العمال النشطين وإضافة مسارات إيداع موجهة لفئات جديدة في V2.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="role-section role-staff d-none">
+            <section class="hero-panel mb-4">
+                <div class="hero-title">قيادة تشغيلية لمخاطر النظام ومساراته المفتوحة</div>
+                <div class="hero-copy">بدل لوحة أرقام عامة فقط، تعرض هذه النسخة أين توجد المخاطر التشغيلية: طلبات صرف، اعتراضات أجور، حالات يدوية، فواتير متأخرة، وإشعارات خروج تحتاج قرارًا أو تصعيدًا.</div>
+                <div class="hero-stats">
+                    <div class="hero-stat"><div class="hero-stat-label">طلبات صرف</div><div class="hero-stat-value">18</div></div>
+                    <div class="hero-stat"><div class="hero-stat-label">حالات يدوية</div><div class="hero-stat-value">3</div></div>
+                    <div class="hero-stat"><div class="hero-stat-label">اعتراضات أجر</div><div class="hero-stat-value">9</div></div>
+                    <div class="hero-stat"><div class="hero-stat-label">فواتير متأخرة</div><div class="hero-stat-value">5</div></div>
+                </div>
+            </section>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">إجمالي الحسابات</div><div class="metric-value">1.2M</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">إجمالي المدخرات</div><div class="metric-value">850M</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">إيداعات اليوم</div><div class="metric-value">120K</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">نسبة الالتزام</div><div class="metric-value">99.9%</div></div></div>
+            </div>
+
+            <div class="board-grid mb-4">
+                <div class="section-card">
+                    <div class="section-title">قائمة القيادة التشغيلية</div>
+                    <div class="process-rail">
+                        <div class="process-step warning">
+                            <div class="process-step-title">صرف المدخرات</div>
+                            <div class="mini-note">4 حالات تعذر بنكي و3 حالات مرشحة للمسار اليدوي ضمن دورة الصرف الحالية.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf" href="../../internal/staff/disbursement-processing.html">فتح قائمة الصرف</a>
+                            </div>
+                        </div>
+                        <div class="process-step danger">
+                            <div class="process-step-title">حالات يدوية واستثناءات</div>
+                            <div class="mini-note">يوجد ملف قانوني وملفان لتعذر التحويل البنكي يحتاجان متابعة SLA وتوزيع على المختصين.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf" href="../../internal/staff/manual-cases.html">عرض الحالات</a>
+                            </div>
+                        </div>
+                        <div class="process-step current">
+                            <div class="process-step-title">إشعارات الخروج وفقدان الشرط</div>
+                            <div class="mini-note">بعض الإشعارات أرسلت بعد المهلة وتحتاج اعتماد التاريخ المؤثر على العوائد.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf-outline" href="../../internal/staff/exit-notifications.html">عرض الإشعارات</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">وحدات الإدارة السريعة</div>
+                    <div class="action-stack">
+                        <a href="../../internal/staff/investment-return.html" class="action-card">
+                            <div class="action-icon"><i class="fas fa-percent"></i></div>
+                            <div class="action-title">توزيع عائد الاستثمار</div>
+                            <div class="action-desc">تحديد العائد السنوي والسيناريوهات المرتبطة.</div>
+                        </a>
+                        <a href="../../internal/staff/mandatory-invoices.html" class="action-card">
+                            <div class="action-icon"><i class="fas fa-file-invoice"></i></div>
+                            <div class="action-title">فواتير الادخار الإلزامي</div>
+                            <div class="action-desc">متابعة الحسابات الافتراضية والتخصيصات والغرامات.</div>
+                        </a>
+                        <a href="../../internal/staff/reports.html" class="action-card">
+                            <div class="action-icon"><i class="fas fa-chart-pie"></i></div>
+                            <div class="action-title">التقارير والتحليل</div>
+                            <div class="action-desc">مؤشرات تشغيلية وتنظيمية قابلة للتصدير.</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="board-grid-equal">
+                <div class="section-card">
+                    <div class="section-title">اتجاه الطلبات المفتوحة</div>
+                    <div class="mini-chart mt-2">
+                        <div class="mini-bar" style="height: 44%; background: var(--spf-green-light);"><span>صرف</span></div>
+                        <div class="mini-bar" style="height: 52%; background: var(--spf-gold);"><span>اعتراضات</span></div>
+                        <div class="mini-bar" style="height: 68%; background: var(--spf-green);"><span>فواتير</span></div>
+                        <div class="mini-bar" style="height: 26%; background: var(--spf-green-dark);"><span>خروج</span></div>
+                    </div>
+                    <div class="data-note mt-4">هذه اللوحة لا تستبدل التقارير، لكنها تعطي صورة سريعة عن أماكن الضغط التشغيلي في النظام.</div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">آخر التحركات الإدارية</div>
+                    <div class="table-responsive">
+                        <table class="table dense-table compact-table align-middle">
+                            <thead>
+                                <tr><th>المجال</th><th>الحدث</th><th>الحالة</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>الصرف</td><td>اعتماد دفعة جديدة</td><td><span class="status-chip success">مكتمل</span></td></tr>
+                                <tr><td>المسار اليدوي</td><td>إسناد حالة وفاة غير عماني</td><td><span class="status-chip pending">مفتوح</span></td></tr>
+                                <tr><td>الفواتير</td><td>احتساب غرامة على فاتورة يونيو</td><td><span class="status-chip danger">متأخرة</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/js/prototype-core.js"></script>
+<script src="../../assets/js/internal-shell.js"></script>
+
+</body>
+</html>

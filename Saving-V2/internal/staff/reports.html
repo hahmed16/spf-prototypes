@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التقارير - مساحة العمل الداخلية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../../assets/css/app.css">
+    <link rel="stylesheet" href="../../assets/css/shell.css">
+    
+</head>
+<body data-root="../../" data-user-role="staff">
+<main class="spf-main">
+<div class="page-header">
+            <div>
+                <h4>التقارير والتحليلات الإحصائية</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="../../internal/staff/index.html">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">التقارير</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge staff">موظف الصندوق</span>
+            </div>
+        </div>
+
+        <div class="state-banner primary mb-4">
+            <div>
+                <div class="state-banner-title">تقارير تشغيلية وإدارية في نفس الواجهة</div>
+                <div class="state-banner-copy">توحد هذه الصفحة تقارير الإيداع، التسجيل، الصرف، الاعتراضات، الحالات اليدوية، والفواتير حتى يكون الأثر التشغيلي مرئيًا وليس فقط المؤشرات المالية العامة.</div>
+            </div>
+        </div>
+
+        <div class="section-card mb-4">
+            <div class="list-toolbar">
+                <div class="toolbar-group">
+                    <div class="section-title mb-0">نطاق التقرير</div>
+                </div>
+                <div class="pill-tabs" id="reportTabs">
+                    <button class="pill-tab active" data-tab="operations" onclick="selectReportTab('operations')">تشغيلي</button>
+                    <button class="pill-tab" data-tab="financial" onclick="selectReportTab('financial')">مالي</button>
+                    <button class="pill-tab" data-tab="compliance" onclick="selectReportTab('compliance')">التزام</button>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-3"><input type="date" class="form-control"></div>
+                <div class="col-md-3"><input type="date" class="form-control"></div>
+                <div class="col-md-2"><select class="form-select"><option>كل القطاعات</option><option>النفط والغاز</option><option>الخدمات</option></select></div>
+                <div class="col-md-2"><select class="form-select"><option>كل الجهات</option><option>جهة عمل</option><option>مدخر فردي</option></select></div>
+                <div class="col-md-2"><button class="btn btn-spf w-100">تحديث المؤشرات</button></div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3"><div class="metric-card"><div class="metric-label">إجمالي الحسابات</div><div class="metric-value">1.2M</div></div></div>
+            <div class="col-md-3"><div class="metric-card"><div class="metric-label">إجمالي المدخرات</div><div class="metric-value">850M</div></div></div>
+            <div class="col-md-3"><div class="metric-card"><div class="metric-label">طلبات مفتوحة</div><div class="metric-value">35</div></div></div>
+            <div class="col-md-3"><div class="metric-card"><div class="metric-label">جهات عمل نشطة</div><div class="metric-value">12.5K</div></div></div>
+        </div>
+
+        <div class="board-grid mb-4">
+            <div class="report-card">
+                <div class="report-card-header">
+                    <div>
+                        <div class="report-card-title">اتجاه الأعمال المفتوحة</div>
+                        <div class="report-card-copy">مقارنة بين الصرف، الاعتراضات، الإشعارات، والحالات اليدوية.</div>
+                    </div>
+                    <span class="status-chip info" id="chartModeLabel">تشغيلي</span>
+                </div>
+                <div class="mini-chart" id="reportChart"></div>
+            </div>
+
+            <div class="report-card">
+                <div class="report-card-header">
+                    <div>
+                        <div class="report-card-title">ملخص الإدارة</div>
+                        <div class="report-card-copy">أهم ما يجب متابعته بحسب تبويب التقرير الحالي.</div>
+                    </div>
+                </div>
+                <div class="process-rail" id="reportHighlights"></div>
+            </div>
+        </div>
+
+        <div class="board-grid-equal mb-4">
+            <div class="report-card">
+                <div class="report-card-header">
+                    <div>
+                        <div class="report-card-title">القطاعات الأعلى مساهمة</div>
+                        <div class="report-card-copy">قراءة إدارية لحجم المساهمة والضغط التشغيلي حسب القطاع.</div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table dense-table compact-table align-middle">
+                        <thead>
+                            <tr><th>القطاع</th><th>المشتركون</th><th>القيمة</th><th>الإشارة</th></tr>
+                        </thead>
+                        <tbody id="sectorRows"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="report-card">
+                <div class="report-card-header">
+                    <div>
+                        <div class="report-card-title">تقارير قابلة للتصدير</div>
+                        <div class="report-card-copy">تقارير عملية مرتبطة مباشرة بمسارات V2.</div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table dense-table compact-table align-middle">
+                        <thead>
+                            <tr><th>اسم التقرير</th><th>آخر تحديث</th><th>الإجراء</th></tr>
+                        </thead>
+                        <tbody id="exportRows"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card">
+            <div class="report-card-header">
+                <div>
+                    <div class="report-card-title">لوحة المتابعة التفصيلية</div>
+                    <div class="report-card-copy">تتغير هذه القراءة بحسب تبويب التقرير وتلخص ما يحتاج قرارًا أو انتباهًا.</div>
+                </div>
+            </div>
+            <div class="matrix-grid" id="detailCards"></div>
+        </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/js/prototype-core.js"></script>
+<script src="../../assets/js/internal-shell.js"></script>
+<script>
+const reportData = {
+            operations: {
+                label: 'تشغيلي',
+                chart: [
+                    ['صرف', 62, 'var(--spf-green)'],
+                    ['اعتراضات', 44, 'var(--spf-gold)'],
+                    ['يدوي', 28, 'var(--spf-green-dark)'],
+                    ['خروج', 18, 'var(--spf-green-light)']
+                ],
+                highlights: [
+                    ['طلبات الصرف ذات أولوية', 'current', '18 طلبًا مفتوحًا منها 4 حالات تعذر بنكي.'],
+                    ['الاعتراضات ضمن المهلة', 'warning', '3 اعتراضات تحتاج رد جهة العمل.'],
+                    ['الحالات اليدوية', 'danger', 'ملف قانوني واحد وملفان لتعذر التحويل.']
+                ],
+                sectors: [
+                    ['النفط والغاز', '45,000', '320M ر.ع', 'أعلى مساهمة'],
+                    ['الخدمات المالية', '28,500', '185M ر.ع', 'مستقر'],
+                    ['اللوجستيات', '22,100', '110M ر.ع', 'ضغط فواتير']
+                ],
+                exports: [
+                    ['تقرير الطلبات التشغيلية المفتوحة', 'اليوم', 'PDF'],
+                    ['تقرير مسارات الصرف والاستثناءات', 'اليوم', 'Excel'],
+                    ['تقرير الحالات اليدوية وSLA', 'أمس', 'PDF']
+                ],
+                details: [
+                    ['الصرف', 'يوجد ارتفاع في حالات التعذر البنكي مقارنة بالأسبوع السابق.', 'pending'],
+                    ['التسجيل', '3 تسجيلات بأثر رجعي تحتاج اعتمادًا نهائيًا.', 'info'],
+                    ['الفواتير', 'فاتورتان متأخرتان رفعتا مؤشر الغرامات.', 'danger'],
+                    ['الخروج', 'إشعاران متأخران بحاجة إلى اعتماد تاريخ الأثر.', 'warning']
+                ]
+            },
+            financial: {
+                label: 'مالي',
+                chart: [
+                    ['ذاتي', 70, 'var(--spf-green)'],
+                    ['صاحب عمل', 38, 'var(--spf-gold)'],
+                    ['عوائد', 16, 'var(--spf-green-light)'],
+                    ['فائض', 12, 'var(--spf-green-dark)']
+                ],
+                highlights: [
+                    ['نمو الإيداعات', 'current', 'الإيداعات الذاتية ما زالت المحرك الأعلى للنمو.'],
+                    ['توزيع العائد', 'warning', 'توجد مراجعة على أثر بعض الإشعارات المتأخرة.'],
+                    ['الرصيد المتبقي على الفواتير', 'warning', '18,240 ر.ع ما زالت مفتوحة.']
+                ],
+                sectors: [
+                    ['النفط والغاز', '45,000', '320M ر.ع', 'قيمة مرتفعة'],
+                    ['التجارة', '31,000', '95M ر.ع', 'نمو متدرج'],
+                    ['السياحة', '12,400', '45M ر.ع', 'أقل استقرار']
+                ],
+                exports: [
+                    ['تقرير هيكل الإيداعات', 'اليوم', 'Excel'],
+                    ['تقرير التوزيع المالي حسب القطاع', 'أمس', 'PDF'],
+                    ['تقرير الفواتير والغرامات', 'أمس', 'Excel']
+                ],
+                details: [
+                    ['الإيداعات الذاتية', 'تمثل المصدر الأكبر وتغذي أغلب أرصدة V2 الحالية.', 'success'],
+                    ['إيداعات جهات العمل', 'تتأثر بدورات الفواتير والسداد الجماعي.', 'info'],
+                    ['عوائد الاستثمار', 'تحتاج قراءة منفصلة عند وجود خروج أو صرف مؤجل.', 'warning'],
+                    ['الغرامات', 'ارتفعت في حالات التأخير على الفواتير الإلزامية.', 'danger']
+                ]
+            },
+            compliance: {
+                label: 'التزام',
+                chart: [
+                    ['مكتمل', 82, 'var(--spf-green)'],
+                    ['قيد المراجعة', 34, 'var(--spf-gold)'],
+                    ['متأخر', 14, 'var(--spf-green-dark)'],
+                    ['استثناء', 9, 'var(--spf-green-light)']
+                ],
+                highlights: [
+                    ['الالتزام العام', 'current', 'نسبة الامتثال ما زالت ضمن المستوى المقبول.'],
+                    ['المهل النظامية', 'warning', 'بعض اعتراضات الأجر وإشعارات الخروج قريبة من الانتهاء.'],
+                    ['الاستثناءات القانونية', 'danger', 'هناك ملف وفاة غير عماني قيد الاستكمال.']
+                ],
+                sectors: [
+                    ['الخدمات', '18,500', '110M ر.ع', 'اعتراضات أكثر'],
+                    ['اللوجستيات', '22,100', '110M ر.ع', 'فواتير متأخرة'],
+                    ['الصحة', '11,200', '76M ر.ع', 'التزام جيد']
+                ],
+                exports: [
+                    ['تقرير الالتزام بالمهل', 'اليوم', 'PDF'],
+                    ['تقرير الاعتراضات والتسويات', 'اليوم', 'Excel'],
+                    ['تقرير الحالات القانونية', 'أمس', 'PDF']
+                ],
+                details: [
+                    ['الاعتراضات', 'يجب الرد على الاعتراضات المفتوحة قبل أثرها على الاشتراكات.', 'warning'],
+                    ['الخروج وفقدان الشرط', 'الإشعارات المتأخرة تحتاج قرارًا واضحًا على العوائد.', 'warning'],
+                    ['الحالات القانونية', 'الملفات الشرعية تبقى خارج المسار الآلي إلى اكتمال المستندات.', 'danger'],
+                    ['التسجيلات بأثر رجعي', 'تحتاج ضبط التاريخ المرجعي لتجنب تضارب الالتزامات.', 'info']
+                ]
+            }
+        };
+
+        let activeReportTab = 'operations';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            selectReportTab(activeReportTab);
+        });
+
+        function selectReportTab(tab) {
+            activeReportTab = tab;
+            const data = reportData[tab];
+            document.querySelectorAll('#reportTabs .pill-tab').forEach(button => {
+                button.classList.toggle('active', button.dataset.tab === tab);
+            });
+            document.getElementById('chartModeLabel').innerText = data.label;
+            document.getElementById('reportChart').innerHTML = data.chart.map(item => `
+                <div class="mini-bar" style="height:${item[1]}%; background:${item[2]};"><span>${item[0]}</span></div>
+            `).join('');
+            document.getElementById('reportHighlights').innerHTML = data.highlights.map(item => `
+                <div class="process-step ${item[1]}">
+                    <div class="process-step-title">${item[0]}</div>
+                    <div class="mini-note">${item[2]}</div>
+                </div>
+            `).join('');
+            document.getElementById('sectorRows').innerHTML = data.sectors.map(item => `
+                <tr>
+                    <td>${item[0]}</td>
+                    <td>${item[1]}</td>
+                    <td>${item[2]}</td>
+                    <td>${item[3]}</td>
+                </tr>
+            `).join('');
+            document.getElementById('exportRows').innerHTML = data.exports.map(item => `
+                <tr>
+                    <td>${item[0]}</td>
+                    <td>${item[1]}</td>
+                    <td><button class="btn btn-sm btn-spf-outline">${item[2]}</button></td>
+                </tr>
+            `).join('');
+            document.getElementById('detailCards').innerHTML = data.details.map(item => `
+                <div class="matrix-card">
+                    <span class="status-chip ${item[2] === 'success' ? 'success' : item[2] === 'danger' ? 'danger' : item[2] === 'warning' ? 'pending' : 'info'}">${item[0]}</span>
+                    <div class="flow-copy">${item[1]}</div>
+                </div>
+            `).join('');
+        }
+</script>
+</body>
+</html>

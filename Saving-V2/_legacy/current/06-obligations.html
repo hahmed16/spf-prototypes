@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سداد الالتزامات المالية - نظام الادخار</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-user-role="saver">
+    <div id="navbarPlaceholder"></div>
+    <div id="sidebarPlaceholder"></div>
+
+    <main class="spf-main">
+        <div class="page-header">
+            <div>
+                <h4>سداد الالتزامات المالية من المدخرات</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="01-dashboard.html">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">سداد الالتزامات</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge saver">المدخر</span>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="spf-card mb-4">
+                    <div class="card-header-custom">ملخص الرصيد المتاح</div>
+                    <div class="card-body text-center py-4">
+                        <h6 class="text-muted mb-2">رصيدك الحالي في نظام الادخار</h6>
+                        <h2 class="fw-800 text-spf">1,450.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"></h2>
+                        <div class="mt-3 p-2 bg-spf-light rounded small text-spf-dark">
+                            <i class="fas fa-info-circle me-1"></i> يمكنك استخدام هذا الرصيد لسداد التزاماتك لدى الصندوق.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert-spf alert-info">
+                    <i class="fas fa-lightbulb"></i>
+                    <div>
+                        <strong>نصيحة:</strong> سداد الالتزامات من المدخرات يساعدك على إدارة تدفقاتك النقدية وتجنب غرامات التأخير.
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="spf-card">
+                    <div class="card-header-custom">قائمة الالتزامات المالية المستحقة</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="spf-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;"></th>
+                                        <th>وصف الالتزام</th>
+                                        <th>الجهة / النوع</th>
+                                        <th>تاريخ الاستحقاق</th>
+                                        <th>المبلغ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="checkbox" class="ob-check" data-amount="45.500"></td>
+                                        <td>قسط متأخر - نظام الأمان الوظيفي</td>
+                                        <td>صندوق الحماية الاجتماعية</td>
+                                        <td>01/02/2026</td>
+                                        <td class="fw-700">45.500 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" class="ob-check" data-amount="200.000"></td>
+                                        <td>دفعة قسط - قرض سكني مدعوم</td>
+                                        <td>برنامج الإسكان</td>
+                                        <td>15/02/2026</td>
+                                        <td class="fw-700">200.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" class="ob-check" data-amount="50.000"></td>
+                                        <td>مساهمة شهرية - مبادرة سهم</td>
+                                        <td>مبادرة سهم الخيرية</td>
+                                        <td>20/02/2026</td>
+                                        <td class="fw-700">50.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" class="ob-check" data-amount="15.000"></td>
+                                        <td>رسوم إدارية - تحديث بيانات</td>
+                                        <td>صندوق الحماية الاجتماعية</td>
+                                        <td>10/02/2026</td>
+                                        <td class="fw-700">15.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="insufficientFunds" class="alert-spf alert-danger mt-4 d-none">
+                            <i class="fas fa-times-circle"></i>
+                            <span>عذراً، المبلغ المختار يتجاوز رصيدك الحالي. يرجى تعديل الاختيارات.</span>
+                        </div>
+
+                        <div class="running-summary mt-4">
+                            <div class="summary-item">
+                                <i class="fas fa-check-square"></i>
+                                <span>إجمالي الالتزامات المختارة: <span id="selCount">0</span></span>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fas fa-calculator"></i>
+                                <span>إجمالي المبلغ: <span id="totalOb">0.000</span> ر.ع</span>
+                            </div>
+                            <button class="btn btn-spf-gold px-5" id="confirmBtn" disabled onclick="confirmPayment()">سداد المبالغ المختارة</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تأكيد سداد الالتزامات</h5>
+                    <button type="button" class="btn-close ms-0 me-auto" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-question-circle text-gold mb-3" style="font-size: 3rem; color: var(--spf-gold);"></i>
+                        <p>هل أنت متأكد من خصم مبلغ <strong id="modalAmount" class="text-spf-dark"></strong> من رصيد ادخارك لسداد الالتزامات المختارة؟</p>
+                    </div>
+                    <div class="p-3 bg-light rounded small">
+                        <strong>ملاحظة:</strong> سيتم تحديث سجل العمليات فور تأكيدك للعملية.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-spf-outline" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-spf" onclick="submitPayment()">تأكيد الخصم</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="common.js"></script>
+    <script>
+        const balance = 1450.000;
+        const checks = document.querySelectorAll('.ob-check');
+        const countSpan = document.getElementById('selCount');
+        const totalSpan = document.getElementById('totalOb');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const errorDiv = document.getElementById('insufficientFunds');
+
+        checks.forEach(c => {
+            c.addEventListener('change', updateSummary);
+        });
+
+        function updateSummary() {
+            let total = 0;
+            let count = 0;
+            checks.forEach(c => {
+                if(c.checked) {
+                    total += parseFloat(c.getAttribute('data-amount'));
+                    count++;
+                }
+            });
+
+            countSpan.innerText = count;
+            totalSpan.innerText = total.toFixed(3);
+
+            if(total > balance) {
+                errorDiv.classList.remove('d-none');
+                confirmBtn.disabled = true;
+            } else {
+                errorDiv.classList.add('d-none');
+                confirmBtn.disabled = (count === 0);
+            }
+        }
+
+        function confirmPayment() {
+            document.getElementById('modalAmount').innerText = totalSpan.innerText + ' '; 
+            const img = document.createElement('img');
+            img.src = 'omr_icon.svg';
+            img.className = 'currency-icon';
+            img.alt = 'ر.ع';
+            document.getElementById('modalAmount').appendChild(img);
+
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+
+        function submitPayment() {
+            bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+            spf.showSuccess('تم سداد الالتزامات المالية المحددة بنجاح وخصمها من رصيدك.');
+            setTimeout(() => {
+                window.location.href = '04-account-details.html';
+            }, 2000);
+        }
+        document.addEventListener('spfRoleChanged', function(e) {
+            updateRoleUI(e.detail.role);
+        });
+
+        function updateRoleUI(role) {
+            if (role === 'staff') {
+                document.querySelectorAll('.ob-check').forEach(c => c.disabled = true);
+                confirmBtn.classList.add('d-none');
+            } else {
+                document.querySelectorAll('.ob-check').forEach(c => c.disabled = false);
+                confirmBtn.classList.remove('d-none');
+            }
+        }
+
+        // Initial check
+        updateRoleUI(localStorage.getItem('spf-user-role') || 'saver');
+
+        // Initialize inquiries
+        document.addEventListener('DOMContentLoaded', function() {
+            spf.renderInquiries([
+                "ما هي آليات وضوابط الخصم التلقائي من حساب المدخر بشكل تلقائي لسداد الالتزامات المستحقة عليه والمشار إليها في المادة 111 من اللائحة؟",
+                "تم الإشارة أيضاً في المادة 111 إلى أنه \"يجوز للمدخر استخدام مدخراته لسداد الاشتراكات لفرع كبار السن والعجز والوفاة وفرع تأمين إصابات العمل والأمراض المهنية، إذا كان الالتزام بسداد الاشتراكات على المؤمن عليه، أو لسداد أي التزام مالي يترتب عليه للصندوق.\". وبناء عليه، ما هي الاشتراكات التي يلتزم المؤمن عليه بسدادها؟"
+            ]);
+        });
+    </script>
+</body>
+</html>

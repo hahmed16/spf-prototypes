@@ -1,0 +1,2546 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>وثيقة متطلبات الأعمال — نظام الادخار</title>
+  <style>
+    /* ========== Reset & Base ========== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', 'Arial', sans-serif;
+      background: #f4f6f9;
+      color: #1a1a2e;
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    /* ========== Cover Page ========== */
+    .cover {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0d3b66 0%, #1565c0 50%, #0a7e8c 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 40px;
+      color: #fff;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cover::before {
+      content: '';
+      position: absolute;
+      top: -100px; left: -100px;
+      width: 400px; height: 400px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 50%;
+    }
+    .cover::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; right: -80px;
+      width: 300px; height: 300px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 50%;
+    }
+    .cover-logo {
+      width: 90px; height: 90px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 28px;
+      font-size: 38px;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    .cover-org { font-size: 16px; letter-spacing: 2px; opacity: 0.8; margin-bottom: 8px; text-transform: uppercase; }
+    .cover-title { font-size: 44px; font-weight: 700; margin-bottom: 10px; }
+    .cover-subtitle { font-size: 20px; opacity: 0.85; margin-bottom: 40px; }
+    .cover-divider { width: 80px; height: 3px; background: rgba(255,255,255,0.5); margin: 0 auto 40px; border-radius: 2px; }
+    .cover-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 40px;
+      max-width: 600px;
+      text-align: right;
+      margin-bottom: 48px;
+    }
+    .cover-meta-item label { font-size: 11px; opacity: 0.6; display: block; margin-bottom: 2px; }
+    .cover-meta-item span { font-size: 14px; font-weight: 600; }
+    .cover-badge {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 8px 24px;
+      border-radius: 20px;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+    .cover-legal {
+      margin-top: 40px;
+      font-size: 12px;
+      opacity: 0.55;
+    }
+
+    /* ========== Layout ========== */
+    .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+    /* ========== TOC ========== */
+    .toc-wrapper {
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px;
+      margin-bottom: 40px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+    }
+    .toc-title { font-size: 22px; font-weight: 700; color: #0d3b66; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 3px solid #1565c0; }
+    .toc-list { list-style: none; }
+    .toc-list > li { margin-bottom: 6px; }
+    .toc-list a { color: #1565c0; text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+    .toc-list a:hover { color: #0a7e8c; }
+    .toc-num { color: #0a7e8c; font-weight: 700; min-width: 28px; }
+    .toc-sub { margin-right: 20px; }
+    .toc-sub a { font-size: 13px; color: #555; }
+
+    /* ========== Section Cards ========== */
+    .section-card {
+      background: #fff;
+      border-radius: 12px;
+      margin-bottom: 32px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    .section-header {
+      background: linear-gradient(135deg, #0d3b66, #1565c0);
+      color: #fff;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .section-num {
+      background: rgba(255,255,255,0.2);
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .section-title { font-size: 20px; font-weight: 700; }
+    .section-body { padding: 32px; }
+
+    /* ========== Subsection ========== */
+    .subsection { margin-bottom: 28px; }
+    .subsection:last-child { margin-bottom: 0; }
+    .subsection-title {
+      font-size: 16px; font-weight: 700; color: #0d3b66;
+      margin-bottom: 12px;
+      padding-right: 12px;
+      border-right: 4px solid #0a7e8c;
+    }
+    .subsection-sub-title {
+      font-size: 14px; font-weight: 700; color: #1565c0;
+      margin-bottom: 8px; margin-top: 16px;
+    }
+
+    /* ========== Typography ========== */
+    p { margin-bottom: 12px; color: #333; }
+    p:last-child { margin-bottom: 0; }
+
+    ul, ol { padding-right: 24px; margin-bottom: 12px; color: #333; }
+    ul li, ol li { margin-bottom: 6px; }
+    ul ul { margin-top: 4px; }
+
+    /* ========== Tables ========== */
+    .table-wrapper { overflow-x: auto; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      background: #0d3b66; color: #fff;
+      padding: 12px 14px; text-align: right;
+      font-weight: 600;
+    }
+    tbody tr:nth-child(even) { background: #f0f4f8; }
+    tbody tr:hover { background: #e3eaf3; }
+    tbody td { padding: 10px 14px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
+    .table-caption { font-size: 12px; color: #666; margin-top: 6px; text-align: left; }
+
+    /* ========== Requirement Boxes ========== */
+    .req-id {
+      display: inline-block;
+      background: #0d3b66; color: #fff;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 11px; font-weight: 700;
+      margin-left: 8px;
+      font-family: monospace;
+    }
+    .req-row { border-right: 3px solid #1565c0; padding-right: 12px; margin-bottom: 16px; }
+    .req-row.must { border-color: #c62828; }
+    .req-row.should { border-color: #e65100; }
+    .req-row.nfr { border-color: #0a7e8c; }
+
+    /* ========== Callout Boxes ========== */
+    .callout {
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      display: flex; gap: 12px;
+    }
+    .callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { flex: 1; }
+    .callout-title { font-weight: 700; margin-bottom: 4px; font-size: 13px; }
+    .callout-text { font-size: 13px; margin: 0; }
+
+    .callout.info    { background: #e3f2fd; border-right: 4px solid #1565c0; }
+    .callout.warning { background: #fff3e0; border-right: 4px solid #e65100; }
+    .callout.danger  { background: #fce4ec; border-right: 4px solid #c62828; }
+    .callout.success { background: #e8f5e9; border-right: 4px solid #2e7d32; }
+    .callout.legal   { background: #ede7f6; border-right: 4px solid #4527a0; }
+
+    .callout.info    .callout-title { color: #1565c0; }
+    .callout.warning .callout-title { color: #e65100; }
+    .callout.danger  .callout-title { color: #c62828; }
+    .callout.success .callout-title { color: #2e7d32; }
+    .callout.legal   .callout-title { color: #4527a0; }
+
+    /* ========== Badges ========== */
+    .badge {
+      display: inline-block; padding: 2px 10px;
+      border-radius: 12px; font-size: 11px; font-weight: 700;
+      margin: 1px;
+    }
+    .badge-must    { background: #fce4ec; color: #c62828; }
+    .badge-should  { background: #fff3e0; color: #e65100; }
+    .badge-could   { background: #e8f5e9; color: #2e7d32; }
+    .badge-high    { background: #fce4ec; color: #c62828; }
+    .badge-medium  { background: #fff3e0; color: #e65100; }
+    .badge-low     { background: #e8f5e9; color: #2e7d32; }
+    .badge-in      { background: #e3f2fd; color: #1565c0; }
+    .badge-out     { background: #f3e5f5; color: #6a1b9a; }
+
+    /* ========== Process Flow ========== */
+    .process-flow { display: flex; flex-direction: column; gap: 0; }
+    .process-step {
+      display: flex; gap: 0; align-items: stretch;
+    }
+    .process-step-left {
+      display: flex; flex-direction: column; align-items: center;
+      width: 44px; flex-shrink: 0;
+    }
+    .process-step-circle {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #1565c0; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px;
+      flex-shrink: 0; z-index: 1;
+    }
+    .process-step-line {
+      width: 2px; flex: 1; background: #cdd7e0; margin: 0 auto;
+    }
+    .process-step:last-child .process-step-line { display: none; }
+    .process-step-content {
+      flex: 1; padding: 0 0 24px 0; padding-right: 16px;
+    }
+    .process-step-title { font-weight: 700; color: #0d3b66; margin-bottom: 4px; font-size: 14px; }
+    .process-step-desc { font-size: 13px; color: #555; }
+
+    /* ========== SMART Grid ========== */
+    .smart-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+    .smart-cell {
+      border-radius: 8px; padding: 14px; text-align: center;
+      border: 2px solid;
+    }
+    .smart-cell.s { border-color: #1565c0; background: #e3f2fd; }
+    .smart-cell.m { border-color: #0a7e8c; background: #e0f2f1; }
+    .smart-cell.a { border-color: #2e7d32; background: #e8f5e9; }
+    .smart-cell.r { border-color: #e65100; background: #fff3e0; }
+    .smart-cell.t { border-color: #6a1b9a; background: #f3e5f5; }
+    .smart-cell .smart-letter { font-size: 26px; font-weight: 900; margin-bottom: 4px; }
+    .smart-cell.s .smart-letter { color: #1565c0; }
+    .smart-cell.m .smart-letter { color: #0a7e8c; }
+    .smart-cell.a .smart-letter { color: #2e7d32; }
+    .smart-cell.r .smart-letter { color: #e65100; }
+    .smart-cell.t .smart-letter { color: #6a1b9a; }
+    .smart-cell .smart-word { font-size: 11px; font-weight: 700; margin-bottom: 6px; }
+    .smart-cell .smart-desc { font-size: 11px; color: #555; }
+
+    /* ========== Risk Matrix ========== */
+    .risk-level-critical { background: #c62828; color: #fff; }
+    .risk-level-high     { background: #e53935; color: #fff; }
+    .risk-level-medium   { background: #fb8c00; color: #fff; }
+    .risk-level-low      { background: #43a047; color: #fff; }
+    .risk-badge { padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+
+    /* ========== Stakeholder Matrix ========== */
+    .role-saver     { background: #e3f2fd; color: #0d3b66; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .role-employer  { background: #e8f5e9; color: #1b5e20; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .role-employee  { background: #fff3e0; color: #e65100; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .role-mgmt      { background: #ede7f6; color: #4527a0; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .role-it        { background: #fce4ec; color: #880e4f; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+
+    /* ========== Approval Table ========== */
+    .approval-table td { vertical-align: middle; }
+    .sig-line { border-bottom: 1px solid #aaa; min-width: 140px; display: inline-block; }
+
+    /* ========== Footer ========== */
+    .doc-footer {
+      background: #0d3b66; color: rgba(255,255,255,0.7);
+      text-align: center; padding: 24px;
+      font-size: 12px; margin-top: 40px;
+    }
+    .doc-footer strong { color: #fff; }
+
+    /* ========== Highlight ========== */
+    .highlight { background: #fff9c4; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+    .law-ref { color: #4527a0; font-size: 11px; font-weight: 700; }
+
+    /* ========== Print ========== */
+    @media print {
+      .cover { page-break-after: always; }
+      .section-card { page-break-inside: avoid; }
+      body { background: #fff; font-size: 12px; }
+    }
+
+    /* ========== Responsive ========== */
+    @media (max-width: 768px) {
+      .cover-meta { grid-template-columns: 1fr; }
+      .smart-grid { grid-template-columns: 1fr 1fr; }
+      .section-body { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- COVER PAGE                                                    -->
+<!-- ============================================================ -->
+<div class="cover">
+  <div class="cover-logo">🏦</div>
+  <div class="cover-org">صندوق الحماية الاجتماعية — سلطنة عُمان</div>
+  <div class="cover-title">نظام الادخار</div>
+  <div class="cover-subtitle">وثيقة متطلبات الأعمال — Business Requirements Document</div>
+  <div class="cover-divider"></div>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <label>رقم الوثيقة</label>
+      <span>SPF-SAV-BRD-001</span>
+    </div>
+    <div class="cover-meta-item">
+      <label>الإصدار</label>
+      <span>1.0</span>
+    </div>
+    <div class="cover-meta-item">
+      <label>تاريخ الإعداد</label>
+      <span>أبريل ٢٠٢٦</span>
+    </div>
+    <div class="cover-meta-item">
+      <label>الحالة</label>
+      <span>مسودة للمراجعة</span>
+    </div>
+    <div class="cover-meta-item">
+      <label>المرجع القانوني</label>
+      <span>مرسوم سلطاني رقم ٥٢/٢٠٢٣</span>
+    </div>
+    <div class="cover-meta-item">
+      <label>وحدة الأعمال</label>
+      <span>إدارة نظام الادخار</span>
+    </div>
+  </div>
+  <div class="cover-badge">سري — للاستخدام الداخلي</div>
+  <div class="cover-legal">هذه الوثيقة سرية ومخصصة للأطراف المعتمدة فقط. يُحظر إعادة التوزيع بدون إذن مسبق.</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CONTAINER                                                     -->
+<!-- ============================================================ -->
+<div class="container">
+
+  <!-- ==================== سجل المراجعات ==================== -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">📋</div>
+      <div class="section-title">سجل مراجعات الوثيقة</div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>الإصدار</th>
+              <th>التاريخ</th>
+              <th>التغييرات</th>
+              <th>أُعدَّ بواسطة</th>
+              <th>اعتُمد بواسطة</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0.1</td>
+              <td>مارس ٢٠٢٦</td>
+              <td>الإصدار الأولي — هيكل الوثيقة والمتطلبات الأساسية</td>
+              <td>فريق تحليل الأعمال</td>
+              <td>قيد المراجعة</td>
+            </tr>
+            <tr>
+              <td>0.2</td>
+              <td>أبريل ٢٠٢٦</td>
+              <td>إضافة مسار الادخار الإلزامي والنماذج الأولية</td>
+              <td>فريق تحليل الأعمال</td>
+              <td>قيد المراجعة</td>
+            </tr>
+            <tr>
+              <td>1.0</td>
+              <td>أبريل ٢٠٢٦</td>
+              <td>الإصدار الكامل — وثيقة متطلبات الأعمال</td>
+              <td>فريق تحليل الأعمال</td>
+              <td>قيد الاعتماد</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== جدول المحتويات ==================== -->
+  <div class="toc-wrapper">
+    <div class="toc-title">📑 جدول المحتويات</div>
+    <ul class="toc-list">
+      <li><a href="#sec1"><span class="toc-num">١</span> نظرة عامة وملخص تنفيذي</a></li>
+      <li><a href="#sec2"><span class="toc-num">٢</span> الحاجة التجارية وبيان المشكلة</a></li>
+      <li><a href="#sec3"><span class="toc-num">٣</span> أهداف المشروع ومحركات الأعمال</a></li>
+      <li><a href="#sec4"><span class="toc-num">٤</span> معايير النجاح</a></li>
+      <li><a href="#sec5"><span class="toc-num">٥</span> نطاق المشروع (داخل النطاق / خارج النطاق)</a></li>
+      <li><a href="#sec6"><span class="toc-num">٦</span> القيود والافتراضات</a></li>
+      <li><a href="#sec7"><span class="toc-num">٧</span> أصحاب المصلحة</a></li>
+      <li><a href="#sec8"><span class="toc-num">٨</span> الإطار القانوني والتنظيمي</a></li>
+      <li><a href="#sec9"><span class="toc-num">٩</span> العملية المقترحة ومسارات العمل</a></li>
+      <li><a href="#sec10"><span class="toc-num">١٠</span> المتطلبات الوظيفية</a></li>
+      <li><a href="#sec11"><span class="toc-num">١١</span> المتطلبات غير الوظيفية</a></li>
+      <li><a href="#sec12"><span class="toc-num">١٢</span> القواعد التجارية</a></li>
+      <li><a href="#sec13"><span class="toc-num">١٣</span> متطلبات واجهة المستخدم</a></li>
+      <li><a href="#sec14"><span class="toc-num">١٤</span> متطلبات البيانات</a></li>
+      <li><a href="#sec15"><span class="toc-num">١٥</span> متطلبات التكامل</a></li>
+      <li><a href="#sec16"><span class="toc-num">١٦</span> فحوصات الجودة — معايير SMART</a></li>
+      <li><a href="#sec17"><span class="toc-num">١٧</span> تقييم المخاطر</a></li>
+      <li><a href="#sec18"><span class="toc-num">١٨</span> التبعيات</a></li>
+      <li><a href="#sec19"><span class="toc-num">١٩</span> اعتماد أصحاب المصلحة</a></li>
+      <li><a href="#sec20"><span class="toc-num">٢٠</span> المسرد والتعريفات</a></li>
+    </ul>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 1 — نظرة عامة                                        -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec1">
+    <div class="section-header">
+      <div class="section-num">١</div>
+      <div class="section-title">نظرة عامة وملخص تنفيذي</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">١.١ نبذة عن المشروع</div>
+        <p>
+          <strong>نظام الادخار</strong> هو نظام مالي رقمي متكامل تابع لـ<strong>صندوق الحماية الاجتماعية</strong> في سلطنة عُمان، أُنشئ بموجب <span class="law-ref">المرسوم السلطاني رقم ٥٢/٢٠٢٣</span> (قانون الحماية الاجتماعية). يهدف النظام إلى توفير مدخرات مالية للعاملين في السلطنة عبر آليتين رئيسيتين: <strong>الادخار الإلزامي</strong> للعمال غير العمانيين، و<strong>الادخار الاختياري</strong> للفئات المحددة في القانون.
+        </p>
+        <p>
+          يُشكّل هذا النظام ركيزةً جوهرية في منظومة الحماية الاجتماعية بالسلطنة، إذ يحل محل نظام مكافأة نهاية الخدمة التقليدي للعمال غير العمانيين عن فترة الخدمة اللاحقة لتاريخ تطبيق النظام، ويوفر بديلاً تراكمياً مدعوماً بعوائد استثمارية مضمونة.
+        </p>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١.٢ بيانات المشروع الأساسية</div>
+        <div class="table-wrapper">
+          <table>
+            <tbody>
+              <tr><td style="font-weight:700;width:200px">اسم المشروع</td><td>نظام الادخار — Social Protection Fund Saving System</td></tr>
+              <tr><td style="font-weight:700">الجهة المالكة</td><td>صندوق الحماية الاجتماعية — سلطنة عُمان</td></tr>
+              <tr><td style="font-weight:700">المرجع القانوني</td><td>مرسوم سلطاني رقم ٥٢/٢٠٢٣ — قانون الحماية الاجتماعية</td></tr>
+              <tr><td style="font-weight:700">اللائحة التنفيذية</td><td>قرار رقم ر/٧/٢٠٢٣ — اللائحة التنفيذية لقانون الحماية الاجتماعية</td></tr>
+              <tr><td style="font-weight:700">نوع الوثيقة</td><td>وثيقة متطلبات الأعمال (BRD)</td></tr>
+              <tr><td style="font-weight:700">رقم الوثيقة</td><td>SPF-SAV-BRD-001</td></tr>
+              <tr><td style="font-weight:700">الإصدار</td><td>1.0 — مسودة للمراجعة</td></tr>
+              <tr><td style="font-weight:700">تاريخ الإعداد</td><td>أبريل ٢٠٢٦</td></tr>
+              <tr><td style="font-weight:700">الجمهور المستهدف</td><td>أصحاب المصلحة، فريق المشروع، الإدارة التنفيذية، الفريق التقني</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١.٣ الملخص التنفيذي</div>
+        <p>يجمع نظام الادخار بين مسارين تشغيليين متكاملين تحت إدارة الصندوق:</p>
+        <ul>
+          <li><strong>الادخار الإلزامي:</strong> يطبق تلقائياً على جميع العمال غير العمانيين العاملين في السلطنة، حيث يُلزَم صاحب العمل بسداد ٩٪ من الأجر الأساسي شهرياً.</li>
+          <li><strong>الادخار الاختياري:</strong> يتيح للفئات المحددة قانوناً الانضمام الطوعي بحد أدنى إيداع ١٠٠ ريال عماني لكل معاملة.</li>
+        </ul>
+        <p>يخدم النظام ثلاثة أدوار محورية: <strong>المدخر</strong>، <strong>صاحب العمل</strong>، و<strong>موظف الصندوق</strong>، وينفذ خمس عشرة وظيفة تشغيلية رئيسية من التسجيل حتى التقارير والتحليلات الإحصائية.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 2 — الحاجة التجارية                                  -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec2">
+    <div class="section-header">
+      <div class="section-num">٢</div>
+      <div class="section-title">الحاجة التجارية وبيان المشكلة</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">٢.١ السياق والخلفية</div>
+        <p>
+          في ظل التحولات الجذرية التي تشهدها منظومة سوق العمل في سلطنة عُمان، أصدر جلالة السلطان هيثم بن طارق المرسوم السلطاني رقم ٥٢/٢٠٢٣ بإصدار قانون الحماية الاجتماعية، الذي يُرسي أسس نظام حماية اجتماعية شاملة لجميع العاملين في القطاع الخاص بالسلطنة، عمانيين وغير عمانيين على حد سواء.
+        </p>
+        <p>
+          قبل صدور هذا النظام، كان العمال غير العمانيون يخضعون لنظام مكافأة نهاية الخدمة التقليدي المنصوص عليه في قانون العمل، والذي اتسم بعدة إشكاليات هيكلية؛ أبرزها: غياب الادخار التراكمي المنتظم، وضعف الرقابة على التزام أصحاب العمل بالسداد، وانعدام العوائد الاستثمارية على مستحقات العمال. يأتي نظام الادخار ليعالج هذه الإشكاليات بمنظومة رقمية متكاملة تتسم بالشفافية والفاعلية.
+        </p>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">٢.٢ بيان المشكلة</div>
+        <div class="callout warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body">
+            <div class="callout-title">تحدي الفراغ التشغيلي</div>
+            <p class="callout-text">لا يوجد حالياً نظام رقمي مركزي يُدير نظام الادخار بكلا مساريه (الإلزامي والاختياري) بما يضمن الامتثال الكامل لأحكام المرسوم السلطاني رقم ٥٢/٢٠٢٣ واللائحة التنفيذية الصادرة بموجبه.</p>
+          </div>
+        </div>
+        <p>تتمثل المشاكل الرئيسية المُعالَجة في:</p>
+        <ul>
+          <li><strong>غياب منصة موحدة:</strong> لا توجد أداة رقمية متكاملة تُتيح لأصحاب العمل تسجيل عمالهم غير العمانيين وسداد اشتراكاتهم الشهرية إلكترونياً.</li>
+          <li><strong>صعوبة الرقابة والمتابعة:</strong> يُعسر على الصندوق تتبع حالات عدم الالتزام بالتسجيل أو السداد في مواعيدها وفرض الغرامات المقررة (٨٪ سنوياً تراكمياً).</li>
+          <li><strong>تعقيد إدارة الحسابات الشخصية:</strong> يحتاج المدخرون إلى منفذ رقمي واضح لمتابعة أرصدتهم وعوائد استثماراتهم وإدارة طلبات الصرف.</li>
+          <li><strong>مخاطر الامتثال القانوني:</strong> قد يُعرّض غياب النظام الرقمي الصندوق وأصحاب العمل والمدخرين لمخاطر قانونية جراء عدم الالتزام بالمواعيد والإجراءات المنصوص عليها.</li>
+          <li><strong>عدم كفاءة العمليات اليدوية:</strong> المعالجة اليدوية لطلبات الصرف وعوائد الاستثمار وتحويلات الفائض تستهلك وقتاً وجهداً بشرياً غير مبرر.</li>
+          <li><strong>صعوبة الاندماج بين النظامين:</strong> الحفاظ على الفصل المحاسبي بين الادخار الإلزامي والاختياري يستلزم أدوات متخصصة.</li>
+        </ul>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">٢.٣ التأثير على الأعمال في غياب الحل</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>الجانب</th><th>التأثير المتوقع</th><th>درجة الخطورة</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>الامتثال القانوني</td><td>مخاطر عدم الالتزام بأحكام المرسوم السلطاني</td><td><span class="risk-badge risk-level-critical">حرج</span></td></tr>
+              <tr><td>حقوق العمال</td><td>ضياع حقوق العمال غير العمانيين في الاشتراكات</td><td><span class="risk-badge risk-level-high">عالٍ</span></td></tr>
+              <tr><td>الكفاءة التشغيلية</td><td>زيادة التكاليف التشغيلية للمعالجة اليدوية</td><td><span class="risk-badge risk-level-high">عالٍ</span></td></tr>
+              <tr><td>ثقة المستفيدين</td><td>تراجع ثقة أصحاب العمل والمدخرين في الصندوق</td><td><span class="risk-badge risk-level-medium">متوسط</span></td></tr>
+              <tr><td>القدرة الاستيعابية</td><td>عجز الصندوق عن استيعاب الأعداد المتزايدة</td><td><span class="risk-badge risk-level-high">عالٍ</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 3 — الأهداف ومحركات الأعمال                          -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec3">
+    <div class="section-header">
+      <div class="section-num">٣</div>
+      <div class="section-title">أهداف المشروع ومحركات الأعمال</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">٣.١ الهدف العام للمشروع</div>
+        <div class="callout info">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-body">
+            <div class="callout-title">الهدف الاستراتيجي</div>
+            <p class="callout-text">بناء منصة رقمية متكاملة لإدارة نظام الادخار بمساريه الإلزامي والاختياري، تضمن الامتثال الكامل لقانون الحماية الاجتماعية، وتُمكّن أصحاب المصلحة الثلاثة (المدخر، صاحب العمل، موظف الصندوق) من أداء مهامهم بكفاءة وشفافية عالية.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">٣.٢ الأهداف التفصيلية</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>#</th><th>الهدف</th><th>المؤشر</th><th>الأولوية</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>O-01</td>
+                <td>أتمتة تسجيل العمال غير العمانيين في النظام الإلزامي</td>
+                <td>تسجيل ١٠٠٪ من العمال المؤهلين خلال ٣٠ يوماً من الالتحاق</td>
+                <td><span class="badge badge-high">أولوية قصوى</span></td>
+              </tr>
+              <tr>
+                <td>O-02</td>
+                <td>توفير منفذ رقمي لتسجيل الفئات الاختيارية وإدارة حساباتها</td>
+                <td>معالجة طلبات التسجيل الاختياري خلال يوم عمل واحد</td>
+                <td><span class="badge badge-high">أولوية قصوى</span></td>
+              </tr>
+              <tr>
+                <td>O-03</td>
+                <td>أتمتة سداد الاشتراكات الشهرية الإلزامية ومتابعتها</td>
+                <td>تحصيل ≥ ٩٥٪ من الاشتراكات في مواعيدها المحددة</td>
+                <td><span class="badge badge-high">أولوية قصوى</span></td>
+              </tr>
+              <tr>
+                <td>O-04</td>
+                <td>احتساب عوائد الاستثمار السنوية وتوزيعها آلياً</td>
+                <td>توزيع العوائد قبل نهاية الربع الأول من كل عام</td>
+                <td><span class="badge badge-high">أولوية قصوى</span></td>
+              </tr>
+              <tr>
+                <td>O-05</td>
+                <td>رقمنة عملية طلب صرف المدخرات ومعالجتها</td>
+                <td>معالجة ١٠٠٪ من طلبات الصرف إلكترونياً بدون معاملات ورقية</td>
+                <td><span class="badge badge-high">أولوية قصوى</span></td>
+              </tr>
+              <tr>
+                <td>O-06</td>
+                <td>أتمتة فرض الغرامات على التأخر في السداد</td>
+                <td>احتساب ٨٪ سنوياً تراكمياً دون تدخل يدوي</td>
+                <td><span class="badge badge-medium">متوسط</span></td>
+              </tr>
+              <tr>
+                <td>O-07</td>
+                <td>توفير لوحات تحكم تحليلية للإدارة والرقابة</td>
+                <td>توفر تقارير فورية ويومية وشهرية وسنوية</td>
+                <td><span class="badge badge-medium">متوسط</span></td>
+              </tr>
+              <tr>
+                <td>O-08</td>
+                <td>ضمان الفصل المحاسبي بين الادخار الإلزامي والاختياري</td>
+                <td>تقارير مستقلة لكل مسار بدون تداخل</td>
+                <td><span class="badge badge-medium">متوسط</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">٣.٣ محركات الأعمال</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>المحرك</th><th>النوع</th><th>الوصف</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>الالتزام التشريعي</strong></td>
+                <td><span class="badge badge-must">قانوني</span></td>
+                <td>وجوب الامتثال لأحكام مرسوم سلطاني رقم ٥٢/٢٠٢٣ واللائحة التنفيذية</td>
+              </tr>
+              <tr>
+                <td><strong>التحول الرقمي</strong></td>
+                <td><span class="badge badge-must">استراتيجي</span></td>
+                <td>التوجه الوطني نحو رقمنة الخدمات الحكومية ضمن رؤية عُمان ٢٠٤٠</td>
+              </tr>
+              <tr>
+                <td><strong>حماية حقوق العمال</strong></td>
+                <td><span class="badge badge-must">اجتماعي</span></td>
+                <td>ضمان حصول العمال غير العمانيين على حقوقهم الادخارية المقررة</td>
+              </tr>
+              <tr>
+                <td><strong>الكفاءة التشغيلية</strong></td>
+                <td><span class="badge badge-should">تشغيلي</span></td>
+                <td>تقليص التكاليف الإدارية وزمن المعالجة للعمليات المتكررة</td>
+              </tr>
+              <tr>
+                <td><strong>الشفافية والثقة</strong></td>
+                <td><span class="badge badge-should">مؤسسي</span></td>
+                <td>بناء ثقة المستفيدين عبر الشفافية الكاملة في إدارة المدخرات</td>
+              </tr>
+              <tr>
+                <td><strong>القدرة على التوسع</strong></td>
+                <td><span class="badge badge-should">تقني</span></td>
+                <td>استيعاب الأعداد المتزايدة من المدخرين مع توسع تطبيق النظام</td>
+              </tr>
+              <tr>
+                <td><strong>التكامل الاجتماعي</strong></td>
+                <td><span class="badge badge-could">اجتماعي</span></td>
+                <td>إدماج نظام الادخار في المنظومة الشاملة للحماية الاجتماعية</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 4 — معايير النجاح                                    -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec4">
+    <div class="section-header">
+      <div class="section-num">٤</div>
+      <div class="section-title">معايير النجاح</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">٤.١ مؤشرات الأداء الرئيسية (KPIs)</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>المجال</th><th>المؤشر</th><th>القيمة المستهدفة</th><th>الإطار الزمني</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td rowspan="3"><strong>التسجيل</strong></td>
+                <td>نسبة تسجيل العمال غير العمانيين ضمن المهلة القانونية</td>
+                <td>≥ ٩٥٪</td>
+                <td>شهرياً</td>
+              </tr>
+              <tr>
+                <td>متوسط وقت معالجة طلب التسجيل الاختياري</td>
+                <td>≤ ١ يوم عمل</td>
+                <td>مستمر</td>
+              </tr>
+              <tr>
+                <td>نسبة اكتمال البيانات في ملفات المدخرين</td>
+                <td>١٠٠٪</td>
+                <td>مستمر</td>
+              </tr>
+              <tr>
+                <td rowspan="2"><strong>الاشتراكات</strong></td>
+                <td>نسبة تحصيل الاشتراكات الشهرية في موعدها</td>
+                <td>≥ ٩٥٪</td>
+                <td>شهرياً</td>
+              </tr>
+              <tr>
+                <td>دقة احتساب الغرامات على التأخر</td>
+                <td>١٠٠٪ بدون أخطاء</td>
+                <td>مستمر</td>
+              </tr>
+              <tr>
+                <td rowspan="2"><strong>عوائد الاستثمار</strong></td>
+                <td>إعلان نسبة العائد السنوي قبل ٣١ مارس</td>
+                <td>١٠٠٪ التزام</td>
+                <td>سنوياً</td>
+              </tr>
+              <tr>
+                <td>دقة توزيع العوائد على الحسابات</td>
+                <td>١٠٠٪ بدون انحراف</td>
+                <td>سنوياً</td>
+              </tr>
+              <tr>
+                <td rowspan="3"><strong>طلبات الصرف</strong></td>
+                <td>متوسط وقت معالجة طلبات الصرف</td>
+                <td>≤ ٥ أيام عمل</td>
+                <td>مستمر</td>
+              </tr>
+              <tr>
+                <td>نسبة الطلبات المعالجة إلكترونياً</td>
+                <td>١٠٠٪</td>
+                <td>مستمر</td>
+              </tr>
+              <tr>
+                <td>نسبة رضا المدخرين عن خدمة الصرف</td>
+                <td>≥ ٨٠٪</td>
+                <td>ربع سنوي</td>
+              </tr>
+              <tr>
+                <td rowspan="2"><strong>الأداء التقني</strong></td>
+                <td>معدل توفر النظام (Uptime)</td>
+                <td>≥ ٩٩.٥٪</td>
+                <td>شهرياً</td>
+              </tr>
+              <tr>
+                <td>زمن الاستجابة لعمليات الإيداع</td>
+                <td>≤ ٣ ثوانٍ</td>
+                <td>مستمر</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">٤.٢ معايير قبول المشروع</div>
+        <ul>
+          <li>اجتياز جميع اختبارات القبول لكل وظيفة رئيسية بنسبة نجاح ١٠٠٪.</li>
+          <li>مراجعة ومصادقة فريق قانوني مختص على امتثال النظام لأحكام المرسوم السلطاني.</li>
+          <li>إتمام اختبارات تكامل ناجحة مع جميع الأنظمة الخارجية (منظومة الهوية، شبكات الدفع، منظومة العمل).</li>
+          <li>اجتياز اختبار الأداء تحت الضغط بمعالجة ١٠,٠٠٠ طلب متزامن دون تدهور في الأداء.</li>
+          <li>اعتماد وثيقة أمن المعلومات من الجهات المختصة قبل الإطلاق.</li>
+          <li>إتمام التدريب الكامل لأدوار المستخدمين الثلاثة قبل الإطلاق الرسمي.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 5 — النطاق                                           -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec5">
+    <div class="section-header">
+      <div class="section-num">٥</div>
+      <div class="section-title">نطاق المشروع</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">٥.١ داخل النطاق</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>#</th><th>الوظيفة / الوحدة</th><th>الوصف المختصر</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>S-01</td><td><span class="badge badge-in">داخل النطاق</span> التسجيل الاختياري</td><td>تسجيل الفئات الأربع المحددة في المادة ١٣٦ من القانون</td></tr>
+              <tr><td>S-02</td><td><span class="badge badge-in">داخل النطاق</span> التسجيل الإلزامي</td><td>تسجيل العمال غير العمانيين بآلياته الثلاث (تلقائي، رجعي، مباشر)</td></tr>
+              <tr><td>S-03</td><td><span class="badge badge-in">داخل النطاق</span> إدارة الحساب الشخصي</td><td>إنشاء وعرض وإدارة حساب المدخر</td></tr>
+              <tr><td>S-04</td><td><span class="badge badge-in">داخل النطاق</span> الإيداع الذاتي</td><td>إيداع مدخر فردي بطرق دفع متعددة</td></tr>
+              <tr><td>S-05</td><td><span class="badge badge-in">داخل النطاق</span> الإيداع الجماعي</td><td>إيداع صاحب العمل لصالح مجموعة من العمال</td></tr>
+              <tr><td>S-06</td><td><span class="badge badge-in">داخل النطاق</span> سداد الالتزامات</td><td>خصم الالتزامات المالية من رصيد المدخرات</td></tr>
+              <tr><td>S-07</td><td><span class="badge badge-in">داخل النطاق</span> عوائد الاستثمار</td><td>احتساب وتوزيع واعتماد العوائد السنوية</td></tr>
+              <tr><td>S-08</td><td><span class="badge badge-in">داخل النطاق</span> تحويلات الفائض</td><td>تحويل فائض اشتراكات المؤمن عليه العماني تلقائياً</td></tr>
+              <tr><td>S-09</td><td><span class="badge badge-in">داخل النطاق</span> طلبات الصرف</td><td>تقديم ومعالجة طلبات صرف المدخرات</td></tr>
+              <tr><td>S-10</td><td><span class="badge badge-in">داخل النطاق</span> الخروج من النظام</td><td>إجراءات إغلاق الحساب والتسوية النهائية</td></tr>
+              <tr><td>S-11</td><td><span class="badge badge-in">داخل النطاق</span> سجل المعاملات</td><td>عرض وتصفية وتصدير سجل العمليات</td></tr>
+              <tr><td>S-12</td><td><span class="badge badge-in">داخل النطاق</span> التقارير والتحليلات</td><td>تقارير تشغيلية وإدارية وإحصائية</td></tr>
+              <tr><td>S-13</td><td><span class="badge badge-in">داخل النطاق</span> إدارة الأدوار والصلاحيات</td><td>التحكم في وصول الأدوار الثلاثة</td></tr>
+              <tr><td>S-14</td><td><span class="badge badge-in">داخل النطاق</span> الإشعارات الرقمية</td><td>إشعارات SMS والمنصة للأحداث الرئيسية</td></tr>
+              <tr><td>S-15</td><td><span class="badge badge-in">داخل النطاق</span> الغرامات والمبالغ الإضافية</td><td>احتساب غرامات التأخر تلقائياً</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">٥.٢ خارج النطاق</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>#</th><th>الوظيفة / الوحدة</th><th>السبب</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>OS-01</td><td><span class="badge badge-out">خارج النطاق</span> فروع التأمين الاجتماعي الأخرى</td><td>نظام مستقل — يخرج عن نطاق نظام الادخار تحديداً</td></tr>
+              <tr><td>OS-02</td><td><span class="badge badge-out">خارج النطاق</span> إدارة المحافظ الاستثمارية</td><td>تتم من قِبَل إدارة الاستثمار بالصندوق بنظام منفصل</td></tr>
+              <tr><td>OS-03</td><td><span class="badge badge-out">خارج النطاق</span> مكافأة نهاية الخدمة عن المدة السابقة</td><td>تُعالج وفق قانون العمل بين صاحب العمل والعامل مباشرة</td></tr>
+              <tr><td>OS-04</td><td><span class="badge badge-out">خارج النطاق</span> الاتفاقيات الدولية للتأمين</td><td>تُبرم على مستوى مجلس إدارة الصندوق</td></tr>
+              <tr><td>OS-05</td><td><span class="badge badge-out">خارج النطاق</span> منظومة الرواتب الداخلية للمؤسسات</td><td>نظام منفصل لدى جهات العمل</td></tr>
+              <tr><td>OS-06</td><td><span class="badge badge-out">خارج النطاق</span> إدارة وصايا المدخرات في حالة الوفاة</td><td>تُحال إلى الجهات القضائية المختصة</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 6 — القيود والافتراضات                               -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec6">
+    <div class="section-header">
+      <div class="section-num">٦</div>
+      <div class="section-title">القيود والافتراضات</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">٦.١ القيود</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>#</th><th>القيد</th><th>النوع</th><th>التأثير</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>C-01</td>
+                <td>جميع المعاملات المالية بالريال العماني حصراً — لا يُقبل أي عملة أخرى</td>
+                <td><span class="badge badge-must">قانوني</span></td>
+                <td>تصميم محرك العملة والتحويلات</td>
+              </tr>
+              <tr>
+                <td>C-02</td>
+                <td>المصادقة عبر PKI/Mobile PKI فقط — لا توجد كلمة مرور تقليدية</td>
+                <td><span class="badge badge-must">أمني</span></td>
+                <td>تصميم وحدة المصادقة وواجهة تسجيل الدخول</td>
+              </tr>
+              <tr>
+                <td>C-03</td>
+                <td>الحد الأدنى للإيداع الاختياري ١٠٠ ريال عماني لكل عملية</td>
+                <td><span class="badge badge-must">قانوني</span></td>
+                <td>التحقق من المدخلات في جميع شاشات الإيداع</td>
+              </tr>
+              <tr>
+                <td>C-04</td>
+                <td>إعلان نسبة عائد الاستثمار قبل ٣١ مارس من العام التالي</td>
+                <td><span class="badge badge-must">قانوني</span></td>
+                <td>جدولة مهمة توزيع العوائد السنوية</td>
+              </tr>
+              <tr>
+                <td>C-05</td>
+                <td>الحد الأدنى لعائد الاستثمار ٢٪ سنوياً مضمون من الاحتياطيات</td>
+                <td><span class="badge badge-must">قانوني</span></td>
+                <td>منطق احتساب ومكافأة العوائد</td>
+              </tr>
+              <tr>
+                <td>C-06</td>
+                <td>صفحة طلب الصرف والخروج للمدخرين الأفراد فقط دون أصحاب العمل أو الموظفين</td>
+                <td><span class="badge badge-must">وظيفي</span></td>
+                <td>منطق التحكم في الأدوار والصلاحيات</td>
+              </tr>
+              <tr>
+                <td>C-07</td>
+                <td>فصل محاسبي مستقل بين الادخار الإلزامي والاختياري</td>
+                <td><span class="badge badge-must">محاسبي</span></td>
+                <td>تصميم قاعدة البيانات والتقارير المالية</td>
+              </tr>
+              <tr>
+                <td>C-08</td>
+                <td>مدة تسوية إغلاق الحساب ٥ أيام عمل كحد أقصى</td>
+                <td><span class="badge badge-should">تشغيلي</span></td>
+                <td>مسار تأكيد عملية الخروج والتسوية</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">٦.٢ الافتراضات</div>
+        <ul>
+          <li><strong>A-01:</strong> تتوفر لدى الصندوق بنية تحتية تقنية سحابية أو محلية كافية لاستضافة النظام وضمان توفره بنسبة ٩٩.٥٪.</li>
+          <li><strong>A-02:</strong> يُوفَّر التكامل مع منظومة الهوية الوطنية (PKI) كخدمة من الجهات الحكومية المختصة.</li>
+          <li><strong>A-03:</strong> تتوفر APIs موثوقة من شبكات الدفع (بطاقة بنكية، محفظة رقمية، تحويل بنكي) لمعالجة المعاملات المالية.</li>
+          <li><strong>A-04:</strong> يُوفَّر تكامل مع نظام وزارة العمل للتحقق من عقود العمل وانتهاء الخدمة.</li>
+          <li><strong>A-05:</strong> يُوفَّر تكامل مع سجلات شرطة عُمان السلطانية للتحقق من مغادرة السلطنة عند معالجة طلبات صرف معينة.</li>
+          <li><strong>A-06:</strong> جميع المستخدمين لديهم أجهزة مستوفية للحد الأدنى التقني للوصول للمنصة الرقمية.</li>
+          <li><strong>A-07:</strong> الأحكام القانونية الواردة في مرسوم سلطاني رقم ٥٢/٢٠٢٣ واللائحة التنفيذية ثابتة وغير خاضعة لتعديل جوهري أثناء تطوير النظام.</li>
+          <li><strong>A-08:</strong> تُوفَّر خدمة SMS موثوقة لإرسال الإشعارات للمدخرين وأصحاب العمل.</li>
+          <li><strong>A-09:</strong> لدى الصندوق فريق دعم تقني مدرب لمعالجة الحالات الاستثنائية والشكاوى.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 7 — أصحاب المصلحة                                    -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec7">
+    <div class="section-header">
+      <div class="section-num">٧</div>
+      <div class="section-title">أصحاب المصلحة</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">٧.١ خريطة أصحاب المصلحة</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>صاحب المصلحة</th><th>الدور في النظام</th><th>مستوى الاهتمام</th><th>مستوى التأثير</th><th>الاحتياج الرئيسي</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="role-saver">المدخر</span></td>
+                <td>المستخدم النهائي — صاحب الحساب</td>
+                <td><span class="badge badge-high">عالٍ جداً</span></td>
+                <td><span class="badge badge-high">عالٍ</span></td>
+                <td>سهولة الوصول، شفافية الرصيد، سرعة الصرف</td>
+              </tr>
+              <tr>
+                <td><span class="role-employer">صاحب العمل</span></td>
+                <td>مسؤول التسجيل وسداد الاشتراكات</td>
+                <td><span class="badge badge-high">عالٍ</span></td>
+                <td><span class="badge badge-high">عالٍ جداً</span></td>
+                <td>سهولة الإيداع الجماعي، الامتثال القانوني</td>
+              </tr>
+              <tr>
+                <td><span class="role-employee">موظف الصندوق</span></td>
+                <td>المراجع والمعتمد لطلبات الصرف والعوائد</td>
+                <td><span class="badge badge-high">عالٍ</span></td>
+                <td><span class="badge badge-high">عالٍ جداً</span></td>
+                <td>أدوات مراجعة فعّالة، تقارير تشغيلية</td>
+              </tr>
+              <tr>
+                <td><span class="role-mgmt">إدارة الصندوق</span></td>
+                <td>الجهة المالكة واتخاذ القرار</td>
+                <td><span class="badge badge-high">عالٍ</span></td>
+                <td><span class="badge badge-high">عالٍ جداً</span></td>
+                <td>تقارير استراتيجية، ضمان الامتثال</td>
+              </tr>
+              <tr>
+                <td><span class="role-mgmt">لجنة الاستثمار</span></td>
+                <td>اعتماد نسبة عوائد الاستثمار السنوية</td>
+                <td><span class="badge badge-medium">متوسط</span></td>
+                <td><span class="badge badge-high">عالٍ</span></td>
+                <td>بيانات أداء المحفظة، واجهة الاعتماد</td>
+              </tr>
+              <tr>
+                <td><span class="role-it">الفريق التقني</span></td>
+                <td>تطوير النظام وصيانته</td>
+                <td><span class="badge badge-high">عالٍ</span></td>
+                <td><span class="badge badge-medium">متوسط</span></td>
+                <td>وثائق تقنية واضحة، متطلبات محددة</td>
+              </tr>
+              <tr>
+                <td><span class="role-mgmt">الجهات الرقابية</span></td>
+                <td>وزارة العمل، الجهاز المركزي للإحصاء</td>
+                <td><span class="badge badge-medium">متوسط</span></td>
+                <td><span class="badge badge-medium">متوسط</span></td>
+                <td>تقارير الامتثال، إحصائيات سوق العمل</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">٧.٢ الأدوار والصلاحيات التفصيلية</div>
+        <div class="subsection-sub-title">المدخر</div>
+        <ul>
+          <li>عرض لوحة التحكم الشخصية (الرصيد، العوائد، المعاملات)</li>
+          <li>التسجيل في نظام الادخار الاختياري (للفئات المؤهلة)</li>
+          <li>تنفيذ إيداع جديد وعرض تفاصيل الحساب الشخصي</li>
+          <li>سداد الالتزامات المالية من المدخرات</li>
+          <li>تقديم طلب صرف المدخرات</li>
+          <li>طلب الخروج النهائي من النظام الاختياري</li>
+          <li>الاطلاع على سجل المعاملات وتصديره</li>
+        </ul>
+        <div class="subsection-sub-title">صاحب العمل</div>
+        <ul>
+          <li>عرض لوحة التحكم لإدارة العمال</li>
+          <li>تسجيل عمال جدد (غير عمانيين) في النظام الإلزامي</li>
+          <li>تنفيذ إيداع جماعي بأوضاع توزيع متعددة</li>
+          <li>إدارة قائمة العمال المسجلين والبحث فيها</li>
+          <li>الاطلاع على سجل الإيداعات وتتبع حالاتها</li>
+        </ul>
+        <div class="subsection-sub-title">موظف الصندوق</div>
+        <ul>
+          <li>مراجعة ومعالجة طلبات الصرف (اعتماد / رفض / طلب مستندات)</li>
+          <li>إدخال واعتماد نسبة عوائد الاستثمار السنوية</li>
+          <li>متابعة تحويلات فائض الاشتراكات السنوية</li>
+          <li>الاطلاع على التقارير الإحصائية والإدارية الشاملة</li>
+          <li>الوصول القرائي لحسابات المدخرين وسجلات العمليات</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 8 — الإطار القانوني                                   -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec8">
+    <div class="section-header">
+      <div class="section-num">٨</div>
+      <div class="section-title">الإطار القانوني والتنظيمي</div>
+    </div>
+    <div class="section-body">
+
+      <div class="callout legal">
+        <div class="callout-icon">⚖️</div>
+        <div class="callout-body">
+          <div class="callout-title">أساس قانوني ملزم</div>
+          <p class="callout-text">جميع أحكام هذا النظام مستمدة من مرسوم سلطاني رقم ٥٢/٢٠٢٣ (قانون الحماية الاجتماعية) وقرار رقم ر/٧/٢٠٢٣ (اللائحة التنفيذية). أي متطلب يتعارض مع هذا الإطار القانوني يستلزم إحالته للإدارة القانونية للصندوق.</p>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">٨.١ المواد القانونية الجوهرية</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>المادة</th><th>المصدر</th><th>الحكم الجوهري</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>المادة ١٣٥</td><td>القانون</td><td>نظام الادخار نظام محدد الاشتراكات</td></tr>
+              <tr><td>المادة ١٣٦</td><td>القانون</td><td>الإلزامية للعمال غير العمانيين؛ الاختيارية لأربع فئات</td></tr>
+              <tr><td>المادة ١٣٧</td><td>القانون</td><td>النظام يحل محل مكافأة نهاية الخدمة للعمال غير العمانيين</td></tr>
+              <tr><td>المادة ١٣٩</td><td>القانون</td><td>مصادر التمويل: ٩٪ من الأجر الأساسي + المبالغ الإضافية</td></tr>
+              <tr><td>المادة ١٤١</td><td>القانون</td><td>يستحق المدخر جميع الاشتراكات والعوائد في حسابه</td></tr>
+              <tr><td>المادة ١٤٢</td><td>القانون</td><td>الصرف دفعة واحدة أو بالتقسيط مع استمرار العوائد</td></tr>
+              <tr><td>المادة ١٤٣</td><td>القانون</td><td>حالات استحقاق الصرف (٥ حالات للعماني + ٣ لغير العماني)</td></tr>
+              <tr><td>المادة ١٤٤</td><td>القانون</td><td>إلزام المدخر بالإخطار عند الخروج أو فقدان الشرط</td></tr>
+              <tr><td>المادة ٩٦</td><td>اللائحة</td><td>التسجيل الاختياري بطلب رسمي للصندوق</td></tr>
+              <tr><td>المادة ٩٧</td><td>اللائحة</td><td>التسجيل الإلزامي خلال ٣٠ يوماً؛ جواز التسجيل بأثر رجعي</td></tr>
+              <tr><td>المادة ٩٨</td><td>اللائحة</td><td>الاعتراض على الأجر خلال ٩٠ يوماً؛ رد جهة العمل خلال ٣٠ يوماً</td></tr>
+              <tr><td>المادة ١٠٠</td><td>اللائحة</td><td>الحد الأدنى للإيداع ١٠٠ ر.ع؛ الحد السنوي ١٢ ضعف سقف الاشتراك</td></tr>
+              <tr><td>المادة ١٠١</td><td>اللائحة</td><td>سداد ٩٪ من الأجر الأساسي شهرياً على عاتق صاحب العمل</td></tr>
+              <tr><td>المادة ١٠٢</td><td>اللائحة</td><td>غرامة التأخر: ٨٪ سنوياً تراكمياً</td></tr>
+              <tr><td>المادة ١٠٤</td><td>اللائحة</td><td>الحد الأدنى لعائد الاستثمار ٢٪ سنوياً</td></tr>
+              <tr><td>المادة ١٠٦</td><td>اللائحة</td><td>إعلان نسبة العائد قبل ٣١ مارس من العام التالي</td></tr>
+              <tr><td>المادة ١٠٧</td><td>اللائحة</td><td>احتساب العائد السنوي شهرياً على المدخرات</td></tr>
+              <tr><td>المادة ١١٠</td><td>اللائحة</td><td>تحويل الفائض السنوي وجواز صرفه دون عائد استثمار</td></tr>
+              <tr><td>المادة ١١١</td><td>اللائحة</td><td>جواز الخصم التلقائي من المدخرات لسداد الالتزامات</td></tr>
+              <tr><td>المادة ١١٢</td><td>اللائحة</td><td>إخطار الخروج خلال شهر — غرامة التأخر: ٢٪ ثم بدون عائد</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 9 — العملية المقترحة                                  -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec9">
+    <div class="section-header">
+      <div class="section-num">٩</div>
+      <div class="section-title">العملية المقترحة ومسارات العمل</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">٩.١ مسار الادخار الاختياري</div>
+        <div class="process-flow">
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle">١</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">المصادقة والدخول على النظام</div>
+              <div class="process-step-desc">يدخل المستخدم عبر PKI أو Mobile PKI. يُوجَّه تلقائياً للوحة التحكم المخصصة لدوره (مدخر / صاحب عمل / موظف صندوق).</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle">٢</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">التحقق من الأهلية واختيار الفئة</div>
+              <div class="process-step-desc">يختار المستخدم الفئة المناسبة من الفئات الأربع (عماني مؤمن عليه / جهة عمل / عامل غير عماني للإضافي / عماني غير مؤمن عليه). يجلب النظام البيانات تلقائياً من منظومة الهوية الوطنية.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle">٣</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">الموافقة على الشروط والأحكام</div>
+              <div class="process-step-desc">يطّلع المستخدم على الشروط القانونية ويوافق صراحةً. يُشترط إتمام هذه الخطوة للمتابعة.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle">٤</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">تحديد مبلغ الإيداع الأولي</div>
+              <div class="process-step-desc">يُدخل مبلغاً لا يقل عن ١٠٠ ريال عماني، ضمن الحد السنوي (١٢ ضعف سقف الاشتراك). يُختار أسلوب الدفع: بطاقة بنكية / محفظة رقمية / تحويل بنكي / شيك بنكي.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle">٥</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">إنشاء الحساب الشخصي وإتمام التسجيل</div>
+              <div class="process-step-desc">يُنشئ النظام تلقائياً الحساب الشخصي بعد تأكيد الإيداع. يُودَع فيه مبلغ الإيداع الأولي ويُنشأ رقم مرجعي فريد.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle">٦</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">الإيداعات الدورية</div>
+              <div class="process-step-desc">يُنفذ المدخر إيداعات دورية إضافية بحد أدنى ١٠٠ ر.ع في أي وقت. يستطيع صاحب العمل تنفيذ إيداع جماعي لعمالته.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle">٧</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">توزيع عوائد الاستثمار السنوية</div>
+              <div class="process-step-desc">يعتمد أخصائي الاستثمار ← مدير المخاطر ← لجنة الاستثمار نسبة العائد. يُوزَّع العائد آلياً على جميع الحسابات (لا يقل عن ٢٪ سنوياً).</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle">٨</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">طلب صرف المدخرات</div>
+              <div class="process-step-desc">عند توفر مسوّغ قانوني يتقدم المدخر بطلب الصرف (دفعة واحدة أو تقسيط). يُراجَع الطلب من موظف الصندوق ويُتخذ القرار (اعتماد/رفض/طلب مستندات).</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle">٩</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">الخروج النهائي (اختياري)</div>
+              <div class="process-step-desc">يطلب المدخر إغلاق حسابه، يُقرّ بفهم التبعات، يُحدَّد حساب التسوية، تُحوَّل المدخرات خلال ٥ أيام عمل.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">٩.٢ مسار الادخار الإلزامي (العمال غير العمانيين)</div>
+        <div class="process-flow">
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#0a7e8c">١</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">التسجيل التلقائي عند اعتماد عقد العمل</div>
+              <div class="process-step-desc">بمجرد اعتماد عقد العمل، يُسجَّل العامل غير العماني تلقائياً. يلتزم صاحب العمل بإتمام التسجيل خلال ٣٠ يوماً.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#0a7e8c">٢</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">إنشاء الحساب الشخصي</div>
+              <div class="process-step-desc">يُنشئ الصندوق حساباً ادخارياً بالريال العماني برقم مرجعي فريد، مرتبط بجهة العمل، برصيد مبدئي صفر.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#0a7e8c">٣</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">سداد الاشتراكات الشهرية الإلزامية</div>
+              <div class="process-step-desc">يسدد صاحب العمل ٩٪ من الأجر الأساسي شهرياً. عند التأخر تُفرض غرامة ٨٪ سنوياً تراكمية.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#0a7e8c">٤</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">الاعتراض على الأجر المسجل</div>
+              <div class="process-step-desc">يحق للعامل الاعتراض خلال ٩٠ يوماً. تلتزم جهة العمل بالرد خلال ٣٠ يوماً وإلا اعتُمد الاعتراض تلقائياً.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#0a7e8c">٥</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">توزيع عوائد الاستثمار</div>
+              <div class="process-step-desc">نفس آلية الادخار الاختياري مع ضمان خاص من الاحتياطيات في حال عدم تحصيل الاشتراكات. يُجاز الفصل المحاسبي بين المسارين.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#0a7e8c">٦</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">استحقاق وصرف المدخرات</div>
+              <div class="process-step-desc">عند تحقق إحدى الحالات الخمس (انتهاء العمل + المغادرة، ٣ أشهر دون عقد، ١٨٠ شهراً، الوفاة، العجز) يتقدم بطلب الصرف.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">٩.٣ مسار معالجة طلبات الصرف (موظف الصندوق)</div>
+        <div class="process-flow">
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#c62828">١</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">استلام الطلب ومراجعة القائمة</div>
+              <div class="process-step-desc">يراجع الموظف الطلبات المعلقة مع إمكانية البحث والتصفية بالرقم المدني / سبب الصرف / الحالة / الفترة الزمنية.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#c62828">٢</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">التحقق الآلي من الأهلية</div>
+              <div class="process-step-desc">يُجري النظام تلقائياً: التحقق من إنهاء الخدمة (ربط بنظام العمل) + التحقق من المغادرة (ربط بشرطة عُمان) + فحص الالتزامات المالية القائمة.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#c62828">٣</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">مراجعة تفاصيل الطلب</div>
+              <div class="process-step-desc">يراجع الموظف: تفاصيل المبالغ (ذاتي + صاحب عمل + عوائد) + بيانات الحساب البنكي (البنك، رقم الحساب، IBAN).</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#c62828">٤</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">إدخال مبررات القرار</div>
+              <div class="process-step-desc">يُدخل الموظف مبررات قراره التي تظهر للمدخر في إشعار النتيجة.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#c62828">٥</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">اتخاذ القرار وتنفيذه</div>
+              <div class="process-step-desc">اعتماد الصرف (تحويل المبلغ وإشعار المدخر) / رفض الطلب (إشعار بالأسباب) / طلب وثائق إضافية (إشعار بالمستندات المطلوبة).</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 10 — المتطلبات الوظيفية                              -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec10">
+    <div class="section-header">
+      <div class="section-num">١٠</div>
+      <div class="section-title">المتطلبات الوظيفية</div>
+    </div>
+    <div class="section-body">
+
+      <div class="callout info">
+        <div class="callout-icon">ℹ️</div>
+        <div class="callout-body">
+          <p class="callout-text"><strong>مستوى الأولوية:</strong> <span class="badge badge-must">يجب</span> متطلب إلزامي | <span class="badge badge-should">ينبغي</span> متطلب مهم | <span class="badge badge-could">يمكن</span> متطلب مرغوب</p>
+        </div>
+      </div>
+
+      <!-- FR-01: المصادقة والدخول -->
+      <div class="subsection">
+        <div class="subsection-title">FR-01 — المصادقة وإدارة الجلسات</div>
+        <div class="req-row must">
+          <span class="req-id">FR-01-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يدعم النظام تسجيل الدخول عبر بنية PKI (البنية الوطنية للهوية الرقمية) وMobile PKI فقط، دون الاعتماد على كلمة مرور تقليدية.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-01-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يوجّه النظام المستخدم تلقائياً إلى لوحة التحكم المناسبة بناءً على الدور المرتبط بهويته (مدخر / صاحب عمل / موظف صندوق) فور إتمام المصادقة.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-01-03</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن تنتهي الجلسة تلقائياً بعد فترة خمول محددة من الخمول مع إشعار تحذيري قبل الانتهاء.</p>
+        </div>
+      </div>
+
+      <!-- FR-02: لوحة التحكم -->
+      <div class="subsection">
+        <div class="subsection-title">FR-02 — لوحات التحكم</div>
+        <div class="req-row must">
+          <span class="req-id">FR-02-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن تعرض لوحة تحكم المدخر: إجمالي الرصيد (مقسم: ذاتي + صاحب عمل + عوائد)، عوائد آخر دورة، الالتزامات المستحقة، تاريخ آخر إيداع، آخر المعاملات، ورصد مصادر الإيداع بيانياً.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-02-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن تعرض لوحة تحكم صاحب العمل: إجمالي العمال المسجلين، إجمالي مدخرات العمال، تاريخ آخر إيداع جماعي، العمال الذين يتطلبون تحديثاً، وآخر عمليات الإيداع الجماعي.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-02-03</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن تعرض لوحة تحكم موظف الصندوق: إجمالي الحسابات، إجمالي المدخرات على مستوى النظام، طلبات الصرف المعلقة، طلبات التسجيل الجديدة، إيداعات اليوم، والعائد الاستثماري المستهدف.</p>
+        </div>
+      </div>
+
+      <!-- FR-03: التسجيل -->
+      <div class="subsection">
+        <div class="subsection-title">FR-03 — التسجيل في النظام</div>
+        <div class="req-row must">
+          <span class="req-id">FR-03-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يدعم النظام التسجيل الاختياري للفئات الأربع المنصوص عليها في المادة ١٣٦ من القانون مع التحقق الآلي من أهلية الفئة.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-03-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يجلب النظام بيانات المستخدم (الاسم، الرقم المدني، الجنسية، جهة العمل، تاريخ الميلاد) تلقائياً من منظومة الهوية الوطنية دون الحاجة لإدخالها يدوياً.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-03-03</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يستلزم التسجيل موافقة صريحة من المستخدم على الشروط والأحكام القانونية قبل المتابعة، ويُحفَظ سجل الموافقة مع بيانات التسجيل.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-03-04</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يدعم النظام تسجيل العمال الإلزامي بثلاث آليات: تلقائي عند اعتماد عقد العمل، بأثر رجعي، ومباشر بقرار النظام (المادة ٩٧ من اللائحة).</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-03-05</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يُنشئ النظام حساباً شخصياً تلقائياً برقم مرجعي فريد فور إتمام التسجيل وتأكيد الإيداع الأولي.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-03-06</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يتيح النظام لصاحب العمل تسجيل مجموعة من العمال غير العمانيين ضمن عملية واحدة (تسجيل جماعي).</p>
+        </div>
+      </div>
+
+      <!-- FR-04: الإيداع -->
+      <div class="subsection">
+        <div class="subsection-title">FR-04 — الإيداع</div>
+        <div class="req-row must">
+          <span class="req-id">FR-04-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يتحقق النظام من أن مبلغ الإيداع لا يقل عن ١٠٠ ريال عماني لأي عملية إيداع اختيارية، ويرفض العملية برسالة واضحة في حال النقصان.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-04-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يتحقق النظام من عدم تجاوز الإيداعات السنوية للحد الأقصى المقرر (١٢ ضعف سقف أجر الاشتراك) لكل من المدخر وجهة العمل منفصلين.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-04-03</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يدعم النظام أربع طرق دفع: بطاقة بنكية، محفظة رقمية، تحويل بنكي (معالجة فورية لجميعها)، وشيك بنكي (لا ينعكس الرصيد إلا بعد التسوية).</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-04-04</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يُظهر النظام تنبيهاً واضحاً عند اختيار الشيك البنكي بأن الرصيد لن يُحدَّث حتى إتمام التسوية.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-04-05</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يدعم الإيداع الجماعي لصاحب العمل أربعة أوضاع توزيع: مبلغ ثابت للجميع، مبالغ منفردة لكل عامل، نسبة من الأجر الأساسي، وتقسيم إجمالي بالتساوي.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-04-06</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يُصدر النظام رقماً مرجعياً فريداً لكل عملية إيداع فور التأكيد، ويُحدَّث سجل معاملات المدخر فورياً.</p>
+        </div>
+      </div>
+
+      <!-- FR-05: الالتزامات -->
+      <div class="subsection">
+        <div class="subsection-title">FR-05 — سداد الالتزامات المالية</div>
+        <div class="req-row must">
+          <span class="req-id">FR-05-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يعرض النظام قائمة كاملة بالالتزامات المالية المستحقة على المدخر تجاه الصندوق مع تواريخها ومبالغها وأنواعها.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-05-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يدعم النظام اختيار أكثر من التزام للسداد في عملية واحدة مع احتساب المجموع فورياً.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-05-03</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يمنع النظام إتمام السداد إذا تجاوز إجمالي المبالغ المختارة الرصيد المتاح، ويُعطَّل زر التأكيد مع رسالة تحذير.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-05-04</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يدعم النظام الخصم التلقائي من مدخرات العامل عند عدم سداد الالتزامات في مواعيدها، وفقاً للمادة ١١١ من اللائحة التنفيذية.</p>
+        </div>
+      </div>
+
+      <!-- FR-06: عوائد الاستثمار -->
+      <div class="subsection">
+        <div class="subsection-title">FR-06 — عوائد الاستثمار</div>
+        <div class="req-row must">
+          <span class="req-id">FR-06-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يتيح النظام لأخصائي الاستثمار إدخال نسبة العائد السنوي المقترحة مع المبررات، ومتابعة مسار التدقيق والاعتماد (أخصائي → مدير مخاطر → لجنة استثمار).</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-06-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب ألا يقبل النظام نسبة عائد أقل من ٢٪ سنوياً، مع تطبيق الحد الأدنى تلقائياً إذا استحق مدخر مدخراته قبل إعلان النسبة الرسمية.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-06-03</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يُوزَّع العائد آلياً على جميع الحسابات الشخصية بعد الاعتماد النهائي، مع احتساب شهري للرصيد.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-06-04</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يحتفظ النظام بسجل تاريخي للعوائد السنوية المعتمدة مع تاريخ الاعتماد والنسبة لكل عام.</p>
+        </div>
+      </div>
+
+      <!-- FR-07: الفائض -->
+      <div class="subsection">
+        <div class="subsection-title">FR-07 — تحويلات فائض الاشتراكات</div>
+        <div class="req-row must">
+          <span class="req-id">FR-07-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يحسب النظام تلقائياً فائض اشتراكات المؤمن عليه العماني التي تتجاوز سقف أجر الاشتراك ويُحوّلها إلى الحساب الشخصي.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-07-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يُشعَر المدخر العماني فور إتمام تحويل الفائض عبر الإشعار الرقمي.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-07-03</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يدعم النظام طلب المدخر العماني صرف الفائض في نهاية كل عام دون احتساب عائد استثمار عليه (إلا عند تحقق حالة الاستحقاق القانونية).</p>
+        </div>
+      </div>
+
+      <!-- FR-08: الصرف -->
+      <div class="subsection">
+        <div class="subsection-title">FR-08 — طلبات الصرف</div>
+        <div class="req-row must">
+          <span class="req-id">FR-08-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن تكون صفحة طلب الصرف متاحة للمدخرين الأفراد فقط، ومحجوبة عن أصحاب العمل وموظفي الصندوق.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-08-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يعرض النظام أسباب الصرف المتاحة بناءً على جنسية المدخر فقط (عماني: ٤ أسباب، غير عماني: ٣ أسباب).</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-08-03</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يدعم النظام خياري الصرف: دفعة واحدة (تحويل كامل الرصيد) وأقساط شهرية (مع استمرار احتساب العوائد على الرصيد المتبقي).</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-08-04</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يتحقق موظف الصندوق آلياً من: إنهاء الخدمة (ربط نظام العمل)، مغادرة السلطنة للغير عمانيين (ربط سجلات شرطة عُمان)، وخلو الحساب من الالتزامات المالية.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-08-05</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يُشعَر المدخر بنتيجة قراره (اعتماد / رفض / طلب مستندات) مع ذكر المبررات فور اتخاذ القرار.</p>
+        </div>
+      </div>
+
+      <!-- FR-09: الخروج -->
+      <div class="subsection">
+        <div class="subsection-title">FR-09 — الخروج من النظام</div>
+        <div class="req-row must">
+          <span class="req-id">FR-09-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يعرض النظام ملخص التسوية النهائية (إجمالي الإيداعات + العوائد الموزعة) قبل تأكيد الخروج.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-09-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يستلزم الخروج إقراراً إلزامياً من المدخر بفهم تبعات إغلاق الحساب وانقطاع العوائد المستقبلية.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-09-03</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يُحوَّل مبلغ التسوية النهائية إلى الحساب البنكي المحدد خلال ٥ أيام عمل من تأكيد الإغلاق.</p>
+        </div>
+      </div>
+
+      <!-- FR-10: السجل والتقارير -->
+      <div class="subsection">
+        <div class="subsection-title">FR-10 — سجل المعاملات والتقارير</div>
+        <div class="req-row must">
+          <span class="req-id">FR-10-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يوفر سجل المعاملات تصفية حسب: التاريخ، نوع العملية، المبلغ، الحالة، مع عرض تفاصيل كل عملية والإيصال الرقمي.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-10-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يدعم النظام تصدير سجل المعاملات بصيغة Excel و PDF.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-10-03</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن توفر وحدة التقارير: مؤشرات تشغيلية فورية، تقارير يومية وشهرية وسنوية، تحليلات إحصائية توزيعية، وتقارير الالتزام لأصحاب العمل.</p>
+        </div>
+        <div class="req-row should">
+          <span class="req-id">FR-10-04</span> <span class="badge badge-should">ينبغي</span>
+          <p>ينبغي أن تدعم التقارير الفلترة حسب: صاحب العمل، نوع الادخار (إلزامي/اختياري)، الجنسية، المنطقة الجغرافية.</p>
+        </div>
+      </div>
+
+      <!-- FR-11: الغرامات -->
+      <div class="subsection">
+        <div class="subsection-title">FR-11 — الغرامات والمبالغ الإضافية</div>
+        <div class="req-row must">
+          <span class="req-id">FR-11-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يحتسب النظام مبالغ التأخر تلقائياً بنسبة ٨٪ سنوياً تراكمياً من تاريخ استحقاق الاشتراكات حتى تاريخ السداد الفعلي.</p>
+        </div>
+        <div class="req-row must">
+          <span class="req-id">FR-11-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يُفرَض مبلغ إضافي بنسبة ٨٪ سنوياً تراكمياً على الاشتراكات غير المحتسبة على الأجور الحقيقية وفقاً للمادة ١٠٢ من اللائحة.</p>
+        </div>
+        <div class="req-row should">
+          <span class="req-id">FR-11-03</span> <span class="badge badge-should">ينبغي</span>
+          <p>ينبغي أن يتيح النظام إعفاءات من الغرامة في حالات القوة القاهرة الموثقة وفق الضوابط المعتمدة من مجلس الصندوق.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 11 — المتطلبات غير الوظيفية                         -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec11">
+    <div class="section-header">
+      <div class="section-num">١١</div>
+      <div class="section-title">المتطلبات غير الوظيفية</div>
+    </div>
+    <div class="section-body">
+
+      <!-- NFR-01: الأداء -->
+      <div class="subsection">
+        <div class="subsection-title">NFR-01 — الأداء والاستجابة</div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-01-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن تستجيب الصفحات الرئيسية للتحميل الكامل في مدة لا تتجاوز ٣ ثوانٍ في ظروف الشبكة الاعتيادية.</p>
+        </div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-01-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن تُعالَج عمليات الإيداع الفردية وتُحدَّث الأرصدة في مدة لا تتجاوز ٥ ثوانٍ.</p>
+        </div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-01-03</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يُعالج النظام عمليات الإيداع الجماعي لما لا يقل عن ١,٠٠٠ عامل في عملية واحدة خلال دقيقتين.</p>
+        </div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-01-04</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يستوعب النظام ما لا يقل عن ١٠,٠٠٠ مستخدم متزامن دون تدهور ملحوظ في الأداء.</p>
+        </div>
+      </div>
+
+      <!-- NFR-02: التوفر -->
+      <div class="subsection">
+        <div class="subsection-title">NFR-02 — التوفر والاستمرارية</div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-02-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يحقق النظام معدل توفر لا يقل عن ٩٩.٥٪ سنوياً، ما يُعادل حداً أقصى ٤٤ ساعة توقف مخطط ومجدول سنوياً.</p>
+        </div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-02-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يكون زمن الاسترداد عند الأعطال (RTO) لا يتجاوز ٤ ساعات، وهدف نقطة الاسترداد (RPO) لا يتجاوز ١٥ دقيقة.</p>
+        </div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-02-03</span> <span class="badge badge-must">يجب</span>
+          <p>يجب توفير آلية نسخ احتياطي يومي تلقائي مع اختبار دوري لإجراءات الاسترداد.</p>
+        </div>
+      </div>
+
+      <!-- NFR-03: الأمن -->
+      <div class="subsection">
+        <div class="subsection-title">NFR-03 — الأمن وحماية البيانات</div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-03-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن تُشفَّر جميع البيانات أثناء النقل باستخدام TLS 1.3 أو أعلى، وتُشفَّر البيانات المحفوظة باستخدام AES-256.</p>
+        </div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-03-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب تطبيق مبدأ الحد الأدنى من الصلاحيات (Least Privilege) بحيث لا يصل أي مستخدم إلا للبيانات والوظائف المصرح له بها حصراً.</p>
+        </div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-03-03</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يسجل النظام مسار تدقيق (Audit Trail) شاملاً لجميع العمليات الحساسة: الدخول، التعديل، الاعتماد، الرفض، مع ختم زمني وهوية المستخدم.</p>
+        </div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-03-04</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن تمتثل معالجة البيانات الشخصية لأحكام حماية البيانات المعمول بها في سلطنة عُمان.</p>
+        </div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-03-05</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يتضمن النظام حماية من الهجمات الشائعة: OWASP Top 10، هجمات الحقن، التزوير عبر المواقع (CSRF)، وهجمات القوة الغاشمة.</p>
+        </div>
+      </div>
+
+      <!-- NFR-04: الدقة الحسابية -->
+      <div class="subsection">
+        <div class="subsection-title">NFR-04 — الدقة والصحة الحسابية</div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-04-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن تُنفَّذ جميع العمليات الحسابية المالية (الإيداعات، العوائد، الغرامات، الأرصدة) بدقة لا تقل عن ثلاثة منازل عشرية بالريال العماني.</p>
+        </div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-04-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن يُجري النظام تسويات يومية للتحقق من توازن الأرصدة الإجمالية وتطابقها مع السجلات المحاسبية.</p>
+        </div>
+      </div>
+
+      <!-- NFR-05: قابلية الاستخدام -->
+      <div class="subsection">
+        <div class="subsection-title">NFR-05 — قابلية الاستخدام وتجربة المستخدم</div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-05-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن تكون واجهة المستخدم باللغة العربية بالكامل مع دعم الكتابة من اليمين لليسار (RTL) في جميع الصفحات.</p>
+        </div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-05-02</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن تُوجد رسائل خطأ ونجاح واضحة وصريحة بالعربية لجميع العمليات الرئيسية.</p>
+        </div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-05-03</span> <span class="badge badge-should">ينبغي</span>
+          <p>ينبغي أن يدعم النظام متصفحات الويب الرئيسية (Chrome, Firefox, Safari, Edge) وأجهزة الجوال بتصميم متجاوب.</p>
+        </div>
+      </div>
+
+      <!-- NFR-06: قابلية التوسع -->
+      <div class="subsection">
+        <div class="subsection-title">NFR-06 — قابلية التوسع والصيانة</div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-06-01</span> <span class="badge badge-must">يجب</span>
+          <p>يجب أن تتيح بنية النظام التوسع الأفقي لاستيعاب ضعف حجم المستخدمين الحالي دون إعادة هيكلة جوهرية.</p>
+        </div>
+        <div class="req-row nfr">
+          <span class="req-id">NFR-06-02</span> <span class="badge badge-should">ينبغي</span>
+          <p>ينبغي أن يدعم النظام آليات إدارة الإصدارات وترقية المكونات دون توقف مخطط يتجاوز ساعة.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 12 — القواعد التجارية                                -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec12">
+    <div class="section-header">
+      <div class="section-num">١٢</div>
+      <div class="section-title">القواعد التجارية</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">١٢.١ قواعد التسجيل</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>رقم القاعدة</th><th>القاعدة</th><th>المرجع القانوني</th></tr></thead>
+            <tbody>
+              <tr><td>BR-REG-01</td><td>تلتزم جهة العمل بتسجيل العامل غير العماني خلال ٣٠ يوماً من تاريخ الالتحاق بالعمل</td><td>م. ٩٧ لائحة</td></tr>
+              <tr><td>BR-REG-02</td><td>يحق للصندوق التسجيل بأثر رجعي إذا ثبت عدم التسجيل في وقته</td><td>م. ٩٧ لائحة</td></tr>
+              <tr><td>BR-REG-03</td><td>يُعدّ العامل غير العماني مسجلاً تلقائياً إذا كان مسجلاً في أي فرع من فروع التأمين الاجتماعي</td><td>م. ٩٧ لائحة</td></tr>
+              <tr><td>BR-REG-04</td><td>التسجيل في النظام يُعدّ سارياً حتى وقفه صراحةً من المدخر أو الصندوق</td><td>م. ٩٦ لائحة</td></tr>
+              <tr><td>BR-REG-05</td><td>الفئات الأربع للادخار الاختياري محددة في المادة ١٣٦، ويجوز لمجلس الإدارة إضافة فئات أخرى</td><td>م. ١٣٦ قانون</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٢.٢ قواعد الإيداع والاشتراكات</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>رقم القاعدة</th><th>القاعدة</th><th>المرجع القانوني</th></tr></thead>
+            <tbody>
+              <tr><td>BR-DEP-01</td><td>الحد الأدنى لأي إيداع أو ادخار اختياري في كل مرة: ١٠٠ ريال عماني</td><td>م. ١٠٠ لائحة</td></tr>
+              <tr><td>BR-DEP-02</td><td>الحد السنوي الأقصى: ١٢ ضعف سقف أجر الاشتراك لكل من المدخر وجهة العمل منفصلاً</td><td>م. ١٠٠ لائحة</td></tr>
+              <tr><td>BR-DEP-03</td><td>جميع المبالغ في الحساب الشخصي بالريال العماني حصراً</td><td>م. ١٠٠ لائحة</td></tr>
+              <tr><td>BR-DEP-04</td><td>نسبة الاشتراك الإلزامي: ٩٪ من الأجر الأساسي للعامل غير العماني شهرياً على عاتق صاحب العمل</td><td>م. ١٣٩ قانون</td></tr>
+              <tr><td>BR-DEP-05</td><td>عملية الدفع بالشيك البنكي لا تنعكس على الرصيد إلا بعد إتمام التسوية المالية للشيك</td><td>قاعدة تشغيلية</td></tr>
+              <tr><td>BR-DEP-06</td><td>في الإيداع الجماعي: يجب أن لا يقل مبلغ كل عامل عن ١٠٠ ر.ع وإلا يُرفض إكمال العملية</td><td>م. ١٠٠ لائحة</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٢.٣ قواعد عوائد الاستثمار</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>رقم القاعدة</th><th>القاعدة</th><th>المرجع القانوني</th></tr></thead>
+            <tbody>
+              <tr><td>BR-INV-01</td><td>الحد الأدنى لعائد الاستثمار: ٢٪ سنوياً مضمون من احتياطيات الصندوق</td><td>م. ١٠٤ لائحة</td></tr>
+              <tr><td>BR-INV-02</td><td>يُعلَن عن نسبة العائد السنوي قبل انتهاء الربع الأول من العام اللاحق (قبل ٣١ مارس)</td><td>م. ١٠٦ لائحة</td></tr>
+              <tr><td>BR-INV-03</td><td>يُحتسب العائد السنوي على المدخرات بصفة شهرية</td><td>م. ١٠٧ لائحة</td></tr>
+              <tr><td>BR-INV-04</td><td>إذا استحق مدخر مدخراته قبل إعلان نسبة العائد يُطبَّق الحد الأدنى ٢٪ للفترة المعلقة</td><td>م. ١٠٤ لائحة</td></tr>
+              <tr><td>BR-INV-05</td><td>يجوز للصندوق الفصل المحاسبي بين أموال الادخار الإلزامي والاختياري بما يشمل عوائد واحتياطيات مستقلة</td><td>م. ١٠٨ لائحة</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٢.٤ قواعد الصرف</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>رقم القاعدة</th><th>القاعدة</th><th>المرجع القانوني</th></tr></thead>
+            <tbody>
+              <tr><td>BR-DIS-01</td><td>الصرف دفعة واحدة أو تقسيط سنوي أو شهري مع استمرار احتساب العوائد على الرصيد المتبقي</td><td>م. ١٤٢ قانون</td></tr>
+              <tr><td>BR-DIS-02</td><td>يستحق المدخر العماني مدخراته في: استحقاق المعاش، ١٨٠ شهراً اشتراك، العجز الدائم، صرف فائض الاشتراكات</td><td>م. ١٤٣ قانون</td></tr>
+              <tr><td>BR-DIS-03</td><td>يستحق المدخر غير العماني مدخراته في: انتهاء العمل ومغادرة السلطنة، أو مرور ٣ أشهر دون عقد جديد</td><td>م. ١٠٩ لائحة</td></tr>
+              <tr><td>BR-DIS-04</td><td>في حالة الوفاة: تُصرف المدخرات للورثة الشرعيين، وتؤول للنظام في غياب المستحقين</td><td>م. ١٤٣ قانون</td></tr>
+              <tr><td>BR-DIS-05</td><td>تُحوَّل مبالغ التسوية النهائية عند الخروج خلال ٥ أيام عمل</td><td>قاعدة تشغيلية</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٢.٥ قواعد الالتزامات والغرامات</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>رقم القاعدة</th><th>القاعدة</th><th>المرجع القانوني</th></tr></thead>
+            <tbody>
+              <tr><td>BR-PEN-01</td><td>غرامة التأخر على جهة العمل: ٨٪ سنوياً تراكمياً من تاريخ الاستحقاق حتى السداد</td><td>م. ١٠٢ لائحة</td></tr>
+              <tr><td>BR-PEN-02</td><td>يحق للصندوق الخصم التلقائي من مدخرات العامل عند عدم سداد الالتزامات في مواعيدها</td><td>م. ١١١ لائحة</td></tr>
+              <tr><td>BR-PEN-03</td><td>يحق للعامل الاعتراض على الأجر المسجل خلال ٩٠ يوماً — وجهة العمل ترد خلال ٣٠ يوماً</td><td>م. ٩٨ لائحة</td></tr>
+              <tr><td>BR-PEN-04</td><td>عدم إخطار الصندوق بالخروج خلال شهر: عائد ٢٪ فقط للسنة الأولى ثم لا عائد بعدها</td><td>م. ١١٢ لائحة</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٢.٦ قواعد فائض الاشتراكات</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>رقم القاعدة</th><th>القاعدة</th><th>المرجع القانوني</th></tr></thead>
+            <tbody>
+              <tr><td>BR-SUR-01</td><td>يُحوَّل فائض اشتراكات العماني التي تتجاوز سقف أجر الاشتراك تلقائياً إلى حساب الادخار</td><td>م. ١١٠ لائحة</td></tr>
+              <tr><td>BR-SUR-02</td><td>يحق للعامل العماني صرف الفائض في نهاية كل عام دون احتساب عائد استثمار</td><td>م. ١١٠ لائحة</td></tr>
+              <tr><td>BR-SUR-03</td><td>إذا تحققت حالة الاستحقاق القانونية: يُحتسب عائد الاستثمار على الفائض أيضاً</td><td>م. ١١٠ لائحة</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 13 — متطلبات واجهة المستخدم                         -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec13">
+    <div class="section-header">
+      <div class="section-num">١٣</div>
+      <div class="section-title">متطلبات واجهة المستخدم</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">١٣.١ مبادئ التصميم العامة</div>
+        <ul>
+          <li><strong>الاتجاه:</strong> جميع الواجهات من اليمين لليسار (RTL) باللغة العربية الفصحى.</li>
+          <li><strong>الاتساق:</strong> توحيد ألوان العلامة التجارية لصندوق الحماية الاجتماعية في جميع الصفحات.</li>
+          <li><strong>الإمكانية:</strong> امتثال معايير WCAG 2.1 AA للوصول للمعلومات لذوي الاحتياجات الخاصة.</li>
+          <li><strong>التجاوب:</strong> تصميم متجاوب يدعم الشاشات من ٣٢٠ بكسل إلى ٢٥٦٠ بكسل.</li>
+          <li><strong>البساطة:</strong> رحلة مستخدم خطوة بخطوة (Wizard) للعمليات المتعددة الخطوات.</li>
+        </ul>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٣.٢ متطلبات الشاشات الرئيسية</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>الشاشة</th><th>المتطلبات الجوهرية</th><th>الدور</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>لوحة التحكم</strong></td>
+                <td>عرض بطاقات ملخص رئيسية، مخطط توزيع مصادر الإيداع، قائمة آخر المعاملات، روابط سريعة للعمليات الشائعة</td>
+                <td><span class="role-saver">مدخر</span> <span class="role-employer">صاحب عمل</span> <span class="role-employee">موظف</span></td>
+              </tr>
+              <tr>
+                <td><strong>التسجيل</strong></td>
+                <td>معالج (Wizard) متعدد الخطوات مع شريط تقدم، جلب بيانات تلقائي، نموذج الشروط قابل للقراءة الكاملة</td>
+                <td><span class="role-saver">مدخر</span></td>
+              </tr>
+              <tr>
+                <td><strong>الإيداع</strong></td>
+                <td>حقل المبلغ مع تنبيه الحد الأدنى الفوري، قائمة طرق الدفع مع تنبيه الشيك، تأكيد العملية قبل التنفيذ</td>
+                <td><span class="role-saver">مدخر</span> <span class="role-employer">صاحب عمل</span></td>
+              </tr>
+              <tr>
+                <td><strong>الإيداع الجماعي</strong></td>
+                <td>معالج ثلاثي الخطوات (اختيار العمال ← تحديد المبالغ ← الدفع)، بحث وفلترة العمال، ملخص إجمالي قبل التأكيد</td>
+                <td><span class="role-employer">صاحب عمل</span></td>
+              </tr>
+              <tr>
+                <td><strong>طلب الصرف</strong></td>
+                <td>عرض الرصيد مفصلاً بمصادره، قائمة أسباب مفلترة بالجنسية، خيار الدفعة الواحدة أو التقسيط، تأكيد متعدد المراحل</td>
+                <td><span class="role-saver">مدخر</span></td>
+              </tr>
+              <tr>
+                <td><strong>معالجة الصرف</strong></td>
+                <td>قائمة الطلبات مع فلترة متقدمة، شاشة مراجعة شاملة، نتائج الفحوصات الآلية بصرية واضحة، أزرار القرار بارزة</td>
+                <td><span class="role-employee">موظف</span></td>
+              </tr>
+              <tr>
+                <td><strong>عوائد الاستثمار</strong></td>
+                <td>حقل إدخال النسبة مع التحقق من الحد الأدنى، سجل مسار الاعتماد، جدول العوائد التاريخية</td>
+                <td><span class="role-employee">موظف</span></td>
+              </tr>
+              <tr>
+                <td><strong>سجل المعاملات</strong></td>
+                <td>جدول قابل للفرز والتصفية المتقدمة، تصدير Excel و PDF، تفاصيل كل معاملة عند النقر عليها</td>
+                <td>الجميع</td>
+              </tr>
+              <tr>
+                <td><strong>التقارير</strong></td>
+                <td>لوحة مؤشرات تفاعلية، فلترة متقدمة، مخططات بيانية، تصدير بصيغ متعددة</td>
+                <td><span class="role-employee">موظف</span></td>
+              </tr>
+              <tr>
+                <td><strong>الخروج من النظام</strong></td>
+                <td>شاشة تحذير واضحة بالتبعات، ملخص التسوية المفصل، تأكيد مزدوج غير قابل للتراجع</td>
+                <td><span class="role-saver">مدخر</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٣.٣ نظام الإشعارات</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>الحدث</th><th>قناة الإشعار</th><th>المستلم</th><th>التوقيت</th></tr></thead>
+            <tbody>
+              <tr><td>إتمام التسجيل</td><td>SMS + المنصة</td><td>المدخر</td><td>فوري</td></tr>
+              <tr><td>تأكيد الإيداع</td><td>SMS + المنصة</td><td>المدخر / صاحب العمل</td><td>فوري</td></tr>
+              <tr><td>تحويل الفائض</td><td>SMS + المنصة</td><td>المدخر العماني</td><td>فوري</td></tr>
+              <tr><td>نتيجة طلب الصرف</td><td>SMS + المنصة</td><td>المدخر</td><td>فوري</td></tr>
+              <tr><td>طلب وثائق إضافية</td><td>SMS + المنصة</td><td>المدخر</td><td>فوري</td></tr>
+              <tr><td>توزيع عوائد الاستثمار</td><td>SMS + المنصة</td><td>المدخر</td><td>عند الاعتماد</td></tr>
+              <tr><td>تذكير استحقاق الاشتراكات</td><td>SMS + المنصة</td><td>صاحب العمل</td><td>قبل ٧ أيام</td></tr>
+              <tr><td>غرامة التأخر</td><td>SMS + المنصة</td><td>صاحب العمل</td><td>عند الاستحقاق</td></tr>
+              <tr><td>طلبات جديدة للمراجعة</td><td>المنصة</td><td>موظف الصندوق</td><td>فوري</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 14 — متطلبات البيانات                                -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec14">
+    <div class="section-header">
+      <div class="section-num">١٤</div>
+      <div class="section-title">متطلبات البيانات</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">١٤.١ الكيانات الرئيسية وبياناتها</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>الكيان</th><th>الحقول الأساسية</th><th>ملاحظات</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>المدخر</strong></td>
+                <td>الرقم المدني، الاسم الكامل، الجنسية، تاريخ الميلاد، المهنة، جهة العمل، تاريخ التسجيل، نوع الادخار، حالة الاشتراك، بيانات التواصل</td>
+                <td>جلب تلقائي من منظومة الهوية الوطنية</td>
+              </tr>
+              <tr>
+                <td><strong>جهة العمل</strong></td>
+                <td>السجل التجاري، اسم المؤسسة، بيانات التواصل، عدد العمال المسجلين، تاريخ آخر إيداع</td>
+                <td>ربط بسجلات وزارة التجارة</td>
+              </tr>
+              <tr>
+                <td><strong>الحساب الشخصي</strong></td>
+                <td>رقم الحساب (فريد)، رقم المدخر، نوع الادخار، الرصيد الإجمالي، مكوّنات الرصيد (ذاتي/صاحب عمل/عوائد)، تاريخ الإنشاء، حالة الحساب</td>
+                <td>جميع المبالغ بالريال العماني</td>
+              </tr>
+              <tr>
+                <td><strong>المعاملة المالية</strong></td>
+                <td>الرقم المرجعي (فريد)، نوع العملية، المبلغ، تاريخ ووقت التنفيذ، طريقة الدفع، الحالة، معرّف المنفذ، ملاحظات</td>
+                <td>محفوظة بشكل دائم غير قابل للحذف</td>
+              </tr>
+              <tr>
+                <td><strong>طلب الصرف</strong></td>
+                <td>رقم الطلب، معرّف المدخر، سبب الصرف، طريقة الصرف، تفاصيل الحساب البنكي (IBAN)، حالة الطلب، مبررات القرار، تاريخ التقديم والبت</td>
+                <td>ربط بالمدخر وموظف الصندوق</td>
+              </tr>
+              <tr>
+                <td><strong>الالتزام المالي</strong></td>
+                <td>وصف الالتزام، نوعه، مبلغه، تاريخ الاستحقاق، حالة السداد، طريقة السداد</td>
+                <td>ربط بالمدخر وفروع التأمين</td>
+              </tr>
+              <tr>
+                <td><strong>عائد الاستثمار</strong></td>
+                <td>السنة المالية، النسبة المعتمدة، تاريخ الاعتماد، سلسلة الاعتماد (أخصائي → مدير مخاطر → لجنة)، إجمالي الموزع</td>
+                <td>سجل تاريخي غير قابل للتعديل</td>
+              </tr>
+              <tr>
+                <td><strong>فائض الاشتراكات</strong></td>
+                <td>معرّف المدخر، السنة، مبلغ الفائض، تفاصيل احتساب الفائض، حالة التحويل، تاريخ الإشعار</td>
+                <td>مرتبط بسقف أجر الاشتراك</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٤.٢ متطلبات حفظ البيانات وأرشفتها</div>
+        <ul>
+          <li>يجب الاحتفاظ بسجلات المعاملات المالية لمدة لا تقل عن <strong>١٠ سنوات</strong> من تاريخ الإغلاق.</li>
+          <li>يجب الاحتفاظ بسجلات الحسابات الشخصية لمدة <strong>٧ سنوات</strong> بعد الإغلاق.</li>
+          <li>يجب الاحتفاظ بسجلات الاعتماد والمراجعة (Audit Logs) لمدة <strong>٥ سنوات</strong>.</li>
+          <li>يجب أن تكون جميع السجلات المالية <strong>للقراءة فقط</strong> بعد إتمام العملية — لا يُسمح بالحذف.</li>
+          <li>يجب تنفيذ <strong>نسخ احتياطي يومي</strong> مع اختبار دوري للاسترداد.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 15 — متطلبات التكامل                                 -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec15">
+    <div class="section-header">
+      <div class="section-num">١٥</div>
+      <div class="section-title">متطلبات التكامل</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">١٥.١ التكاملات الخارجية المطلوبة</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>النظام الخارجي</th><th>الغرض</th><th>الأولوية</th><th>نوع التكامل</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>INT-01</td>
+                <td><strong>منظومة الهوية الوطنية (PKI)</strong></td>
+                <td>المصادقة عبر PKI/Mobile PKI وجلب بيانات المدخر تلقائياً</td>
+                <td><span class="badge badge-must">إلزامي</span></td>
+                <td>API آمن (HTTPS/OAuth)</td>
+              </tr>
+              <tr>
+                <td>INT-02</td>
+                <td><strong>شبكات الدفع الإلكتروني</strong></td>
+                <td>معالجة مدفوعات البطاقات والمحافظ الرقمية والتحويلات البنكية</td>
+                <td><span class="badge badge-must">إلزامي</span></td>
+                <td>Payment Gateway API</td>
+              </tr>
+              <tr>
+                <td>INT-03</td>
+                <td><strong>نظام وزارة العمل</strong></td>
+                <td>التحقق من اعتماد عقود العمل وانتهاء علاقة العمل</td>
+                <td><span class="badge badge-must">إلزامي</span></td>
+                <td>API / Batch</td>
+              </tr>
+              <tr>
+                <td>INT-04</td>
+                <td><strong>سجلات شرطة عُمان السلطانية</strong></td>
+                <td>التحقق من مغادرة العامل غير العماني للسلطنة</td>
+                <td><span class="badge badge-must">إلزامي</span></td>
+                <td>API آمن</td>
+              </tr>
+              <tr>
+                <td>INT-05</td>
+                <td><strong>خدمة الرسائل القصيرة (SMS Gateway)</strong></td>
+                <td>إرسال إشعارات العمليات وتنبيهات الاستحقاق</td>
+                <td><span class="badge badge-must">إلزامي</span></td>
+                <td>SMS API</td>
+              </tr>
+              <tr>
+                <td>INT-06</td>
+                <td><strong>فروع التأمين الاجتماعي الأخرى</strong></td>
+                <td>استيراد بيانات الاشتراكات للتحقق من الأهلية وفائض الاشتراكات</td>
+                <td><span class="badge badge-must">إلزامي</span></td>
+                <td>Internal API / DB</td>
+              </tr>
+              <tr>
+                <td>INT-07</td>
+                <td><strong>منظومة الاستثمار</strong></td>
+                <td>استيراد بيانات أداء المحفظة الاستثمارية لاحتساب نسبة العائد</td>
+                <td><span class="badge badge-should">مهم</span></td>
+                <td>Internal API</td>
+              </tr>
+              <tr>
+                <td>INT-08</td>
+                <td><strong>منظومة المراسلات الرقمية للصندوق</strong></td>
+                <td>إرسال المراسلات الرسمية وإشعارات القرارات</td>
+                <td><span class="badge badge-should">مهم</span></td>
+                <td>Internal API</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٥.٢ مبادئ التكامل التقني</div>
+        <ul>
+          <li>جميع الاتصالات مع الأنظمة الخارجية عبر بروتوكول HTTPS مع TLS 1.3 أو أعلى.</li>
+          <li>يجب توفر آليات الاستعادة التلقائية عند فشل أي تكامل خارجي (Retry Mechanism).</li>
+          <li>يجب توثيق جميع APIs المستخدمة بمعيار OpenAPI 3.0 أو ما يعادله.</li>
+          <li>لا تُخزَّن أي بيانات حساسة (أرقام بطاقات، كلمات مرور) في أنظمة الصندوق.</li>
+          <li>كل تكامل يستلزم خطة طوارئ واضحة عند انقطاع الخدمة الخارجية.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 16 — فحوصات الجودة SMART                            -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec16">
+    <div class="section-header">
+      <div class="section-num">١٦</div>
+      <div class="section-title">فحوصات الجودة — معايير SMART</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">١٦.١ إطار SMART للتحقق من جودة المتطلبات</div>
+        <div class="smart-grid">
+          <div class="smart-cell s">
+            <div class="smart-letter">S</div>
+            <div class="smart-word">محدد</div>
+            <div class="smart-desc">هل المتطلب واضح وغير ملتبس؟</div>
+          </div>
+          <div class="smart-cell m">
+            <div class="smart-letter">M</div>
+            <div class="smart-word">قابل للقياس</div>
+            <div class="smart-desc">هل يمكن التحقق من اكتماله؟</div>
+          </div>
+          <div class="smart-cell a">
+            <div class="smart-letter">A</div>
+            <div class="smart-word">قابل للتحقيق</div>
+            <div class="smart-desc">هل هو واقعي وقابل للتنفيذ؟</div>
+          </div>
+          <div class="smart-cell r">
+            <div class="smart-letter">R</div>
+            <div class="smart-word">ملائم</div>
+            <div class="smart-desc">هل يتوافق مع أهداف المشروع؟</div>
+          </div>
+          <div class="smart-cell t">
+            <div class="smart-letter">T</div>
+            <div class="smart-word">محدد زمنياً</div>
+            <div class="smart-desc">متى يكون المتطلب مطلوباً؟</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٦.٢ تحقق SMART لعينة من المتطلبات الجوهرية</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>المتطلب</th><th>محدد</th><th>قابل للقياس</th><th>قابل للتحقيق</th><th>ملائم</th><th>محدد زمنياً</th><th>الحكم</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>FR-03-01: دعم التسجيل الاختياري للفئات الأربع</td>
+                <td>✅ الفئات محددة قانونياً</td>
+                <td>✅ اختبار كل فئة</td>
+                <td>✅ قابل للبناء</td>
+                <td>✅ أساس النظام</td>
+                <td>✅ الإطلاق</td>
+                <td><span class="badge badge-could">✅ مطابق</span></td>
+              </tr>
+              <tr>
+                <td>FR-04-01: التحقق من الحد الأدنى ١٠٠ ر.ع</td>
+                <td>✅ القيمة محددة</td>
+                <td>✅ اختبار أتمتة</td>
+                <td>✅ تحقق في الواجهة</td>
+                <td>✅ حكم قانوني</td>
+                <td>✅ الإطلاق</td>
+                <td><span class="badge badge-could">✅ مطابق</span></td>
+              </tr>
+              <tr>
+                <td>FR-06-02: الحد الأدنى لعائد الاستثمار ٢٪</td>
+                <td>✅ النسبة محددة</td>
+                <td>✅ اختبار الاحتساب</td>
+                <td>✅ منطق قاعدة بيانات</td>
+                <td>✅ حكم قانوني</td>
+                <td>✅ سنوياً</td>
+                <td><span class="badge badge-could">✅ مطابق</span></td>
+              </tr>
+              <tr>
+                <td>NFR-01-01: استجابة الصفحات ≤ ٣ ثوانٍ</td>
+                <td>✅ المدة محددة</td>
+                <td>✅ اختبار الأداء</td>
+                <td>⚠️ مشروط بالبنية التحتية</td>
+                <td>✅ تجربة المستخدم</td>
+                <td>✅ قبل الإطلاق</td>
+                <td><span class="badge badge-should">⚠️ مشروط</span></td>
+              </tr>
+              <tr>
+                <td>NFR-02-01: توفر النظام ≥ ٩٩.٥٪</td>
+                <td>✅ النسبة محددة</td>
+                <td>✅ مقاييس مراقبة</td>
+                <td>⚠️ يستلزم بنية تحتية مزدوجة</td>
+                <td>✅ استمرارية الأعمال</td>
+                <td>✅ مستمر</td>
+                <td><span class="badge badge-should">⚠️ مشروط</span></td>
+              </tr>
+              <tr>
+                <td>FR-08-04: التحقق الآلي عبر أنظمة خارجية</td>
+                <td>✅ الأنظمة محددة</td>
+                <td>✅ نتيجة اجتياز/فشل</td>
+                <td>⚠️ مشروط بتوفر التكاملات</td>
+                <td>✅ ضمان الأهلية</td>
+                <td>✅ عند الاعتماد</td>
+                <td><span class="badge badge-should">⚠️ مشروط</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body">
+            <div class="callout-title">ملاحظة التبعيات المشروطة</div>
+            <p class="callout-text">المتطلبات المشروطة (NFR-01-01، NFR-02-01، FR-08-04) تعتمد على تبعيات خارجية (البنية التحتية، التكاملات الحكومية). يُوصى بتأكيد هذه التبعيات مبكراً في خطة المشروع لتجنب تأثيرها على الجدول الزمني.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 17 — تقييم المخاطر                                   -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec17">
+    <div class="section-header">
+      <div class="section-num">١٧</div>
+      <div class="section-title">تقييم المخاطر</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">١٧.١ المخاطر التقنية</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>رقم الخطر</th><th>الخطر</th><th>الاحتمالية</th><th>التأثير</th><th>المستوى</th><th>استراتيجية التخفيف</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>RT-01</td>
+                <td>تأخر أو عدم توفر تكامل منظومة الهوية الوطنية (PKI)</td>
+                <td>متوسط</td>
+                <td>حرج</td>
+                <td><span class="risk-badge risk-level-high">عالٍ</span></td>
+                <td>التنسيق المبكر مع الجهات المختصة؛ تطوير نموذج مؤقت للمصادقة في مرحلة الاختبار</td>
+              </tr>
+              <tr>
+                <td>RT-02</td>
+                <td>عدم اتساق بيانات الفحص الآلي من وزارة العمل وشرطة عُمان</td>
+                <td>متوسط</td>
+                <td>عالٍ</td>
+                <td><span class="risk-badge risk-level-high">عالٍ</span></td>
+                <td>تحديد اتفاقية مستوى خدمة (SLA) مع الجهات؛ آلية معالجة يدوية احتياطية</td>
+              </tr>
+              <tr>
+                <td>RT-03</td>
+                <td>أخطاء في احتساب العوائد أو الغرامات المالية</td>
+                <td>منخفض</td>
+                <td>حرج</td>
+                <td><span class="risk-badge risk-level-high">عالٍ</span></td>
+                <td>مراجعة محاسبية مستقلة للمحرك الحسابي؛ اختبار شامل ببيانات حقيقية قبل الإطلاق</td>
+              </tr>
+              <tr>
+                <td>RT-04</td>
+                <td>فشل عمليات الدفع الإلكترونية في أوقات الذروة</td>
+                <td>متوسط</td>
+                <td>عالٍ</td>
+                <td><span class="risk-badge risk-level-medium">متوسط</span></td>
+                <td>التكامل مع أكثر من مزود دفع؛ آلية إعادة المحاولة التلقائية مع تسجيل الأخطاء</td>
+              </tr>
+              <tr>
+                <td>RT-05</td>
+                <td>عدم استيعاب النظام لأعداد المستخدمين المتوقعة في المراحل الأولى</td>
+                <td>منخفض</td>
+                <td>متوسط</td>
+                <td><span class="risk-badge risk-level-medium">متوسط</span></td>
+                <td>اختبارات الحمل قبل الإطلاق؛ بنية سحابية قابلة للتوسع التلقائي (Auto-scaling)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٧.٢ المخاطر التجارية والقانونية</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>رقم الخطر</th><th>الخطر</th><th>الاحتمالية</th><th>التأثير</th><th>المستوى</th><th>استراتيجية التخفيف</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>RB-01</td>
+                <td>تعديل اللائحة التنفيذية أو إضافة أحكام جديدة أثناء التطوير</td>
+                <td>متوسط</td>
+                <td>عالٍ</td>
+                <td><span class="risk-badge risk-level-high">عالٍ</span></td>
+                <td>تصميم معمارية مرنة لاستيعاب التغييرات؛ مراجعة قانونية دورية طوال مراحل التطوير</td>
+              </tr>
+              <tr>
+                <td>RB-02</td>
+                <td>مقاومة أصحاب العمل للتحول إلى النظام الرقمي</td>
+                <td>متوسط</td>
+                <td>متوسط</td>
+                <td><span class="risk-badge risk-level-medium">متوسط</span></td>
+                <td>برنامج توعية وتدريب مكثف؛ خطة تدريج في التطبيق مع دعم مباشر</td>
+              </tr>
+              <tr>
+                <td>RB-03</td>
+                <td>بيانات تاريخية غير مكتملة عند الترحيل من الأنظمة القديمة</td>
+                <td>عالٍ</td>
+                <td>عالٍ</td>
+                <td><span class="risk-badge risk-level-high">عالٍ</span></td>
+                <td>خطة ترحيل بيانات مفصلة مع التحقق الشامل؛ فترة تشغيل موازي</td>
+              </tr>
+              <tr>
+                <td>RB-04</td>
+                <td>تفسيرات متباينة لأحكام اللائحة بين الفرق المختلفة</td>
+                <td>متوسط</td>
+                <td>عالٍ</td>
+                <td><span class="risk-badge risk-level-high">عالٍ</span></td>
+                <td>ورش عمل تفسيرية مع مستشارين قانونيين؛ توثيق رسمي لكل قاعدة تجارية قبل التطوير</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٧.٣ مخاطر الموارد والمشروع</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>رقم الخطر</th><th>الخطر</th><th>الاحتمالية</th><th>التأثير</th><th>المستوى</th><th>استراتيجية التخفيف</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>RR-01</td>
+                <td>شُح الكوادر المتخصصة في تطوير منظومات الحماية الاجتماعية</td>
+                <td>متوسط</td>
+                <td>متوسط</td>
+                <td><span class="risk-badge risk-level-medium">متوسط</span></td>
+                <td>تعاقد مبكر؛ برامج نقل المعرفة وتوطين التقنية</td>
+              </tr>
+              <tr>
+                <td>RR-02</td>
+                <td>تغيير متطلبات الأعمال في مراحل متقدمة من التطوير</td>
+                <td>متوسط</td>
+                <td>عالٍ</td>
+                <td><span class="risk-badge risk-level-high">عالٍ</span></td>
+                <td>نهج تطوير رشيق (Agile)؛ اعتماد رسمي للمتطلبات قبل البدء</td>
+              </tr>
+              <tr>
+                <td>RR-03</td>
+                <td>تأخر الحصول على موافقات التكاملات الحكومية</td>
+                <td>عالٍ</td>
+                <td>عالٍ</td>
+                <td><span class="risk-badge risk-level-critical">حرج</span></td>
+                <td>بدء إجراءات التكامل الحكومي في اليوم الأول؛ تعيين مسؤول تنسيق حكومي مخصص</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٧.٤ مصفوفة تقييم المخاطر (الاحتمالية × التأثير)</div>
+        <div class="table-wrapper">
+          <table style="text-align:center">
+            <thead>
+              <tr>
+                <th style="width:120px">التأثير ↓ / الاحتمالية →</th>
+                <th>منخفضة</th>
+                <th>متوسطة</th>
+                <th>عالية</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:700;text-align:right">حرج</td>
+                <td style="background:#fb8c00;color:#fff">عالٍ</td>
+                <td style="background:#e53935;color:#fff">حرج</td>
+                <td style="background:#b71c1c;color:#fff">حرج جداً</td>
+              </tr>
+              <tr>
+                <td style="font-weight:700;text-align:right">عالٍ</td>
+                <td style="background:#43a047;color:#fff">منخفض</td>
+                <td style="background:#fb8c00;color:#fff">عالٍ</td>
+                <td style="background:#e53935;color:#fff">حرج</td>
+              </tr>
+              <tr>
+                <td style="font-weight:700;text-align:right">متوسط</td>
+                <td style="background:#43a047;color:#fff">منخفض</td>
+                <td style="background:#43a047;color:#fff">منخفض</td>
+                <td style="background:#fb8c00;color:#fff">متوسط</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 18 — التبعيات                                        -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec18">
+    <div class="section-header">
+      <div class="section-num">١٨</div>
+      <div class="section-title">التبعيات</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">١٨.١ التبعيات الحكومية والتنظيمية</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>التبعية</th><th>الجهة المسؤولة</th><th>الأثر على المشروع</th><th>الحالة</th></tr></thead>
+            <tbody>
+              <tr><td>D-01</td><td>توفير واجهة برمجية (API) لمنظومة PKI الوطنية</td><td>هيئة تقنية المعلومات</td><td>عدم إمكانية تسجيل الدخول</td><td>يحتاج تأكيد</td></tr>
+              <tr><td>D-02</td><td>توفير API للتحقق من عقود العمل وإنهائها</td><td>وزارة العمل</td><td>تأثير على صرف مدخرات غير العمانيين</td><td>يحتاج تأكيد</td></tr>
+              <tr><td>D-03</td><td>توفير API للتحقق من المغادرة</td><td>شرطة عُمان السلطانية</td><td>تأثير على معالجة طلبات الصرف</td><td>يحتاج تأكيد</td></tr>
+              <tr><td>D-04</td><td>اعتماد متطلبات الأمن وحماية البيانات من الجهات المختصة</td><td>المجلس الأعلى للتخطيط / هيئة تقنية المعلومات</td><td>ضروري لإطلاق النظام</td><td>يحتاج تنسيق</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٨.٢ التبعيات التقنية</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>التبعية</th><th>التأثير</th><th>الأولوية</th></tr></thead>
+            <tbody>
+              <tr><td>DT-01</td><td>توفر بوابات الدفع الإلكتروني المعتمدة في السلطنة</td><td>عمليات الإيداع والسداد</td><td><span class="badge badge-must">حرج</span></td></tr>
+              <tr><td>DT-02</td><td>توفر منصة SMS موثوقة بتغطية وطنية</td><td>جميع الإشعارات</td><td><span class="badge badge-must">إلزامي</span></td></tr>
+              <tr><td>DT-03</td><td>بيئة استضافة سحابية أو مركز بيانات محلي معتمد</td><td>توفر النظام ومتطلبات الأداء</td><td><span class="badge badge-must">حرج</span></td></tr>
+              <tr><td>DT-04</td><td>ترحيل البيانات التاريخية من الأنظمة الحالية</td><td>اكتمال بيانات المدخرين الحاليين</td><td><span class="badge badge-must">إلزامي</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٨.٣ تبعيات المشروع الداخلية</div>
+        <ul>
+          <li>اعتماد المتطلبات النهائية من أصحاب المصلحة قبل البدء في التصميم التقني.</li>
+          <li>إتمام تحليل الفجوة مع الأنظمة القائمة لدى الصندوق قبل تصميم البنية التحتية.</li>
+          <li>اعتماد خطة ترحيل البيانات قبل الإطلاق التجريبي.</li>
+          <li>إتمام التدريب لجميع أصحاب الأدوار قبل الإطلاق الرسمي.</li>
+          <li>اعتماد وثيقة الأمن وحماية البيانات قبل بدء اختبار القبول.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 19 — اعتماد أصحاب المصلحة                           -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec19">
+    <div class="section-header">
+      <div class="section-num">١٩</div>
+      <div class="section-title">اعتماد أصحاب المصلحة</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">١٩.١ عملية المراجعة</div>
+        <div class="process-flow">
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#4527a0">١</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">توزيع الوثيقة (يوم ١)</div>
+              <div class="process-step-desc">يُرسل فريق تحليل الأعمال نسخة الوثيقة لجميع أصحاب المصلحة المحددين في مصفوفة الاعتماد.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#4527a0">٢</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">فترة المراجعة الفردية (أيام ١–٧)</div>
+              <div class="process-step-desc">يراجع كل صاحب مصلحة الوثيقة ويُرسل ملاحظاته وتعليقاته مكتوبة.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#4527a0">٣</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">ورشة مراجعة جماعية (يوم ١٠)</div>
+              <div class="process-step-desc">تُعقد جلسة مراجعة مشتركة لمناقشة الملاحظات، حل التعارضات، والاتفاق على التعديلات.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#4527a0">٤</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">إصدار النسخة المُحدَّثة (يوم ١٢)</div>
+              <div class="process-step-desc">يُصدر فريق تحليل الأعمال النسخة المُحدَّثة مع سجل التغييرات الموضحة.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="process-step-left"><div class="process-step-circle" style="background:#4527a0">٥</div><div class="process-step-line"></div></div>
+            <div class="process-step-content">
+              <div class="process-step-title">الاعتماد الرسمي (يوم ١٤)</div>
+              <div class="process-step-desc">يُوقّع أصحاب المصلحة المعنيون على الوثيقة النهائية وتُرفع للإدارة العليا للاعتماد.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٩.٢ مصفوفة الاعتماد</div>
+        <div class="table-wrapper">
+          <table class="approval-table">
+            <thead><tr><th>الدور</th><th>الجهة</th><th>نوع المشاركة</th><th>التوقيع</th><th>التاريخ</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>مالك المنتج (Product Owner)</td>
+                <td>إدارة نظام الادخار — صندوق الحماية الاجتماعية</td>
+                <td>اعتماد إلزامي</td>
+                <td><span class="sig-line"></span></td>
+                <td><span class="sig-line" style="min-width:80px"></span></td>
+              </tr>
+              <tr>
+                <td>مدير المشروع</td>
+                <td>مكتب إدارة المشاريع — صندوق الحماية الاجتماعية</td>
+                <td>اعتماد إلزامي</td>
+                <td><span class="sig-line"></span></td>
+                <td><span class="sig-line" style="min-width:80px"></span></td>
+              </tr>
+              <tr>
+                <td>المستشار القانوني</td>
+                <td>الإدارة القانونية — صندوق الحماية الاجتماعية</td>
+                <td>اعتماد إلزامي</td>
+                <td><span class="sig-line"></span></td>
+                <td><span class="sig-line" style="min-width:80px"></span></td>
+              </tr>
+              <tr>
+                <td>مدير تقنية المعلومات</td>
+                <td>إدارة تقنية المعلومات — صندوق الحماية الاجتماعية</td>
+                <td>اعتماد إلزامي</td>
+                <td><span class="sig-line"></span></td>
+                <td><span class="sig-line" style="min-width:80px"></span></td>
+              </tr>
+              <tr>
+                <td>ممثل المدخرين</td>
+                <td>ممثل المستفيدين</td>
+                <td>مراجعة استشارية</td>
+                <td><span class="sig-line"></span></td>
+                <td><span class="sig-line" style="min-width:80px"></span></td>
+              </tr>
+              <tr>
+                <td>ممثل أصحاب العمل</td>
+                <td>غرفة تجارة وصناعة عُمان</td>
+                <td>مراجعة استشارية</td>
+                <td><span class="sig-line"></span></td>
+                <td><span class="sig-line" style="min-width:80px"></span></td>
+              </tr>
+              <tr>
+                <td>مدير الاستثمار</td>
+                <td>إدارة الاستثمار — صندوق الحماية الاجتماعية</td>
+                <td>مراجعة تخصصية</td>
+                <td><span class="sig-line"></span></td>
+                <td><span class="sig-line" style="min-width:80px"></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">١٩.٣ إجراءات إدارة التغيير</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>الخطوة</th><th>الإجراء</th><th>المسؤول</th><th>الإطار الزمني</th></tr></thead>
+            <tbody>
+              <tr><td>١</td><td>تقديم طلب تغيير موثق (Change Request Form)</td><td>صاحب المصلحة الطالب</td><td>عند الحاجة</td></tr>
+              <tr><td>٢</td><td>تقييم تأثير التغيير على النطاق والجدول والميزانية</td><td>مدير المشروع + محلل الأعمال</td><td>٣ أيام عمل</td></tr>
+              <tr><td>٣</td><td>رفع الطلب للجنة التغيير للمراجعة والقرار</td><td>مدير المشروع</td><td>٥ أيام عمل</td></tr>
+              <tr><td>٤</td><td>إبلاغ الأطراف بقرار اللجنة (موافقة / رفض / تأجيل)</td><td>مكتب إدارة المشاريع</td><td>يوم عمل</td></tr>
+              <tr><td>٥</td><td>تحديث الوثيقة وإعادة الاعتماد في حال الموافقة</td><td>محلل الأعمال</td><td>٣ أيام عمل</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout info">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-body">
+            <div class="callout-title">سياسة التغيير</div>
+            <p class="callout-text">أي تغيير على متطلب مُعتمَد يستلزم اتباع إجراءات إدارة التغيير. التغييرات المؤثرة على الجدول الزمني أو الميزانية أو النطاق تستلزم إعادة اعتماد من مالك المنتج والإدارة العليا.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 20 — المسرد                                          -->
+  <!-- ============================================================ -->
+  <div class="section-card" id="sec20">
+    <div class="section-header">
+      <div class="section-num">٢٠</div>
+      <div class="section-title">المسرد والتعريفات</div>
+    </div>
+    <div class="section-body">
+
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>المصطلح</th><th>التعريف</th><th>المرجع</th></tr></thead>
+          <tbody>
+            <tr><td><strong>المدخر</strong></td><td>كل مشترك في نظام الادخار المنصوص عليه في قانون الحماية الاجتماعية</td><td>م. ١ قانون</td></tr>
+            <tr><td><strong>الادخار الإلزامي</strong></td><td>نظام الادخار المطبق تلقائياً على العمال غير العمانيين بنسبة ٩٪ من الأجر الأساسي</td><td>م. ١٣٦ قانون</td></tr>
+            <tr><td><strong>الادخار الاختياري</strong></td><td>نظام الادخار الذي تنضم إليه الفئات المحددة طوعاً بطلب رسمي</td><td>م. ١٣٦ قانون</td></tr>
+            <tr><td><strong>الحساب الشخصي</strong></td><td>الحساب الادخاري الفردي بالريال العماني المُنشأ لكل مدخر لدى الصندوق</td><td>م. ١٠٠ لائحة</td></tr>
+            <tr><td><strong>نظام محدد الاشتراكات</strong></td><td>نظام تُحدَّد فيه مبالغ الاشتراكات مسبقاً دون ضمان معاش محدد مسبقاً</td><td>م. ١٣٥ قانون</td></tr>
+            <tr><td><strong>سقف أجر الاشتراك</strong></td><td>الحد الأقصى للأجر المُعتمَد لاحتساب الاشتراكات في فروع التأمين الاجتماعي</td><td>اللائحة</td></tr>
+            <tr><td><strong>فائض الاشتراكات</strong></td><td>المبلغ الزائد عن سقف أجر الاشتراك الذي يُحوَّل تلقائياً لحساب الادخار</td><td>م. ١١٠ لائحة</td></tr>
+            <tr><td><strong>عائد الاستثمار</strong></td><td>النسبة السنوية المعتمدة من لجنة الاستثمار التي تُوزَّع على حسابات المدخرين</td><td>م. ١٠٤ لائحة</td></tr>
+            <tr><td><strong>التسجيل بأثر رجعي</strong></td><td>تسجيل العامل غير العماني في وقت لاحق لتاريخ بدء عمله مع ترتيب الاشتراكات عن الفترة الفائتة</td><td>م. ٩٧ لائحة</td></tr>
+            <tr><td><strong>الالتزام المالي</strong></td><td>أي مبلغ مستحق على المدخر تجاه الصندوق يُجاز سداده من رصيد المدخرات</td><td>م. ١١١ لائحة</td></tr>
+            <tr><td><strong>مكافأة نهاية الخدمة</strong></td><td>المبلغ المدفوع لغير العمانيين عند انتهاء خدمتهم، الذي يحل نظام الادخار محله</td><td>م. ١٣٧ قانون</td></tr>
+            <tr><td><strong>PKI</strong></td><td>البنية الوطنية للهوية الرقمية المستخدمة للمصادقة الإلكترونية الآمنة</td><td>—</td></tr>
+            <tr><td><strong>IBAN</strong></td><td>رقم الحساب المصرفي الدولي (International Bank Account Number)</td><td>—</td></tr>
+            <tr><td><strong>BRD</strong></td><td>وثيقة متطلبات الأعمال (Business Requirements Document)</td><td>—</td></tr>
+            <tr><td><strong>KPI</strong></td><td>مؤشر الأداء الرئيسي (Key Performance Indicator)</td><td>—</td></tr>
+            <tr><td><strong>SLA</strong></td><td>اتفاقية مستوى الخدمة (Service Level Agreement)</td><td>—</td></tr>
+            <tr><td><strong>API</strong></td><td>واجهة برمجة التطبيقات (Application Programming Interface)</td><td>—</td></tr>
+            <tr><td><strong>RTO</strong></td><td>هدف وقت الاسترداد (Recovery Time Objective)</td><td>—</td></tr>
+            <tr><td><strong>RPO</strong></td><td>هدف نقطة الاسترداد (Recovery Point Objective)</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- FOOTER                                                        -->
+  <!-- ============================================================ -->
+  <div class="doc-footer">
+    <strong>صندوق الحماية الاجتماعية — سلطنة عُمان</strong><br>
+    وثيقة متطلبات الأعمال | نظام الادخار | الإصدار 1.0 | أبريل ٢٠٢٦<br>
+    <span style="font-size:11px">هذه الوثيقة سرية — للاستخدام الداخلي فقط | SPF-SAV-BRD-001</span>
+  </div>
+
+</div><!-- /.container -->
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>العمال المسجلون - تنفيذ الخدمة</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../../../assets/css/app.css">
+    <link rel="stylesheet" href="../../../assets/css/shell.css">
+    
+</head>
+<body data-root="../../../" data-user-role="employer" data-landing-href="index.html" data-service-name="العمال المسجلون">
+<main class="spf-main">
+<div class="page-header">
+            <div>
+                <h4>العمال المسجلون في نظام الادخار</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="../../../index.html#employer-services">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">قائمة العمال</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge employer">صاحب العمل</span>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3"><div class="metric-card"><div class="metric-label">عمال نشطون</div><div class="metric-value">345</div></div></div>
+            <div class="col-md-3"><div class="metric-card"><div class="metric-label">غير مكتمل</div><div class="metric-value">7</div></div></div>
+            <div class="col-md-3"><div class="metric-card"><div class="metric-label">اعتراضات أجر</div><div class="metric-value">3</div></div></div>
+            <div class="col-md-3"><div class="metric-card"><div class="metric-label">تسويات سابقة</div><div class="metric-value">12</div></div></div>
+        </div>
+
+        <div class="state-banner primary mb-4">
+            <div>
+                <div class="state-banner-title">إدارة العمال بعد التسجيل</div>
+                <div class="state-banner-copy">تعرض القائمة الحالة التشغيلية لكل عامل: هل هو نشط، يحتاج استكمال بيانات، لديه اعتراض أجر، أو دخل في مسار تسوية أو صرف لاحق.</div>
+            </div>
+            <div class="toolbar-inline">
+                <a class="btn btn-spf" href="../../../services/employer/worker-registration/start.html">تسجيل جديد</a>
+                <a class="btn btn-spf-outline" href="../../../services/employer/group-deposit/start.html">إيداع جماعي</a>
+            </div>
+        </div>
+
+        <div class="section-card mb-4">
+            <div class="list-toolbar">
+                <div class="toolbar-group">
+                    <div class="section-title mb-0">فلاتر القائمة</div>
+                </div>
+                <div class="pill-tabs" id="workerTabs">
+                    <button class="pill-tab active" data-tab="all" onclick="filterWorkers('all')">الكل</button>
+                    <button class="pill-tab" data-tab="active" onclick="filterWorkers('active')">نشط</button>
+                    <button class="pill-tab" data-tab="incomplete" onclick="filterWorkers('incomplete')">غير مكتمل</button>
+                    <button class="pill-tab" data-tab="objection" onclick="filterWorkers('objection')">اعتراض أجر</button>
+                    <button class="pill-tab" data-tab="settlement" onclick="filterWorkers('settlement')">تسوية</button>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-3"><input type="text" class="form-control" id="searchName" placeholder="الاسم أو رقم الهوية"></div>
+                <div class="col-md-2"><select class="form-select" id="filterNationality"><option value="">كل الجنسيات</option><option>عماني</option><option>غير عماني</option></select></div>
+                <div class="col-md-3"><select class="form-select" id="filterWorkState"><option value="">كل الحالات</option><option>نشط</option><option>غير مكتمل</option><option>اعتراض أجر</option><option>بانتظار تسوية</option></select></div>
+                <div class="col-md-2"><input type="text" class="form-control" id="filterCr" placeholder="السجل التجاري"></div>
+                <div class="col-md-2"><button class="btn btn-spf w-100" onclick="renderWorkers()">تحديث</button></div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="table-responsive">
+                <table class="table dense-table compact-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>العامل</th>
+                            <th>الهوية</th>
+                            <th>الجنسية</th>
+                            <th>الأجر الأساسي</th>
+                            <th>الرصيد</th>
+                            <th>المسار الحالي</th>
+                            <th>الحالة</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="workerRows"></tbody>
+                </table>
+            </div>
+        </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../../assets/js/prototype-core.js"></script>
+<script src="../../../assets/js/external-shell.js"></script>
+<script>
+const workers = [
+            { id: 1, name: 'عمر بن خالد الهنائي', civilId: '87654321', nationality: 'عماني', salary: '850 ر.ع', balance: '1,200.000 ر.ع', route: 'اعتيادي', state: 'active', stateLabel: 'نشط', note: 'العامل مكتمل البيانات ويمكن إيداع مبالغ جديدة له دون ملاحظات.', steps: [['التسجيل مكتمل', 'current', 'تم'], ['الإيداع متاح', 'current', 'يمكن المتابعة مباشرة.']] },
+            { id: 2, name: 'راجيش كومار', civilId: '99001122', nationality: 'غير عماني', salary: '450 ر.ع', balance: '900.000 ر.ع', route: 'تسوية سابقة', state: 'settlement', stateLabel: 'بانتظار تسوية', note: 'يوجد مسار تسوية مكافأة خدمة سابقة مرتبط بالعامل قبل إغلاق بعض القرارات النهائية.', steps: [['قرار جهة العمل', 'current', 'تم إرساله'], ['اعتماد العامل', 'warning', 'بانتظار الرد'], ['الربط مع الفاتورة أو التحويل', 'warning', 'يتحدد حسب القرار.']] },
+            { id: 3, name: 'محمد أحمد', civilId: '10002001', nationality: 'غير عماني', salary: '900 ر.ع', balance: '1,500.000 ر.ع', route: 'اعتراض أجر', state: 'objection', stateLabel: 'اعتراض أجر', note: 'العامل رفع اعتراضًا على الأجر الأساسي المسجل ويجب متابعة القرار قبل تثبيت بعض الآثار اللاحقة.', steps: [['فتح الاعتراض', 'current', 'تم'], ['رد جهة العمل', 'warning', 'بانتظار الرد'], ['قرار نهائي', 'warning', 'بعد استكمال المراجعة.']] },
+            { id: 4, name: 'فاطمة علي', civilId: '10002002', nationality: 'عماني', salary: '600 ر.ع', balance: '800.000 ر.ع', route: 'أثر رجعي', state: 'incomplete', stateLabel: 'غير مكتمل', note: 'التسجيل بالأثر الرجعي ما زال يتطلب التحقق من فترة سابقة قبل اعتباره مكتملًا تشغيليًا.', steps: [['تحميل الملف', 'current', 'تم'], ['التحقق من الفترات السابقة', 'warning', 'مفتوح'], ['تفعيل كامل', 'warning', 'بعد الاعتماد.']] }
+        ];
+
+        let activeFilter = 'all';
+        let activeWorker = null;
+        const workerModal = new bootstrap.Modal(document.getElementById('workerModal'));
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderWorkers();
+        });
+
+        function filterWorkers(tab) {
+            activeFilter = tab;
+            document.querySelectorAll('#workerTabs .pill-tab').forEach(button => {
+                button.classList.toggle('active', button.dataset.tab === tab);
+            });
+            renderWorkers();
+        }
+
+        function renderWorkers() {
+            const search = document.getElementById('searchName').value.trim();
+            const nationality = document.getElementById('filterNationality').value;
+            const workState = document.getElementById('filterWorkState').value;
+
+            const filtered = workers.filter(worker => {
+                if (activeFilter !== 'all' && worker.state !== activeFilter) return false;
+                if (search && !(`${worker.name} ${worker.civilId}`.includes(search))) return false;
+                if (nationality && worker.nationality !== nationality) return false;
+                if (workState && worker.stateLabel !== workState) return false;
+                return true;
+            });
+
+            document.getElementById('workerRows').innerHTML = filtered.map(worker => `
+                <tr>
+                    <td class="fw-700">${worker.name}</td>
+                    <td>${worker.civilId}</td>
+                    <td>${worker.nationality}</td>
+                    <td>${worker.salary}</td>
+                    <td>${worker.balance}</td>
+                    <td><span class="status-chip info">${worker.route}</span></td>
+                    <td><span class="status-chip ${worker.state === 'active' ? 'success' : worker.state === 'incomplete' ? 'pending' : worker.state === 'objection' ? 'danger' : 'info'}">${worker.stateLabel}</span></td>
+                    <td><button class="btn btn-sm btn-spf-outline" onclick="openWorker(${worker.id})">عرض</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function openWorker(id) {
+            activeWorker = workers.find(worker => worker.id === id);
+            if (!activeWorker) return;
+
+            document.getElementById('workerSummary').innerHTML = `
+                <div class="detail-item"><div class="detail-label">العامل</div><div class="detail-value">${activeWorker.name}</div></div>
+                <div class="detail-item"><div class="detail-label">رقم الهوية</div><div class="detail-value">${activeWorker.civilId}</div></div>
+                <div class="detail-item"><div class="detail-label">المسار</div><div class="detail-value">${activeWorker.route}</div></div>
+                <div class="detail-item"><div class="detail-label">الحالة</div><div class="detail-value">${activeWorker.stateLabel}</div></div>
+            `;
+            document.getElementById('workerNotes').innerHTML = `
+                <div class="signal-title">${activeWorker.stateLabel}</div>
+                <div>${activeWorker.note}</div>
+            `;
+            document.getElementById('workerSteps').innerHTML = activeWorker.steps.map(step => `
+                <div class="process-step ${step[1]}">
+                    <div class="process-step-title">${step[0]}</div>
+                    <div class="mini-note">${step[2]}</div>
+                </div>
+            `).join('');
+
+            workerModal.show();
+        }
+</script>
+</body>
+</html>

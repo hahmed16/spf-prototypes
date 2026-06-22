@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التسجيل في نظام الادخار - نظام الادخار V2</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-user-role="saver">
+    <div id="navbarPlaceholder"></div>
+    <div id="sidebarPlaceholder"></div>
+
+    <main class="spf-main">
+        <div class="page-header">
+            <div>
+                <h4>التسجيل في نظام الادخار</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="01-dashboard.html">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">التسجيل</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge saver">المدخر</span>
+            </div>
+        </div>
+
+        <div class="state-banner primary mb-4">
+            <div>
+                <div class="state-banner-title">تغطية آليات التسجيل الثلاث</div>
+                <div class="state-banner-copy">تعرض هذه الصفحة التسجيل المباشر، وتسجيل جهة العمل، والتسجيل بقرار مباشر أو بأثر رجعي مع توضيح البيانات الأساسية والخطوة التالية لكل حالة.</div>
+            </div>
+        </div>
+
+        <div class="role-section role-saver">
+            <div class="section-card mb-4">
+                <div class="section-title">اختيار فئة التسجيل</div>
+                <div class="scenario-grid" id="saverCategoryGrid"></div>
+            </div>
+
+            <div class="board-grid">
+                <div class="section-card">
+                    <div class="section-title">بيانات التسجيل المباشر</div>
+                    <div class="detail-list mb-4" id="saverRegistrationSummary"></div>
+                    <form>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-700">البريد الإلكتروني</label>
+                                <input class="form-control" value="ahmed@example.om">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-700">رقم الهاتف</label>
+                                <input class="form-control" value="+968 99887766">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-700">إقرار الاشتراك</label>
+                            <textarea class="form-control" rows="3" readonly>أقر بصحة البيانات وأفهم أن حساب الادخار سيُفعّل بعد استكمال التسجيل والدفعة الأولية أو اعتماد المسار البديل بحسب الفئة.</textarea>
+                        </div>
+                        <div class="toolbar-inline">
+                            <button type="button" class="btn btn-spf" onclick="submitSaverRegistration()">تأكيد التسجيل</button>
+                            <a class="btn btn-spf-outline" href="05-deposit.html">الانتقال إلى الإيداع</a>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">ملخص التسجيل</div>
+                    <div id="saverEffectBox" class="signal-box mb-3"></div>
+                    <div class="process-rail" id="saverProcessRail"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="role-section role-employer d-none">
+            <div class="row g-3 mb-4">
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">طلبات تسجيل اليوم</div><div class="metric-value">14</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">تسجيلات بأثر رجعي</div><div class="metric-value">3</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">قيد الاعتماد</div><div class="metric-value">5</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">جاهزة للإيداع</div><div class="metric-value">9</div></div></div>
+            </div>
+
+            <div class="section-card mb-4">
+                <div class="section-title">اختيار آلية التسجيل</div>
+                <div class="pill-tabs" id="employerModeTabs">
+                    <button class="pill-tab active" data-mode="standard" onclick="selectEmployerMode('standard')">تسجيل اعتيادي</button>
+                    <button class="pill-tab" data-mode="retroactive" onclick="selectEmployerMode('retroactive')">تسجيل بأثر رجعي</button>
+                    <button class="pill-tab" data-mode="decision" onclick="selectEmployerMode('decision')">قرار مباشر</button>
+                </div>
+            </div>
+
+            <div class="board-grid">
+                <div class="section-card">
+                    <div class="section-title">قائمة العمال المرشحين للتسجيل</div>
+                    <div class="table-responsive">
+                        <table class="table dense-table compact-table align-middle">
+                            <thead>
+                                <tr><th>العامل</th><th>الهوية</th><th>الأجر الأساسي</th><th>نوع التسجيل</th><th>الحالة</th></tr>
+                            </thead>
+                            <tbody id="employerCandidateRows"></tbody>
+                        </table>
+                    </div>
+                    <div class="toolbar-inline mt-3">
+                        <button type="button" class="btn btn-spf" onclick="submitEmployerRegistration()">اعتماد التسجيلات</button>
+                        <a class="btn btn-spf-outline" href="03-registered-workers.html">إدارة القائمة بعد التسجيل</a>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">ملخص التسجيل</div>
+                    <div id="employerModeBox" class="signal-box mb-3"></div>
+                    <div class="process-rail" id="employerProcessRail"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="role-section role-staff d-none">
+            <div class="board-grid">
+                <div class="section-card">
+                    <div class="section-title">طلبات التسجيل الواردة للصندوق</div>
+                    <div class="table-responsive">
+                        <table class="table dense-table compact-table align-middle">
+                            <thead>
+                                <tr><th>الجهة</th><th>النوع</th><th>العدد</th><th>الحالة</th><th>الملاحظة</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>شركة الخليج للخدمات</td><td>تسجيل اعتيادي</td><td>8</td><td><span class="status-chip info">قيد المراجعة</span></td><td>بانتظار التحقق من الأجور</td></tr>
+                                <tr><td>شركة المدار اللوجستية</td><td>أثر رجعي</td><td>3</td><td><span class="status-chip pending">مفتوح</span></td><td>يستلزم احتساب فترات سابقة</td></tr>
+                                <tr><td>قرار صندوق</td><td>قرار مباشر</td><td>2</td><td><span class="status-chip success">جاهز للتفعيل</span></td><td>تم استكمال المستندات</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">ماذا يفعل الموظف هنا؟</div>
+                    <div class="process-rail">
+                        <div class="process-step current">
+                            <div class="process-step-title">مراجعة نوع التسجيل</div>
+                            <div class="mini-note">يتم التحقق مما إذا كانت الحالة اعتيادية أو بأثر رجعي أو بقرار مباشر.</div>
+                        </div>
+                        <div class="process-step warning">
+                            <div class="process-step-title">مراجعة الأجر والحالة</div>
+                            <div class="mini-note">إذا وُجد اعتراض أجر أو نقص بيانات ينتقل الملف إلى شاشة الاعتراض أو المراجعة.</div>
+                        </div>
+                        <div class="process-step">
+                            <div class="process-step-title">تفعيل الحساب وربطه بالإيداع أو الفاتورة</div>
+                            <div class="mini-note">بعد الاعتماد تظهر الحالة في قائمة العمال المسجلين وتنتقل إلى الخطوة التالية.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="common.js"></script>
+    <script>
+        const saverCategories = {
+            omaniInsured: {
+                title: 'عماني مؤمن عليه',
+                tag: 'مباشر',
+                meta: 'يبدأ التسجيل من حساب المستخدم مع استدعاء بياناته الأساسية من السجلات المرتبطة.',
+                summary: [
+                    ['الفئة', 'عماني مؤمن عليه'],
+                    ['الاسم', 'أحمد بن سالم البوسعيدي'],
+                    ['الرقم المدني', '12345678'],
+                    ['جهة العمل الحالية', 'شركة أوكيو'],
+                    ['الحالة', 'جاهز للتفعيل']
+                ],
+                effectTitle: 'يتم تفعيل الحساب بعد تأكيد التسجيل',
+                effectBody: 'بعد تأكيد البيانات والإقرار يمكن متابعة الإيداع من نفس المنظومة.',
+                steps: [
+                    ['التحقق من الهوية', 'current', 'تم الربط بالحساب الأساسي.'],
+                    ['استدعاء بيانات العمل', 'current', 'تم العثور على جهة العمل الحالية.'],
+                    ['تفعيل الحساب وبدء الإيداع', 'current', 'الخطوة التالية بعد التأكيد.']
+                ]
+            },
+            nonOmani: {
+                title: 'عامل غير عماني',
+                tag: 'اختياري',
+                meta: 'يستخدم عندما يكون التسجيل خارج المسار الإلزامي أو بمبالغ تتجاوز الحدود ذات العلاقة.',
+                summary: [
+                    ['الفئة', 'عامل غير عماني'],
+                    ['الاسم', 'راجيش كومار'],
+                    ['رقم الإقامة', '99001122'],
+                    ['جهة العمل الحالية', 'شركة الخليج للخدمات'],
+                    ['الحالة', 'يتطلب ربطًا مع صاحب العمل']
+                ],
+                effectTitle: 'يتم تفعيل الحساب بعد اكتمال الربط مع جهة العمل',
+                effectBody: 'إذا كان التسجيل مرتبطًا بجهة العمل أو بقرار سابق، تظهر الحالة بعد اعتماد البيانات.',
+                steps: [
+                    ['التحقق من بيانات الإقامة', 'current', 'تم تحميل بيانات العامل الأساسية.'],
+                    ['مراجعة أهلية التسجيل', 'warning', 'يتم التحقق من نوع التسجيل.'],
+                    ['الربط مع جهة العمل أو تفعيل الحساب', 'warning', 'قد تتطلب الحالة مراجعة إضافية.']
+                ]
+            },
+            omaniNonInsured: {
+                title: 'عماني غير مؤمن عليه',
+                tag: 'يدوي جزئي',
+                meta: 'يحتاج استكمال بيانات التواصل وبعض البيانات الذاتية قبل تفعيل الحساب.',
+                summary: [
+                    ['الفئة', 'عماني غير مؤمن عليه'],
+                    ['الاسم', 'خالد بن محمد الراسبي'],
+                    ['الرقم المدني', '88776655'],
+                    ['رقم الهاتف', '+968 99887766'],
+                    ['الحالة', 'بانتظار استكمال الإقرار']
+                ],
+                effectTitle: 'استكمال بيانات التواصل قبل التفعيل',
+                effectBody: 'بعد استكمال البيانات والإقرار يمكن الانتقال إلى الإيداع.',
+                steps: [
+                    ['التحقق من الهوية', 'current', 'تمت المطابقة مع الرقم المدني.'],
+                    ['استكمال بيانات التواصل', 'warning', 'البريد والهاتف مطلوبان للتفعيل.'],
+                    ['تفعيل الحساب والانتقال للإيداع', 'warning', 'بعد اعتماد البيانات.']
+                ]
+            }
+        };
+
+        const employerModes = {
+            standard: {
+                title: 'التسجيل الاعتيادي',
+                body: 'يستخدم للعمال الجدد أو الحالات التي تمر بالمسار المعتاد دون أثر رجعي أو قرار مباشر.',
+                candidates: [
+                    ['أمير حسين', '90011223', '420.000 ر.ع', 'اعتيادي', 'جاهز'],
+                    ['سالم ناصر', '90011224', '510.000 ر.ع', 'اعتيادي', 'جاهز'],
+                    ['محمد إقبال', '90011225', '380.000 ر.ع', 'اعتيادي', 'قيد المراجعة']
+                ],
+                steps: [
+                    ['تحميل العامل من المصدر الأساسي', 'current', 'عقد عمل فعال وبيانات مكتملة.'],
+                    ['تأكيد الأجر والحالة', 'current', 'يراجع صاحب العمل قبل الاعتماد.'],
+                    ['إظهار العامل في قائمة المسجلين', 'current', 'بعد التنفيذ مباشرة.']
+                ]
+            },
+            retroactive: {
+                title: 'التسجيل بأثر رجعي',
+                body: 'يعالج العمال الذين تأخر تسجيلهم ويستلزم احتساب الفترات السابقة وربطها بالفواتير أو الفروقات المستحقة.',
+                candidates: [
+                    ['علي رضا', '90011231', '450.000 ر.ع', 'أثر رجعي', 'يتطلب احتساب'],
+                    ['يوسف شريف', '90011232', '390.000 ر.ع', 'أثر رجعي', 'بانتظار مراجعة']
+                ],
+                steps: [
+                    ['تحديد فترة الأثر الرجعي', 'warning', 'يراجع تاريخ بداية العمل الفعلي.'],
+                    ['احتساب الاشتراكات أو الفروقات', 'warning', 'قد ينتج عنها فرق على الفاتورة.'],
+                    ['اعتماد التسجيل وربط الفترات السابقة', 'warning', 'بعد موافقة الجهة المختصة.']
+                ]
+            },
+            decision: {
+                title: 'التسجيل بقرار مباشر',
+                body: 'يستخدم عندما يصدر قرار من الصندوق أو جهة مختصة بضم العامل مباشرة دون المرور بكل خطوات المسار الاعتيادي.',
+                candidates: [
+                    ['جون سميث', '90011241', '1,100.000 ر.ع', 'قرار مباشر', 'جاهز للتفعيل'],
+                    ['لي وانغ', '90011242', '980.000 ر.ع', 'قرار مباشر', 'جاهز للتفعيل']
+                ],
+                steps: [
+                    ['ربط العامل بمرجع القرار', 'current', 'القرار محفوظ ضمن الملف.'],
+                    ['تفعيل الحساب دون انتظار المسار الاعتيادي', 'current', 'يتم مباشرة بعد الاعتماد.'],
+                    ['إظهاره في قائمة التسجيلات والعمليات اللاحقة', 'current', 'يرتبط بالإيداع أو الفاتورة.']
+                ]
+            }
+        };
+
+        let activeSaverCategory = 'omaniInsured';
+        let activeEmployerMode = 'standard';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderSaverCategories();
+            selectSaverCategory(activeSaverCategory);
+            selectEmployerMode(activeEmployerMode);
+        });
+
+        function renderSaverCategories() {
+            document.getElementById('saverCategoryGrid').innerHTML = Object.entries(saverCategories).map(([key, item]) => `
+                <div class="scenario-card ${key === activeSaverCategory ? 'active' : ''}" data-key="${key}" onclick="selectSaverCategory('${key}')">
+                    <div class="scenario-tag">${item.tag}</div>
+                    <div class="scenario-title">${item.title}</div>
+                    <div class="scenario-meta">${item.meta}</div>
+                </div>
+            `).join('');
+        }
+
+        function selectSaverCategory(key) {
+            activeSaverCategory = key;
+            const item = saverCategories[key];
+            document.querySelectorAll('#saverCategoryGrid .scenario-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.key === key);
+            });
+            document.getElementById('saverRegistrationSummary').innerHTML = item.summary.map(row => `
+                <div class="detail-item"><div class="detail-label">${row[0]}</div><div class="detail-value">${row[1]}</div></div>
+            `).join('');
+            document.getElementById('saverEffectBox').innerHTML = `
+                <div class="signal-title">${item.effectTitle}</div>
+                <div>${item.effectBody}</div>
+            `;
+            document.getElementById('saverProcessRail').innerHTML = item.steps.map(step => `
+                <div class="process-step ${step[1]}">
+                    <div class="process-step-title">${step[0]}</div>
+                    <div class="mini-note">${step[2]}</div>
+                </div>
+            `).join('');
+        }
+
+        function selectEmployerMode(mode) {
+            activeEmployerMode = mode;
+            const item = employerModes[mode];
+            document.querySelectorAll('#employerModeTabs .pill-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.mode === mode);
+            });
+            document.getElementById('employerCandidateRows').innerHTML = item.candidates.map(row => `
+                <tr>
+                    <td class="fw-700">${row[0]}</td>
+                    <td>${row[1]}</td>
+                    <td>${row[2]}</td>
+                    <td><span class="status-chip info">${row[3]}</span></td>
+                    <td><span class="status-chip ${row[4].includes('جاهز') ? 'success' : 'pending'}">${row[4]}</span></td>
+                </tr>
+            `).join('');
+            document.getElementById('employerModeBox').innerHTML = `
+                <div class="signal-title">${item.title}</div>
+                <div>${item.body}</div>
+            `;
+            document.getElementById('employerProcessRail').innerHTML = item.steps.map(step => `
+                <div class="process-step ${step[1]}">
+                    <div class="process-step-title">${step[0]}</div>
+                    <div class="mini-note">${step[2]}</div>
+                </div>
+            `).join('');
+        }
+
+        function submitSaverRegistration() {
+            spf.showSuccess('تم حفظ طلب التسجيل، ويمكنك الآن متابعة حالة التفعيل ثم الانتقال إلى الإيداع عند الحاجة.');
+        }
+
+        function submitEmployerRegistration() {
+            spf.showSuccess('تم اعتماد التسجيلات في الحالة الحالية، وستظهر الآن ضمن قائمة العمال المسجلين مع حالتها.');
+        }
+    </script>
+</body>
+</html>

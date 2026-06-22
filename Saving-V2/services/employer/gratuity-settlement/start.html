@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسوية مكافأة الخدمة السابقة - تنفيذ الخدمة</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../../../assets/css/app.css">
+    <link rel="stylesheet" href="../../../assets/css/shell.css">
+    
+</head>
+<body data-root="../../../" data-user-role="employer" data-landing-href="index.html" data-service-name="تسوية مكافأة الخدمة السابقة">
+<main class="spf-main">
+<div class="page-header">
+            <div>
+                <h4>تسوية مكافأة نهاية الخدمة السابقة</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="../../../index.html#employer-services">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">تسوية مكافأة الخدمة</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge employer">صاحب العمل</span>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">إجمالي العمال المؤهلين</div>
+                    <div class="metric-value" id="eligibleCount">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">لم يتم الحسم بعد</div>
+                    <div class="metric-value" id="pendingCount">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">تم ترحيلها إلى الادخار</div>
+                    <div class="metric-value" id="transferCount">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">تمت التسوية وديًا</div>
+                    <div class="metric-value" id="amicableCount">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="list-toolbar">
+                <div>
+                    <div class="section-title mb-1">قائمة جميع العمال وحالة التسوية</div>
+                    <div class="text-muted">اختر العامل المناسب، ثم افتح نافذة القرار أو عرض التفاصيل حسب حالة التسوية.</div>
+                </div>
+                <div class="toolbar-group">
+                    <input id="searchInput" class="form-control" style="min-width: 240px;" placeholder="ابحث بالاسم أو الرقم المدني">
+                    <select id="statusFilter" class="form-select" style="min-width: 190px;">
+                        <option value="all">كل الحالات</option>
+                        <option value="pending">بانتظار القرار</option>
+                        <option value="transferred">تم ترحيلها إلى الادخار</option>
+                        <option value="amicable">تمت التسوية وديًا</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table dense-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>العامل</th>
+                            <th>الرقم المدني</th>
+                            <th>تاريخ الالتحاق</th>
+                            <th>مدة الخدمة</th>
+                            <th>آخر أجر أساسي</th>
+                            <th>مبلغ التسوية التقديري</th>
+                            <th>الحالة</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="settlementRows"></tbody>
+                </table>
+            </div>
+        </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../../assets/js/prototype-core.js"></script>
+<script src="../../../assets/js/external-shell.js"></script>
+<script>
+const settlements = [
+            {
+                id: 1,
+                name: 'راجيش كومار',
+                civilId: '88001122',
+                joinDate: '2018/04/12',
+                duration: '6 سنوات و 2 شهر',
+                salary: 420,
+                estimate: 2675,
+                status: 'pending',
+                decision: '',
+                statusLabel: 'بانتظار القرار'
+            },
+            {
+                id: 2,
+                name: 'محمد إقبال',
+                civilId: '88001123',
+                joinDate: '2019/01/05',
+                duration: '5 سنوات و 5 أشهر',
+                salary: 380,
+                estimate: 2140,
+                status: 'transferred',
+                decision: 'تم ترحيلها إلى نظام الادخار',
+                statusLabel: 'تم ترحيلها إلى الادخار',
+                invoiceNo: 'ART138-240615',
+                paymentStatus: 'مسددة',
+                allocationStatus: 'تم التخصيص',
+                notificationStatus: 'تم إشعار العامل'
+            },
+            {
+                id: 3,
+                name: 'علي رضا',
+                civilId: '88001124',
+                joinDate: '2017/10/30',
+                duration: '6 سنوات و 8 أشهر',
+                salary: 510,
+                estimate: 3310,
+                status: 'amicable',
+                decision: 'تمت التسوية مع العامل وديًا',
+                statusLabel: 'تمت التسوية وديًا',
+                paymentStatus: 'لا يوجد',
+                allocationStatus: 'غير مطبق',
+                notificationStatus: 'تم إشعار العامل'
+            },
+            {
+                id: 4,
+                name: 'جوزيف ماثيو',
+                civilId: '88001125',
+                joinDate: '2020/02/17',
+                duration: '4 سنوات و 4 أشهر',
+                salary: 450,
+                estimate: 1980,
+                status: 'pending',
+                decision: '',
+                statusLabel: 'بانتظار القرار'
+            }
+        ];
+
+        let activeSettlement = null;
+        const modal = new bootstrap.Modal(document.getElementById('settlementModal'));
+
+        function formatAmount(value) {
+            return `${Number(value).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} ر.ع`;
+        }
+
+        function statusChip(status, label) {
+            const map = {
+                pending: 'pending',
+                transferred: 'info',
+                amicable: 'success'
+            };
+            return `<span class="status-chip ${map[status] || 'neutral'}">${label}</span>`;
+        }
+
+        function computeMetrics() {
+            document.getElementById('eligibleCount').innerText = settlements.length;
+            document.getElementById('pendingCount').innerText = settlements.filter(item => item.status === 'pending').length;
+            document.getElementById('transferCount').innerText = settlements.filter(item => item.status === 'transferred').length;
+            document.getElementById('amicableCount').innerText = settlements.filter(item => item.status === 'amicable').length;
+        }
+
+        function renderRows() {
+            const search = document.getElementById('searchInput').value.trim();
+            const filter = document.getElementById('statusFilter').value;
+            const rows = settlements.filter(item => {
+                const text = `${item.name} ${item.civilId}`;
+                const matchesSearch = !search || text.includes(search);
+                const matchesFilter = filter === 'all' || item.status === filter;
+                return matchesSearch && matchesFilter;
+            });
+
+            const tbody = document.getElementById('settlementRows');
+            tbody.innerHTML = rows.map(item => `
+                <tr>
+                    <td class="fw-700">${item.name}</td>
+                    <td>${item.civilId}</td>
+                    <td>${item.joinDate}</td>
+                    <td>${item.duration}</td>
+                    <td>${formatAmount(item.salary)}</td>
+                    <td class="fw-700 text-spf-dark">${formatAmount(item.estimate)}</td>
+                    <td>${statusChip(item.status, item.statusLabel)}</td>
+                    <td>
+                        <button class="btn btn-sm ${item.status === 'pending' ? 'btn-spf' : 'btn-spf-outline'}" onclick="openSettlementModal(${item.id})">
+                            ${item.status === 'pending' ? 'اتخاذ قرار' : 'عرض التفاصيل'}
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function buildDetails(item) {
+            return [
+                ['العامل', item.name],
+                ['الرقم المدني', item.civilId],
+                ['تاريخ الالتحاق', item.joinDate],
+                ['مدة الخدمة', item.duration],
+                ['آخر أجر أساسي', formatAmount(item.salary)],
+                ['مبلغ التسوية', formatAmount(item.estimate)],
+                ['الحالة الحالية', item.statusLabel]
+            ];
+        }
+
+        function renderDetailList(targetId, details) {
+            document.getElementById(targetId).innerHTML = details.map(([label, value]) => `
+                <div class="detail-item">
+                    <div class="detail-label">${label}</div>
+                    <div class="detail-value">${value}</div>
+                </div>
+            `).join('');
+        }
+
+        function openSettlementModal(id) {
+            activeSettlement = settlements.find(item => item.id === id);
+            renderDetailList('settlementDetails', buildDetails(activeSettlement));
+            document.getElementById('settlementModalTitle').innerText = activeSettlement.status === 'pending'
+                ? `اتخاذ قرار التسوية - ${activeSettlement.name}`
+                : `تفاصيل التسوية - ${activeSettlement.name}`;
+
+            const isPending = activeSettlement.status === 'pending';
+            document.getElementById('decisionFormArea').style.display = isPending ? 'block' : 'none';
+            document.getElementById('readonlyArea').style.display = isPending ? 'none' : 'block';
+            document.getElementById('saveDecisionBtn').style.display = isPending ? 'inline-flex' : 'none';
+
+            document.querySelectorAll('input[name="decisionOption"]').forEach(input => input.checked = false);
+            document.getElementById('approvedAmount').value = activeSettlement.estimate.toFixed(3);
+            document.getElementById('batchReference').value = 'MANUAL-SETTLEMENT';
+            document.getElementById('decisionNotes').value = '';
+            document.getElementById('transferFields').style.display = 'none';
+
+            if (!isPending) {
+                renderDetailList('readonlyDetails', [
+                    ['القرار المعتمد', activeSettlement.decision],
+                    ['رقم الفاتورة', activeSettlement.invoiceNo || 'لا يوجد'],
+                    ['حالة السداد', activeSettlement.paymentStatus || 'لا يوجد'],
+                    ['حالة التخصيص', activeSettlement.allocationStatus || 'لا يوجد'],
+                    ['حالة الإشعار', activeSettlement.notificationStatus || 'لم يتم']
+                ]);
+            }
+
+            modal.show();
+        }
+
+        function saveDecision() {
+            const selected = document.querySelector('input[name="decisionOption"]:checked');
+            if (!selected) {
+                spf.showError('يرجى اختيار قرار التسوية قبل الحفظ.');
+                return;
+            }
+
+            const chosen = selected.value;
+            activeSettlement.status = chosen;
+            activeSettlement.statusLabel = chosen === 'amicable' ? 'تمت التسوية وديًا' : 'تم ترحيلها إلى الادخار';
+            activeSettlement.decision = chosen === 'amicable' ? 'تمت التسوية مع العامل وديًا' : 'تم ترحيلها إلى نظام الادخار';
+            activeSettlement.notificationStatus = 'تم إشعار العامل';
+
+            if (chosen === 'transferred') {
+                activeSettlement.invoiceNo = 'ART138-' + String(activeSettlement.id).padStart(6, '0');
+                activeSettlement.paymentStatus = 'بانتظار السداد';
+                activeSettlement.allocationStatus = 'بانتظار التخصيص';
+            } else {
+                activeSettlement.invoiceNo = '';
+                activeSettlement.paymentStatus = 'لا يوجد';
+                activeSettlement.allocationStatus = 'غير مطبق';
+            }
+
+            renderRows();
+            computeMetrics();
+            modal.hide();
+            spf.showSuccess(`تم حفظ قرار التسوية للعامل ${activeSettlement.name}.`);
+        }
+
+        document.getElementById('searchInput').addEventListener('input', renderRows);
+        document.getElementById('statusFilter').addEventListener('change', renderRows);
+        document.getElementById('decisionTransfer').addEventListener('change', function () {
+            document.getElementById('transferFields').style.display = this.checked ? 'flex' : 'none';
+        });
+        document.getElementById('decisionAmicable').addEventListener('change', function () {
+            if (this.checked) document.getElementById('transferFields').style.display = 'none';
+        });
+        document.getElementById('saveDecisionBtn').addEventListener('click', saveDecision);
+
+        computeMetrics();
+        renderRows();
+</script>
+</body>
+</html>

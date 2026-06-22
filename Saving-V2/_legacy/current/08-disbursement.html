@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طلبات صرف المدخرات - نظام الادخار V2</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-user-role="saver">
+    <div id="navbarPlaceholder"></div>
+    <div id="sidebarPlaceholder"></div>
+
+    <main class="spf-main">
+        <div class="page-header">
+            <div>
+                <h4>طلبات صرف مبالغ الادخار</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="01-dashboard.html">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">صرف المدخرات</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge saver">المدخر</span>
+            </div>
+        </div>
+
+        <div id="scenarioBanner" class="state-banner primary mb-4"></div>
+
+        <div class="section-card mb-4">
+            <div class="section-title">تغطية مسارات الصرف الرئيسية والاستثنائية</div>
+            <div class="scenario-grid" id="scenarioGrid"></div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-xl-8">
+                <div class="section-card mb-4">
+                    <div class="section-title">بيانات طلب الصرف</div>
+                    <form id="disbursementForm">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-700">سبب طلب الصرف</label>
+                                <select class="form-select" id="disbursementReason">
+                                    <option value="termination">انتهاء علاقة العمل ومغادرة السلطنة</option>
+                                    <option value="three-months">انقضاء 3 أشهر دون الارتباط بعقد جديد</option>
+                                    <option value="retirement">استحقاق معاش تقاعدي</option>
+                                    <option value="disability">العجز الدائم</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-700">طريقة الصرف</label>
+                                <select class="form-select" id="paymentMethod">
+                                    <option value="full">دفعة واحدة</option>
+                                    <option value="installments">أقساط شهرية</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="installmentPanel" class="row g-3 mb-3 d-none">
+                            <div class="col-md-4">
+                                <label class="form-label fw-700">عدد الأقساط</label>
+                                <select class="form-select" id="installmentCount">
+                                    <option>6 أشهر</option>
+                                    <option>12 شهرًا</option>
+                                    <option>24 شهرًا</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label fw-700">ملاحظات جدول الأقساط</label>
+                                <input class="form-control" value="يستمر احتساب العائد على الرصيد المتبقي حتى كل دفعة." readonly>
+                            </div>
+                        </div>
+
+                        <div id="bankPanel" class="signal-box mb-3"></div>
+
+                        <div id="manualBankFields" class="row g-3 mb-3 d-none">
+                            <div class="col-md-6">
+                                <label class="form-label fw-700">اسم البنك</label>
+                                <input type="text" class="form-control" id="manualBankName" placeholder="مثال: بنك مسقط">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-700">رقم الآيبان</label>
+                                <input type="text" class="form-control" id="manualIban" placeholder="OM00 XXXX 0000 0000 0000 0000 0">
+                            </div>
+                        </div>
+
+                        <div id="supportingFields" class="row g-3 mb-3 d-none">
+                            <div class="col-md-6">
+                                <label class="form-label fw-700">رقم الحدود أو الجواز</label>
+                                <input type="text" class="form-control" id="passportNumber" placeholder="للاستخدام في التحقق من المغادرة">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-700">تاريخ آخر محاولة تحويل</label>
+                                <input type="date" class="form-control" id="lastTransferDate">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-700">ملاحظات إضافية</label>
+                            <textarea class="form-control" id="notes" rows="3" placeholder="أدخل أي توضيحات مرتبطة بالحالة أو الطلب..."></textarea>
+                        </div>
+
+                        <div id="formHint" class="mini-note mb-3"></div>
+
+                        <div class="toolbar-inline">
+                            <button type="button" class="btn btn-spf" id="submitButton" onclick="submitDisbursement()">تقديم الطلب</button>
+                            <button type="button" class="btn btn-spf-outline" onclick="window.location.href='14-transaction-history.html'">عرض سجل الطلبات</button>
+                            <button type="button" class="btn btn-spf-outline" id="secondaryActionButton"></button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">حالة الطلب الحالي والمتابعة</div>
+                    <div class="decision-strip mb-3" id="statusStrip"></div>
+                    <div class="split-card">
+                        <div class="signal-box" id="currentCaseBox"></div>
+                        <div class="signal-box warning" id="nextStepBox"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4">
+                <div class="stack-card">
+                    <div class="section-card">
+                        <div class="section-title">ملخص الرصيد القابل للصرف</div>
+                        <div class="detail-list mb-3">
+                            <div class="detail-item">
+                                <div class="detail-label">إجمالي الرصيد</div>
+                                <div class="detail-value" id="totalBalanceValue">1,450.000 ر.ع</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">التزامات قائمة</div>
+                                <div class="detail-value" id="obligationsValue">0.000 ر.ع</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">المتاح حاليًا للصرف</div>
+                                <div class="detail-value" id="availableBalanceValue">1,450.000 ر.ع</div>
+                            </div>
+                        </div>
+                        <div class="kv-list">
+                            <div class="kv-row">
+                                <div class="kv-key">إيداع ذاتي</div>
+                                <div class="kv-value">800.000 ر.ع</div>
+                            </div>
+                            <div class="kv-row">
+                                <div class="kv-key">إيداع صاحب عمل</div>
+                                <div class="kv-value">580.000 ر.ع</div>
+                            </div>
+                            <div class="kv-row">
+                                <div class="kv-key">عوائد استثمار</div>
+                                <div class="kv-value">70.000 ر.ع</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-title">التحقق النظامي</div>
+                        <div class="process-rail" id="checksRail"></div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-title">تسلسل المعالجة</div>
+                        <ul class="timeline-list" id="journeyTimeline"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="common.js"></script>
+    <script>
+        const scenarios = {
+            normal: {
+                key: 'normal',
+                title: 'صرف اعتيادي',
+                tag: 'المسار الأساسي',
+                meta: 'طلب صرف بعد تحقق شروط الاستحقاق ونجاح جلب الحساب البنكي.',
+                bannerClass: 'primary',
+                bannerTitle: 'الطلب جاهز للتقديم إلكترونيًا',
+                bannerCopy: 'تم التحقق من أهلية الصرف والحساب البنكي الأساسي. يمكن للمدخر تقديم الطلب ومتابعته حتى اعتماد التحويل.',
+                reason: 'termination',
+                amount: '1,450.000 ر.ع',
+                obligations: '0.000 ر.ع',
+                available: '1,450.000 ر.ع',
+                bankMode: 'linked',
+                bankTitle: 'الحساب البنكي المسترجع آليًا',
+                bankBody: 'بنك مسقط - ****9876. يمكن اعتماد الحساب الحالي دون إدخال بيانات جديدة.',
+                showManualBankFields: false,
+                showSupportingFields: false,
+                hint: 'سيتم تمرير الطلب مباشرة إلى موظف الصرف بعد التقديم.',
+                allowSubmit: true,
+                secondaryAction: { label: 'تغيير الحساب البنكي', action: 'manualBank' },
+                statusItems: [
+                    'الحالة الحالية: لا توجد ملاحظات',
+                    'قناة الصرف: تحويل بنكي مباشر',
+                    'التحقق من المغادرة: مكتمل'
+                ],
+                currentCase: {
+                    title: 'لا توجد حالة مفتوحة سابقة',
+                    body: 'هذا النموذج يمثل الحالة الطبيعية التي يبدأ منها المدخر طلب صرف جديد دون ملاحظات أو استثناءات.'
+                },
+                nextStep: {
+                    title: 'بعد الإرسال',
+                    body: 'يظهر الطلب لموظف الصرف في قائمة المراجعة ويصدر القرار خلال دورة المعالجة المعتادة.'
+                },
+                checks: [
+                    ['تحقق انتهاء علاقة العمل', 'current', 'تم التحقق من بيانات العمل الحالية.'],
+                    ['تحقق المغادرة أو الاستحقاق', 'current', 'سجلات الاستحقاق متاحة ولا يوجد تعارض.'],
+                    ['الحساب البنكي', 'current', 'تم جلب الحساب البنكي الأساسي بنجاح.']
+                ],
+                timeline: [
+                    ['تم احتساب الرصيد القابل للصرف تلقائيًا', 'منذ 3 دقائق', ''],
+                    ['تم جلب بيانات الحساب البنكي الأساسي', 'منذ دقيقتين', ''],
+                    ['بانتظار إرسال الطلب من المدخر', 'الآن', 'pending']
+                ],
+                submissionMessage: 'تم استلام طلب صرف المدخرات بنجاح وسيظهر الآن ضمن قائمة المراجعة لدى موظف الصندوق.'
+            },
+            bankFailure: {
+                key: 'bankFailure',
+                title: 'تعذر جلب الحساب البنكي',
+                tag: 'استثناء تكاملي',
+                meta: 'فشل الاسترجاع الآلي للحساب البنكي ويجب على المدخر استكمال البيانات يدويًا.',
+                bannerClass: 'warning',
+                bannerTitle: 'الحالة تحتاج استكمال بيانات بنكية',
+                bannerCopy: 'تعذر على النظام جلب الحساب البنكي من مصدر التكامل. يمكن متابعة الطلب بعد إدخال اسم البنك ورقم الآيبان للتحقق اليدوي.',
+                reason: 'termination',
+                amount: '1,450.000 ر.ع',
+                obligations: '0.000 ر.ع',
+                available: '1,450.000 ر.ع',
+                bankMode: 'warning',
+                bankTitle: 'تعذر التحقق من الحساب البنكي تلقائيًا',
+                bankBody: 'أدخل بيانات البنك يدويًا ليتم التحقق منها قبل اعتماد الصرف.',
+                showManualBankFields: true,
+                showSupportingFields: false,
+                hint: 'لن ينتقل الطلب إلى الاعتماد النهائي قبل التحقق من الآيبان ومطابقته لبيانات المدخر.',
+                allowSubmit: true,
+                secondaryAction: { label: 'إعادة المحاولة تلقائيًا', action: 'retryBankLookup' },
+                statusItems: [
+                    'الحالة الحالية: بانتظار تحقق بنكي',
+                    'سبب التعطيل: فشل الاسترجاع الآلي',
+                    'المسار المتوقع: مراجعة دعم بنكي'
+                ],
+                currentCase: {
+                    title: 'مطلوب استكمال معلومات التحويل',
+                    body: 'لن يتم رفض الطلب، لكن سيتم تعليقه في حالة تحقق بنكي حتى يتم مطابقة الآيبان مع الاسم ورقم الهوية.'
+                },
+                nextStep: {
+                    title: 'المتابعة بعد التقديم',
+                    body: 'عند إدخال البيانات البنكية سيرسل النظام الحالة إلى موظف الصرف وقد يحولها إلى المعالجة اليدوية إذا استمر التعذر.'
+                },
+                checks: [
+                    ['تحقق أهلية الصرف', 'current', 'الأهلية مكتملة ولا توجد ملاحظات على الرصيد.'],
+                    ['الحساب البنكي', 'warning', 'تعذر جلب الحساب من المصدر الخارجي.'],
+                    ['التحقق اليدوي', 'warning', 'مطلوب إدخال بيانات بنكية ومراجعتها.']
+                ],
+                timeline: [
+                    ['تم فشل التكامل البنكي في آخر محاولة', 'اليوم 10:15 ص', 'pending'],
+                    ['تم إشعار المدخر باستكمال بيانات التحويل', 'اليوم 10:18 ص', ''],
+                    ['بانتظار إرسال البيانات اليدوية', 'الآن', 'pending']
+                ],
+                submissionMessage: 'تم تسجيل بيانات الحساب البنكي وإرسال طلب الصرف إلى مسار التحقق اليدوي قبل الاعتماد.'
+            },
+            returnedTransfer: {
+                key: 'returnedTransfer',
+                title: 'حوالة مرتجعة بعد المغادرة',
+                tag: 'حالة متابعة',
+                meta: 'أعيدت الحوالة السابقة من البنك بعد مغادرة العامل ويجب إعادة تقديم بيانات التحويل.',
+                bannerClass: 'warning',
+                bannerTitle: 'يوجد طلب سابق أعيد من البنك',
+                bannerCopy: 'الحوالة السابقة لم تكتمل بسبب رفض البنك المستقبل. يمكن تحديث الآيبان وإعادة تقديم الطلب، وفي حال تكرر الرفض يتم تحويله تلقائيًا إلى المعالجة اليدوية.',
+                reason: 'three-months',
+                amount: '1,320.000 ر.ع',
+                obligations: '120.000 ر.ع',
+                available: '1,200.000 ر.ع',
+                bankMode: 'warning',
+                bankTitle: 'التحويل السابق مرتجع',
+                bankBody: 'تمت إعادة الحوالة بتاريخ 2026/06/18 بسبب عدم مطابقة الآيبان. يرجى إدخال البيانات الصحيحة أو طلب تحويل الحالة يدويًا.',
+                showManualBankFields: true,
+                showSupportingFields: true,
+                hint: 'إذا تعذر تحديث الحساب الصحيح، يتم إنشاء حالة يدوية ومتابعتها من قبل موظفي الصرف.',
+                allowSubmit: true,
+                secondaryAction: { label: 'فتح الحالة اليدوية', action: 'manualCase' },
+                statusItems: [
+                    'الحالة الحالية: حوالة مرتجعة',
+                    'رصيد محجوز للمراجعة: 1,200.000 ر.ع',
+                    'التزامات معلقة: 120.000 ر.ع'
+                ],
+                currentCase: {
+                    title: 'يوجد طلب صرف سابق مفتوح',
+                    body: 'تم إرجاع الحوالة من البنك، والرصد الحالي محجوز بانتظار تحديث بيانات التحويل أو قرار موظف الصرف.'
+                },
+                nextStep: {
+                    title: 'إذا تكرر الرفض البنكي',
+                    body: 'ينشئ النظام مسار متابعة يدوي ويرسل الحالة إلى صفحة الحالات اليدوية لمراقبة المهلة والتواصل مع المستفيد.'
+                },
+                checks: [
+                    ['تحقق الاستحقاق بعد 3 أشهر', 'current', 'تم استيفاء شرط المدة دون عقد جديد.'],
+                    ['التزامات مالية سابقة', 'warning', 'يوجد 120.000 ر.ع بانتظار التسوية قبل إغلاق الملف.'],
+                    ['تحويل بنكي مرتجع', 'danger', 'الحوالة السابقة أعيدت من البنك.']
+                ],
+                timeline: [
+                    ['تم اعتماد طلب الصرف السابق', '2026/06/09', ''],
+                    ['تمت إعادة الحوالة من البنك', '2026/06/18', 'pending'],
+                    ['تم فتح نافذة تحديث بيانات التحويل', 'اليوم', '']
+                ],
+                submissionMessage: 'تمت إعادة تفعيل طلب الصرف مع بيانات التحويل الجديدة، وسيتم التحقق منه قبل إعادة إرسال الحوالة.'
+            },
+            deceased: {
+                key: 'deceased',
+                title: 'وفاة مدخر غير عماني',
+                tag: 'حالة قانونية',
+                meta: 'الصرف لا يتم ذاتيًا ويحتاج مسار مطالبة شرعية ومراجعة يدوية.',
+                bannerClass: 'danger',
+                bannerTitle: 'هذه الحالة لا تُدار بطلب صرف ذاتي',
+                bannerCopy: 'عند وفاة المدخر غير العماني يتم تحويل الملف إلى مطالبة شرعية ومراجعة يدوية حتى اكتمال المستندات وتحديد المستحقين للصرف.',
+                reason: 'termination',
+                amount: '1,870.000 ر.ع',
+                obligations: '0.000 ر.ع',
+                available: '1,870.000 ر.ع',
+                bankMode: 'danger',
+                bankTitle: 'تم إيقاف قنوات الصرف الذاتية',
+                bankBody: 'الصرف لهذه الحالة يتم فقط بعد اكتمال المستندات الشرعية ومراجعة موظف الصندوق.',
+                showManualBankFields: false,
+                showSupportingFields: false,
+                hint: 'يعرض النموذج هذه الحالة كمرجع تغطية فقط، ويجب تحويلها إلى المعالجة اليدوية والورثة الشرعيين.',
+                allowSubmit: false,
+                secondaryAction: { label: 'عرض متطلبات المطالبة', action: 'requirements' },
+                statusItems: [
+                    'الحالة الحالية: قيد مراجعة شرعية',
+                    'مسار المعالجة: يدوي',
+                    'الإجراء المتاح: متابعة المستندات'
+                ],
+                currentCase: {
+                    title: 'الحالة مرتبطة بمطالبة شرعية',
+                    body: 'تبدأ المعالجة بعد استلام شهادة الوفاة ومستندات المستحقين، ولا يمكن استخدام مسار الصرف المعتاد أو التحويل البنكي المباشر.'
+                },
+                nextStep: {
+                    title: 'المتابعة الصحيحة',
+                    body: 'ينشأ ملف يدوي لدى موظف الصندوق وتتم متابعة المستندات حتى تحديد المستحقين وإصدار قرار الصرف.'
+                },
+                checks: [
+                    ['تعليق الصرف الذاتي', 'danger', 'تم حظر إرسال طلب إلكتروني مباشر.'],
+                    ['مراجعة قانونية', 'warning', 'بانتظار مستندات الورثة أو المطالب الشرعي.'],
+                    ['قرار الصرف النهائي', 'warning', 'يصدر بعد اكتمال الملف اليدوي.']
+                ],
+                timeline: [
+                    ['تم إشعار النظام بوفاة المدخر', '2026/06/02', ''],
+                    ['تم تحويل الملف إلى مسار المطالبات الشرعية', '2026/06/03', 'pending'],
+                    ['بانتظار اكتمال المستندات', 'الآن', 'pending']
+                ],
+                submissionMessage: ''
+            }
+        };
+
+        let activeScenario = 'normal';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const role = localStorage.getItem('spf-user-role') || 'saver';
+            if (role === 'employer' || role === 'staff') {
+                document.body.innerHTML = '<div class="container mt-5 text-center"><div class="alert alert-warning">عذرًا، صفحة طلبات الصرف هذه مخصصة للمدخرين الأفراد فقط.</div><a href="01-dashboard.html" class="btn btn-spf">العودة إلى لوحة التحكم</a></div>';
+                return;
+            }
+
+            renderScenarioCards();
+            bindFormEvents();
+            selectScenario('normal');
+        });
+
+        function renderScenarioCards() {
+            const grid = document.getElementById('scenarioGrid');
+            grid.innerHTML = Object.values(scenarios).map(item => `
+                <div class="scenario-card" data-scenario="${item.key}" onclick="selectScenario('${item.key}')">
+                    <div class="scenario-tag">${item.tag}</div>
+                    <div class="scenario-title">${item.title}</div>
+                    <div class="scenario-meta">${item.meta}</div>
+                </div>
+            `).join('');
+        }
+
+        function bindFormEvents() {
+            document.getElementById('paymentMethod').addEventListener('change', function() {
+                document.getElementById('installmentPanel').classList.toggle('d-none', this.value !== 'installments');
+            });
+        }
+
+        function selectScenario(key) {
+            activeScenario = key;
+            const scenario = scenarios[key];
+
+            document.querySelectorAll('.scenario-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.scenario === key);
+            });
+
+            document.getElementById('scenarioBanner').className = `state-banner ${scenario.bannerClass} mb-4`;
+            document.getElementById('scenarioBanner').innerHTML = `
+                <div>
+                    <div class="state-banner-title">${scenario.bannerTitle}</div>
+                    <div class="state-banner-copy">${scenario.bannerCopy}</div>
+                </div>
+                <div class="toolbar-inline">
+                    <span class="status-chip ${scenario.bannerClass === 'danger' ? 'danger' : scenario.bannerClass === 'warning' ? 'pending' : 'success'}">${scenario.title}</span>
+                    <span class="decision-pill"><strong>المتاح للصرف:</strong> ${scenario.available}</span>
+                </div>
+            `;
+
+            document.getElementById('disbursementReason').value = scenario.reason;
+            document.getElementById('totalBalanceValue').innerText = scenario.amount;
+            document.getElementById('obligationsValue').innerText = scenario.obligations;
+            document.getElementById('availableBalanceValue').innerText = scenario.available;
+            document.getElementById('formHint').innerText = scenario.hint;
+            document.getElementById('submitButton').disabled = !scenario.allowSubmit;
+            document.getElementById('submitButton').innerText = scenario.allowSubmit ? 'تقديم الطلب' : 'غير متاح للتقديم الذاتي';
+
+            renderBankPanel(scenario);
+            renderStatusStrip(scenario);
+            renderCaseBoxes(scenario);
+            renderChecks(scenario);
+            renderTimeline(scenario);
+            renderSecondaryAction(scenario);
+        }
+
+        function renderBankPanel(scenario) {
+            const bankPanel = document.getElementById('bankPanel');
+            const toneClass = scenario.bankMode === 'danger' ? 'danger' : scenario.bankMode === 'warning' ? 'warning' : '';
+            bankPanel.className = `signal-box mb-3 ${toneClass}`.trim();
+            bankPanel.innerHTML = `
+                <div class="signal-title">${scenario.bankTitle}</div>
+                <div>${scenario.bankBody}</div>
+            `;
+            document.getElementById('manualBankFields').classList.toggle('d-none', !scenario.showManualBankFields);
+            document.getElementById('supportingFields').classList.toggle('d-none', !scenario.showSupportingFields);
+        }
+
+        function renderStatusStrip(scenario) {
+            document.getElementById('statusStrip').innerHTML = scenario.statusItems.map(item => `<span class="decision-pill">${item}</span>`).join('');
+        }
+
+        function renderCaseBoxes(scenario) {
+            document.getElementById('currentCaseBox').innerHTML = `
+                <div class="signal-title">${scenario.currentCase.title}</div>
+                <div>${scenario.currentCase.body}</div>
+            `;
+            document.getElementById('nextStepBox').innerHTML = `
+                <div class="signal-title">${scenario.nextStep.title}</div>
+                <div>${scenario.nextStep.body}</div>
+            `;
+        }
+
+        function renderChecks(scenario) {
+            document.getElementById('checksRail').innerHTML = scenario.checks.map(item => `
+                <div class="process-step ${item[1]}">
+                    <div class="process-step-title">${item[0]}</div>
+                    <div class="mini-note">${item[2]}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderTimeline(scenario) {
+            document.getElementById('journeyTimeline').innerHTML = scenario.timeline.map(item => `
+                <li class="timeline-item ${item[2] || ''}">
+                    <div class="fw-700">${item[0]}</div>
+                    <div class="mini-note">${item[1]}</div>
+                </li>
+            `).join('');
+        }
+
+        function renderSecondaryAction(scenario) {
+            const button = document.getElementById('secondaryActionButton');
+            button.innerText = scenario.secondaryAction.label;
+            button.onclick = function() {
+                if (scenario.secondaryAction.action === 'manualBank') {
+                    document.getElementById('manualBankFields').classList.remove('d-none');
+                    spf.showSuccess('يمكنك الآن إدخال الحساب البديل وسيتم استخدامه بدل الحساب الأساسي.');
+                } else if (scenario.secondaryAction.action === 'retryBankLookup') {
+                    spf.showSuccess('تم إرسال طلب إعادة المحاولة لجلب الحساب البنكي. إذا استمر التعذر سيبقى المسار يدويًا.');
+                } else if (scenario.secondaryAction.action === 'manualCase') {
+                    window.location.href = '19-manual-cases.html';
+                } else if (scenario.secondaryAction.action === 'requirements') {
+                    spf.showSuccess('المستندات المطلوبة تشمل شهادة الوفاة، صفة المطالب، وبيانات المستحقين المعتمدين.');
+                }
+            };
+        }
+
+        function submitDisbursement() {
+            const scenario = scenarios[activeScenario];
+            if (!scenario.allowSubmit) {
+                spf.showError('هذه الحالة لا يمكن تقديمها عبر الطلب الذاتي ويجب متابعتها من خلال المسار اليدوي.');
+                return;
+            }
+
+            if (scenario.showManualBankFields) {
+                const bankName = document.getElementById('manualBankName').value.trim();
+                const iban = document.getElementById('manualIban').value.trim();
+                if (!bankName || !iban) {
+                    spf.showError('يرجى استكمال اسم البنك ورقم الآيبان قبل متابعة الطلب.');
+                    return;
+                }
+            }
+
+            if (scenario.showSupportingFields) {
+                const passportNumber = document.getElementById('passportNumber').value.trim();
+                if (!passportNumber) {
+                    spf.showError('يرجى إدخال رقم الحدود أو الجواز المرتبط بالحالة قبل المتابعة.');
+                    return;
+                }
+            }
+
+            spf.showSuccess(scenario.submissionMessage);
+        }
+    </script>
+</body>
+</html>

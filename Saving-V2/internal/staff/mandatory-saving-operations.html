@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الادخار الإلزامي - مساحة العمل الداخلية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../../assets/css/app.css">
+    <link rel="stylesheet" href="../../assets/css/shell.css">
+    <style>
+.filter-chip-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .filter-chip {
+            border: 1px solid var(--spf-border);
+            border-radius: 999px;
+            background: #fff;
+            color: var(--spf-text);
+            padding: 7px 14px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .filter-chip.active {
+            background: var(--spf-green-dark);
+            border-color: var(--spf-green-dark);
+            color: #fff;
+        }
+
+        .route-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .route-card {
+            border: 1px solid var(--spf-border);
+            border-radius: 18px;
+            background: #fff;
+            padding: 18px;
+            box-shadow: var(--spf-shadow);
+        }
+
+        .route-card .route-title {
+            font-weight: 800;
+            color: var(--spf-green-dark);
+            margin-bottom: 8px;
+        }
+
+        .route-card .route-copy {
+            color: var(--spf-text-muted);
+            line-height: 1.8;
+            margin-bottom: 14px;
+        }
+
+        .action-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+</style>
+</head>
+<body data-root="../../" data-user-role="staff">
+<main class="spf-main">
+<div class="page-header">
+            <div>
+                <h4>الادخار الإلزامي</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="../../internal/staff/index.html">لوحة التحكم</a></li>
+                        <li class="breadcrumb-item active">تشغيل الادخار الإلزامي</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="user-info-badge">
+                <span class="current-role-badge badge user-type-badge saver">المدخر</span>
+            </div>
+        </div>
+
+        <section class="role-section role-saver">
+            <div class="state-banner primary mb-4">
+                <div>
+                    <div class="state-banner-title">وضعك في الادخار الإلزامي يظهر من نفس منظومة V2</div>
+                    <div class="state-banner-copy">تعرض هذه الشاشة حالة التسجيل الإلزامي، والأجر المعتمد، والاعتراضات المفتوحة، ومتى ينتقل الملف إلى الصرف أو إخطار الخروج.</div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">حالة التسجيل</div><div class="metric-value">نشط</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">الأجر الأساسي المعتمد</div><div class="metric-value">420</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">الاستقطاع الشهري 9%</div><div class="metric-value">37.800</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">إجراءات مفتوحة</div><div class="metric-value">2</div></div></div>
+            </div>
+
+            <div class="board-grid">
+                <div class="section-card">
+                    <div class="section-title">ماذا يحدث في حالتك الآن</div>
+                    <div class="process-rail">
+                        <div class="process-step current">
+                            <div class="process-step-title">التسجيل الإلزامي مكتمل</div>
+                            <div class="mini-note">تم إنشاء الحساب الإلزامي من بيانات عقد العمل، ويظهر الأجر الحالي المستخدم في احتساب مساهمة 9%.</div>
+                        </div>
+                        <div class="process-step warning">
+                            <div class="process-step-title">يمكنك الاعتراض على الأجر إذا كان غير صحيح</div>
+                            <div class="mini-note">إذا كان الأجر الأساسي المسجل لا يطابق العقد أو قرار الجهة المختصة، فيمكن تقديم الاعتراض من الشاشة المخصصة.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf-outline" href="../../internal/staff/salary-objections.html">فتح اعتراض الأجر</a>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="process-step-title">عند انتهاء العلاقة أو فقدان الشرط</div>
+                            <div class="mini-note">يتم الربط بين إشعار الخروج، استحقاق الصرف، والتأثير على العوائد من داخل V2 دون الحاجة لشاشة منفصلة توضيحية فقط.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf-outline" href="../../internal/staff/exit-notifications.html">إخطار الخروج</a>
+                                <a class="btn btn-spf-outline" href="../../internal/staff/disbursement-processing.html">طلبات الصرف</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">روابط المتابعة السريعة</div>
+                    <div class="action-stack">
+                        <a href="../../internal/staff/index.html" class="action-card">
+                            <div class="action-icon"><i class="fas fa-id-card"></i></div>
+                            <div class="action-title">تفاصيل الحساب</div>
+                            <div class="action-desc">عرض الرصيد، الحركات، ومصادر المبالغ المسجلة.</div>
+                        </a>
+                        <a href="../../internal/staff/salary-objections.html" class="action-card">
+                            <div class="action-icon"><i class="fas fa-money-check-dollar"></i></div>
+                            <div class="action-title">اعتراض الأجر</div>
+                            <div class="action-desc">متابعة الاعتراض والرد والشكوى العمالية من شاشة واحدة.</div>
+                        </a>
+                        <a href="../../internal/staff/exit-notifications.html" class="action-card">
+                            <div class="action-icon"><i class="fas fa-right-from-bracket"></i></div>
+                            <div class="action-title">الخروج من النظام</div>
+                            <div class="action-desc">تقديم الإشعار ومتابعة أثره على الصرف والعوائد قبل الإرسال.</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="role-section role-employer d-none">
+            <section class="hero-panel mb-4">
+                <div class="hero-title">تشغيل الادخار الإلزامي من نفس شاشة المتابعة</div>
+                <div class="hero-copy">تعرض هذه الشاشة التسجيل التلقائي والرجعي والمباشر، واعتراضات الأجر، والفواتير، وإشعارات الخروج التي تؤثر على التزامات جهة العمل.</div>
+                <div class="hero-stats">
+                    <div class="hero-stat"><div class="hero-stat-label">عمال إلزاميون نشطون</div><div class="hero-stat-value">212</div></div>
+                    <div class="hero-stat"><div class="hero-stat-label">اعتراضات أجر</div><div class="hero-stat-value">4</div></div>
+                    <div class="hero-stat"><div class="hero-stat-label">تسجيلات رجعية</div><div class="hero-stat-value">7</div></div>
+                    <div class="hero-stat"><div class="hero-stat-label">ملفات تؤثر على الفاتورة</div><div class="hero-stat-value">5</div></div>
+                </div>
+            </section>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">بانتظار تسجيل</div><div class="metric-value" id="needsRegistrationCount">0</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">قيد مراجعة</div><div class="metric-value" id="underReviewCount">0</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">مرتبطة بالفواتير</div><div class="metric-value" id="invoiceRiskCount">0</div></div></div>
+                <div class="col-md-3"><div class="metric-card"><div class="metric-label">بحاجة مسار يدوي</div><div class="metric-value" id="manualCount">0</div></div></div>
+            </div>
+
+            <div class="section-card mb-4">
+                <div class="list-toolbar">
+                    <div>
+                        <div class="section-title mb-1">قائمة العمال وحالة الادخار الإلزامي</div>
+                        <div class="text-muted">يمكنك من نفس الجدول معرفة نوع التسجيل، والأجر الحالي، وأثر الحالة على المساهمة الشهرية، ثم فتح التفاصيل المناسبة.</div>
+                    </div>
+                    <div class="toolbar-group">
+                        <input id="workerSearchInput" class="form-control" style="min-width: 230px;" placeholder="ابحث بالاسم أو الرقم المدني">
+                        <select id="workerStatusFilter" class="form-select" style="min-width: 200px;">
+                            <option value="all">كل الحالات</option>
+                            <option value="needs-registration">تحتاج تسجيل</option>
+                            <option value="review">قيد مراجعة</option>
+                            <option value="invoicing">مرتبطة بالفواتير</option>
+                            <option value="manual">مسار يدوي</option>
+                            <option value="active">نشطة</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-chip-group" id="routeFilterGroup">
+                    <button type="button" class="filter-chip active" data-route="all">الكل</button>
+                    <button type="button" class="filter-chip" data-route="automatic">تلقائي</button>
+                    <button type="button" class="filter-chip" data-route="retroactive">رجعي</button>
+                    <button type="button" class="filter-chip" data-route="direct-decision">قرار مباشر</button>
+                    <button type="button" class="filter-chip" data-route="salary-review">مراجعة أجر</button>
+                    <button type="button" class="filter-chip" data-route="exit-impact">خروج أو فقدان شرط</button>
+                </div>
+
+                <div class="table-responsive mt-3">
+                        <table class="table dense-table compact-table align-middle">
+                            <thead>
+                            <tr>
+                                <th>العامل</th>
+                                <th>نوع التسجيل</th>
+                                <th>الأجر الأساسي</th>
+                                <th>مساهمة 9%</th>
+                                <th>الحالة</th>
+                                <th>الالتزام الحالي</th>
+                                <th>الإجراء</th>
+                            </tr>
+                            </thead>
+                        <tbody id="mandatoryWorkerRows"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="route-grid">
+                <div class="route-card">
+                    <div class="route-title">التسجيل التلقائي</div>
+                    <div class="route-copy">يتم تكوين الحساب من بيانات عقد العمل المعتمد، ثم يظهر العامل مباشرة في قائمة العمال مع الأجر والمساهمة الشهرية.</div>
+                    <div class="action-links">
+                        <a class="btn btn-spf-outline btn-sm" href="../../internal/staff/registration-operations.html">عرض التسجيل</a>
+                    </div>
+                </div>
+                <div class="route-card">
+                    <div class="route-title">التسجيل الرجعي أو بقرار مباشر</div>
+                    <div class="route-copy">إذا تأخر الإدخال أو ورد قرار بإدراج عامل مباشرة، تنتقل الحالة إلى مراجعة ثم تنعكس على الالتزامات أو الفواتير الشهرية.</div>
+                    <div class="action-links">
+                        <a class="btn btn-spf-outline btn-sm" href="../../internal/staff/registration-operations.html">فتح التسجيل</a>
+                        <a class="btn btn-spf-outline btn-sm" href="../../internal/staff/mandatory-invoices.html">عرض الفواتير</a>
+                    </div>
+                </div>
+                <div class="route-card">
+                    <div class="route-title">تصحيح الأجر والجزاءات</div>
+                    <div class="route-copy">إذا ثبت عدم صحة الأجر أو تأخر السداد، يتم تتبع الأثر من الاعتراض أو المراجعة حتى المبلغ الإضافي والفاتورة المعدلة.</div>
+                    <div class="action-links">
+                        <a class="btn btn-spf-outline btn-sm" href="../../internal/staff/salary-objections.html">اعتراض الأجر</a>
+                        <a class="btn btn-spf-outline btn-sm" href="../../internal/staff/mandatory-invoices.html">متابعة الفاتورة</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="role-section role-staff d-none">
+            <section class="hero-panel mb-4">
+                <div class="hero-title">غرفة تشغيل الادخار الإلزامي</div>
+                <div class="hero-copy">تعرض هذه الصفحة متابعة التسجيل، ومراجعات الأجر، والغرامات، وإشعارات الخروج، والحالات التي تحتاج معالجة يدوية.</div>
+                <div class="hero-stats">
+                    <div class="hero-stat"><div class="hero-stat-label">ملفات مفتوحة</div><div class="hero-stat-value">23</div></div>
+                    <div class="hero-stat"><div class="hero-stat-label">قضايا أجر</div><div class="hero-stat-value">9</div></div>
+                    <div class="hero-stat"><div class="hero-stat-label">غرامات تحت المراجعة</div><div class="hero-stat-value">5</div></div>
+                    <div class="hero-stat"><div class="hero-stat-label">تحويلات للمسار اليدوي</div><div class="hero-stat-value">3</div></div>
+                </div>
+            </section>
+
+            <div class="board-grid mb-4">
+                <div class="section-card">
+                    <div class="section-title">مسارات التشغيل المغطاة في V2</div>
+                    <div class="process-rail">
+                        <div class="process-step current">
+                            <div class="process-step-title">التسجيل التلقائي والرجعي</div>
+                            <div class="mini-note">تظهر الحالات التي دخلت تلقائيا، والمتأخرة التي تحتاج رجعية أو قرارا مباشرا، مع ربطها بالتسجيل والفواتير.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf-outline" href="../../internal/staff/registration-operations.html">فتح التسجيل</a>
+                            </div>
+                        </div>
+                        <div class="process-step warning">
+                            <div class="process-step-title">مراجعة الأجر وآثار الجزاء</div>
+                            <div class="mini-note">الاعتراض أو المراجعة المؤيدة لتغيير الأجر تنقل الحالة إلى تعديل الالتزام، ثم إلى الفاتورة أو المتابعة اليدوية.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf-outline" href="../../internal/staff/salary-objections.html">اعتراضات الأجر</a>
+                                <a class="btn btn-spf-outline" href="../../internal/staff/mandatory-invoices.html">الفواتير</a>
+                            </div>
+                        </div>
+                        <div class="process-step danger">
+                            <div class="process-step-title">الاستثناءات والخروج</div>
+                            <div class="mini-note">إشعارات الخروج، فقدان الشرط، وتعذر المسار الآلي تنتقل إلى قوائم التشغيل أو الحالات اليدوية بدل بقائها كنصوص عامة.</div>
+                            <div class="action-rail mt-3">
+                                <a class="btn btn-spf-outline" href="../../internal/staff/exit-notifications.html">إشعارات الخروج</a>
+                                <a class="btn btn-spf-outline" href="../../internal/staff/manual-cases.html">الحالات اليدوية</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">مؤشرات رقابية سريعة</div>
+                    <div class="matrix-grid">
+                        <div class="matrix-card">
+                            <span class="status-chip info">رواتب</span>
+                            <div class="flow-title">4 ملفات مهيأة لتعديل الأجر</div>
+                            <div class="flow-copy">سيؤثر التعديل على المساهمة الإلزامية وفاتورة الشهر الحالي أو السابق.</div>
+                        </div>
+                        <div class="matrix-card">
+                            <span class="status-chip pending">رجعي</span>
+                            <div class="flow-title">3 حالات تتطلب أثر رجعي</div>
+                            <div class="flow-copy">بعض الحالات لم تظهر في التسجيل الأولي وتحتاج إعادة احتساب الالتزام.</div>
+                        </div>
+                        <div class="matrix-card">
+                            <span class="status-chip danger">غرامات</span>
+                            <div class="flow-title">5 فواتير متأخرة</div>
+                            <div class="flow-copy">تم توليد مبلغ إضافي ويجب تتبع السداد أو الاعتراض.</div>
+                        </div>
+                        <div class="matrix-card">
+                            <span class="status-chip success">خروج</span>
+                            <div class="flow-title">6 إشعارات مكتملة</div>
+                            <div class="flow-copy">تم تثبيت أثرها على الرصيد والعائد ومسار الاستحقاق.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">الطابور التشغيلي للحالات الإلزامية</div>
+                <div class="table-responsive">
+                    <table class="table dense-table compact-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>الملف</th>
+                                <th>المسار</th>
+                                <th>سبب الظهور</th>
+                                <th>المدة المحددة</th>
+                                <th>المالك</th>
+                                <th>الخطوة التالية</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffMandatoryRows"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/js/prototype-core.js"></script>
+<script src="../../assets/js/internal-shell.js"></script>
+<script>
+const mandatoryWorkers = [
+            {
+                id: 1,
+                name: 'راجيش كومار',
+                civilId: '88001122',
+                route: 'automatic',
+                routeLabel: 'تسجيل تلقائي',
+                salary: 420,
+                contribution: 37.8,
+                state: 'active',
+                stateLabel: 'نشط',
+                tone: 'success',
+                invoiceImpact: 'مدرج في فاتورة يونيو',
+                summary: 'العامل مسجل تلقائيا ويظهر في الفاتورة الشهرية الحالية دون استثناءات.',
+                nextCopy: 'لا توجد معالجة إضافية حاليا. يمكن مراجعة الحساب أو متابعة الفاتورة فقط.',
+                actions: [
+                    { href: '../../internal/staff/mandatory-saving-operations.html', label: 'قائمة العمال' },
+                    { href: '../../internal/staff/mandatory-invoices.html', label: 'الفواتير الشهرية' }
+                ]
+            },
+            {
+                id: 2,
+                name: 'محمد إقبال',
+                civilId: '88001123',
+                route: 'salary-review',
+                routeLabel: 'مراجعة أجر',
+                salary: 380,
+                contribution: 34.2,
+                state: 'review',
+                stateLabel: 'اعتراض أجر مفتوح',
+                tone: 'pending',
+                invoiceImpact: 'قد تتعدل فاتورة يوليو',
+                summary: 'يوجد اعتراض على الأجر الأساسي وقد ينتج عنه إعادة احتساب للمساهمة والغرامة.',
+                nextCopy: 'المتابعة من شاشة اعتراض الأجر، ثم تنتقل النتيجة إلى الالتزام أو الفاتورة وفق قرار الصندوق.',
+                actions: [
+                    { href: '../../internal/staff/salary-objections.html', label: 'فتح الاعتراض' },
+                    { href: '../../internal/staff/mandatory-invoices.html', label: 'متابعة الفاتورة' }
+                ]
+            },
+            {
+                id: 3,
+                name: 'علي رضا',
+                civilId: '88001124',
+                route: 'retroactive',
+                routeLabel: 'تسجيل رجعي',
+                salary: 510,
+                contribution: 45.9,
+                state: 'needs-registration',
+                stateLabel: 'بانتظار اعتماد رجعي',
+                tone: 'info',
+                invoiceImpact: 'يلزم إنشاء فاتورة فرق',
+                summary: 'الحالة لم تظهر في التسجيل الأولي وتحتاج تسجيلًا بأثر رجعي مع فرق مساهمات.',
+                nextCopy: 'يجب إتمام التسجيل الرجعي ثم توليد فرق الفاتورة أو توجيه الحالة للمراجعة اليدوية إذا كان هناك نقص في البيانات.',
+                actions: [
+                    { href: '../../internal/staff/registration-operations.html', label: 'فتح التسجيل' },
+                    { href: '../../internal/staff/mandatory-invoices.html', label: 'متابعة فرق الفاتورة' }
+                ]
+            },
+            {
+                id: 4,
+                name: 'جوزيف ماثيو',
+                civilId: '88001125',
+                route: 'direct-decision',
+                routeLabel: 'قرار مباشر',
+                salary: 450,
+                contribution: 40.5,
+                state: 'invoicing',
+                stateLabel: 'قرار مباشر مؤثر على الفاتورة',
+                tone: 'warning',
+                invoiceImpact: 'بانتظار سداد فاتورة إدراج',
+                summary: 'تم إدراج العامل بقرار مباشر، والفاتورة الناتجة ما زالت مفتوحة على الحساب الافتراضي.',
+                nextCopy: 'الحالة جاهزة للمتابعة المالية من شاشة الفواتير، وتظهر حالة السداد والتخصيص هناك.',
+                actions: [
+                    { href: '../../internal/staff/mandatory-invoices.html', label: 'عرض الفاتورة' },
+                    { href: '../../internal/staff/mandatory-saving-operations.html', label: 'بيانات العامل' }
+                ]
+            },
+            {
+                id: 5,
+                name: 'أنيل راج',
+                civilId: '88001126',
+                route: 'exit-impact',
+                routeLabel: 'خروج أو فقدان شرط',
+                salary: 400,
+                contribution: 36,
+                state: 'manual',
+                stateLabel: 'تحتاج مسارا يدويا',
+                tone: 'danger',
+                invoiceImpact: 'إشعار خروج متأخر وحالة عائد معلقة',
+                summary: 'إخطار الخروج ورد بعد المهلة ويستلزم تثبيت التاريخ وتحويل الحالة إلى المعالجة اليدوية.',
+                nextCopy: 'ينبغي متابعة إشعار الخروج ثم مراجعة الحالة اليدوية لتثبيت التاريخ وأثره على العائد أو الصرف.',
+                actions: [
+                    { href: '../../internal/staff/exit-notifications.html', label: 'إشعار الخروج' },
+                    { href: '../../internal/staff/manual-cases.html', label: 'فتح الحالة اليدوية' }
+                ]
+            }
+        ];
+
+        const staffQueue = [
+            ['MF-2026-014', 'مراجعة أجر', 'طلب اعتراض أجر قد يغيّر مساهمة 9%', '01:20 يوم', 'فريق الاشتراكات', 'متابعة الاعتراض ثم تحديث الفاتورة'],
+            ['MF-2026-019', 'تسجيل رجعي', 'عامل مضاف بعد فحص تدقيق البيانات', '00:12 يوم', 'فريق التسجيل', 'إكمال التسجيل الرجعي وإنشاء فرق الفاتورة'],
+            ['MF-2026-022', 'غرامة تأخير', 'فاتورة يونيو لم تسدد في الموعد', '02:00 يوم', 'الفريق المالي', 'مراجعة الفاتورة وإشعار جهة العمل'],
+            ['MF-2026-031', 'خروج متأخر', 'إشعار بعد المهلة القانونية', '00:18 يوم', 'فريق الصرف', 'اعتماد الإخطار أو تحويل الحالة اليدوية']
+        ];
+
+        let selectedRoute = 'all';
+        let activeWorker = null;
+        const modal = new bootstrap.Modal(document.getElementById('mandatoryModal'));
+
+        function formatAmount(value) {
+            return `${Number(value).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} ر.ع`;
+        }
+
+        function renderCounts() {
+            document.getElementById('needsRegistrationCount').innerText = mandatoryWorkers.filter(item => item.state === 'needs-registration').length;
+            document.getElementById('underReviewCount').innerText = mandatoryWorkers.filter(item => item.state === 'review').length;
+            document.getElementById('invoiceRiskCount').innerText = mandatoryWorkers.filter(item => item.state === 'invoicing').length;
+            document.getElementById('manualCount').innerText = mandatoryWorkers.filter(item => item.state === 'manual').length;
+        }
+
+        function renderWorkerRows() {
+            const search = document.getElementById('workerSearchInput').value.trim();
+            const statusFilter = document.getElementById('workerStatusFilter').value;
+
+            const rows = mandatoryWorkers.filter(item => {
+                const haystack = `${item.name} ${item.civilId}`;
+                const matchesSearch = !search || haystack.includes(search);
+                const matchesStatus = statusFilter === 'all' || item.state === statusFilter;
+                const matchesRoute = selectedRoute === 'all' || item.route === selectedRoute;
+                return matchesSearch && matchesStatus && matchesRoute;
+            });
+
+            document.getElementById('mandatoryWorkerRows').innerHTML = rows.map(item => `
+                <tr>
+                    <td>
+                        <div class="fw-700">${item.name}</div>
+                        <div class="mini-note">${item.civilId}</div>
+                    </td>
+                    <td>${item.routeLabel}</td>
+                    <td>${formatAmount(item.salary)}</td>
+                    <td>${formatAmount(item.contribution)}</td>
+                    <td><span class="status-chip ${item.tone}">${item.stateLabel}</span></td>
+                    <td>${item.invoiceImpact}</td>
+                    <td><button class="btn btn-sm btn-spf-outline" onclick="openMandatoryModal(${item.id})">عرض التفاصيل</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderStaffRows() {
+            document.getElementById('staffMandatoryRows').innerHTML = staffQueue.map(item => `
+                <tr>
+                    <td class="fw-700">${item[0]}</td>
+                    <td>${item[1]}</td>
+                    <td>${item[2]}</td>
+                    <td>${item[3]}</td>
+                    <td>${item[4]}</td>
+                    <td>${item[5]}</td>
+                </tr>
+            `).join('');
+        }
+
+        function openMandatoryModal(id) {
+            activeWorker = mandatoryWorkers.find(item => item.id === id);
+            if (!activeWorker) return;
+
+            document.getElementById('mandatoryModalTitle').innerText = `تفاصيل الحالة - ${activeWorker.name}`;
+            document.getElementById('mandatoryModalBanner').className = `state-banner ${activeWorker.tone === 'danger' ? 'danger' : activeWorker.tone === 'warning' ? 'warning' : activeWorker.tone === 'pending' ? 'warning' : activeWorker.tone === 'info' ? 'primary' : 'primary'} mb-4`;
+            document.getElementById('mandatoryModalBanner').innerHTML = `
+                <div>
+                    <div class="state-banner-title">${activeWorker.stateLabel}</div>
+                    <div class="state-banner-copy">${activeWorker.summary}</div>
+                </div>
+            `;
+
+            document.getElementById('mandatoryModalDetails').innerHTML = [
+                ['العامل', activeWorker.name],
+                ['الرقم المدني', activeWorker.civilId],
+                ['نوع التسجيل', activeWorker.routeLabel],
+                ['الأجر الأساسي', formatAmount(activeWorker.salary)],
+                ['مساهمة 9%', formatAmount(activeWorker.contribution)],
+                ['الالتزام الحالي', activeWorker.invoiceImpact]
+            ].map(item => `
+                <div class="detail-item">
+                    <div class="detail-label">${item[0]}</div>
+                    <div class="detail-value">${item[1]}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('mandatoryModalCopy').innerText = activeWorker.nextCopy;
+            document.getElementById('mandatoryModalActions').innerHTML = activeWorker.actions.map(action => `
+                <a class="btn btn-spf-outline" href="${action.href}">${action.label}</a>
+            `).join('');
+
+            modal.show();
+        }
+
+        function markReviewed() {
+            if (!activeWorker) {
+                spf.showError('افتح حالة أولا قبل تسجيل المتابعة.');
+                return;
+            }
+
+            activeWorker.summary = 'تم تسجيل متابعة داخلية على الحالة مع الإبقاء على مسارها الحالي في V2.';
+            modal.hide();
+            spf.showSuccess(`تم تسجيل متابعة داخلية على ملف ${activeWorker.name}.`);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            renderCounts();
+            renderWorkerRows();
+            renderStaffRows();
+        });
+
+        document.getElementById('workerSearchInput').addEventListener('input', renderWorkerRows);
+        document.getElementById('workerStatusFilter').addEventListener('change', renderWorkerRows);
+        document.getElementById('markReviewedBtn').addEventListener('click', markReviewed);
+
+        document.getElementById('routeFilterGroup').addEventListener('click', function (e) {
+            const btn = e.target.closest('[data-route]');
+            if (!btn) return;
+
+            selectedRoute = btn.getAttribute('data-route');
+            document.querySelectorAll('#routeFilterGroup .filter-chip').forEach(chip => chip.classList.remove('active'));
+            btn.classList.add('active');
+            renderWorkerRows();
+        });
+</script>
+</body>
+</html>
