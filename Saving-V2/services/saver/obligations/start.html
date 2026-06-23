@@ -36,7 +36,7 @@
                     <div class="card-header-custom">ملخص الرصيد المتاح</div>
                     <div class="card-body text-center py-4">
                         <h6 class="text-muted mb-2">رصيدك الحالي في نظام الادخار</h6>
-                        <h2 class="fw-800 text-spf">1,450.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع"></h2>
+                        <h2 class="fw-800 text-spf">1,450.000 <img src="../../../assets/img/omr_icon.svg" class="currency-icon" alt="ر.ع"></h2>
                         <div class="mt-3 p-2 bg-spf-light rounded small text-spf-dark">
                             <i class="fas fa-info-circle me-1"></i> يمكنك استخدام هذا الرصيد لسداد التزاماتك لدى الصندوق.
                         </div>
@@ -72,28 +72,28 @@
                                         <td>قسط متأخر - نظام الأمان الوظيفي</td>
                                         <td>صندوق الحماية الاجتماعية</td>
                                         <td>01/02/2026</td>
-                                        <td class="fw-700">45.500 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                        <td class="fw-700">45.500 <img src="../../../assets/img/omr_icon.svg" class="currency-icon" alt="ر.ع">
                                     </tr>
                                     <tr>
                                         <td><input type="checkbox" class="ob-check" data-amount="200.000"></td>
                                         <td>دفعة قسط - قرض سكني مدعوم</td>
                                         <td>برنامج الإسكان</td>
                                         <td>15/02/2026</td>
-                                        <td class="fw-700">200.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                        <td class="fw-700">200.000 <img src="../../../assets/img/omr_icon.svg" class="currency-icon" alt="ر.ع">
                                     </tr>
                                     <tr>
                                         <td><input type="checkbox" class="ob-check" data-amount="50.000"></td>
                                         <td>مساهمة شهرية - مبادرة سهم</td>
                                         <td>مبادرة سهم الخيرية</td>
                                         <td>20/02/2026</td>
-                                        <td class="fw-700">50.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                        <td class="fw-700">50.000 <img src="../../../assets/img/omr_icon.svg" class="currency-icon" alt="ر.ع">
                                     </tr>
                                     <tr>
                                         <td><input type="checkbox" class="ob-check" data-amount="15.000"></td>
                                         <td>رسوم إدارية - تحديث بيانات</td>
                                         <td>صندوق الحماية الاجتماعية</td>
                                         <td>10/02/2026</td>
-                                        <td class="fw-700">15.000 <img src="omr_icon.svg" class="currency-icon" alt="ر.ع">
+                                        <td class="fw-700">15.000 <img src="../../../assets/img/omr_icon.svg" class="currency-icon" alt="ر.ع">
                                     </tr>
                                 </tbody>
                             </table>
@@ -160,7 +160,7 @@ const balance = 1450.000;
         function confirmPayment() {
             document.getElementById('modalAmount').innerText = totalSpan.innerText + ' '; 
             const img = document.createElement('img');
-            img.src = 'omr_icon.svg';
+            img.src = '../../../assets/img/omr_icon.svg';
             img.className = 'currency-icon';
             img.alt = 'ر.ع';
             document.getElementById('modalAmount').appendChild(img);

@@ -46,7 +46,7 @@
             <header class="gup-site-header">
                 <div class="gup-site-header-inner">
                     <a class="gup-brand" href="${root}index.html">
-                        <img src="${root}assets/img/SPF_logo_gold.svg" alt="SPF">
+                        <img src="${root}assets/img/Gov.omLogo.png" alt="Gov.om">
                         <div>
                             <div>بيئة العمل الداخلية</div>
                             <small class="text-muted">موظف الصندوق</small>

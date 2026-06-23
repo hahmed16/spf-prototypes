@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - خدمات الادخار</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="assets/css/app.css">
+    <link rel="stylesheet" href="assets/css/shell.css">
+</head>
+<body data-root="./" data-page-kind="auth">
+    <main id="mainContent" class="gup-main-shell">
+        <section class="auth-hero">
+            <div class="breadcrumbs-lite">
+                <a href="index.html">الرئيسية</a>
+                <span>›</span>
+                <span>التجربة الحكومية الموحدة</span>
+                <span>›</span>
+                <span>تسجيل الدخول</span>
+            </div>
+            <h1>تسجيل الدخول</h1>
+            <p>سجّل دخولك بواسطة بياناتك الشخصية لنتمكن من تخصيص تجربتك في الاستفادة من خدمات الادخار المتاحة عبر البوابة الموحدة.</p>
+        </section>
+
+        <section class="auth-shell">
+            <aside class="auth-benefits-card">
+                <h2>ماذا تستفيد من تسجيل الدخول إلى البوابة؟</h2>
+                <ul class="auth-benefits-list">
+                    <li><i class="fas fa-circle-check"></i><span>دخول موحد لكافة الخدمات الحكومية.</span></li>
+                    <li><i class="fas fa-circle-check"></i><span>صفحة شخصية لمتابعة مستجدات الطلب إلكترونياً.</span></li>
+                    <li><i class="fas fa-circle-check"></i><span>سهولة التنقل بين حسابك الشخصي والتجاري.</span></li>
+                    <li><i class="fas fa-circle-check"></i><span>إمكانية تعديل بيانات ملفك الشخصي.</span></li>
+                    <li><i class="fas fa-circle-check"></i><span>إشعارات مخصصة بكل ما يهمك.</span></li>
+                </ul>
+            </aside>
+
+            <article class="auth-panel">
+                <div class="auth-panel-header">
+                    <h2>اختر طريقة لتسجيل الدخول</h2>
+                    <p>يمكنك تسجيل الدخول للبوابة باستخدام بطاقتك الشخصية أو رقم الهاتف. في النموذج الأولي سيتم تحويلك مباشرة إلى واجهة الخدمة بعد اختيار الطريقة.</p>
+                </div>
+
+                <div class="auth-options" id="authOptions">
+                    <button type="button" class="auth-option" data-method="mobile">
+                        <div class="auth-option-main">
+                            <div class="auth-option-title">هاتف نقال</div>
+                            <div class="auth-option-copy">تحتاج إلى شريحة هاتف مفعلة.</div>
+                        </div>
+                        <span class="auth-option-indicator"><i class="fas fa-check"></i></span>
+                    </button>
+                    <button type="button" class="auth-option" data-method="card">
+                        <div class="auth-option-main">
+                            <div class="auth-option-title">البطاقة الشخصية</div>
+                            <div class="auth-option-copy">تحتاج إلى قارئ البطاقة.</div>
+                        </div>
+                        <span class="auth-option-indicator"><i class="fas fa-check"></i></span>
+                    </button>
+                </div>
+
+                <div class="auth-recaptcha">
+                    <span>أنا لست برنامج روبوت</span>
+                    <span class="auth-recaptcha-box" aria-hidden="true"></span>
+                </div>
+
+                <div class="gup-auth-actions mt-4">
+                    <button id="continueButton" type="button" class="gup-primary-btn" disabled>تابع</button>
+                    <a class="auth-helper-link" href="#">احصل على مساعدة</a>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <script src="assets/js/prototype-core.js"></script>
+    <script src="assets/js/external-shell.js"></script>
+    <script>
+        (function () {
+            const optionButtons = Array.from(document.querySelectorAll('.auth-option'));
+            const continueButton = document.getElementById('continueButton');
+            const params = new URLSearchParams(window.location.search);
+            const redirectTarget = params.get('redirect') || 'index.html';
+            let selectedMethod = '';
+
+            optionButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    selectedMethod = this.dataset.method;
+                    optionButtons.forEach(item => item.classList.remove('active'));
+                    this.classList.add('active');
+                    continueButton.disabled = false;
+                });
+            });
+
+            continueButton.addEventListener('click', function () {
+                if (!selectedMethod) return;
+                const target = './' + redirectTarget.replace(/^\.?\//, '');
+                window.location.href = target;
+            });
+        })();
+    </script>
+</body>
+</html>

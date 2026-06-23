@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>خدمات الادخار - V2</title>
+    <title>الخدمات الحكومية - خدمات الادخار</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -12,238 +12,344 @@
     <link rel="stylesheet" href="assets/css/app.css">
     <link rel="stylesheet" href="assets/css/shell.css">
 </head>
-<body data-root="./">
+<body data-root="./" data-page-kind="catalog">
     <main id="mainContent" class="gup-main-shell">
         <section class="catalog-hero">
             <div class="breadcrumbs-lite">
-                <span>الرئيسية</span>
+                <a href="#">الرئيسية</a>
                 <span>›</span>
-                <span>خدمات الادخار</span>
+                <span>الخدمات الحكومية</span>
             </div>
-            <h1>قائمة خدمات الادخار</h1>
-            <p>تعرض هذه النسخة خدمات `المدخر` و`صاحب العمل` كخدمات خارجية متوافقة مع نموذج GUP: بطاقة خدمة ثم صفحة تنفيذ مركزة، مع إبقاء مساحة العمل الداخلية منفصلة لموظف الصندوق.</p>
+            <h1>الخدمات الحكومية</h1>
+            <p class="gup-page-intro">استعرض خدمات الادخار الرقمية المتكاملة للمدخر وصاحب العمل من خلال تجربة عرض متوافقة مع نمط البوابة الحكومية الموحدة، ثم انتقل إلى بطاقة الخدمة وتسجيل الدخول وواجهة التنفيذ.</p>
         </section>
 
-        <section class="service-panel-grid mb-4">
-            <article class="service-panel">
-                <span class="summary-chip">الخدمات الخارجية</span>
-                <h2 class="mt-3">المدخر وصاحب العمل</h2>
-                <p>كل خدمة تبدأ ببطاقة تعريفية تتضمن الوصف والمتطلبات والمستندات والرسوم والمدة، ثم تنتقل إلى صفحة تنفيذ الخدمة دون قائمة جانبية.</p>
-            </article>
-            <article class="service-panel">
-                <span class="summary-chip">العمل الداخلي</span>
-                <h2 class="mt-3">موظف الصندوق</h2>
-                <p>تمت إعادة تنظيم صفحات الموظف ضمن مساحة عمل داخلية ذات قائمة جانبية، مع تحديث كامل للمظهر العام ليتماشى بصريًا مع معايير GUP.</p>
-            </article>
-            <article class="service-panel">
-                <span class="summary-chip">المراجع</span>
-                <h2 class="mt-3">الوثائق المساندة</h2>
-                <p>تبقى وثيقة BRD، وتدقيق الفجوات، والنسخة المؤرشفة من V2 متاحة للمراجعة أثناء التطوير أو العرض.</p>
-                <div class="gup-inline-actions mt-3">
-                    <a class="gup-outline-btn" href="Full-BRD/Saving-Full-BRD.html">BRD</a>
-                    <a class="gup-outline-btn" href="helper-docs/prototype-gap-audit-vs-full-brd.md">تدقيق الفجوات</a>
-                    <a class="gup-outline-btn" href="_legacy/current/index.html">V2 المؤرشفة</a>
-                </div>
-            </article>
-        </section>
+        <section class="catalog-layout">
+            <aside class="catalog-filters-area">
+                <article class="catalog-filter-card">
+                    <h2>التصفية</h2>
+                    <div class="catalog-filter-group">
+                        <label for="catalogSearch">ابحث</label>
+                        <div class="catalog-search-box">
+                            <i class="fas fa-search"></i>
+                            <input id="catalogSearch" class="catalog-search-input" type="search" placeholder="ابحث عن اسم الخدمة">
+                        </div>
+                    </div>
+                    <div class="catalog-filter-group">
+                        <div class="catalog-filter-heading">المستفيد</div>
+                        <div class="catalog-filter-pills" id="audienceFilters">
+                            <button type="button" class="catalog-filter-pill active" data-filter-audience="all">الكل</button>
+                            <button type="button" class="catalog-filter-pill" data-filter-audience="saver">المدخر</button>
+                            <button type="button" class="catalog-filter-pill" data-filter-audience="employer">صاحب العمل</button>
+                        </div>
+                    </div>
+                    <div class="catalog-filter-group">
+                        <label for="journeyFilter">رحلة الخدمة</label>
+                        <select id="journeyFilter" class="catalog-filter-select">
+                            <option value="all">الكل</option>
+                            <option value="registration">التسجيل</option>
+                            <option value="account">الحساب والحركات</option>
+                            <option value="deposit">الإيداع والسداد</option>
+                            <option value="mandatory">الادخار الإلزامي</option>
+                            <option value="disbursement">الصرف والخروج</option>
+                            <option value="compliance">الاعتراضات والتسويات</option>
+                        </select>
+                    </div>
+                </article>
 
-        <section class="catalog-section" id="saver-services">
-            <div class="catalog-section-header">
-                <div>
-                    <span class="context-chip">المدخر</span>
-                    <h2 class="mt-3 mb-2">خدمات المدخر</h2>
-                    <p class="catalog-meta">خدمات خارجية تبدأ من بطاقة خدمة ثم تنتقل إلى تجربة تنفيذ الخدمة فقط.</p>
-                </div>
-            </div>
-            <div class="catalog-grid">
-                <article class="service-card">
-    <span class="service-card-tag">التسجيل في نظام الادخار</span>
-    <h3>التسجيل في نظام الادخار</h3>
-    <p>بدء التسجيل المباشر أو متابعة حالات الربط المختلفة للمدخر.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/saver/registration/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">الادخار الاختياري</span>
-    <h3>الادخار الاختياري</h3>
-    <p>متابعة مسارات الادخار الاختياري ومصادر التمويل والخروج.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/saver/optional-saving/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">الادخار الإلزامي</span>
-    <h3>الادخار الإلزامي</h3>
-    <p>عرض حالة التسجيل الإلزامي والانتقال إلى الاعتراض أو الصرف أو الإخطار.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/saver/mandatory-saving/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">تفاصيل حساب الادخار</span>
-    <h3>تفاصيل حساب الادخار</h3>
-    <p>عرض الرصيد، المصادر، والحركات الرئيسية للحساب.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/saver/account-details/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">الإيداع الإلكتروني</span>
-    <h3>الإيداع الإلكتروني</h3>
-    <p>تنفيذ إيداع جديد ومراجعة طريقة الدفع ونتيجة الإيداع.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/saver/deposit/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">سداد الالتزامات المالية</span>
-    <h3>سداد الالتزامات المالية</h3>
-    <p>استعراض الالتزامات وتسويتها من الرصيد المتاح.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/saver/obligations/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">طلبات صرف المدخرات</span>
-    <h3>طلبات صرف المدخرات</h3>
-    <p>طلب الصرف الاعتيادي أو الاستثنائي ومتابعة حالة الطلب.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/saver/disbursement/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">إشعار تسوية مكافأة الخدمة</span>
-    <h3>إشعار تسوية مكافأة الخدمة</h3>
-    <p>عرض قرار جهة العمل واتخاذ رد العامل من نفس الصفحة.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/saver/gratuity-notification/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">اعتراض الأجر الأساسي</span>
-    <h3>اعتراض الأجر الأساسي</h3>
-    <p>تقديم اعتراض على الأجر المسجل ومتابعة حالته.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/saver/salary-objection/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">إخطار الخروج أو فقدان الشرط</span>
-    <h3>إخطار الخروج أو فقدان الشرط</h3>
-    <p>إرسال إخطار الخروج أو فقدان شرط الاشتراك ومتابعته.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/saver/exit-notification/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">الخروج من النظام</span>
-    <h3>الخروج من النظام</h3>
-    <p>مراجعة أثر الخروج على الاستحقاق والحركات المرتبطة.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/saver/exit-system/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">سجل المعاملات</span>
-    <h3>سجل المعاملات</h3>
-    <p>عرض سجل الحركات والإيصالات والتنقل إلى العمليات المرتبطة.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/saver/transaction-history/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-            </div>
-        </section>
+                <article class="catalog-filter-card">
+                    <h2>الخدمات المتاحة</h2>
+                    <p class="mb-3">الخدمات الخارجية في هذه النسخة تغطي:</p>
+                    <div class="catalog-filter-pills">
+                        <span class="catalog-role-chip">المدخر</span>
+                        <span class="catalog-role-chip">صاحب العمل</span>
+                    </div>
+                    <hr>
+                    <p class="mb-2">المساحة الداخلية:</p>
+                    <a class="gup-outline-btn w-100" href="internal/staff/index.html">فتح بيئة العمل الداخلية</a>
+                </article>
+            </aside>
 
-        <section class="catalog-section" id="employer-services">
-            <div class="catalog-section-header">
-                <div>
-                    <span class="context-chip">صاحب العمل</span>
-                    <h2 class="mt-3 mb-2">خدمات صاحب العمل</h2>
-                    <p class="catalog-meta">خدمات تشغيلية خارجية لجهات العمل مع بطاقة خدمة مستقلة وصفحة تنفيذ مركزة لكل خدمة.</p>
-                </div>
-            </div>
-            <div class="catalog-grid">
-                <article class="service-card">
-    <span class="service-card-tag">تسجيل العمال في نظام الادخار</span>
-    <h3>تسجيل العمال في نظام الادخار</h3>
-    <p>تسجيل اعتيادي أو رجعي أو بقرار مباشر للعمال.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/employer/worker-registration/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">العمال المسجلون</span>
-    <h3>العمال المسجلون</h3>
-    <p>عرض العمال المسجلين ومتابعة حالتهم التشغيلية.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/employer/registered-workers/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">الإيداع الجماعي للعمال</span>
-    <h3>الإيداع الجماعي للعمال</h3>
-    <p>توزيع مبالغ الإيداع على العمال وفق وضع التوزيع المناسب.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/employer/group-deposit/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">برامج الادخار الاختياري للعمال</span>
-    <h3>برامج الادخار الاختياري للعمال</h3>
-    <p>إدارة البرامج والاتفاقيات والدفعات الاختيارية للعمال.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/employer/optional-saving-programs/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">متابعة الادخار الإلزامي للعمال</span>
-    <h3>متابعة الادخار الإلزامي للعمال</h3>
-    <p>متابعة التسجيل والأجر والالتزام والفواتير لكل عامل.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/employer/mandatory-saving/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">تسوية مكافأة الخدمة السابقة</span>
-    <h3>تسوية مكافأة الخدمة السابقة</h3>
-    <p>عرض جميع العمال وحالة التسوية واتخاذ القرار لكل عامل.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/employer/gratuity-settlement/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">الرد على اعتراضات الأجر</span>
-    <h3>الرد على اعتراضات الأجر</h3>
-    <p>عرض اعتراضات العمال واتخاذ قرار جهة العمل بشأن كل اعتراض.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/employer/salary-objection-response/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-<article class="service-card">
-    <span class="service-card-tag">فواتير الادخار الإلزامي</span>
-    <h3>فواتير الادخار الإلزامي</h3>
-    <p>عرض الفواتير الشهرية والحساب الافتراضي والسداد والتخصيص.</p>
-    <div class="service-card-footer">
-        <a class="gup-primary-btn" href="services/employer/mandatory-invoices/index.html">تفاصيل الخدمة</a>
-    </div>
-</article>
-            </div>
-        </section>
+            <div class="catalog-results-area">
+                <article class="catalog-results-card">
+                    <div>
+                        <h2 class="mb-2">الخدمات الموحدة</h2>
+                        <div class="catalog-results-meta" id="catalogCount">يتم تحميل قائمة الخدمات...</div>
+                    </div>
+                    <div class="gup-inline-actions">
+                        </div>
+                </article>
 
-        <section class="catalog-section" id="staff-services">
-            <div class="catalog-section-header">
-                <div>
-                    <span class="context-chip">موظف الصندوق</span>
-                    <h2 class="mt-3 mb-2">مساحة العمل الداخلية</h2>
-                    <p class="catalog-meta">الوصول إلى بيئة العمل الداخلية مع القائمة الجانبية والصفحات التشغيلية المحدثة.</p>
-                </div>
-            </div>
-            <div class="service-panel">
-                <h2>الدخول إلى اللوحة الداخلية</h2>
-                <p>تتضمن اللوحة الداخلية: التسجيل، الادخار الإلزامي والاختياري، الصرف، الفواتير، الاعتراضات، الحالات اليدوية، والتقارير.</p>
-                <div class="gup-inline-actions mt-3">
-                    <a class="gup-primary-btn" href="internal/staff/index.html">فتح بيئة العمل الداخلية</a>
+                <section class="catalog-service-list" id="serviceList">
+                    <article class="catalog-service-item" data-audience="saver" data-journey="registration" data-keywords="التسجيل الادخار نظام الادخار المدخر اختياري">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">المدخر</span>
+                                <span class="summary-chip">التسجيل</span>
+                            </div>
+                            <h3 class="catalog-service-title">التسجيل في نظام الادخار</h3>
+                            <p>بدء التسجيل المباشر في النظام، مراجعة شروط الانضمام، وتحديد الإيداع الأولي ضمن تجربة خدمة خارجية كاملة.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/saver/registration/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="saver" data-journey="mandatory" data-keywords="الادخار الإلزامي غير العماني العامل المدخر">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">المدخر</span>
+                                <span class="summary-chip">الادخار الإلزامي</span>
+                            </div>
+                            <h3 class="catalog-service-title">الادخار الإلزامي</h3>
+                            <p>عرض حالة العامل غير العماني، الاعتراض على الأجر، إشعار الخروج، ومسارات الاستحقاق المرتبطة بالادخار الإلزامي.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/saver/mandatory-saving/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="saver" data-journey="account" data-keywords="تفاصيل الحساب الرصيد الحركات السجل المدخر">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">المدخر</span>
+                                <span class="summary-chip">الحساب والحركات</span>
+                            </div>
+                            <h3 class="catalog-service-title">تفاصيل حساب الادخار</h3>
+                            <p>عرض الرصيد حسب المصدر، الحركات الرئيسية، المؤشرات الأساسية، ومسار التنقل إلى الإيداع أو الصرف أو الالتزامات.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/saver/account-details/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="saver" data-journey="deposit" data-keywords="إيداع إلكتروني فاتورة سداد اختياري المدخر">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">المدخر</span>
+                                <span class="summary-chip">الإيداع والسداد</span>
+                            </div>
+                            <h3 class="catalog-service-title">الإيداع الإلكتروني</h3>
+                            <p>إنشاء إيداع اختياري فردي ومتابعة السداد ضمن المسار المعتمد القائم على الفاتورة في الإصدار الحالي.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/saver/deposit/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="saver" data-journey="deposit" data-keywords="سداد الالتزامات المالية من المدخرات">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">المدخر</span>
+                                <span class="summary-chip">الإيداع والسداد</span>
+                            </div>
+                            <h3 class="catalog-service-title">سداد الالتزامات المالية</h3>
+                            <p>استعراض الالتزامات المالية المستحقة وسدادها من الرصيد المتاح مع التحقق من حدود الرصيد والسياسات المعتمدة.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/saver/obligations/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="saver" data-journey="disbursement" data-keywords="صرف المدخرات طلب صرف استحقاق">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">المدخر</span>
+                                <span class="summary-chip">الصرف والخروج</span>
+                            </div>
+                            <h3 class="catalog-service-title">طلبات صرف المدخرات</h3>
+                            <p>تقديم طلب صرف المدخرات، تحديد سبب الاستحقاق، اختيار طريقة الصرف، ومتابعة حالة الطلب من نفس المسار.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/saver/disbursement/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="saver" data-journey="compliance" data-keywords="تسوية مكافأة الخدمة السابقة إشعار العامل">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">المدخر</span>
+                                <span class="summary-chip">الاعتراضات والتسويات</span>
+                            </div>
+                            <h3 class="catalog-service-title">إشعار تسوية مكافأة الخدمة</h3>
+                            <p>عرض قرار جهة العمل بخصوص مكافأة الخدمة السابقة وتمكين العامل من الإقرار أو تسجيل عدم الموافقة في نفس الشاشة.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/saver/gratuity-notification/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="saver" data-journey="compliance" data-keywords="اعتراض الأجر الأساسي العامل المدخر">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">المدخر</span>
+                                <span class="summary-chip">الاعتراضات والتسويات</span>
+                            </div>
+                            <h3 class="catalog-service-title">اعتراض الأجر الأساسي</h3>
+                            <p>تقديم اعتراض على الأجر الأساسي المسجل ومتابعة حالة الاعتراض ورد جهة العمل وأثر المعالجة.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/saver/salary-objection/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="saver" data-journey="disbursement" data-keywords="إخطار الخروج فقدان الشرط">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">المدخر</span>
+                                <span class="summary-chip">الصرف والخروج</span>
+                            </div>
+                            <h3 class="catalog-service-title">إخطار الخروج أو فقدان الشرط</h3>
+                            <p>إرسال إخطار الخروج أو فقدان شرط الاشتراك ومتابعته ضمن المدة النظامية قبل اكتمال إجراءات التسوية.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/saver/exit-notification/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="saver" data-journey="disbursement" data-keywords="الخروج من النظام ادخار اختياري">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">المدخر</span>
+                                <span class="summary-chip">الصرف والخروج</span>
+                            </div>
+                            <h3 class="catalog-service-title">الخروج من النظام</h3>
+                            <p>مراجعة أثر الخروج النهائي من نظام الادخار الاختياري على الرصيد والعوائد وطلب التسوية النهائية.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/saver/exit-system/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="saver" data-journey="account" data-keywords="سجل المعاملات الإيصالات">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">المدخر</span>
+                                <span class="summary-chip">الحساب والحركات</span>
+                            </div>
+                            <h3 class="catalog-service-title">سجل المعاملات</h3>
+                            <p>عرض سجل المعاملات والإيصالات والتنقل إلى العمليات المرتبطة بالحساب الشخصي ضمن فترة زمنية محددة.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/saver/transaction-history/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="employer" data-journey="registration" data-keywords="تسجيل العمال جهة العمل">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">صاحب العمل</span>
+                                <span class="summary-chip">التسجيل</span>
+                            </div>
+                            <h3 class="catalog-service-title">تسجيل العمال في نظام الادخار</h3>
+                            <p>تسجيل العمال في مسارات الادخار المختلفة، بما في ذلك التسجيل الاعتيادي والرجعي والتسجيل الناتج عن قرارات مباشرة.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/employer/worker-registration/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="employer" data-journey="account" data-keywords="العمال المسجلون قائمة العمال">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">صاحب العمل</span>
+                                <span class="summary-chip">الحساب والحركات</span>
+                            </div>
+                            <h3 class="catalog-service-title">العمال المسجلون</h3>
+                            <p>عرض قائمة العمال المسجلين والحالة التشغيلية لكل عامل والانتقال إلى الخدمات والقرارات المرتبطة به.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/employer/registered-workers/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="employer" data-journey="deposit" data-keywords="الإيداع الجماعي للعمال فاتورة">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">صاحب العمل</span>
+                                <span class="summary-chip">الإيداع والسداد</span>
+                            </div>
+                            <h3 class="catalog-service-title">الإيداع الجماعي للعمال</h3>
+                            <p>اختيار العمال وتوزيع مبالغ الإيداع الجماعي عليهم وإنشاء مسار الدفع المرتبط بالفاتورة الجماعية.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/employer/group-deposit/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="employer" data-journey="deposit" data-keywords="برامج الادخار الاختياري للعمال">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">صاحب العمل</span>
+                                <span class="summary-chip">الإيداع والسداد</span>
+                            </div>
+                            <h3 class="catalog-service-title">برامج الادخار الاختياري للعمال</h3>
+                            <p>متابعة مبادرات وبرامج الادخار الاختياري المرتبطة بالعمال وحالات الإيداع والتخصيص والمشاركة.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/employer/optional-saving-programs/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="employer" data-journey="mandatory" data-keywords="الادخار الإلزامي للعمال">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">صاحب العمل</span>
+                                <span class="summary-chip">الادخار الإلزامي</span>
+                            </div>
+                            <h3 class="catalog-service-title">متابعة الادخار الإلزامي للعمال</h3>
+                            <p>متابعة التسجيل الإلزامي، الأجر الأساسي، الحالات النشطة، الفواتير، والتحديثات المؤثرة على العامل غير العماني.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/employer/mandatory-saving/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="employer" data-journey="compliance" data-keywords="تسوية مكافأة الخدمة السابقة">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">صاحب العمل</span>
+                                <span class="summary-chip">الاعتراضات والتسويات</span>
+                            </div>
+                            <h3 class="catalog-service-title">تسوية مكافأة الخدمة السابقة</h3>
+                            <p>عرض جميع العمال المستهدفين وتسوية حالة كل عامل مع فتح قرار جديد أو استعراض التفاصيل بصيغة قراءة فقط.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/employer/gratuity-settlement/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="employer" data-journey="compliance" data-keywords="الرد على اعتراضات الأجر">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">صاحب العمل</span>
+                                <span class="summary-chip">الاعتراضات والتسويات</span>
+                            </div>
+                            <h3 class="catalog-service-title">الرد على اعتراضات الأجر</h3>
+                            <p>استلام اعتراضات العمال على الأجر الأساسي واتخاذ قرار جهة العمل ضمن المهلة النظامية المحددة.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/employer/salary-objection-response/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+
+                    <article class="catalog-service-item" data-audience="employer" data-journey="mandatory" data-keywords="فواتير الادخار الإلزامي الحساب الافتراضي">
+                        <div>
+                            <div class="catalog-service-meta">
+                                <span class="catalog-role-chip">صاحب العمل</span>
+                                <span class="summary-chip">الادخار الإلزامي</span>
+                            </div>
+                            <h3 class="catalog-service-title">فواتير الادخار الإلزامي</h3>
+                            <p>متابعة الفواتير الشهرية، الحساب الافتراضي، حالة السداد، الرصيد المتبقي، ومرجع التخصيص الخاص بجهة العمل.</p>
+                        </div>
+                        <div class="catalog-service-actions">
+                            <a class="gup-primary-btn" href="services/employer/mandatory-invoices/index.html">تفاصيل الخدمة</a>
+                        </div>
+                    </article>
+                </section>
+
+                <div class="catalog-empty-state d-none" id="catalogEmptyState">
+                    لا توجد خدمات مطابقة لمعايير البحث الحالية. جرّب تغيير الكلمات المفتاحية أو إعادة التصفية.
                 </div>
             </div>
         </section>
@@ -251,5 +357,53 @@
 
     <script src="assets/js/prototype-core.js"></script>
     <script src="assets/js/external-shell.js"></script>
+    <script>
+        (function () {
+            const serviceList = Array.from(document.querySelectorAll('#serviceList .catalog-service-item'));
+            const countLabel = document.getElementById('catalogCount');
+            const searchInput = document.getElementById('catalogSearch');
+            const journeyFilter = document.getElementById('journeyFilter');
+            const audienceButtons = Array.from(document.querySelectorAll('#audienceFilters [data-filter-audience]'));
+            const emptyState = document.getElementById('catalogEmptyState');
+            let audience = 'all';
+
+            function applyFilters() {
+                const searchValue = (searchInput.value || '').trim().toLowerCase();
+                const journeyValue = journeyFilter.value;
+                let visibleCount = 0;
+
+                serviceList.forEach(item => {
+                    const itemAudience = item.dataset.audience;
+                    const itemJourney = item.dataset.journey;
+                    const haystack = item.textContent.toLowerCase() + ' ' + (item.dataset.keywords || '').toLowerCase();
+
+                    const audienceMatch = audience === 'all' || itemAudience === audience;
+                    const journeyMatch = journeyValue === 'all' || itemJourney === journeyValue;
+                    const searchMatch = !searchValue || haystack.indexOf(searchValue) >= 0;
+
+                    const show = audienceMatch && journeyMatch && searchMatch;
+                    item.classList.toggle('d-none', !show);
+                    if (show) visibleCount++;
+                });
+
+                countLabel.textContent = visibleCount + ' خدمة متاحة ضمن قائمة خدمات الادخار.';
+                emptyState.classList.toggle('d-none', visibleCount !== 0);
+            }
+
+            audienceButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    audience = this.dataset.filterAudience;
+                    audienceButtons.forEach(item => item.classList.remove('active'));
+                    this.classList.add('active');
+                    applyFilters();
+                });
+            });
+
+            searchInput.addEventListener('input', applyFilters);
+            journeyFilter.addEventListener('change', applyFilters);
+
+            applyFilters();
+        })();
+    </script>
 </body>
 </html>
