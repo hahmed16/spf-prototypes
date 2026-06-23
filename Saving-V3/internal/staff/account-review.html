@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مراجعة الحساب الادخاري - بيئة العمل الداخلية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../../assets/css/app.css">
+    <link rel="stylesheet" href="../../assets/css/shell.css">
+    <link rel="stylesheet" href="../../assets/css/wizard.css">
+</head>
+<body data-root="../../">
+    <main>
+        <section class="internal-hero">
+            <h1>مراجعة الحساب الادخاري</h1>
+            <p>عرض بيانات الحساب التفصيلية ومراجعة سجل العمليات للمشتركين</p>
+        </section>
+
+        <!-- Search Bar -->
+        <div class="internal-grid-card mb-4">
+            <h6 class="mb-3"><i class="fas fa-search me-2"></i> البحث عن مشترك</h6>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="gup-field-label">الرقم المدني أو اسم المشترك</label>
+                    <input type="text" class="form-control" placeholder="أدخل الرقم المدني أو الاسم الكامل..." value="12345678">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100" onclick="spf.showSuccess('تم تحميل بيانات الحساب')">
+                        <i class="fas fa-search me-1"></i> بحث
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Details -->
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="internal-grid-card h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="mb-1">أحمد بن سالم المعمري</h5>
+                            <span class="ref-number">12345678</span>
+                            <span class="badge bg-success ms-2">نشط</span>
+                        </div>
+                        <span class="badge bg-light text-dark border">عماني — مهندس ميكانيكي</span>
+                    </div>
+
+                    <hr>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <div class="gup-labelled-item">
+                                <span class="gup-field-label">جهة العمل</span>
+                                <span>تنمية نفط عمان</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="gup-labelled-item">
+                                <span class="gup-field-label">السجل التجاري</span>
+                                <span>1002003</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="gup-labelled-item">
+                                <span class="gup-field-label">الراتب الأساسي</span>
+                                <span class="fw-bold">1,200 ر.ع</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="gup-labelled-item">
+                                <span class="gup-field-label">تاريخ التسجيل</span>
+                                <span>15/03/2023</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h6 class="mb-3">الملخص المالي</h6>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded border">
+                                <div class="small text-muted mb-1">إجمالي الرصيد</div>
+                                <div class="h5 fw-bold text-success mb-0">1,450.000 ر.ع</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded border">
+                                <div class="small text-muted mb-1">إجمالي الإيداعات</div>
+                                <div class="h5 fw-bold mb-0">1,405.000 ر.ع</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded border">
+                                <div class="small text-muted mb-1">عوائد الاستثمار</div>
+                                <div class="h5 fw-bold text-primary mb-0">45.250 ر.ع</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded border">
+                                <div class="small text-muted mb-1">الالتزامات المعلقة</div>
+                                <div class="h5 fw-bold text-warning mb-0">2 التزامات</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="internal-grid-card mb-3">
+                    <h6 class="mb-3"><i class="fas fa-sticky-note me-2"></i> ملاحظات الموظف</h6>
+                    <textarea class="form-control mb-3" rows="5" placeholder="أدخل أي ملاحظات داخلية تتعلق بهذا الحساب..."></textarea>
+                    <button class="btn btn-success btn-sm" onclick="spf.showSuccess('تم حفظ الملاحظات بنجاح')">
+                        <i class="fas fa-save me-1"></i> حفظ الملاحظات
+                    </button>
+                </div>
+
+                <div class="internal-grid-card">
+                    <h6 class="mb-3"><i class="fas fa-cogs me-2"></i> الإجراءات</h6>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="spf.showSuccess('فتح نموذج تعديل البيانات...')">
+                            <i class="fas fa-edit me-2"></i> تعديل البيانات
+                        </button>
+                        <a href="internal-log.html" class="btn btn-outline-secondary">
+                            <i class="fas fa-history me-2"></i> عرض سجل العمليات
+                        </a>
+                        <button class="btn btn-outline-warning" onclick="spf.showSuccess('جاري إعداد تقرير الحساب...')">
+                            <i class="fas fa-file-pdf me-2"></i> طباعة كشف الحساب
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="internal-grid-card mt-4">
+            <h6 class="mb-3"><i class="fas fa-exchange-alt me-2"></i> آخر المعاملات</h6>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>نوع العملية</th>
+                            <th>المبلغ</th>
+                            <th>المصدر</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>20/02/2026</td>
+                            <td>إيداع شهري ذاتي</td>
+                            <td>100.000 ر.ع</td>
+                            <td>الخدمة الذاتية</td>
+                            <td><span class="badge bg-success">مكتمل</span></td>
+                        </tr>
+                        <tr>
+                            <td>05/02/2026</td>
+                            <td>إيداع صاحب عمل</td>
+                            <td>150.000 ر.ع</td>
+                            <td>تنمية نفط عمان</td>
+                            <td><span class="badge bg-success">مكتمل</span></td>
+                        </tr>
+                        <tr>
+                            <td>31/01/2026</td>
+                            <td>عائد سنوي 2025</td>
+                            <td>45.250 ر.ع</td>
+                            <td>النظام</td>
+                            <td><span class="badge bg-success">مكتمل</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    <script src="../../assets/js/prototype-core.js"></script>
+    <script src="../../assets/js/internal-shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل العمليات والإيصالات - صندوق الحماية الاجتماعية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../../../assets/css/app.css">
+    <link rel="stylesheet" href="../../../assets/css/shell.css">
+    <link rel="stylesheet" href="../../../assets/css/wizard.css">
+</head>
+<body data-root="../../../" data-page-kind="form" data-user-role="saver">
+<main id="mainContent" class="gup-main-shell">
+
+    <div class="gup-content-header">
+        <div class="breadcrumbs-lite">
+            <a href="../../../index.html">الرئيسية</a> <span>›</span>
+            <a href="index.html">سجل العمليات والإيصالات</a> <span>›</span>
+            <span>سجل العمليات</span>
+        </div>
+        <h1>سجل العمليات والإيصالات</h1>
+    </div>
+
+    <!-- Filter Row -->
+    <div class="gup-form-section mb-4">
+        <h2>تصفية العمليات</h2>
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="gup-field-label">تاريخ من</label>
+                <input type="date" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="gup-field-label">تاريخ إلى</label>
+                <input type="date" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="gup-field-label">نوع العملية</label>
+                <select class="form-select">
+                    <option>الكل</option>
+                    <option>إيداع</option>
+                    <option>صرف</option>
+                    <option>عوائد</option>
+                    <option>التزامات</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="gup-primary-btn w-100">بحث</button>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="gup-outline-btn w-100"><i class="fas fa-file-export me-1"></i> تصدير</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="gup-form-section">
+        <h2>نتائج البحث</h2>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>نوع العملية</th>
+                        <th>المبلغ</th>
+                        <th>المصدر/الوجهة</th>
+                        <th>رقم المرجع</th>
+                        <th>الحالة</th>
+                        <th>الإيصال</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2024-01-15</td>
+                        <td><i class="fas fa-arrow-up text-success me-1"></i> إيداع</td>
+                        <td class="fw-bold text-success">500.000 ر.ع</td>
+                        <td>تحويل بنكي</td>
+                        <td>SPF-DEP-001</td>
+                        <td><span class="badge bg-success">مكتمل</span></td>
+                        <td><a href="#" class="btn btn-sm btn-light border"><i class="fas fa-download text-primary"></i> تنزيل</a></td>
+                    </tr>
+                    <tr>
+                        <td>2024-01-10</td>
+                        <td><i class="fas fa-percentage text-warning me-1"></i> عوائد استثمار</td>
+                        <td class="fw-bold text-success">45.250 ر.ع</td>
+                        <td>الصندوق</td>
+                        <td>SPF-RET-001</td>
+                        <td><span class="badge bg-success">مكتمل</span></td>
+                        <td><a href="#" class="btn btn-sm btn-light border"><i class="fas fa-download text-primary"></i> تنزيل</a></td>
+                    </tr>
+                    <tr>
+                        <td>2024-01-05</td>
+                        <td><i class="fas fa-arrow-down text-danger me-1"></i> صرف</td>
+                        <td class="fw-bold text-danger">200.000 ر.ع</td>
+                        <td>بنك مسقط</td>
+                        <td>SPF-DIS-001</td>
+                        <td><span class="badge bg-warning text-dark">قيد المعالجة</span></td>
+                        <td>—</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+<script src="../../../assets/js/prototype-core.js"></script>
+<script src="../../../assets/js/external-shell.js"></script>
+</body>
+</html>

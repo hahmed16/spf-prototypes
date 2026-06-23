@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متابعة تسوية مكافأة الخدمة - بيئة العمل الداخلية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../../assets/css/app.css">
+    <link rel="stylesheet" href="../../assets/css/shell.css">
+    <link rel="stylesheet" href="../../assets/css/wizard.css">
+</head>
+<body data-root="../../">
+    <main>
+        <section class="internal-hero">
+            <h1>متابعة تسوية مكافأة الخدمة</h1>
+            <p>مراجعة واعتماد طلبات تسوية مكافأة نهاية الخدمة للعمال المنتهية خدمتهم</p>
+        </section>
+
+        <!-- Filter -->
+        <div class="internal-grid-card mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="gup-field-label">الحالة</label>
+                    <select class="form-select form-select-sm">
+                        <option>الكل</option>
+                        <option selected>قيد المراجعة</option>
+                        <option>معتمدة</option>
+                        <option>مرفوضة</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="gup-field-label">جهة العمل</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="اسم جهة العمل...">
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-primary btn-sm w-100" onclick="spf.showSuccess('تم تطبيق الفلتر')">
+                        <i class="fas fa-search me-1"></i> بحث
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requests Table -->
+        <div class="internal-grid-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">طلبات تسوية مكافأة الخدمة</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm table-bordered align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>رقم الطلب</th>
+                            <th>اسم العامل</th>
+                            <th>جهة العمل</th>
+                            <th>مبلغ المكافأة</th>
+                            <th>تاريخ الطلب</th>
+                            <th>الحالة</th>
+                            <th>إجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="ref-number">GRT-2026-0022</span></td>
+                            <td class="fw-bold">سالم بن محمد الهنائي</td>
+                            <td>شركة تنمية نفط عمان</td>
+                            <td>4,200.000 ر.ع</td>
+                            <td>20/06/2026</td>
+                            <td><span class="badge bg-warning text-dark">قيد المراجعة</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-primary py-0 px-2" onclick="showReviewPanel('GRT-2026-0022', 'سالم بن محمد الهنائي')">
+                                    <i class="fas fa-search me-1"></i> مراجعة
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="ref-number">GRT-2026-0021</span></td>
+                            <td class="fw-bold">خالد بن علي الراشدي</td>
+                            <td>مجموعة بهوان</td>
+                            <td>2,800.000 ر.ع</td>
+                            <td>18/06/2026</td>
+                            <td><span class="badge bg-warning text-dark">قيد المراجعة</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-primary py-0 px-2" onclick="showReviewPanel('GRT-2026-0021', 'خالد بن علي الراشدي')">
+                                    <i class="fas fa-search me-1"></i> مراجعة
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="ref-number">GRT-2026-0018</span></td>
+                            <td class="fw-bold">ماريا دي سيلفا</td>
+                            <td>شركة الدلتا للتجارة</td>
+                            <td>1,500.000 ر.ع</td>
+                            <td>15/06/2026</td>
+                            <td><span class="badge bg-success">معتمدة</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="spf.showSuccess('عرض تفاصيل الطلب GRT-2026-0018')">
+                                    <i class="fas fa-eye"></i> عرض
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="ref-number">GRT-2026-0015</span></td>
+                            <td class="fw-bold">أحمد بن سعيد المعمري</td>
+                            <td>بنك مسقط</td>
+                            <td>6,500.000 ر.ع</td>
+                            <td>10/06/2026</td>
+                            <td><span class="badge bg-success">معتمدة</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="spf.showSuccess('عرض تفاصيل الطلب GRT-2026-0015')">
+                                    <i class="fas fa-eye"></i> عرض
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="ref-number">GRT-2026-0010</span></td>
+                            <td class="fw-bold">راجيش كومار</td>
+                            <td>مجموعة بهوان</td>
+                            <td>900.000 ر.ع</td>
+                            <td>01/06/2026</td>
+                            <td><span class="badge bg-danger">مرفوضة</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="spf.showSuccess('عرض تفاصيل الطلب GRT-2026-0010')">
+                                    <i class="fas fa-eye"></i> عرض
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Review Panel (inline, for first pending row) -->
+        <div class="internal-grid-card" id="reviewPanel" style="display:none;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0"><i class="fas fa-clipboard-check me-2 text-primary"></i> لوحة المراجعة — <span id="reviewRef"></span></h6>
+                <button class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('reviewPanel').style.display='none'">
+                    <i class="fas fa-times"></i> إغلاق
+                </button>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <div class="gup-labelled-item">
+                        <span class="gup-field-label">اسم العامل</span>
+                        <span id="reviewWorkerName" class="fw-bold"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="gup-labelled-item">
+                        <span class="gup-field-label">مدة الخدمة</span>
+                        <span>7 سنوات و3 أشهر</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="gup-labelled-item">
+                        <span class="gup-field-label">الراتب الأساسي الأخير</span>
+                        <span>1,200 ر.ع</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="gup-labelled-item">
+                        <span class="gup-field-label">سبب انتهاء الخدمة</span>
+                        <span>استقالة</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="gup-labelled-item">
+                        <span class="gup-field-label">المكافأة المحتسبة</span>
+                        <span class="fw-bold text-primary">4,200.000 ر.ع</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="gup-field-label">قرار الموظف</label>
+                <div class="d-flex gap-3 mt-1">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="decisionRadio" id="decisionApprove" value="approve">
+                        <label class="form-check-label text-success fw-bold" for="decisionApprove">قبول الطلب واعتماد المكافأة</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="decisionRadio" id="decisionReject" value="reject">
+                        <label class="form-check-label text-danger fw-bold" for="decisionReject">رفض الطلب</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="gup-field-label">ملاحظات القرار</label>
+                <textarea class="form-control" rows="3" placeholder="أدخل مبررات القرار..."></textarea>
+            </div>
+
+            <button class="btn btn-primary" onclick="confirmDecision()">
+                <i class="fas fa-check-double me-2"></i> تأكيد القرار
+            </button>
+        </div>
+    </main>
+    <script src="../../assets/js/prototype-core.js"></script>
+    <script src="../../assets/js/internal-shell.js"></script>
+    <script>
+        function showReviewPanel(ref, workerName) {
+            document.getElementById('reviewRef').textContent = ref;
+            document.getElementById('reviewWorkerName').textContent = workerName;
+            const panel = document.getElementById('reviewPanel');
+            panel.style.display = 'block';
+            panel.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function confirmDecision() {
+            const selected = document.querySelector('input[name="decisionRadio"]:checked');
+            if (!selected) {
+                spf.showSuccess('يرجى اختيار قرار (قبول أو رفض) قبل التأكيد.');
+                return;
+            }
+            if (selected.value === 'approve') {
+                spf.showSuccess('تم اعتماد طلب تسوية مكافأة الخدمة وإشعار جميع الأطراف.');
+            } else {
+                spf.showSuccess('تم رفض الطلب وإشعار العامل وجهة العمل بالأسباب.');
+            }
+            document.getElementById('reviewPanel').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

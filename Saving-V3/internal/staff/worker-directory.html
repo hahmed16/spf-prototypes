@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دليل الحسابات والعمال - بيئة العمل الداخلية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../../assets/css/app.css">
+    <link rel="stylesheet" href="../../assets/css/shell.css">
+    <link rel="stylesheet" href="../../assets/css/wizard.css">
+</head>
+<body data-root="../../">
+    <main>
+        <section class="internal-hero">
+            <h1>دليل الحسابات والعمال</h1>
+            <p>بحث وإدارة حسابات المشتركين المسجلين في نظام الادخار الاختياري</p>
+        </section>
+
+        <!-- Filter Panel -->
+        <div class="internal-grid-card mb-4">
+            <h6 class="mb-3"><i class="fas fa-filter me-2"></i> تصفية البحث</h6>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="gup-field-label">الاسم</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="بحث بالاسم...">
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label">الرقم المدني</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="12345678">
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label">المهنة</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="المهنة...">
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label">الجنسية</label>
+                    <select class="form-select form-select-sm">
+                        <option value="">الكل</option>
+                        <option>عماني</option>
+                        <option>غير عماني</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label">السجل التجاري</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="1234567">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary btn-sm w-100" onclick="spf.showSuccess('تم تطبيق الفلتر')">
+                        <i class="fas fa-search me-1"></i> بحث
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="internal-grid-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">نتائج البحث — <span class="text-muted">عرض 1-5 من 12,450</span></h6>
+                <button class="btn btn-sm btn-outline-secondary" onclick="spf.showSuccess('جاري تصدير البيانات...')">
+                    <i class="fas fa-file-export me-1"></i> تصدير
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm table-bordered align-middle mb-3">
+                    <thead class="table-light">
+                        <tr>
+                            <th>الاسم</th>
+                            <th>الرقم المدني</th>
+                            <th>المهنة</th>
+                            <th>الجنسية</th>
+                            <th>السجل التجاري</th>
+                            <th>جهة العمل</th>
+                            <th>الراتب الأساسي</th>
+                            <th>إجمالي المبالغ</th>
+                            <th>آخر إيداع</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold">عمر بن خالد الهنائي</td>
+                            <td><span class="ref-number">87654321</span></td>
+                            <td>محاسب</td>
+                            <td><span class="badge bg-success">عماني</span></td>
+                            <td>1234567</td>
+                            <td>مجموعة بهوان</td>
+                            <td>850 ر.ع</td>
+                            <td>1,200.000 ر.ع</td>
+                            <td>12/02/2026</td>
+                            <td>
+                                <a href="account-review.html" class="btn btn-sm btn-outline-primary py-0 px-2" title="مراجعة الحساب">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">سالم بن حمد الجابري</td>
+                            <td><span class="ref-number">44556677</span></td>
+                            <td>مهندس كيميائي</td>
+                            <td><span class="badge bg-success">عماني</span></td>
+                            <td>1234567</td>
+                            <td>مجموعة بهوان</td>
+                            <td>1,200 ر.ع</td>
+                            <td>3,450.000 ر.ع</td>
+                            <td>10/02/2026</td>
+                            <td>
+                                <a href="account-review.html" class="btn btn-sm btn-outline-primary py-0 px-2" title="مراجعة الحساب">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">راجيش كومار</td>
+                            <td><span class="ref-number">99001122</span></td>
+                            <td>فني مختبر</td>
+                            <td><span class="badge bg-secondary">هندي</span></td>
+                            <td>1234567</td>
+                            <td>مجموعة بهوان</td>
+                            <td>450 ر.ع</td>
+                            <td>900.000 ر.ع</td>
+                            <td>08/02/2026</td>
+                            <td>
+                                <a href="account-review.html" class="btn btn-sm btn-outline-primary py-0 px-2" title="مراجعة الحساب">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">فاطمة علي</td>
+                            <td><span class="ref-number">10002002</span></td>
+                            <td>إداري</td>
+                            <td><span class="badge bg-secondary">مصرية</span></td>
+                            <td>7654321</td>
+                            <td>شركة الدلتا للتجارة</td>
+                            <td>600 ر.ع</td>
+                            <td>800.000 ر.ع</td>
+                            <td>05/02/2026</td>
+                            <td>
+                                <a href="account-review.html" class="btn btn-sm btn-outline-primary py-0 px-2" title="مراجعة الحساب">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">هدى سالم البلوشية</td>
+                            <td><span class="ref-number">10002012</span></td>
+                            <td>محللة بيانات</td>
+                            <td><span class="badge bg-success">عمانية</span></td>
+                            <td>9876543</td>
+                            <td>بنك مسقط</td>
+                            <td>1,050 ر.ع</td>
+                            <td>2,500.000 ر.ع</td>
+                            <td>03/02/2026</td>
+                            <td>
+                                <a href="account-review.html" class="btn btn-sm btn-outline-primary py-0 px-2" title="مراجعة الحساب">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav>
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    <li class="page-item disabled"><a class="page-link" href="#">السابق</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item"><a class="page-link" href="#">التالي</a></li>
+                </ul>
+            </nav>
+        </div>
+    </main>
+    <script src="../../assets/js/prototype-core.js"></script>
+    <script src="../../assets/js/internal-shell.js"></script>
+</body>
+</html>

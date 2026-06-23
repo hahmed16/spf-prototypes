@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المطابقة المالية - بيئة العمل الداخلية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../../assets/css/app.css">
+    <link rel="stylesheet" href="../../assets/css/shell.css">
+    <link rel="stylesheet" href="../../assets/css/wizard.css">
+</head>
+<body data-root="../../">
+    <main>
+        <section class="internal-hero">
+            <h1>المطابقة المالية</h1>
+            <p>التحقق من صحة الأرصدة وتأكيد المطابقة بين السجلات المحاسبية والأرصدة الفعلية</p>
+        </section>
+
+        <div class="gup-inline-alert success mb-4">
+            <i class="fas fa-check-circle me-2"></i>
+            آخر مطابقة ناجحة بتاريخ <strong>2024-01-10</strong> — بواسطة محمد الشيباني. الفرق: صفر ر.ع
+        </div>
+
+        <div class="row g-4">
+            <!-- Reconciliation Form -->
+            <div class="col-lg-6">
+                <div class="internal-grid-card">
+                    <h5 class="mb-4"><i class="fas fa-balance-scale me-2"></i> نموذج المطابقة الشهرية</h5>
+
+                    <div class="gup-form-section">
+                        <div class="mb-3">
+                            <label class="gup-field-label">فترة المطابقة</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <select class="form-select form-select-sm" id="recMonth">
+                                        <option value="01">يناير</option>
+                                        <option value="02">فبراير</option>
+                                        <option value="03">مارس</option>
+                                        <option value="04">أبريل</option>
+                                        <option value="05">مايو</option>
+                                        <option value="06" selected>يونيو</option>
+                                        <option value="07">يوليو</option>
+                                        <option value="08">أغسطس</option>
+                                        <option value="09">سبتمبر</option>
+                                        <option value="10">أكتوبر</option>
+                                        <option value="11">نوفمبر</option>
+                                        <option value="12">ديسمبر</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <select class="form-select form-select-sm">
+                                        <option>2026</option>
+                                        <option>2025</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="gup-field-label">الرصيد الافتتاحي (ر.ع)</label>
+                            <input type="number" class="form-control form-control-sm" id="openingBalance" value="4,100,500" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="gup-field-label">إجمالي الإيداعات (ر.ع)</label>
+                            <input type="number" class="form-control form-control-sm" id="totalDeposits" value="185,000" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="gup-field-label">إجمالي الصرف (ر.ع)</label>
+                            <input type="number" class="form-control form-control-sm" id="totalDisbursements" value="12,500" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="gup-field-label">إجمالي العوائد (ر.ع)</label>
+                            <input type="number" class="form-control form-control-sm" id="totalReturns" value="22,000" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="gup-field-label">الرصيد الختامي المحسوب (ر.ع)</label>
+                            <input type="number" class="form-control form-control-sm bg-light fw-bold" id="computedBalance" value="4,295,000" readonly>
+                            <div class="form-text text-muted">= الافتتاحي + الإيداعات + العوائد − الصرف</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="gup-field-label">الرصيد الفعلي (ر.ع) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control form-control-sm" id="actualBalance" placeholder="أدخل الرصيد الفعلي من البنك..." oninput="calcDiff()">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="gup-field-label">الفرق (ر.ع)</label>
+                            <input type="number" class="form-control form-control-sm" id="diffField" readonly value="0">
+                            <div class="form-text" id="diffNote"></div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="gup-field-label">ملاحظات</label>
+                            <textarea class="form-control" rows="3" placeholder="أدخل أي ملاحظات أو مبررات للفوارق إن وجدت..."></textarea>
+                        </div>
+
+                        <button class="btn btn-primary" onclick="confirmReconciliation()">
+                            <i class="fas fa-check-double me-2"></i> تأكيد المطابقة
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reconciliation History -->
+            <div class="col-lg-6">
+                <div class="internal-grid-card">
+                    <h5 class="mb-4"><i class="fas fa-history me-2"></i> سجل المطابقات السابقة</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>الفترة</th>
+                                    <th>الرصيد الافتتاحي</th>
+                                    <th>الرصيد الختامي</th>
+                                    <th>الفرق</th>
+                                    <th>تاريخ المطابقة</th>
+                                    <th>الموظف</th>
+                                    <th>الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>مايو 2026</td>
+                                    <td>3,920,000</td>
+                                    <td>4,100,500</td>
+                                    <td class="text-success fw-bold">0</td>
+                                    <td>05/06/2026</td>
+                                    <td>محمد الشيباني</td>
+                                    <td><span class="badge bg-success">مطابق</span></td>
+                                </tr>
+                                <tr>
+                                    <td>أبريل 2026</td>
+                                    <td>3,740,000</td>
+                                    <td>3,920,000</td>
+                                    <td class="text-success fw-bold">0</td>
+                                    <td>03/05/2026</td>
+                                    <td>هند الكلبانية</td>
+                                    <td><span class="badge bg-success">مطابق</span></td>
+                                </tr>
+                                <tr>
+                                    <td>مارس 2026</td>
+                                    <td>3,560,000</td>
+                                    <td>3,740,000</td>
+                                    <td class="text-danger fw-bold">-150</td>
+                                    <td>02/04/2026</td>
+                                    <td>خالد الحوسني</td>
+                                    <td><span class="badge bg-warning text-dark">فرق</span></td>
+                                </tr>
+                                <tr>
+                                    <td>فبراير 2026</td>
+                                    <td>3,380,000</td>
+                                    <td>3,560,000</td>
+                                    <td class="text-success fw-bold">0</td>
+                                    <td>02/03/2026</td>
+                                    <td>محمد الشيباني</td>
+                                    <td><span class="badge bg-success">مطابق</span></td>
+                                </tr>
+                                <tr>
+                                    <td>يناير 2026</td>
+                                    <td>3,200,000</td>
+                                    <td>3,380,000</td>
+                                    <td class="text-success fw-bold">0</td>
+                                    <td>01/02/2026</td>
+                                    <td>هند الكلبانية</td>
+                                    <td><span class="badge bg-success">مطابق</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="../../assets/js/prototype-core.js"></script>
+    <script src="../../assets/js/internal-shell.js"></script>
+    <script>
+        function calcDiff() {
+            const computed = 4295000;
+            const actual = parseFloat(document.getElementById('actualBalance').value) || 0;
+            const diff = actual - computed;
+            const diffField = document.getElementById('diffField');
+            const diffNote = document.getElementById('diffNote');
+            diffField.value = diff.toFixed(3);
+            if (diff !== 0) {
+                diffField.style.color = 'red';
+                diffNote.textContent = 'تحذير: يوجد فرق في المطابقة. يرجى مراجعة البيانات.';
+                diffNote.className = 'form-text text-danger';
+            } else {
+                diffField.style.color = 'green';
+                diffNote.textContent = 'المطابقة ناجحة — لا يوجد فرق.';
+                diffNote.className = 'form-text text-success';
+            }
+        }
+
+        function confirmReconciliation() {
+            const actual = document.getElementById('actualBalance').value;
+            if (!actual) {
+                spf.showSuccess('يرجى إدخال الرصيد الفعلي أولاً.');
+                return;
+            }
+            spf.showSuccess('تم تأكيد المطابقة المالية لشهر يونيو 2026 بنجاح.');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم التشغيلية - بيئة العمل الداخلية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../../assets/css/app.css">
+    <link rel="stylesheet" href="../../assets/css/shell.css">
+    <link rel="stylesheet" href="../../assets/css/wizard.css">
+</head>
+<body data-root="../../">
+    <main>
+        <section class="internal-hero">
+            <h1>لوحة التحكم التشغيلية</h1>
+            <p>نظرة عامة على مؤشرات النظام والنشاط التشغيلي اليومي لصندوق الحماية الاجتماعية</p>
+        </section>
+
+        <!-- KPI Stats -->
+        <div class="dashboard-stat-grid mb-4">
+            <div class="internal-grid-card text-center">
+                <div class="mb-2"><i class="fas fa-users fa-2x text-primary"></i></div>
+                <div class="h3 fw-bold mb-1">12,450</div>
+                <div class="text-muted small">إجمالي المشتركين النشطين</div>
+            </div>
+            <div class="internal-grid-card text-center">
+                <div class="mb-2"><i class="fas fa-clock fa-2x text-warning"></i></div>
+                <div class="h3 fw-bold mb-1">38</div>
+                <div class="text-muted small">طلبات الصرف المعلقة</div>
+            </div>
+            <div class="internal-grid-card text-center">
+                <div class="mb-2"><i class="fas fa-balance-scale fa-2x text-danger"></i></div>
+                <div class="h3 fw-bold mb-1">5</div>
+                <div class="text-muted small">المطابقات المالية المستحقة</div>
+            </div>
+            <div class="internal-grid-card text-center">
+                <div class="mb-2"><i class="fas fa-exclamation-triangle fa-2x text-info"></i></div>
+                <div class="h3 fw-bold mb-1">14</div>
+                <div class="text-muted small">الاعتراضات قيد المراجعة</div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="internal-grid-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i> آخر العمليات في النظام</h5>
+                <a href="internal-log.html" class="btn btn-sm btn-outline-secondary">عرض السجل الكامل</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>نوع العملية</th>
+                            <th>المستخدم</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-muted small">2026-06-23 09:14</td>
+                            <td><i class="fas fa-user-plus me-1 text-success"></i> تسجيل مشترك جديد</td>
+                            <td>خالد الحوسني</td>
+                            <td><span class="badge bg-success">مكتمل</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted small">2026-06-23 08:55</td>
+                            <td><i class="fas fa-coins me-1 text-primary"></i> إيداع جماعي</td>
+                            <td>منى الرئيسية</td>
+                            <td><span class="badge bg-success">مكتمل</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted small">2026-06-23 08:30</td>
+                            <td><i class="fas fa-hand-holding-usd me-1 text-warning"></i> طلب صرف</td>
+                            <td>النظام (آلي)</td>
+                            <td><span class="badge bg-warning text-dark">معلق</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted small">2026-06-22 16:45</td>
+                            <td><i class="fas fa-gavel me-1 text-danger"></i> اعتراض على أجر</td>
+                            <td>سعيد الجابري</td>
+                            <td><span class="badge bg-warning text-dark">قيد المراجعة</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted small">2026-06-22 15:20</td>
+                            <td><i class="fas fa-percentage me-1 text-info"></i> تحديث عائد استثمار</td>
+                            <td>هند الكلبانية</td>
+                            <td><span class="badge bg-success">مكتمل</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <h5 class="mb-3"><i class="fas fa-link me-2"></i> روابط سريعة</h5>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <a href="worker-directory.html" class="internal-grid-card d-block text-decoration-none text-center p-3">
+                    <i class="fas fa-address-book fa-2x text-primary mb-2 d-block"></i>
+                    <div class="fw-bold">دليل العمال</div>
+                    <div class="text-muted small">بحث ومراجعة الحسابات</div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="disbursement-processing.html" class="internal-grid-card d-block text-decoration-none text-center p-3">
+                    <i class="fas fa-tasks fa-2x text-warning mb-2 d-block"></i>
+                    <div class="fw-bold">معالجة الصرف</div>
+                    <div class="text-muted small">38 طلب معلق</div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="salary-objections.html" class="internal-grid-card d-block text-decoration-none text-center p-3">
+                    <i class="fas fa-gavel fa-2x text-danger mb-2 d-block"></i>
+                    <div class="fw-bold">اعتراضات الأجر</div>
+                    <div class="text-muted small">14 اعتراض قيد المراجعة</div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="reports.html" class="internal-grid-card d-block text-decoration-none text-center p-3">
+                    <i class="fas fa-chart-pie fa-2x text-success mb-2 d-block"></i>
+                    <div class="fw-bold">التقارير والتحليلات</div>
+                    <div class="text-muted small">إحصائيات شاملة</div>
+                </a>
+            </div>
+        </div>
+    </main>
+    <script src="../../assets/js/prototype-core.js"></script>
+    <script src="../../assets/js/internal-shell.js"></script>
+</body>
+</html>

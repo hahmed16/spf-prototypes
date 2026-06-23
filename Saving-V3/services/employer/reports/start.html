@@ -1,0 +1,205 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقارير جهة العمل - صندوق الحماية الاجتماعية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../../../assets/css/app.css">
+    <link rel="stylesheet" href="../../../assets/css/shell.css">
+    <link rel="stylesheet" href="../../../assets/css/wizard.css">
+</head>
+<body data-root="../../../" data-page-kind="form" data-user-role="employer">
+<main id="mainContent" class="gup-main-shell">
+
+    <div class="gup-content-header">
+        <div class="breadcrumbs-lite">
+            <a href="../../../index.html">الرئيسية</a> <span>›</span>
+            <a href="index.html">تقارير جهة العمل</a> <span>›</span>
+            <span>التقارير</span>
+        </div>
+        <h1>تقارير جهة العمل</h1>
+    </div>
+
+    <!-- KPI Stats -->
+    <div class="dashboard-stat-grid mb-4">
+        <div class="gup-form-section" style="text-align:center; padding:20px;">
+            <div style="font-size:2rem; color:var(--gup-color-primary,#1a6e3c); margin-bottom:8px;"><i class="fas fa-users"></i></div>
+            <div class="balance-value highlight" style="font-size:1.5rem; font-weight:700;">450</div>
+            <div style="color:#666; margin-top:4px;">إجمالي العمال</div>
+        </div>
+        <div class="gup-form-section" style="text-align:center; padding:20px;">
+            <div style="font-size:2rem; color:#b8860b; margin-bottom:8px;"><i class="fas fa-wallet"></i></div>
+            <div class="balance-value highlight" style="font-size:1.5rem; font-weight:700;">12,450 ر.ع</div>
+            <div style="color:#666; margin-top:4px;">إجمالي الإيداعات</div>
+        </div>
+        <div class="gup-form-section" style="text-align:center; padding:20px;">
+            <div style="font-size:2rem; color:#1d6fa4; margin-bottom:8px;"><i class="fas fa-chart-line"></i></div>
+            <div class="balance-value highlight" style="font-size:1.5rem; font-weight:700;">650 ر.ع</div>
+            <div style="color:#666; margin-top:4px;">متوسط الراتب</div>
+        </div>
+    </div>
+
+    <!-- Reports Generation -->
+    <div class="gup-form-section">
+        <h2>توليد التقارير</h2>
+
+        <!-- Report 1: Registered Workers -->
+        <div class="p-3 mb-3 rounded" style="border:1px solid #dee2e6; background:#fafafa;">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <div class="fw-bold mb-1">
+                        <i class="fas fa-users text-primary me-2"></i>
+                        تقرير العمال المسجلين
+                    </div>
+                    <div style="color:#666; font-size:.85rem;">قائمة كاملة بجميع العمال المسجلين وبياناتهم</div>
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label" for="rpt1from">من</label>
+                    <input type="date" id="rpt1from" class="form-control form-control-sm" value="2024-01-01">
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label" for="rpt1to">إلى</label>
+                    <input type="date" id="rpt1to" class="form-control form-control-sm" value="2024-06-30">
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label" for="rpt1fmt">الصيغة</label>
+                    <select id="rpt1fmt" class="form-select form-select-sm">
+                        <option>PDF</option>
+                        <option>Excel</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="button" class="gup-primary-btn w-100" onclick="generateReport('تقرير العمال المسجلين')">
+                        <i class="fas fa-file-download"></i> توليد التقرير
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report 2: Monthly Deposits -->
+        <div class="p-3 mb-3 rounded" style="border:1px solid #dee2e6; background:#fafafa;">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <div class="fw-bold mb-1">
+                        <i class="fas fa-money-bill-wave text-success me-2"></i>
+                        تقرير الإيداعات الشهرية
+                    </div>
+                    <div style="color:#666; font-size:.85rem;">ملخص الإيداعات الجماعية الشهرية والتواريخ</div>
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label" for="rpt2from">من</label>
+                    <input type="date" id="rpt2from" class="form-control form-control-sm" value="2024-01-01">
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label" for="rpt2to">إلى</label>
+                    <input type="date" id="rpt2to" class="form-control form-control-sm" value="2024-06-30">
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label" for="rpt2fmt">الصيغة</label>
+                    <select id="rpt2fmt" class="form-select form-select-sm">
+                        <option>PDF</option>
+                        <option>Excel</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="button" class="gup-primary-btn w-100" onclick="generateReport('تقرير الإيداعات الشهرية')">
+                        <i class="fas fa-file-download"></i> توليد التقرير
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report 3: Mandatory Subscriptions -->
+        <div class="p-3 mb-3 rounded" style="border:1px solid #dee2e6; background:#fafafa;">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <div class="fw-bold mb-1">
+                        <i class="fas fa-file-invoice-dollar text-warning me-2"></i>
+                        تقرير الاشتراكات الإلزامية
+                    </div>
+                    <div style="color:#666; font-size:.85rem;">الاشتراكات الإلزامية المدفوعة والمستحقة (9%)</div>
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label" for="rpt3from">من</label>
+                    <input type="date" id="rpt3from" class="form-control form-control-sm" value="2024-01-01">
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label" for="rpt3to">إلى</label>
+                    <input type="date" id="rpt3to" class="form-control form-control-sm" value="2024-06-30">
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label" for="rpt3fmt">الصيغة</label>
+                    <select id="rpt3fmt" class="form-select form-select-sm">
+                        <option>PDF</option>
+                        <option>Excel</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="button" class="gup-primary-btn w-100" onclick="generateReport('تقرير الاشتراكات الإلزامية')">
+                        <i class="fas fa-file-download"></i> توليد التقرير
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report 4: Objections -->
+        <div class="p-3 mb-3 rounded" style="border:1px solid #dee2e6; background:#fafafa;">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <div class="fw-bold mb-1">
+                        <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                        تقرير الاعتراضات
+                    </div>
+                    <div style="color:#666; font-size:.85rem;">اعتراضات العمال على الأجر وحالة الردود</div>
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label" for="rpt4from">من</label>
+                    <input type="date" id="rpt4from" class="form-control form-control-sm" value="2024-01-01">
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label" for="rpt4to">إلى</label>
+                    <input type="date" id="rpt4to" class="form-control form-control-sm" value="2024-06-30">
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label" for="rpt4fmt">الصيغة</label>
+                    <select id="rpt4fmt" class="form-select form-select-sm">
+                        <option>PDF</option>
+                        <option>Excel</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="button" class="gup-primary-btn w-100" onclick="generateReport('تقرير الاعتراضات')">
+                        <i class="fas fa-file-download"></i> توليد التقرير
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success toast (shown on generate) -->
+    <div id="reportToast" style="display:none;" class="gup-inline-alert success mt-4">
+        <i class="fas fa-check-circle"></i>
+        <span>تم توليد <strong id="toastReportName"></strong> بنجاح. سيبدأ التنزيل تلقائياً.</span>
+    </div>
+
+</main>
+<script src="../../../assets/js/prototype-core.js"></script>
+<script src="../../../assets/js/external-shell.js"></script>
+<script>
+function generateReport(name) {
+    const toast = document.getElementById('reportToast');
+    const toastName = document.getElementById('toastReportName');
+    if (toast && toastName) {
+        toastName.textContent = name;
+        toast.style.display = '';
+        setTimeout(() => { toast.style.display = 'none'; }, 4000);
+    }
+}
+</script>
+</body>
+</html>
