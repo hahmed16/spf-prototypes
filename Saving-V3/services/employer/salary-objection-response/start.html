@@ -47,6 +47,15 @@
 
     <!-- Step 1 -->
     <div class="wizard-content-area" id="wizardStep1">
+        <!-- Deadline Alert -->
+        <div class="gup-inline-alert danger mb-4" style="background:#fdecea;border-color:#f5c6cb;color:#721c24;">
+            <i class="fas fa-hourglass-half"></i>
+            <div>
+                <strong>تحذير: مهلة الرد تقترب</strong> — يتعين على صاحب العمل الرد على اعتراضات الأجر خلال <strong>30 يوم عمل</strong> من تاريخ الاستلام.<br>
+                <span style="font-size:.88rem;">وفقاً للبند <strong>BR-OBJ-05</strong>: إذا انقضت المهلة دون رد من صاحب العمل، يُعتمد الأجر المقترح من العامل تلقائياً ويُحدَّث في سجلات الصندوق دون الحاجة إلى موافقة.</span>
+            </div>
+        </div>
+
         <!-- Objections Table -->
         <section class="gup-form-section mb-4">
             <h2>قائمة الاعتراضات المفتوحة</h2>
@@ -59,6 +68,7 @@
                             <th>الأجر المسجل</th>
                             <th>الأجر المقترح</th>
                             <th>تاريخ الاعتراض</th>
+                            <th>المهلة المتبقية</th>
                             <th>الحالة</th>
                             <th>إجراء</th>
                         </tr>
@@ -70,6 +80,9 @@
                             <td>550 ر.ع</td>
                             <td>650 ر.ع</td>
                             <td>10/06/2024</td>
+                            <td>
+                                <span style="color:#c0392b;font-weight:700;"><i class="fas fa-hourglass-half me-1"></i>8 أيام</span>
+                            </td>
                             <td><span class="badge bg-warning text-dark">بانتظار الرد</span></td>
                             <td>
                                 <button type="button" class="gup-primary-btn" style="padding:4px 14px; font-size:.85rem;" onclick="showResponseForm()">
@@ -83,6 +96,9 @@
                             <td>700 ر.ع</td>
                             <td>800 ر.ع</td>
                             <td>05/06/2024</td>
+                            <td>
+                                <span style="color:#856404;font-weight:700;"><i class="fas fa-hourglass-half me-1"></i>13 يوم</span>
+                            </td>
                             <td><span class="badge bg-warning text-dark">بانتظار الرد</span></td>
                             <td>
                                 <button type="button" class="gup-outline-btn" style="padding:4px 14px; font-size:.85rem;">

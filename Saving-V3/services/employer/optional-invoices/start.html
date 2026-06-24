@@ -12,6 +12,18 @@
     <link rel="stylesheet" href="../../../assets/css/app.css">
     <link rel="stylesheet" href="../../../assets/css/shell.css">
     <link rel="stylesheet" href="../../../assets/css/wizard.css">
+    <style>
+        .inv-card { border:1px solid #dee2e6; border-radius:10px; margin-bottom:16px; overflow:hidden; }
+        .inv-card-header { padding:14px 18px; background:#f8f9fa; border-bottom:1px solid #dee2e6; display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
+        .inv-card-body { padding:16px 18px; display:none; }
+        .inv-card-body.open { display:block; }
+        .alloc-badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:.75rem; font-weight:600; }
+        .alloc-ok      { background:#d1e7dd; color:#0a3622; border:1px solid #198754; }
+        .alloc-pending { background:#fff3cd; color:#856404; border:1px solid #ffc107; }
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; align-items:center; justify-content:center; }
+        .modal-overlay.open { display:flex; }
+        .modal-box { background:#fff; border-radius:12px; padding:28px; max-width:480px; width:95%; }
+    </style>
 </head>
 <body data-root="../../../" data-page-kind="form" data-user-role="employer">
 <main id="mainContent" class="gup-main-shell">
@@ -23,153 +35,235 @@
             <span>قائمة الفواتير</span>
         </div>
         <h1>إدارة فواتير الإيداع الاختياري الجماعي</h1>
+        <p class="gup-page-intro">متابعة الفواتير الجماعية، حالة السداد، وحالة تخصيص المبلغ لكل عامل بعد السداد.</p>
+    </div>
+
+    <!-- KPI Summary -->
+    <div class="dashboard-stat-grid mb-4">
+        <div class="gup-form-section" style="text-align:center;padding:16px;">
+            <div style="font-size:1.5rem;color:#c0392b;margin-bottom:4px;"><i class="fas fa-file-invoice-dollar"></i></div>
+            <div class="fw-bold" style="font-size:1.3rem;">2</div>
+            <div style="color:#666;font-size:.83rem;margin-top:2px;">فاتورة بانتظار السداد</div>
+        </div>
+        <div class="gup-form-section" style="text-align:center;padding:16px;">
+            <div style="font-size:1.5rem;color:#856404;margin-bottom:4px;"><i class="fas fa-hourglass-half"></i></div>
+            <div class="fw-bold" style="font-size:1.3rem;">115</div>
+            <div style="color:#666;font-size:.83rem;margin-top:2px;">عامل بانتظار التخصيص</div>
+        </div>
+        <div class="gup-form-section" style="text-align:center;padding:16px;">
+            <div style="font-size:1.5rem;color:var(--gup-color-primary,#1a6e3c);margin-bottom:4px;"><i class="fas fa-check-circle"></i></div>
+            <div class="fw-bold" style="font-size:1.3rem;">115</div>
+            <div style="color:#666;font-size:.83rem;margin-top:2px;">عامل مُخصَّص (آخر فاتورة)</div>
+        </div>
+        <div class="gup-form-section" style="text-align:center;padding:16px;">
+            <div style="font-size:1.5rem;color:#555;margin-bottom:4px;"><i class="fas fa-coins"></i></div>
+            <div class="fw-bold" style="font-size:1.3rem;">14,994 ر.ع</div>
+            <div style="color:#666;font-size:.83rem;margin-top:2px;">إجمالي المستحق حالياً</div>
+        </div>
     </div>
 
     <!-- Filter -->
     <div class="gup-form-section mb-4">
-        <h2>تصفية الفواتير</h2>
         <div class="row g-3 align-items-end">
             <div class="col-md-3">
-                <label class="gup-field-label" for="filterMonth">الفترة</label>
-                <select id="filterMonth" class="form-select">
-                    <option>يناير 2024</option>
-                    <option>فبراير 2024</option>
-                    <option selected>مارس 2024</option>
-                    <option>أبريل 2024</option>
-                    <option>مايو 2024</option>
-                    <option>يونيو 2024</option>
+                <label class="gup-field-label" for="filterPeriod">الفترة</label>
+                <select id="filterPeriod" class="form-select">
+                    <option>الكل</option>
+                    <option selected>2024</option>
+                    <option>2023</option>
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="gup-field-label" for="filterStatus">الحالة</label>
+                <label class="gup-field-label" for="filterStatus">حالة الفاتورة</label>
                 <select id="filterStatus" class="form-select">
                     <option value="">الكل</option>
-                    <option value="pending">مستحقة</option>
-                    <option value="paid">مدفوعة</option>
+                    <option>بانتظار السداد</option>
+                    <option>مدفوعة — تخصيص جزئي</option>
+                    <option>مدفوعة — تم التخصيص</option>
                 </select>
             </div>
             <div class="col-md-3">
-                <button type="button" class="gup-primary-btn w-100">
-                    <i class="fas fa-search"></i> بحث
-                </button>
+                <button type="button" class="gup-primary-btn w-100"><i class="fas fa-search me-1"></i> بحث</button>
+            </div>
+            <div class="col-md-3">
+                <a href="group-deposit/start.html" class="gup-outline-btn w-100"><i class="fas fa-plus me-1"></i> إيداع جماعي جديد</a>
             </div>
         </div>
     </div>
 
-    <!-- Invoices Table -->
-    <div class="gup-form-section">
-        <h2>الفواتير</h2>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>رقم الفاتورة</th>
-                        <th>الفترة</th>
-                        <th>عدد العمال</th>
-                        <th>الإجمالي</th>
-                        <th>المتبقي</th>
-                        <th>الحالة</th>
-                        <th>إجراء</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="fw-bold">INV-OPT-2024-001</td>
-                        <td>يناير 2024</td>
-                        <td>120 عامل</td>
-                        <td>7,560 ر.ع</td>
-                        <td>7,560 ر.ع</td>
-                        <td><span class="badge bg-danger">مستحقة</span></td>
-                        <td>
-                            <button type="button" class="gup-primary-btn" style="padding:4px 16px; font-size:.85rem;" onclick="payInvoice('INV-OPT-2024-001')">
-                                <i class="fas fa-credit-card"></i> دفع
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="fw-bold">INV-OPT-2024-002</td>
-                        <td>فبراير 2024</td>
-                        <td>118 عامل</td>
-                        <td>7,434 ر.ع</td>
-                        <td>7,434 ر.ع</td>
-                        <td><span class="badge bg-danger">مستحقة</span></td>
-                        <td>
-                            <button type="button" class="gup-primary-btn" style="padding:4px 16px; font-size:.85rem;" onclick="payInvoice('INV-OPT-2024-002')">
-                                <i class="fas fa-credit-card"></i> دفع
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="fw-bold">INV-OPT-2023-012</td>
-                        <td>ديسمبر 2023</td>
-                        <td>115 عامل</td>
-                        <td>7,245 ر.ع</td>
-                        <td>0 ر.ع</td>
-                        <td><span class="badge bg-success">مدفوعة</span></td>
-                        <td>
-                            <button type="button" class="gup-outline-btn" style="padding:4px 16px; font-size:.85rem;">
-                                <i class="fas fa-receipt"></i> إيصال
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- Invoice Cards -->
+    <div>
+
+        <!-- Invoice 1 — pending payment -->
+        <div class="inv-card">
+            <div class="inv-card-header" onclick="toggleInv('inv1')">
+                <div>
+                    <span class="fw-bold">INV-OPT-2024-001</span>
+                    <span style="color:#888;font-size:.85rem;margin-right:12px;">يناير 2024 · 120 عامل · 7,560 ر.ع</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-danger">بانتظار السداد</span>
+                    <button class="gup-primary-btn" style="font-size:.8rem;padding:4px 14px;" onclick="event.stopPropagation();openPayModal('INV-OPT-2024-001','7,560')">
+                        <i class="fas fa-credit-card me-1"></i> سداد
+                    </button>
+                    <i class="fas fa-chevron-down" id="chevron-inv1" style="color:#888;"></i>
+                </div>
+            </div>
+            <div class="inv-card-body" id="body-inv1">
+                <div class="gup-inline-alert warning mb-3">
+                    <i class="fas fa-info-circle"></i>
+                    <span>لن يُخصَّص أي مبلغ للعمال قبل إتمام السداد الكامل. الفاتورة الجماعية لا تقبل الدفع الجزئي.</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead class="table-light"><tr><th>العامل</th><th>الرقم المدني</th><th>حصة الإيداع</th><th>حالة التخصيص</th></tr></thead>
+                        <tbody>
+                            <tr><td>محمد بن علي السعدي</td><td>23456789</td><td>63.000 ر.ع</td><td><span class="alloc-badge alloc-pending"><i class="fas fa-clock me-1"></i> بانتظار السداد</span></td></tr>
+                            <tr><td>أحمد بن سالم الحارثي</td><td>34567890</td><td>49.500 ر.ع</td><td><span class="alloc-badge alloc-pending"><i class="fas fa-clock me-1"></i> بانتظار السداد</span></td></tr>
+                            <tr><td>راجيف كومار</td><td>45678901</td><td>34.200 ر.ع</td><td><span class="alloc-badge alloc-pending"><i class="fas fa-clock me-1"></i> بانتظار السداد</span></td></tr>
+                            <tr><td colspan="4" style="text-align:left;color:#888;font-size:.8rem;">... و117 عاملاً آخرين</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
-        <!-- Summary -->
-        <div class="mt-4 p-3 rounded" style="background:#f8f9fa; border:1px solid #dee2e6;">
-            <div class="row g-2 text-center">
-                <div class="col-md-4">
-                    <div style="color:#666; font-size:.85rem;">إجمالي الفواتير المستحقة</div>
-                    <div class="fw-bold" style="font-size:1.2rem; color:#c0392b;">14,994 ر.ع</div>
+        <!-- Invoice 2 — pending payment -->
+        <div class="inv-card">
+            <div class="inv-card-header" onclick="toggleInv('inv2')">
+                <div>
+                    <span class="fw-bold">INV-OPT-2024-002</span>
+                    <span style="color:#888;font-size:.85rem;margin-right:12px;">فبراير 2024 · 118 عامل · 7,434 ر.ع</span>
                 </div>
-                <div class="col-md-4">
-                    <div style="color:#666; font-size:.85rem;">إجمالي الفواتير المدفوعة</div>
-                    <div class="fw-bold" style="font-size:1.2rem; color:var(--gup-color-primary,#1a6e3c);">7,245 ر.ع</div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-danger">بانتظار السداد</span>
+                    <button class="gup-primary-btn" style="font-size:.8rem;padding:4px 14px;" onclick="event.stopPropagation();openPayModal('INV-OPT-2024-002','7,434')">
+                        <i class="fas fa-credit-card me-1"></i> سداد
+                    </button>
+                    <i class="fas fa-chevron-down" id="chevron-inv2" style="color:#888;"></i>
                 </div>
-                <div class="col-md-4">
-                    <div style="color:#666; font-size:.85rem;">عدد الفواتير</div>
-                    <div class="fw-bold" style="font-size:1.2rem;">3 فواتير</div>
+            </div>
+            <div class="inv-card-body" id="body-inv2">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead class="table-light"><tr><th>العامل</th><th>الرقم المدني</th><th>حصة الإيداع</th><th>حالة التخصيص</th></tr></thead>
+                        <tbody>
+                            <tr><td>محمد بن علي السعدي</td><td>23456789</td><td>63.000 ر.ع</td><td><span class="alloc-badge alloc-pending"><i class="fas fa-clock me-1"></i> بانتظار السداد</span></td></tr>
+                            <tr><td>أحمد بن سالم الحارثي</td><td>34567890</td><td>49.500 ر.ع</td><td><span class="alloc-badge alloc-pending"><i class="fas fa-clock me-1"></i> بانتظار السداد</span></td></tr>
+                            <tr><td colspan="4" style="text-align:left;color:#888;font-size:.8rem;">... و116 عاملاً آخرين</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Payment Modal (inline simulation) -->
-    <div id="paymentSection" style="display:none;" class="gup-form-section mt-4">
-        <h2><i class="fas fa-credit-card me-2"></i>دفع الفاتورة: <span id="payInvNum"></span></h2>
-        <div class="gup-inline-alert info mb-4">
-            <i class="fas fa-info-circle"></i>
-            <span>الرجاء اختيار طريقة الدفع وإدخال البيانات المطلوبة لإتمام العملية.</span>
-        </div>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="gup-field-label">طريقة الدفع</label>
-                <select class="form-select">
-                    <option>تحويل بنكي</option>
-                    <option>شيك مصرفي</option>
-                </select>
+        <!-- Invoice 3 — paid + fully allocated -->
+        <div class="inv-card" style="border-color:#b7dfca;">
+            <div class="inv-card-header" onclick="toggleInv('inv3')" style="background:#f0faf4;">
+                <div>
+                    <span class="fw-bold">INV-OPT-2023-012</span>
+                    <span style="color:#888;font-size:.85rem;margin-right:12px;">ديسمبر 2023 · 115 عامل · 7,245 ر.ع</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success">مدفوعة — تم التخصيص</span>
+                    <a href="#" class="gup-outline-btn" style="font-size:.8rem;padding:4px 14px;" onclick="event.stopPropagation();">
+                        <i class="fas fa-download me-1"></i> إيصال
+                    </a>
+                    <i class="fas fa-chevron-down" id="chevron-inv3" style="color:#888;"></i>
+                </div>
             </div>
-            <div class="col-md-6">
-                <label class="gup-field-label">رقم المرجع البنكي</label>
-                <input type="text" class="form-control" placeholder="أدخل رقم المرجع">
+            <div class="inv-card-body" id="body-inv3">
+                <div class="gup-inline-alert success mb-3">
+                    <i class="fas fa-check-circle"></i>
+                    <span>تم تخصيص المبالغ في حسابات جميع العمال بتاريخ 05/01/2024.</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead class="table-light"><tr><th>العامل</th><th>الرقم المدني</th><th>حصة الإيداع</th><th>حالة التخصيص</th><th>تاريخ التخصيص</th></tr></thead>
+                        <tbody>
+                            <tr><td>محمد بن علي السعدي</td><td>23456789</td><td>63.000 ر.ع</td><td><span class="alloc-badge alloc-ok"><i class="fas fa-check me-1"></i> مُخصَّص</span></td><td>05/01/2024</td></tr>
+                            <tr><td>أحمد بن سالم الحارثي</td><td>34567890</td><td>49.500 ر.ع</td><td><span class="alloc-badge alloc-ok"><i class="fas fa-check me-1"></i> مُخصَّص</span></td><td>05/01/2024</td></tr>
+                            <tr><td>راجيف كومار</td><td>45678901</td><td>34.200 ر.ع</td><td><span class="alloc-badge alloc-ok"><i class="fas fa-check me-1"></i> مُخصَّص</span></td><td>05/01/2024</td></tr>
+                            <tr><td colspan="5" style="text-align:left;color:#888;font-size:.8rem;">... و112 عاملاً آخرين — جميعهم مُخصَّصون</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-        <div class="mt-3 d-flex gap-3">
-            <button type="button" class="gup-primary-btn" onclick="document.getElementById('paymentSection').style.display='none'">تأكيد الدفع</button>
-            <button type="button" class="gup-outline-btn" onclick="document.getElementById('paymentSection').style.display='none'">إلغاء</button>
-        </div>
+
     </div>
 
 </main>
+
+<!-- Payment Modal -->
+<div class="modal-overlay" id="payModal">
+    <div class="modal-box">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 style="margin:0;">سداد الفاتورة</h3>
+            <button type="button" onclick="document.getElementById('payModal').classList.remove('open')" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#666;">&times;</button>
+        </div>
+        <div class="gup-labelled-item"><span class="item-label">رقم الفاتورة</span><span class="item-value fw-bold" id="payModalInvNum">—</span></div>
+        <div class="gup-labelled-item"><span class="item-label">المبلغ المستحق</span><span class="item-value fw-bold" id="payModalAmt">—</span></div>
+        <div class="gup-inline-alert info mt-2 mb-3">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>يجب سداد المبلغ كاملاً دفعةً واحدة. لا يُقبل الدفع الجزئي.</span>
+        </div>
+        <div class="mb-3">
+            <label class="gup-field-label">طريقة الدفع</label>
+            <select class="form-select">
+                <option>ONEIC أو THAWANI أو OIFC</option>
+                <option>شيك مصرفي</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="gup-field-label">رقم المرجع البنكي</label>
+            <input type="text" class="form-control" id="payRef" placeholder="أدخل رقم المرجع">
+        </div>
+        <div class="d-flex gap-2 justify-content-end">
+            <button type="button" class="gup-outline-btn" onclick="document.getElementById('payModal').classList.remove('open')">إلغاء</button>
+            <button type="button" class="gup-primary-btn" onclick="confirmPayment()">
+                <i class="fas fa-check me-1"></i> تأكيد السداد
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Success Toast -->
+<div id="payToast" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:2000;min-width:340px;">
+    <div class="gup-inline-alert success">
+        <i class="fas fa-check-circle"></i>
+        <span>تم تسجيل السداد. سيبدأ النظام بتخصيص المبالغ في حسابات العمال خلال دقائق.</span>
+    </div>
+</div>
+
 <script src="../../../assets/js/prototype-core.js"></script>
 <script src="../../../assets/js/external-shell.js"></script>
 <script>
-function payInvoice(inv) {
-    document.getElementById('payInvNum').textContent = inv;
-    document.getElementById('paymentSection').style.display = '';
-    document.getElementById('paymentSection').scrollIntoView({ behavior: 'smooth' });
+function toggleInv(id) {
+    const body = document.getElementById('body-' + id);
+    const chevron = document.getElementById('chevron-' + id);
+    const isOpen = body.classList.toggle('open');
+    chevron.className = isOpen ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+    chevron.style.color = '#888';
 }
+function openPayModal(invNum, amt) {
+    document.getElementById('payModalInvNum').textContent = invNum;
+    document.getElementById('payModalAmt').textContent = amt + ' ر.ع';
+    document.getElementById('payRef').value = '';
+    document.getElementById('payModal').classList.add('open');
+}
+function confirmPayment() {
+    if (!document.getElementById('payRef').value.trim()) {
+        alert('يُرجى إدخال رقم المرجع البنكي'); return;
+    }
+    document.getElementById('payModal').classList.remove('open');
+    const t = document.getElementById('payToast');
+    t.style.display = '';
+    setTimeout(() => { t.style.display = 'none'; }, 4500);
+}
+document.getElementById('payModal').addEventListener('click', function (e) {
+    if (e.target === this) this.classList.remove('open');
+});
 </script>
 </body>
 </html>

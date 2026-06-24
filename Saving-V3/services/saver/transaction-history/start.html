@@ -12,6 +12,16 @@
     <link rel="stylesheet" href="../../../assets/css/app.css">
     <link rel="stylesheet" href="../../../assets/css/shell.css">
     <link rel="stylesheet" href="../../../assets/css/wizard.css">
+    <style>
+        .tab-nav { display:flex; gap:4px; border-bottom:2px solid #dee2e6; margin-bottom:20px; }
+        .tab-btn { background:none; border:none; padding:10px 20px; font-size:.92rem; color:#666; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; border-radius:4px 4px 0 0; transition:all .2s; }
+        .tab-btn.active { color:var(--gup-color-primary,#1a6e3c); border-bottom-color:var(--gup-color-primary,#1a6e3c); font-weight:700; background:#f0faf4; }
+        .tab-btn:hover:not(.active) { background:#f5f5f5; color:#333; }
+        .inv-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:.78rem; font-weight:600; }
+        .inv-pending  { background:#fff3cd; color:#856404; border:1px solid #ffc107; }
+        .inv-allocated{ background:#d1e7dd; color:#0a3622; border:1px solid #198754; }
+        .inv-partial  { background:#cff4fc; color:#055160; border:1px solid #0dcaf0; }
+    </style>
 </head>
 <body data-root="../../../" data-page-kind="form" data-user-role="saver">
 <main id="mainContent" class="gup-main-shell">
@@ -20,93 +30,284 @@
         <div class="breadcrumbs-lite">
             <a href="../../../index.html">الرئيسية</a> <span>›</span>
             <a href="index.html">سجل العمليات والإيصالات</a> <span>›</span>
-            <span>سجل العمليات</span>
+            <span>السجل</span>
         </div>
         <h1>سجل العمليات والإيصالات</h1>
     </div>
 
-    <!-- Filter Row -->
-    <div class="gup-form-section mb-4">
-        <h2>تصفية العمليات</h2>
-        <div class="row g-3 align-items-end">
-            <div class="col-md-3">
-                <label class="gup-field-label">تاريخ من</label>
-                <input type="date" class="form-control">
+    <!-- Tab Navigation -->
+    <div class="tab-nav" role="tablist">
+        <button class="tab-btn active" role="tab" id="tabTx" onclick="switchTab('tx')">
+            <i class="fas fa-list-ul me-1"></i> الحركات المالية
+        </button>
+        <button class="tab-btn" role="tab" id="tabInv" onclick="switchTab('inv')">
+            <i class="fas fa-file-invoice me-1"></i> الفواتير الفردية
+            <span style="background:#ffc107;color:#333;border-radius:20px;padding:1px 8px;font-size:.75rem;margin-right:4px;">3</span>
+        </button>
+    </div>
+
+    <!-- ===== TAB: Transactions ===== -->
+    <div id="panelTx">
+        <!-- Filter Row -->
+        <div class="gup-form-section mb-4">
+            <h2>تصفية الحركات</h2>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="gup-field-label">من</label>
+                    <input type="date" class="form-control" value="2024-01-01">
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label">إلى</label>
+                    <input type="date" class="form-control" value="2024-06-30">
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label">نوع العملية</label>
+                    <select class="form-select">
+                        <option>الكل</option>
+                        <option>إيداع ذاتي اختياري</option>
+                        <option>إيداع من صاحب العمل</option>
+                        <option>إيداع إلزامي</option>
+                        <option>عوائد استثمار</option>
+                        <option>فائض محوَّل</option>
+                        <option>صرف</option>
+                        <option>سداد التزام</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label">الحالة</label>
+                    <select class="form-select">
+                        <option>الكل</option>
+                        <option>مكتمل</option>
+                        <option>قيد المعالجة</option>
+                        <option>مرفوض</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="gup-primary-btn w-100"><i class="fas fa-search me-1"></i> بحث</button>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="gup-outline-btn w-100"><i class="fas fa-file-export me-1"></i> تصدير</button>
+                </div>
             </div>
-            <div class="col-md-3">
-                <label class="gup-field-label">تاريخ إلى</label>
-                <input type="date" class="form-control">
-            </div>
-            <div class="col-md-3">
-                <label class="gup-field-label">نوع العملية</label>
-                <select class="form-select">
-                    <option>الكل</option>
-                    <option>إيداع</option>
-                    <option>صرف</option>
-                    <option>عوائد</option>
-                    <option>التزامات</option>
-                </select>
-            </div>
-            <div class="col-md-1">
-                <button type="button" class="gup-primary-btn w-100">بحث</button>
-            </div>
-            <div class="col-md-2">
-                <button type="button" class="gup-outline-btn w-100"><i class="fas fa-file-export me-1"></i> تصدير</button>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="gup-form-section">
+            <h2>الحركات المالية</h2>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>نوع العملية</th>
+                            <th>المصدر</th>
+                            <th>المبلغ</th>
+                            <th>رقم المرجع</th>
+                            <th>الحالة</th>
+                            <th>الإيصال</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>15/06/2024</td>
+                            <td><i class="fas fa-arrow-up text-success me-1"></i> إيداع ذاتي اختياري</td>
+                            <td>تحويل بنكي</td>
+                            <td class="fw-bold text-success">500.000 ر.ع</td>
+                            <td>SPF-DEP-2024-0041</td>
+                            <td><span class="badge bg-success">مكتمل</span></td>
+                            <td><a href="#" class="btn btn-sm btn-light border"><i class="fas fa-download text-primary"></i></a></td>
+                        </tr>
+                        <tr>
+                            <td>01/06/2024</td>
+                            <td><i class="fas fa-building text-primary me-1"></i> إيداع إلزامي (9%)</td>
+                            <td>صاحب العمل</td>
+                            <td class="fw-bold text-success">63.000 ر.ع</td>
+                            <td>SPF-MND-2024-0020</td>
+                            <td><span class="badge bg-success">مكتمل</span></td>
+                            <td><a href="#" class="btn btn-sm btn-light border"><i class="fas fa-download text-primary"></i></a></td>
+                        </tr>
+                        <tr>
+                            <td>01/01/2024</td>
+                            <td><i class="fas fa-percentage text-warning me-1"></i> عوائد استثمار</td>
+                            <td>الصندوق</td>
+                            <td class="fw-bold text-success">48.300 ر.ع</td>
+                            <td>SPF-RET-2024-0001</td>
+                            <td><span class="badge bg-success">مكتمل</span></td>
+                            <td><a href="#" class="btn btn-sm btn-light border"><i class="fas fa-download text-primary"></i></a></td>
+                        </tr>
+                        <tr>
+                            <td>15/05/2024</td>
+                            <td><i class="fas fa-arrow-down text-danger me-1"></i> صرف جزئي</td>
+                            <td>بنك مسقط — IBAN...4521</td>
+                            <td class="fw-bold text-danger">200.000 ر.ع</td>
+                            <td>SPF-DIS-2024-0012</td>
+                            <td><span class="badge bg-warning text-dark">قيد المعالجة</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>03/04/2024</td>
+                            <td><i class="fas fa-receipt text-info me-1"></i> سداد التزام</td>
+                            <td>خصم تلقائي من الرصيد</td>
+                            <td class="fw-bold text-danger">150.000 ر.ع</td>
+                            <td>SPF-OBL-2024-0008</td>
+                            <td><span class="badge bg-success">مكتمل</span></td>
+                            <td><a href="#" class="btn btn-sm btn-light border"><i class="fas fa-download text-primary"></i></a></td>
+                        </tr>
+                        <tr>
+                            <td>01/03/2024</td>
+                            <td><i class="fas fa-exchange-alt" style="color:#6f42c1;" ></i> فائض محوَّل</td>
+                            <td>تحويل فائض الاشتراك</td>
+                            <td class="fw-bold text-success">120.000 ر.ع</td>
+                            <td>SPF-SRP-2024-0003</td>
+                            <td><span class="badge bg-success">مكتمل</span></td>
+                            <td><a href="#" class="btn btn-sm btn-light border"><i class="fas fa-download text-primary"></i></a></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <!-- Results Table -->
-    <div class="gup-form-section">
-        <h2>نتائج البحث</h2>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>التاريخ</th>
-                        <th>نوع العملية</th>
-                        <th>المبلغ</th>
-                        <th>المصدر/الوجهة</th>
-                        <th>رقم المرجع</th>
-                        <th>الحالة</th>
-                        <th>الإيصال</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>2024-01-15</td>
-                        <td><i class="fas fa-arrow-up text-success me-1"></i> إيداع</td>
-                        <td class="fw-bold text-success">500.000 ر.ع</td>
-                        <td>تحويل بنكي</td>
-                        <td>SPF-DEP-001</td>
-                        <td><span class="badge bg-success">مكتمل</span></td>
-                        <td><a href="#" class="btn btn-sm btn-light border"><i class="fas fa-download text-primary"></i> تنزيل</a></td>
-                    </tr>
-                    <tr>
-                        <td>2024-01-10</td>
-                        <td><i class="fas fa-percentage text-warning me-1"></i> عوائد استثمار</td>
-                        <td class="fw-bold text-success">45.250 ر.ع</td>
-                        <td>الصندوق</td>
-                        <td>SPF-RET-001</td>
-                        <td><span class="badge bg-success">مكتمل</span></td>
-                        <td><a href="#" class="btn btn-sm btn-light border"><i class="fas fa-download text-primary"></i> تنزيل</a></td>
-                    </tr>
-                    <tr>
-                        <td>2024-01-05</td>
-                        <td><i class="fas fa-arrow-down text-danger me-1"></i> صرف</td>
-                        <td class="fw-bold text-danger">200.000 ر.ع</td>
-                        <td>بنك مسقط</td>
-                        <td>SPF-DIS-001</td>
-                        <td><span class="badge bg-warning text-dark">قيد المعالجة</span></td>
-                        <td>—</td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- ===== TAB: Invoices ===== -->
+    <div id="panelInv" style="display:none;">
+        <!-- Filter Row -->
+        <div class="gup-form-section mb-4">
+            <h2>تصفية الفواتير</h2>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="gup-field-label">حالة الفاتورة</label>
+                    <select class="form-select">
+                        <option>الكل</option>
+                        <option>بانتظار السداد</option>
+                        <option>تم التخصيص</option>
+                        <option>مدفوعة جزئياً</option>
+                        <option>ملغاة</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label">من</label>
+                    <input type="date" class="form-control" value="2024-01-01">
+                </div>
+                <div class="col-md-2">
+                    <label class="gup-field-label">إلى</label>
+                    <input type="date" class="form-control" value="2024-06-30">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="gup-primary-btn w-100"><i class="fas fa-search me-1"></i> بحث</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invoices -->
+        <div class="gup-form-section">
+            <h2>الفواتير الفردية</h2>
+
+            <!-- Invoice 1 — pending payment -->
+            <div class="p-3 mb-3 rounded" style="border:1px solid #ffc107;background:#fffdf0;">
+                <div class="row align-items-center g-2">
+                    <div class="col-md-3">
+                        <div class="fw-bold" style="font-size:.95rem;">INV-DEP-2024-0055</div>
+                        <div style="color:#888;font-size:.8rem;">إيداع اختياري ذاتي</div>
+                    </div>
+                    <div class="col-md-2" style="font-size:.85rem;">
+                        <div style="color:#666;">تاريخ الإنشاء</div>
+                        <div>20/06/2024</div>
+                    </div>
+                    <div class="col-md-2" style="font-size:.85rem;">
+                        <div style="color:#666;">تاريخ الاستحقاق</div>
+                        <div>30/06/2024</div>
+                    </div>
+                    <div class="col-md-2">
+                        <div style="color:#666;font-size:.8rem;">المبلغ</div>
+                        <div class="fw-bold">300.000 ر.ع</div>
+                    </div>
+                    <div class="col-md-2">
+                        <span class="inv-badge inv-pending"><i class="fas fa-clock me-1"></i> بانتظار السداد</span>
+                    </div>
+                    <div class="col-md-1 text-start">
+                        <a href="#" class="btn btn-sm btn-light border"><i class="fas fa-download text-primary"></i></a>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2" style="border-top:1px dashed #ffc107;font-size:.82rem;color:#856404;">
+                    <i class="fas fa-info-circle me-1"></i> يمكن سداد هذه الفاتورة عبر قنوات الدفع الحكومية المعتمدة (ONEIC أو THAWANI أو OIFC).
+                </div>
+            </div>
+
+            <!-- Invoice 2 — allocated -->
+            <div class="p-3 mb-3 rounded" style="border:1px solid #198754;background:#f0faf4;">
+                <div class="row align-items-center g-2">
+                    <div class="col-md-3">
+                        <div class="fw-bold" style="font-size:.95rem;">INV-DEP-2024-0041</div>
+                        <div style="color:#888;font-size:.8rem;">إيداع اختياري ذاتي</div>
+                    </div>
+                    <div class="col-md-2" style="font-size:.85rem;">
+                        <div style="color:#666;">تاريخ الإنشاء</div>
+                        <div>10/06/2024</div>
+                    </div>
+                    <div class="col-md-2" style="font-size:.85rem;">
+                        <div style="color:#666;">تاريخ السداد</div>
+                        <div>15/06/2024</div>
+                    </div>
+                    <div class="col-md-2">
+                        <div style="color:#666;font-size:.8rem;">المبلغ</div>
+                        <div class="fw-bold">500.000 ر.ع</div>
+                    </div>
+                    <div class="col-md-2">
+                        <span class="inv-badge inv-allocated"><i class="fas fa-check-circle me-1"></i> تم التخصيص</span>
+                    </div>
+                    <div class="col-md-1 text-start">
+                        <a href="#" class="btn btn-sm btn-light border"><i class="fas fa-download text-primary"></i></a>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2" style="border-top:1px dashed #b7dfca;font-size:.82rem;color:#1a7f37;">
+                    <i class="fas fa-check-circle me-1"></i> خُصِّص المبلغ في حسابك الادخاري بتاريخ 15/06/2024.
+                </div>
+            </div>
+
+            <!-- Invoice 3 — gratuity settlement, pending employer payment -->
+            <div class="p-3 mb-3 rounded" style="border:1px solid #0dcaf0;background:#f0f9ff;">
+                <div class="row align-items-center g-2">
+                    <div class="col-md-3">
+                        <div class="fw-bold" style="font-size:.95rem;">INV-GRT-2024-003421</div>
+                        <div style="color:#888;font-size:.8rem;">تسوية مكافأة نهاية الخدمة (م.138)</div>
+                    </div>
+                    <div class="col-md-2" style="font-size:.85rem;">
+                        <div style="color:#666;">تاريخ الإنشاء</div>
+                        <div>10/06/2024</div>
+                    </div>
+                    <div class="col-md-2" style="font-size:.85rem;">
+                        <div style="color:#666;">الجهة الدافعة</div>
+                        <div>شركة الخليج للمقاولات</div>
+                    </div>
+                    <div class="col-md-2">
+                        <div style="color:#666;font-size:.8rem;">المبلغ</div>
+                        <div class="fw-bold">4,200.000 ر.ع</div>
+                    </div>
+                    <div class="col-md-2">
+                        <span class="inv-badge inv-pending"><i class="fas fa-clock me-1"></i> بانتظار سداد الجهة</span>
+                    </div>
+                    <div class="col-md-1 text-start">
+                        <a href="#" class="btn btn-sm btn-light border"><i class="fas fa-download text-primary"></i></a>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2" style="border-top:1px dashed #0dcaf0;font-size:.82rem;color:#055160;">
+                    <i class="fas fa-info-circle me-1"></i> تقع مسؤولية سداد هذه الفاتورة على جهة العمل السابقة. سيُضاف المبلغ لحسابك فور السداد.
+                </div>
+            </div>
+
         </div>
     </div>
 
 </main>
 <script src="../../../assets/js/prototype-core.js"></script>
 <script src="../../../assets/js/external-shell.js"></script>
+<script>
+function switchTab(tab) {
+    document.getElementById('panelTx').style.display  = tab === 'tx'  ? '' : 'none';
+    document.getElementById('panelInv').style.display = tab === 'inv' ? '' : 'none';
+    document.getElementById('tabTx').classList.toggle('active',  tab === 'tx');
+    document.getElementById('tabInv').classList.toggle('active', tab === 'inv');
+}
+</script>
 </body>
 </html>

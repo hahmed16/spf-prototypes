@@ -82,55 +82,34 @@
 
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
-                    <label class="gup-field-label">مبلغ الاشتراك الشهري</label>
-                    <input type="number" id="monthlyAmount" class="form-control" value="100" min="100">
+                    <label class="gup-field-label">مبلغ الإيداع الأولي</label>
+                    <input type="number" id="monthlyAmount" class="form-control" value="100" min="100" oninput="checkAnnualCap(this.value)">
                     <div class="gup-field-hint">بالريال العماني — الحد الأدنى 100 ر.ع</div>
                 </div>
-            </div>
-
-            <div class="mb-4">
-                <label class="gup-field-label d-block mb-2">طريقة الدفع</label>
-                <div class="payment-option-grid">
-                    <div class="payment-option-card active" id="optCard" onclick="selectPayment('card')">
-                        <i class="fas fa-credit-card fa-lg mb-1"></i>
-                        <div>بطاقة ائتمانية</div>
-                    </div>
-                    <div class="payment-option-card" id="optCheque" onclick="selectPayment('cheque')">
-                        <i class="fas fa-money-check fa-lg mb-1"></i>
-                        <div>شيك مصرفي</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card Details Panel -->
-            <div class="payment-detail-panel show" id="cardPanel">
-                <div class="row g-3">
-                    <div class="col-12">
-                        <label class="gup-field-label">رقم البطاقة</label>
-                        <input type="text" class="form-control" placeholder="**** **** **** ****">
-                    </div>
-                    <div class="col-6">
-                        <label class="gup-field-label">تاريخ الانتهاء</label>
-                        <input type="text" class="form-control" placeholder="MM/YY">
-                    </div>
-                    <div class="col-6">
-                        <label class="gup-field-label">CVV</label>
-                        <input type="text" class="form-control" placeholder="123">
+                <div class="col-md-6 d-flex align-items-end">
+                    <div class="p-3 rounded w-100" style="background:#f0f4f8;border:1px solid #c8d8e8;font-size:.85rem;">
+                        <div class="fw-bold mb-1" style="color:#555;"><i class="fas fa-tachometer-alt me-1"></i> الحد السنوي للإيداع الاختياري الذاتي</div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:#666;">الحد الأقصى السنوي:</span>
+                            <span class="fw-bold">10,800 ر.ع</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:#666;">المُودَع هذا العام:</span>
+                            <span>0 ر.ع</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:#666;">المتبقي:</span>
+                            <span class="fw-bold text-success" id="capRemaining">10,800 ر.ع</span>
+                        </div>
+                        <div id="capWarning" class="mt-1" style="display:none;color:#c0392b;font-size:.8rem;"><i class="fas fa-exclamation-circle me-1"></i>المبلغ المدخل يتجاوز الحد السنوي المتبقي</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Cheque Details Panel -->
-            <div class="payment-detail-panel" id="chequePanel">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="gup-field-label">رقم الشيك</label>
-                        <input type="text" class="form-control" placeholder="00012345">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="gup-field-label">اسم البنك</label>
-                        <input type="text" class="form-control" placeholder="أدخل اسم البنك">
-                    </div>
+            <div class="gup-inline-alert info mb-4">
+                <i class="fas fa-file-invoice"></i>
+                <div>
+                    <strong>آلية الإيداع:</strong> عند تأكيد التسجيل، ستُنشأ فاتورة بمبلغ الإيداع الأولي المحدد. يُرجى سدادها عبر قنوات الدفع الحكومية المعتمدة (ONEIC أو THAWANI أو OIFC). لا يُقبل الدفع الجزئي للفاتورة.
                 </div>
             </div>
 
@@ -152,8 +131,8 @@
             <div class="gup-labelled-item"><span class="item-label">الجنسية</span><span class="item-value">عماني</span></div>
             <div class="gup-labelled-item"><span class="item-label">جهة العمل الحالية</span><span class="item-value">شركة أوكيو (OQ)</span></div>
             <div class="gup-labelled-item"><span class="item-label">تاريخ الميلاد</span><span class="item-value">15/05/1990</span></div>
-            <div class="gup-labelled-item"><span class="item-label">مبلغ الاشتراك الشهري</span><span class="item-value" id="reviewAmount">100 ر.ع</span></div>
-            <div class="gup-labelled-item"><span class="item-label">طريقة الدفع</span><span class="item-value" id="reviewPayment">بطاقة ائتمانية</span></div>
+            <div class="gup-labelled-item"><span class="item-label">مبلغ الإيداع الأولي</span><span class="item-value" id="reviewAmount">100 ر.ع</span></div>
+            <div class="gup-labelled-item"><span class="item-label">طريقة السداد</span><span class="item-value">فاتورة — يتم الدفع عبر قنوات الدفع الحكومية المعتمدة</span></div>
             <div class="gup-labelled-item"><span class="item-label">الشروط والأحكام</span><span class="item-value">موافق</span></div>
         </section>
     </div>
@@ -164,11 +143,22 @@
             <div class="page-status-icon" style="background:var(--gup-color-success-soft,#d4edda);color:#1a7f37">
                 <i class="fas fa-check-circle fa-2x"></i>
             </div>
-            <h2>تم تقديم الطلب بنجاح</h2>
-            <p>رقم المرجع:</p>
-            <div class="ref-number">SPF-REG-2024-003847</div>
-            <p class="mt-3">سيتم مراجعة طلبك ومعالجته خلال 3-5 أيام عمل.</p>
-            <div class="mt-4">
+            <h2>تم تسجيلك في نظام الادخار الاختياري</h2>
+            <p>صدرت فاتورة الإيداع الأولي. يُرجى سدادها عبر قنوات الدفع الحكومية المعتمدة.</p>
+            <div class="mt-3 mb-4" style="text-align:right;max-width:380px;margin-left:auto;margin-right:auto;">
+                <div class="gup-labelled-item"><span class="item-label">رقم الطلب</span><span class="item-value fw-bold">SPF-REG-2024-003847</span></div>
+                <div class="gup-labelled-item"><span class="item-label">رقم الفاتورة</span><span class="item-value fw-bold">INV-DEP-2024-0001</span></div>
+                <div class="gup-labelled-item"><span class="item-label">المبلغ المستحق</span><span class="item-value fw-bold" id="confAmount">100 ر.ع</span></div>
+                <div class="gup-labelled-item"><span class="item-label">حالة الفاتورة</span>
+                    <span class="item-value"><span style="background:#fff3cd;color:#856404;border:1px solid #ffc107;border-radius:20px;padding:2px 10px;font-size:.83rem;">بانتظار السداد</span></span>
+                </div>
+            </div>
+            <div class="gup-inline-alert info mb-4" style="max-width:460px;margin:0 auto;">
+                <i class="fas fa-info-circle"></i>
+                <span>سدِّد الفاتورة عبر <strong>ONEIC</strong> أو <strong>THAWANI</strong> أو <strong>OIFC</strong> باستخدام رقم الفاتورة أعلاه. سيُفعَّل حسابك فور تأكيد السداد.</span>
+            </div>
+            <div class="mt-3 d-flex gap-3 justify-content-center flex-wrap">
+                <a href="../transaction-history/start.html" class="gup-primary-btn"><i class="fas fa-file-invoice me-1"></i> متابعة الفاتورة</a>
                 <a href="../../../index.html" class="gup-outline-btn">العودة إلى الرئيسية</a>
             </div>
         </div>
@@ -233,6 +223,14 @@
     document.getElementById('backBtn').addEventListener('click', function (e) {
         if (currentStep > 1) { e.preventDefault(); showStep(currentStep - 1); }
     });
+
+    function checkAnnualCap(val) {
+        var remaining = 10800;
+        var entered = parseFloat(val) || 0;
+        var warn = document.getElementById('capWarning');
+        if (warn) warn.style.display = entered > remaining ? '' : 'none';
+    }
+    window.checkAnnualCap = checkAnnualCap;
 
     showStep(1);
 })();

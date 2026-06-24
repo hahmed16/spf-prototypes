@@ -1215,6 +1215,15 @@ body {
     }
 }
 
+/* ===== Table Readability ===== */
+.table > :not(caption) > * > * {
+    padding: 0.85rem 1rem;
+}
+
+.table-sm > :not(caption) > * > * {
+    padding: 0.6rem 0.85rem;
+}
+
 /* ===== Print ===== */
 @media print {
 
@@ -2393,7 +2402,6 @@ textarea:focus-visible,
 
 .form-control,
 .form-select,
-.form-check-input,
 .filter-panel .form-control,
 .filter-panel .form-select {
     border: 1px solid #7a7a83;
@@ -2401,6 +2409,19 @@ textarea:focus-visible,
     min-height: 48px;
     background: #fff;
     color: var(--gup-color-content-primary);
+}
+
+.form-check-input {
+    border: 1.5px solid #7a7a83;
+    width: 1.1em;
+    height: 1.1em;
+    min-height: unset;
+    border-radius: 0.25em;
+    flex-shrink: 0;
+}
+
+.form-check-input[type="radio"] {
+    border-radius: 50%;
 }
 
 textarea.form-control {

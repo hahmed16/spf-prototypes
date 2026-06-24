@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>نظام الحماية الاجتماعية - النماذج التجريبية</title>
-  <link href="https://fonts.googleapis.com/css2?family=Zain:wght@300;400;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Zain:wght@300;400;700;800&family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
       --g1: #004d43;
@@ -44,7 +45,7 @@
     }
     .systems {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 30px;
     }
     .system-card {
@@ -84,6 +85,50 @@
     @media (max-width: 600px) {
       .systems { grid-template-columns: 1fr; }
     }
+
+    /* GUP card variant */
+    .gup-card {
+      border: 1.5px solid #bfd8ff;
+      background: linear-gradient(145deg, #ffffff 0%, #f4f8ff 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .gup-card:hover {
+      border-color: #2f57cd;
+      box-shadow: 0 10px 30px rgba(47, 87, 205, 0.14);
+    }
+    .gup-card i {
+      color: #2f57cd;
+      font-size: 44px;
+    }
+    .gup-card h2 {
+      color: #132459;
+    }
+    .gup-card .new-badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: #2f57cd;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-family: 'Readex Pro', sans-serif;
+      letter-spacing: 0.03em;
+    }
+    .gup-card .gup-label {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 11px;
+      color: #2f57cd;
+      font-family: 'Readex Pro', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      border: 1px solid #bfd8ff;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
   </style>
 </head>
 <body>
@@ -97,6 +142,13 @@
         <i>💰</i>
         <h2>نظام الادخار</h2>
         <p>إدارة مساهمات وتحويلات نظام الادخار للمؤمن عليهم.</p>
+      </a>
+      <a href="Saving-V3/index.html" class="system-card gup-card">
+        <span class="new-badge">النسخة المحدثة</span>
+        <i class="fas fa-piggy-bank"></i>
+        <h2>نظام الادخار</h2>
+        <p>النسخة المحدثة وفق مبادئ تصميم GUP — خدمات المدخر، صاحب العمل، والموظف الداخلي.</p>
+        <span class="gup-label">GUP Design</span>
       </a>
       <a href="Directorate-WorkInjuries/index.html" class="system-card">
         <i>🏥</i>

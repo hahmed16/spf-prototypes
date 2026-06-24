@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -20,110 +20,151 @@
         <div class="breadcrumbs-lite">
             <a href="../../../index.html">الرئيسية</a> <span>›</span>
             <a href="index.html">تسوية مكافأة نهاية الخدمة السابقة</a> <span>›</span>
-            <span>تقديم الطلب</span>
+            <span>إشعار التسوية</span>
         </div>
         <h1>تسوية مكافأة نهاية الخدمة السابقة</h1>
+        <p class="gup-page-intro">تلقّيتَ إشعاراً من جهة عملك بشأن تسوية مكافأة نهاية الخدمة. يُرجى مراجعة التفاصيل واتخاذ قرارك.</p>
     </div>
 
-    <!-- Stepper -->
-    <nav class="wizard-stepper-bar" aria-label="خطوات الطلب">
-        <ol class="wizard-stepper">
-            <li class="stepper-item selected" id="step1Indicator">
-                <span class="stepper-num">1</span>
-                <span class="stepper-label">بيانات الطلب</span>
-                <div class="stepper-connector"></div>
-            </li>
-            <li class="stepper-item" id="step2Indicator">
-                <span class="stepper-num">2</span>
-                <span class="stepper-label">المراجعة</span>
-                <div class="stepper-connector"></div>
-            </li>
-            <li class="stepper-item" id="step3Indicator">
-                <span class="stepper-num">3</span>
-                <span class="stepper-label">التأكيد</span>
-            </li>
-        </ol>
-    </nav>
-
-    <!-- Step 1 -->
-    <div class="wizard-content-area" id="wizardStep1">
-        <section class="gup-form-section">
-            <h2>بيانات المكافأة</h2>
-
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <label class="gup-field-label">اسم جهة العمل السابقة</label>
-                    <input type="text" id="prevEmployer" class="form-control" placeholder="أدخل اسم جهة العمل السابقة">
-                </div>
-            </div>
-
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <label class="gup-field-label">تاريخ بدء الخدمة</label>
-                    <input type="date" id="serviceStartDate" class="form-control">
-                </div>
-                <div class="col-md-6">
-                    <label class="gup-field-label">تاريخ انتهاء الخدمة</label>
-                    <input type="date" id="serviceEndDate" class="form-control">
-                </div>
-            </div>
-
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <label class="gup-field-label">مبلغ المكافأة</label>
-                    <input type="number" id="gratuityAmount" class="form-control" placeholder="أدخل مبلغ المكافأة">
-                    <div class="gup-field-hint">بالريال العماني</div>
-                </div>
-            </div>
-
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <label class="gup-field-label">رفع وثيقة المكافأة</label>
-                    <input type="file" id="gratuityDoc" class="form-control">
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <label class="gup-field-label">ملاحظات</label>
-                <textarea class="form-control" id="gratuityNotes" rows="3" placeholder="ملاحظات إضافية (اختياري)"></textarea>
-            </div>
-        </section>
+    <!-- Notification Alert -->
+    <div class="gup-inline-alert info mb-4">
+        <i class="fas fa-bell"></i>
+        <span>أرسلت <strong>شركة الخليج للمقاولات</strong> قرار التسوية بتاريخ <strong>10/06/2024</strong>. يُرجى الرد قبل انتهاء المهلة النظامية.</span>
     </div>
 
-    <!-- Step 2 -->
-    <div class="wizard-content-area" id="wizardStep2" style="display:none">
-        <section class="gup-form-section">
-            <h2>مراجعة البيانات</h2>
-            <div class="gup-labelled-item"><span class="item-label">اسم جهة العمل السابقة</span><span class="item-value" id="reviewEmployer">—</span></div>
-            <div class="gup-labelled-item"><span class="item-label">تاريخ بدء الخدمة</span><span class="item-value" id="reviewStartDate">—</span></div>
-            <div class="gup-labelled-item"><span class="item-label">تاريخ انتهاء الخدمة</span><span class="item-value" id="reviewEndDate">—</span></div>
-            <div class="gup-labelled-item"><span class="item-label">مبلغ المكافأة</span><span class="item-value" id="reviewAmount">—</span></div>
-            <div class="gup-labelled-item"><span class="item-label">وثيقة المكافأة</span><span class="item-value" id="reviewDoc">—</span></div>
-            <div class="gup-labelled-item"><span class="item-label">ملاحظات</span><span class="item-value" id="reviewNotes">—</span></div>
-        </section>
+    <!-- Panel: Employer Decision -->
+    <div class="gup-form-section mb-4">
+        <h2><i class="fas fa-building me-2" style="color:var(--gup-color-primary,#1a6e3c);"></i> قرار جهة العمل</h2>
+
+        <div class="gup-labelled-item"><span class="item-label">جهة العمل</span><span class="item-value">شركة الخليج للمقاولات</span></div>
+        <div class="gup-labelled-item"><span class="item-label">تاريخ بدء الخدمة</span><span class="item-value">01/03/2018</span></div>
+        <div class="gup-labelled-item"><span class="item-label">تاريخ انتهاء الخدمة</span><span class="item-value">28/02/2024</span></div>
+        <div class="gup-labelled-item"><span class="item-label">مدة الخدمة</span><span class="item-value">6 سنوات</span></div>
+        <div class="gup-labelled-item"><span class="item-label">الأجر الأساسي المعتمد</span><span class="item-value">700 ر.ع</span></div>
+
+        <hr class="my-3">
+
+        <div class="gup-labelled-item">
+            <span class="item-label">خيار التسوية المختار من الجهة</span>
+            <span class="item-value">
+                <span class="badge" style="background:var(--gup-color-primary,#1a6e3c);color:#fff;padding:4px 12px;border-radius:20px;font-size:.88rem;">
+                    <i class="fas fa-piggy-bank me-1"></i> تحويل المبلغ إلى حساب الادخار
+                </span>
+            </span>
+        </div>
+        <div class="gup-labelled-item">
+            <span class="item-label">قيمة التسوية المحتسبة</span>
+            <span class="item-value fw-bold" style="font-size:1.1rem;color:var(--gup-color-primary,#1a6e3c);">4,200 ر.ع</span>
+        </div>
+        <div class="gup-labelled-item"><span class="item-label">أساس الاحتساب</span><span class="item-value">7 أيام × 6 سنوات × (700 ÷ 26)</span></div>
     </div>
 
-    <!-- Step 3 -->
-    <div class="wizard-content-area" id="wizardStep3" style="display:none">
-        <div class="page-status-card">
-            <div class="page-status-icon" style="background:var(--gup-color-success-soft,#d4edda);color:#1a7f37">
+    <!-- Panel: Invoice Status -->
+    <div class="gup-form-section mb-4">
+        <h2><i class="fas fa-file-invoice-dollar me-2" style="color:#b8860b;"></i> حالة الفاتورة والتخصيص</h2>
+
+        <div class="gup-labelled-item"><span class="item-label">رقم الفاتورة</span><span class="item-value fw-bold">INV-GRT-2024-003421</span></div>
+        <div class="gup-labelled-item">
+            <span class="item-label">حالة السداد</span>
+            <span class="item-value">
+                <span class="badge" style="background:#fff3cd;color:#856404;border:1px solid #ffc107;padding:4px 10px;border-radius:20px;font-size:.85rem;">
+                    <i class="fas fa-clock me-1"></i> بانتظار السداد من جهة العمل
+                </span>
+            </span>
+        </div>
+        <div class="gup-labelled-item">
+            <span class="item-label">حالة التخصيص في الحساب</span>
+            <span class="item-value">
+                <span class="badge" style="background:#f8d7da;color:#842029;border:1px solid #f5c2c7;padding:4px 10px;border-radius:20px;font-size:.85rem;">
+                    <i class="fas fa-hourglass-half me-1"></i> لم يُخصَّص بعد
+                </span>
+            </span>
+        </div>
+        <div class="gup-labelled-item"><span class="item-label">المبلغ المتوقع في حسابك بعد التخصيص</span><span class="item-value fw-bold" style="color:var(--gup-color-primary,#1a6e3c);">4,200 ر.ع</span></div>
+
+        <div class="gup-inline-alert warning mt-3">
+            <i class="fas fa-info-circle"></i>
+            <span>سيُضاف المبلغ تلقائياً إلى رصيد الادخار الاختياري فور سداد جهة العمل للفاتورة.</span>
+        </div>
+    </div>
+
+    <!-- Panel: Worker Response (pending) -->
+    <div class="gup-form-section mb-4" id="responsePanel">
+        <h2><i class="fas fa-reply me-2" style="color:#1d6fa4;"></i> ردّك على قرار التسوية</h2>
+
+        <p style="color:var(--gup-color-content-secondary);">بمراجعتك للتفاصيل أعلاه، يمكنك الإقرار بالتسوية أو الاعتراض عليها. في حال الاعتراض، ستُحال القضية إلى مسار النزاع العمالي.</p>
+
+        <div class="row g-3 mt-2">
+            <div class="col-md-6">
+                <div class="p-3 rounded" style="border:2px solid var(--gup-color-primary,#1a6e3c);background:#f0faf4;cursor:pointer;" onclick="selectResponse('accept')">
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="radio" name="response" id="responseAccept" value="accept" class="form-check-input mt-0" style="width:20px;height:20px;">
+                        <label for="responseAccept" class="fw-bold" style="color:var(--gup-color-primary,#1a6e3c);cursor:pointer;">
+                            <i class="fas fa-check-circle me-1"></i> أوافق على التسوية
+                        </label>
+                    </div>
+                    <p style="font-size:.85rem;margin:8px 0 0 28px;color:#555;">أقرّ بصحة البيانات وقيمة التسوية المحتسبة وأوافق على تحويلها لحسابي الادخاري.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 rounded" style="border:2px solid #dc3545;background:#fff5f5;cursor:pointer;" onclick="selectResponse('reject')">
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="radio" name="response" id="responseReject" value="reject" class="form-check-input mt-0" style="width:20px;height:20px;">
+                        <label for="responseReject" class="fw-bold" style="color:#dc3545;cursor:pointer;">
+                            <i class="fas fa-times-circle me-1"></i> أعترض على التسوية
+                        </label>
+                    </div>
+                    <p style="font-size:.85rem;margin:8px 0 0 28px;color:#555;">البيانات أو المبلغ غير صحيح وأرغب في فتح مسار النزاع العمالي.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rejection reason (hidden by default) -->
+        <div id="rejectReasonBox" class="mt-3" style="display:none;">
+            <label class="gup-field-label">سبب الاعتراض <span style="color:red">*</span></label>
+            <textarea class="form-control" id="rejectReason" rows="3" placeholder="اذكر سبب اعتراضك على قيمة أو بيانات التسوية..."></textarea>
+        </div>
+
+        <div class="wizard-footer-bar mt-4" style="position:relative;box-shadow:none;border-top:1px solid #e0e0e0;padding-top:16px;">
+            <div class="wizard-footer-inner" style="justify-content:flex-end;">
+                <button type="button" class="gup-primary-btn" id="submitResponseBtn" onclick="submitResponse()">
+                    تأكيد القرار <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation State (shown after submit) -->
+    <div id="confirmationPanel" style="display:none;">
+        <div class="page-status-card" id="acceptConfirm" style="display:none;">
+            <div class="page-status-icon" style="background:#d4edda;color:#1a7f37">
                 <i class="fas fa-check-circle fa-2x"></i>
             </div>
-            <h2>تم تقديم الطلب بنجاح</h2>
-            <p>رقم المرجع:</p>
-            <div class="ref-number">SPF-GRT-2024-000567</div>
-            <p class="mt-3">سيتم مراجعة طلبك ومعالجته خلال 3-5 أيام عمل.</p>
+            <h2>تم تسجيل موافقتك</h2>
+            <p>وافقتَ على تسوية مكافأة نهاية الخدمة. سيُضاف مبلغ <strong>4,200 ر.ع</strong> إلى حسابك الادخاري فور سداد جهة العمل للفاتورة.</p>
+            <div class="mt-3 mb-2">
+                <div class="gup-labelled-item"><span class="item-label">رقم المرجع</span><span class="item-value fw-bold">SPF-GRT-2024-003421</span></div>
+                <div class="gup-labelled-item"><span class="item-label">حالة الفاتورة</span><span class="item-value">بانتظار سداد جهة العمل</span></div>
+            </div>
+            <div class="mt-4 d-flex gap-3 justify-content-center">
+                <a href="../transaction-history/start.html" class="gup-primary-btn"><i class="fas fa-receipt me-1"></i> متابعة الفاتورة</a>
+                <a href="../dashboard/start.html" class="gup-outline-btn">لوحة البيانات</a>
+            </div>
+        </div>
+
+        <div class="page-status-card" id="rejectConfirm" style="display:none;">
+            <div class="page-status-icon" style="background:#f8d7da;color:#842029">
+                <i class="fas fa-exclamation-triangle fa-2x"></i>
+            </div>
+            <h2>تم تسجيل اعتراضك</h2>
+            <p>أُحيل اعتراضك إلى مسار النزاع العمالي. سيتواصل معك الصندوق خلال 5 أيام عمل.</p>
+            <div class="mt-3 mb-2">
+                <div class="gup-labelled-item"><span class="item-label">رقم المرجع</span><span class="item-value fw-bold">SPF-OBJ-2024-000890</span></div>
+                <div class="gup-labelled-item"><span class="item-label">الجهة المختصة</span><span class="item-value">وحدة النزاعات العمالية — صندوق الحماية الاجتماعية</span></div>
+            </div>
             <div class="mt-4">
                 <a href="../../../index.html" class="gup-outline-btn">العودة إلى الرئيسية</a>
             </div>
-        </div>
-    </div>
-
-    <!-- Sticky Footer -->
-    <div class="wizard-footer-bar" id="wizardFooter">
-        <div class="wizard-footer-inner">
-            <a href="index.html" class="gup-outline-btn" id="backBtn"><i class="fas fa-arrow-right"></i> رجوع</a>
-            <button type="button" class="gup-primary-btn" id="continueBtn">تابع <i class="fas fa-arrow-left"></i></button>
         </div>
     </div>
 
@@ -131,51 +172,23 @@
 <script src="../../../assets/js/prototype-core.js"></script>
 <script src="../../../assets/js/external-shell.js"></script>
 <script>
-(function () {
-    let currentStep = 1;
-    const totalSteps = 3;
-
-    function showStep(n) {
-        for (var i = 1; i <= totalSteps; i++) {
-            var el = document.getElementById('wizardStep' + i);
-            if (el) el.style.display = i === n ? '' : 'none';
-            var ind = document.getElementById('step' + i + 'Indicator');
-            if (ind) {
-                ind.classList.remove('selected', 'done');
-                if (i < n) ind.classList.add('done');
-                else if (i === n) ind.classList.add('selected');
-            }
-        }
-        currentStep = n;
-        var footer = document.getElementById('wizardFooter');
-        if (footer) footer.style.display = n === totalSteps ? 'none' : '';
-        var backBtn = document.getElementById('backBtn');
-        if (backBtn) {
-            if (n === 1) { backBtn.setAttribute('href', 'index.html'); backBtn.removeAttribute('data-back'); }
-            else { backBtn.removeAttribute('href'); backBtn.setAttribute('data-back', ''); }
-        }
-        if (n === 2) {
-            document.getElementById('reviewEmployer').textContent = document.getElementById('prevEmployer').value || '—';
-            document.getElementById('reviewStartDate').textContent = document.getElementById('serviceStartDate').value || '—';
-            document.getElementById('reviewEndDate').textContent = document.getElementById('serviceEndDate').value || '—';
-            var amt = document.getElementById('gratuityAmount').value;
-            document.getElementById('reviewAmount').textContent = amt ? amt + ' ر.ع' : '—';
-            var fileInput = document.getElementById('gratuityDoc');
-            document.getElementById('reviewDoc').textContent = fileInput.files.length > 0 ? fileInput.files[0].name : '—';
-            document.getElementById('reviewNotes').textContent = document.getElementById('gratuityNotes').value || '—';
-        }
+function selectResponse(type) {
+    document.getElementById('response' + (type === 'accept' ? 'Accept' : 'Reject')).checked = true;
+    document.getElementById('rejectReasonBox').style.display = type === 'reject' ? '' : 'none';
+}
+function submitResponse() {
+    const accepted = document.getElementById('responseAccept').checked;
+    const rejected = document.getElementById('responseReject').checked;
+    if (!accepted && !rejected) { alert('يُرجى اختيار قرارك أولاً'); return; }
+    if (rejected && !document.getElementById('rejectReason').value.trim()) {
+        alert('يُرجى ذكر سبب الاعتراض'); return;
     }
-
-    document.getElementById('continueBtn').addEventListener('click', function () {
-        if (currentStep < totalSteps) showStep(currentStep + 1);
-    });
-
-    document.getElementById('backBtn').addEventListener('click', function (e) {
-        if (currentStep > 1) { e.preventDefault(); showStep(currentStep - 1); }
-    });
-
-    showStep(1);
-})();
+    document.getElementById('responsePanel').style.display = 'none';
+    document.getElementById('confirmationPanel').style.display = '';
+    if (accepted) document.getElementById('acceptConfirm').style.display = '';
+    else document.getElementById('rejectConfirm').style.display = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 </script>
 </body>
 </html>

@@ -58,6 +58,7 @@
                             <th>جهة العمل</th>
                             <th>مبلغ المكافأة</th>
                             <th>تاريخ الطلب</th>
+                            <th>رد العامل</th>
                             <th>الحالة</th>
                             <th>إجراء</th>
                         </tr>
@@ -69,6 +70,7 @@
                             <td>شركة تنمية نفط عمان</td>
                             <td>4,200.000 ر.ع</td>
                             <td>20/06/2026</td>
+                            <td><span class="badge bg-warning text-dark">بانتظار الرد</span></td>
                             <td><span class="badge bg-warning text-dark">قيد المراجعة</span></td>
                             <td>
                                 <button class="btn btn-sm btn-primary py-0 px-2" onclick="showReviewPanel('GRT-2026-0022', 'سالم بن محمد الهنائي')">
@@ -82,6 +84,7 @@
                             <td>مجموعة بهوان</td>
                             <td>2,800.000 ر.ع</td>
                             <td>18/06/2026</td>
+                            <td><span class="badge bg-success">وافق</span></td>
                             <td><span class="badge bg-warning text-dark">قيد المراجعة</span></td>
                             <td>
                                 <button class="btn btn-sm btn-primary py-0 px-2" onclick="showReviewPanel('GRT-2026-0021', 'خالد بن علي الراشدي')">
@@ -95,6 +98,7 @@
                             <td>شركة الدلتا للتجارة</td>
                             <td>1,500.000 ر.ع</td>
                             <td>15/06/2026</td>
+                            <td><span class="badge bg-success">وافقت</span></td>
                             <td><span class="badge bg-success">معتمدة</span></td>
                             <td>
                                 <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="spf.showSuccess('عرض تفاصيل الطلب GRT-2026-0018')">
@@ -108,6 +112,7 @@
                             <td>بنك مسقط</td>
                             <td>6,500.000 ر.ع</td>
                             <td>10/06/2026</td>
+                            <td><span class="badge bg-success">وافق</span></td>
                             <td><span class="badge bg-success">معتمدة</span></td>
                             <td>
                                 <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="spf.showSuccess('عرض تفاصيل الطلب GRT-2026-0015')">
@@ -121,6 +126,7 @@
                             <td>مجموعة بهوان</td>
                             <td>900.000 ر.ع</td>
                             <td>01/06/2026</td>
+                            <td><span class="badge bg-danger">اعترض</span></td>
                             <td><span class="badge bg-danger">مرفوضة</span></td>
                             <td>
                                 <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="spf.showSuccess('عرض تفاصيل الطلب GRT-2026-0010')">
@@ -175,23 +181,34 @@
                 </div>
             </div>
 
+            <!-- Worker dispute reason (read-only, shown when worker rejected) -->
+            <div class="p-3 rounded mb-3" style="background:#fdecea;border:1px solid #f5c6cb;display:none;" id="workerDisputePanel">
+                <div class="fw-bold mb-1" style="color:#721c24;font-size:.88rem;"><i class="fas fa-exclamation-triangle me-1"></i> سبب اعتراض العامل</div>
+                <div style="font-size:.87rem;color:#555;" id="workerDisputeReason">المبلغ المحتسب لا يعكس الراتب الأساسي الفعلي المتفق عليه في العقد الأخير.</div>
+            </div>
+
             <div class="mb-3">
                 <label class="gup-field-label">قرار الموظف</label>
                 <div class="d-flex gap-3 mt-1">
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="decisionRadio" id="decisionApprove" value="approve">
+                        <input class="form-check-input" type="radio" name="decisionRadio" id="decisionApprove" value="approve" onchange="toggleDisputeField()">
                         <label class="form-check-label text-success fw-bold" for="decisionApprove">قبول الطلب واعتماد المكافأة</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="decisionRadio" id="decisionReject" value="reject">
+                        <input class="form-check-input" type="radio" name="decisionRadio" id="decisionReject" value="reject" onchange="toggleDisputeField()">
                         <label class="form-check-label text-danger fw-bold" for="decisionReject">رفض الطلب</label>
                     </div>
                 </div>
             </div>
 
+            <div class="mb-3" id="disputeReasonField" style="display:none;">
+                <label class="gup-field-label">أسباب الرفض <span class="text-danger">*</span></label>
+                <textarea class="form-control" rows="2" placeholder="أدخل أسباب الرفض تفصيلاً — ستُرسَل للعامل وجهة العمل..."></textarea>
+            </div>
+
             <div class="mb-3">
                 <label class="gup-field-label">ملاحظات القرار</label>
-                <textarea class="form-control" rows="3" placeholder="أدخل مبررات القرار..."></textarea>
+                <textarea class="form-control" rows="2" placeholder="ملاحظات داخلية (اختياري)..."></textarea>
             </div>
 
             <button class="btn btn-primary" onclick="confirmDecision()">
@@ -202,13 +219,24 @@
     <script src="../../assets/js/prototype-core.js"></script>
     <script src="../../assets/js/internal-shell.js"></script>
     <script>
+        var disputeWorkers = { 'GRT-2026-0021': true }; // خالد الراشدي وافق — no dispute; راجيش اعترض
         function showReviewPanel(ref, workerName) {
             document.getElementById('reviewRef').textContent = ref;
             document.getElementById('reviewWorkerName').textContent = workerName;
-            const panel = document.getElementById('reviewPanel');
+            var panel = document.getElementById('reviewPanel');
+            // Show dispute panel for workers who accepted but may have dispute context
+            var disputePanel = document.getElementById('workerDisputePanel');
+            disputePanel.style.display = (ref === 'GRT-2026-0022') ? '' : 'none';
             panel.style.display = 'block';
             panel.scrollIntoView({ behavior: 'smooth' });
         }
+
+        function toggleDisputeField() {
+            var reject = document.getElementById('decisionReject');
+            var field = document.getElementById('disputeReasonField');
+            if (field) field.style.display = (reject && reject.checked) ? '' : 'none';
+        }
+        window.toggleDisputeField = toggleDisputeField;
 
         function confirmDecision() {
             const selected = document.querySelector('input[name="decisionRadio"]:checked');

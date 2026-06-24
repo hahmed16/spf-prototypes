@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سداد الالتزامات - صندوق الحماية الاجتماعية</title>
+    <title>سداد الالتزامات من المدخرات - صندوق الحماية الاجتماعية</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -12,6 +12,14 @@
     <link rel="stylesheet" href="../../../assets/css/app.css">
     <link rel="stylesheet" href="../../../assets/css/shell.css">
     <link rel="stylesheet" href="../../../assets/css/wizard.css">
+    <style>
+        .ob-row { border:1px solid #dee2e6; border-radius:8px; padding:14px 16px; margin-bottom:10px; background:#fafafa; }
+        .ob-row.will-settle { border-color:#198754; background:#f0faf4; }
+        .ob-row.insufficient { opacity:.6; background:#f8f8f8; }
+        .ob-indicator { width:10px; height:10px; border-radius:50%; display:inline-block; margin-left:6px; }
+        .ind-green { background:#198754; }
+        .ind-grey  { background:#adb5bd; }
+    </style>
 </head>
 <body data-root="../../../" data-page-kind="form" data-user-role="saver">
 <main id="mainContent" class="gup-main-shell">
@@ -19,10 +27,10 @@
     <div class="gup-content-header">
         <div class="breadcrumbs-lite">
             <a href="../../../index.html">الرئيسية</a> <span>›</span>
-            <a href="index.html">سداد الالتزامات</a> <span>›</span>
-            <span>تقديم الطلب</span>
+            <a href="index.html">سداد الالتزامات من المدخرات</a> <span>›</span>
+            <span>مراجعة الالتزامات</span>
         </div>
-        <h1>سداد الالتزامات</h1>
+        <h1>سداد الالتزامات من المدخرات</h1>
     </div>
 
     <!-- Stepper -->
@@ -30,108 +38,173 @@
         <ol class="wizard-stepper">
             <li class="stepper-item selected" id="step1Indicator">
                 <span class="stepper-num">1</span>
-                <span class="stepper-label">الالتزامات</span>
+                <span class="stepper-label">مراجعة الالتزامات</span>
                 <div class="stepper-connector"></div>
             </li>
             <li class="stepper-item" id="step2Indicator">
                 <span class="stepper-num">2</span>
-                <span class="stepper-label">المراجعة</span>
-                <div class="stepper-connector"></div>
-            </li>
-            <li class="stepper-item" id="step3Indicator">
-                <span class="stepper-num">3</span>
-                <span class="stepper-label">التأكيد</span>
+                <span class="stepper-label">تأكيد التسوية</span>
             </li>
         </ol>
     </nav>
 
-    <!-- Step 1 -->
+    <!-- Step 1 — Review -->
     <div class="wizard-content-area" id="wizardStep1">
-        <section class="gup-form-section">
-            <h2>الالتزامات المالية المستحقة</h2>
 
-            <div class="gup-inline-alert info mb-4">
-                <i class="fas fa-wallet"></i>
-                <span>رصيدك الحالي: <strong>1,450.000 ر.ع</strong> — يمكنك استخدام هذا الرصيد لسداد التزاماتك.</span>
+        <!-- Balance summary -->
+        <div class="gup-form-section mb-4">
+            <h2>ملخص الرصيد</h2>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="p-3 rounded text-center" style="background:#f0faf4;border:1px solid #b7dfca;">
+                        <div style="color:#666;font-size:.85rem;">الرصيد الاختياري المتاح للسداد</div>
+                        <div class="fw-bold" style="font-size:1.4rem;color:var(--gup-color-primary,#1a6e3c);">1,450.000 ر.ع</div>
+                        <div style="font-size:.78rem;color:#888;margin-top:4px;">يُسدَّد من الرصيد الاختياري فقط</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded text-center" style="background:#fff3cd;border:1px solid #ffc107;">
+                        <div style="color:#666;font-size:.85rem;">إجمالي الالتزامات المستحقة</div>
+                        <div class="fw-bold" style="font-size:1.4rem;color:#856404;">86.000 ر.ع</div>
+                        <div style="font-size:.78rem;color:#888;margin-top:4px;">3 التزامات مسجّلة</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded text-center" style="background:#e9ecef;border:1px solid #dee2e6;">
+                        <div style="color:#666;font-size:.85rem;">الرصيد المتبقي بعد التسوية</div>
+                        <div class="fw-bold" style="font-size:1.4rem;color:#333;">1,364.000 ر.ع</div>
+                        <div style="font-size:.78rem;color:#888;margin-top:4px;">بعد سداد جميع الالتزامات</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How it works -->
+        <div class="gup-inline-alert info mb-4">
+            <i class="fas fa-info-circle"></i>
+            <div>
+                <strong>آلية السداد التلقائي:</strong> يقوم النظام بسداد الالتزامات تلقائياً من الرصيد الاختياري وفق ترتيب الاستحقاق (الأقدم أولاً). يُسدَّد كل التزام كاملاً أو لا يُسدَّد؛ لا يُقبل السداد الجزئي لأي التزام منفرد.
+            </div>
+        </div>
+
+        <!-- Obligations List -->
+        <div class="gup-form-section">
+            <h2>الالتزامات المستحقة</h2>
+
+            <!-- Obligation 1 — will be settled (oldest, sufficient balance) -->
+            <div class="ob-row will-settle">
+                <div class="row align-items-center g-2">
+                    <div class="col-md-1 text-center">
+                        <span class="ob-indicator ind-green" title="سيُسدَّد تلقائياً"></span>
+                        <div style="font-size:.72rem;color:#1a7f37;margin-top:2px;">سيُسدَّد</div>
+                    </div>
+                    <div class="col-md-1 text-center" style="font-size:.8rem;color:#888;">
+                        <div>الترتيب</div>
+                        <div class="fw-bold" style="font-size:1rem;color:#333;">1</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="fw-bold">قسط متأخر — نظام الأمان الوظيفي</div>
+                        <div style="color:#888;font-size:.82rem;">صندوق الحماية الاجتماعية</div>
+                    </div>
+                    <div class="col-md-2" style="font-size:.85rem;">
+                        <div style="color:#666;">تاريخ الاستحقاق</div>
+                        <div>15/02/2024</div>
+                    </div>
+                    <div class="col-md-2">
+                        <div style="color:#666;font-size:.8rem;">المبلغ</div>
+                        <div class="fw-bold">45.500 ر.ع</div>
+                    </div>
+                    <div class="col-md-2">
+                        <span class="badge bg-success">سيُخصَّم تلقائياً</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width:50px;"></th>
-                            <th>وصف الالتزام</th>
-                            <th>الجهة/النوع</th>
-                            <th>تاريخ الاستحقاق</th>
-                            <th>المبلغ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><input type="checkbox" class="form-check-input ob-check" data-amount="25.000" id="ob1"></td>
-                            <td><label for="ob1">التأمين على الحياة</label></td>
-                            <td>تأمين</td>
-                            <td>2024-01-15</td>
-                            <td class="fw-bold">25.000 ر.ع</td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox" class="form-check-input ob-check" data-amount="15.500" id="ob2"></td>
-                            <td><label for="ob2">اشتراك صحي</label></td>
-                            <td>اشتراكات</td>
-                            <td>2024-02-01</td>
-                            <td class="fw-bold">15.500 ر.ع</td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox" class="form-check-input ob-check" data-amount="45.500" id="ob3"></td>
-                            <td><label for="ob3">قسط متأخر - نظام الأمان الوظيفي</label></td>
-                            <td>صندوق الحماية الاجتماعية</td>
-                            <td>2024-02-15</td>
-                            <td class="fw-bold">45.500 ر.ع</td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox" class="form-check-input ob-check" data-amount="15.000" id="ob4"></td>
-                            <td><label for="ob4">رسوم إدارية - تحديث بيانات</label></td>
-                            <td>صندوق الحماية الاجتماعية</td>
-                            <td>2024-03-10</td>
-                            <td class="fw-bold">15.000 ر.ع</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Obligation 2 — will be settled -->
+            <div class="ob-row will-settle">
+                <div class="row align-items-center g-2">
+                    <div class="col-md-1 text-center">
+                        <span class="ob-indicator ind-green"></span>
+                        <div style="font-size:.72rem;color:#1a7f37;margin-top:2px;">سيُسدَّد</div>
+                    </div>
+                    <div class="col-md-1 text-center" style="font-size:.8rem;color:#888;">
+                        <div>الترتيب</div>
+                        <div class="fw-bold" style="font-size:1rem;color:#333;">2</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="fw-bold">التأمين على الحياة</div>
+                        <div style="color:#888;font-size:.82rem;">شركة الضمان للتأمين</div>
+                    </div>
+                    <div class="col-md-2" style="font-size:.85rem;">
+                        <div style="color:#666;">تاريخ الاستحقاق</div>
+                        <div>15/03/2024</div>
+                    </div>
+                    <div class="col-md-2">
+                        <div style="color:#666;font-size:.8rem;">المبلغ</div>
+                        <div class="fw-bold">25.000 ر.ع</div>
+                    </div>
+                    <div class="col-md-2">
+                        <span class="badge bg-success">سيُخصَّم تلقائياً</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="mt-3 d-flex gap-4 align-items-center p-3 border rounded bg-light">
-                <span>الالتزامات المختارة: <strong id="selCount">0</strong></span>
-                <span>الإجمالي: <strong id="totalOb">0.000</strong> ر.ع</span>
+            <!-- Obligation 3 — will be settled -->
+            <div class="ob-row will-settle">
+                <div class="row align-items-center g-2">
+                    <div class="col-md-1 text-center">
+                        <span class="ob-indicator ind-green"></span>
+                        <div style="font-size:.72rem;color:#1a7f37;margin-top:2px;">سيُسدَّد</div>
+                    </div>
+                    <div class="col-md-1 text-center" style="font-size:.8rem;color:#888;">
+                        <div>الترتيب</div>
+                        <div class="fw-bold" style="font-size:1rem;color:#333;">3</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="fw-bold">اشتراك صحي</div>
+                        <div style="color:#888;font-size:.82rem;">نظام الرعاية الصحية</div>
+                    </div>
+                    <div class="col-md-2" style="font-size:.85rem;">
+                        <div style="color:#666;">تاريخ الاستحقاق</div>
+                        <div>01/04/2024</div>
+                    </div>
+                    <div class="col-md-2">
+                        <div style="color:#666;font-size:.8rem;">المبلغ</div>
+                        <div class="fw-bold">15.500 ر.ع</div>
+                    </div>
+                    <div class="col-md-2">
+                        <span class="badge bg-success">سيُخصَّم تلقائياً</span>
+                    </div>
+                </div>
             </div>
-        </section>
+
+            <!-- Summary row -->
+            <div class="p-3 mt-3 rounded d-flex justify-content-between align-items-center" style="background:#f0faf4;border:2px solid var(--gup-color-primary,#1a6e3c);">
+                <div>
+                    <span style="font-size:.9rem;color:#555;">الإجمالي الذي سيُخصَّم من رصيدك الاختياري</span>
+                </div>
+                <div class="fw-bold" style="font-size:1.2rem;color:var(--gup-color-primary,#1a6e3c);">86.000 ر.ع</div>
+            </div>
+        </div>
     </div>
 
-    <!-- Step 2 -->
-    <div class="wizard-content-area" id="wizardStep2" style="display:none">
-        <section class="gup-form-section">
-            <h2>مراجعة الالتزامات المختارة</h2>
-            <div id="reviewObligations">
-                <!-- Populated by JS -->
-            </div>
-            <div class="gup-labelled-item" style="border-top:2px solid #dee2e6; padding-top:12px; margin-top:8px;">
-                <span class="item-label" style="font-weight:700;">الإجمالي للسداد</span>
-                <span class="item-value" id="reviewTotal" style="font-weight:700; font-size:1.1rem;"></span>
-            </div>
-        </section>
-    </div>
-
-    <!-- Step 3 -->
-    <div class="wizard-content-area" id="wizardStep3" style="display:none">
+    <!-- Step 2 — Confirm -->
+    <div class="wizard-content-area" id="wizardStep2" style="display:none;">
         <div class="page-status-card">
-            <div class="page-status-icon" style="background:var(--gup-color-success-soft,#d4edda);color:#1a7f37">
+            <div class="page-status-icon" style="background:#d4edda;color:#1a7f37;">
                 <i class="fas fa-check-circle fa-2x"></i>
             </div>
-            <h2>تم تقديم الطلب بنجاح</h2>
-            <p>رقم المرجع:</p>
-            <div class="ref-number">SPF-OBL-2024-001129</div>
-            <p class="mt-3">سيتم مراجعة طلبك ومعالجته خلال 3-5 أيام عمل.</p>
-            <div class="mt-4">
-                <a href="../../../index.html" class="gup-outline-btn">العودة إلى الرئيسية</a>
+            <h2>تمت التسوية التلقائية بنجاح</h2>
+            <p>خُصِّمت جميع الالتزامات المستحقة من رصيدك الاختياري وفق ترتيب الاستحقاق.</p>
+            <div class="mt-3 mb-4" style="text-align:right;max-width:360px;margin-left:auto;margin-right:auto;">
+                <div class="gup-labelled-item"><span class="item-label">رقم المرجع</span><span class="item-value fw-bold">SPF-OBL-2024-001129</span></div>
+                <div class="gup-labelled-item"><span class="item-label">إجمالي المُسدَّد</span><span class="item-value fw-bold">86.000 ر.ع</span></div>
+                <div class="gup-labelled-item"><span class="item-label">عدد الالتزامات</span><span class="item-value">3 التزامات</span></div>
+                <div class="gup-labelled-item"><span class="item-label">الرصيد المتبقي</span><span class="item-value">1,364.000 ر.ع</span></div>
+            </div>
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="../transaction-history/start.html" class="gup-outline-btn"><i class="fas fa-receipt me-1"></i> عرض الإيصالات</a>
+                <a href="../dashboard/start.html" class="gup-outline-btn">لوحة البيانات</a>
             </div>
         </div>
     </div>
@@ -140,7 +213,9 @@
     <div class="wizard-footer-bar" id="wizardFooter">
         <div class="wizard-footer-inner">
             <a href="index.html" class="gup-outline-btn" id="backBtn"><i class="fas fa-arrow-right"></i> رجوع</a>
-            <button type="button" class="gup-primary-btn" id="continueBtn">تابع <i class="fas fa-arrow-left"></i></button>
+            <button type="button" class="gup-primary-btn" id="continueBtn">
+                <i class="fas fa-check me-1"></i> تأكيد التسوية التلقائية <i class="fas fa-arrow-left"></i>
+            </button>
         </div>
     </div>
 
@@ -150,42 +225,13 @@
 <script>
 (function () {
     let currentStep = 1;
-    const totalSteps = 3;
-
-    // Track obligation selection
-    document.querySelectorAll('.ob-check').forEach(function(cb) {
-        cb.addEventListener('change', updateSummary);
-    });
-
-    function updateSummary() {
-        var total = 0, count = 0;
-        document.querySelectorAll('.ob-check:checked').forEach(function(cb) {
-            total += parseFloat(cb.getAttribute('data-amount'));
-            count++;
-        });
-        document.getElementById('selCount').textContent = count;
-        document.getElementById('totalOb').textContent = total.toFixed(3);
-    }
-
-    function getSelectedObligations() {
-        var items = [];
-        document.querySelectorAll('.ob-check:checked').forEach(function(cb) {
-            var row = cb.closest('tr');
-            items.push({
-                desc: row.cells[1].textContent.trim(),
-                type: row.cells[2].textContent.trim(),
-                date: row.cells[3].textContent.trim(),
-                amount: parseFloat(cb.getAttribute('data-amount'))
-            });
-        });
-        return items;
-    }
+    const totalSteps = 2;
 
     function showStep(n) {
-        for (var i = 1; i <= totalSteps; i++) {
-            var el = document.getElementById('wizardStep' + i);
+        for (let i = 1; i <= totalSteps; i++) {
+            const el = document.getElementById('wizardStep' + i);
             if (el) el.style.display = i === n ? '' : 'none';
-            var ind = document.getElementById('step' + i + 'Indicator');
+            const ind = document.getElementById('step' + i + 'Indicator');
             if (ind) {
                 ind.classList.remove('selected', 'done');
                 if (i < n) ind.classList.add('done');
@@ -193,30 +239,18 @@
             }
         }
         currentStep = n;
-        var footer = document.getElementById('wizardFooter');
+        const footer = document.getElementById('wizardFooter');
         if (footer) footer.style.display = n === totalSteps ? 'none' : '';
-        var backBtn = document.getElementById('backBtn');
+        const backBtn = document.getElementById('backBtn');
         if (backBtn) {
             if (n === 1) { backBtn.setAttribute('href', 'index.html'); backBtn.removeAttribute('data-back'); }
             else { backBtn.removeAttribute('href'); backBtn.setAttribute('data-back', ''); }
-        }
-        if (n === 2) {
-            var items = getSelectedObligations();
-            var total = 0;
-            var html = '';
-            items.forEach(function(item) {
-                total += item.amount;
-                html += '<div class="gup-labelled-item"><span class="item-label">' + item.desc + '</span><span class="item-value">' + item.amount.toFixed(3) + ' ر.ع</span></div>';
-            });
-            document.getElementById('reviewObligations').innerHTML = html;
-            document.getElementById('reviewTotal').textContent = total.toFixed(3) + ' ر.ع';
         }
     }
 
     document.getElementById('continueBtn').addEventListener('click', function () {
         if (currentStep < totalSteps) showStep(currentStep + 1);
     });
-
     document.getElementById('backBtn').addEventListener('click', function (e) {
         if (currentStep > 1) { e.preventDefault(); showStep(currentStep - 1); }
     });

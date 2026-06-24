@@ -50,23 +50,64 @@
         <section class="gup-form-section">
             <h2>بيانات طلب الصرف</h2>
 
+            <!-- Balance Eligibility Summary -->
+            <div class="p-3 rounded mb-4" style="background:#f0f4f8;border:1px solid #c8d8e8;">
+                <div class="fw-bold mb-2" style="color:#1a6e3c;"><i class="fas fa-wallet me-1"></i> رصيدك المتاح للصرف</div>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:10px;text-align:center;">
+                            <div style="font-size:.75rem;color:#856404;">إلزامي</div>
+                            <div style="font-weight:700;font-size:1.05rem;color:#856404;">630 ر.ع</div>
+                            <div style="font-size:.7rem;color:#aaa;">مشروط بالمادة 137</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div style="background:#eef3ff;border:1px solid #b8daff;border-radius:8px;padding:10px;text-align:center;">
+                            <div style="font-size:.75rem;color:#0a58ca;">اختياري ذاتي</div>
+                            <div style="font-weight:700;font-size:1.05rem;color:#0a58ca;">400 ر.ع</div>
+                            <div style="font-size:.7rem;color:#aaa;">صرف الفائض متاح</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div style="background:#e8f8f5;border:1px solid #bee5eb;border-radius:8px;padding:10px;text-align:center;">
+                            <div style="font-size:.75rem;color:#0c5460;">من الجهة</div>
+                            <div style="font-weight:700;font-size:1.05rem;color:#0c5460;">375 ر.ع</div>
+                            <div style="font-size:.7rem;color:#aaa;">مشروط بانتهاء الخدمة</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div style="background:#eafaf1;border:1px solid #c3e6cb;border-radius:8px;padding:10px;text-align:center;">
+                            <div style="font-size:.75rem;color:#155724;">عوائد</div>
+                            <div style="font-weight:700;font-size:1.05rem;color:#155724;">45.25 ر.ع</div>
+                            <div style="font-size:.7rem;color:#aaa;">تُصرف مع الرصيد الكلي</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="eligHint" class="gup-inline-alert info mt-3" style="font-size:.82rem;display:none;">
+                    <i class="fas fa-info-circle"></i>
+                    <span id="eligHintText"></span>
+                </div>
+            </div>
+
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
                     <label class="gup-field-label">سبب طلب الصرف</label>
-                    <select class="form-select" id="disbReason">
+                    <select class="form-select" id="disbReason" onchange="updateEligHint(this.value)">
                         <option value="" disabled selected>اختر السبب...</option>
                         <optgroup label="العماني">
-                            <option value="death">وفاة المشترك</option>
+                            <option value="retirement">استحقاق المعاش التقاعدي</option>
+                            <option value="180months">اكتمال 180 شهراً من الاشتراك</option>
                             <option value="disability">العجز الكلي الدائم</option>
-                            <option value="contract_end">انتهاء العقد</option>
-                            <option value="retirement">التقاعد</option>
+                            <option value="surplus">صرف الفائض الاختياري فقط</option>
                         </optgroup>
                         <optgroup label="غير العماني">
-                            <option value="contract_end_nonoman">انتهاء العقد</option>
-                            <option value="departure">مغادرة البلاد</option>
+                            <option value="contract_end_nonoman">انتهاء العقد وعدم تجديده</option>
+                            <option value="no_contract_3m">مرور 3 أشهر دون عقد جديد</option>
+                            <option value="departure">مغادرة البلاد نهائياً</option>
+                            <option value="disability_nonoman">العجز الكلي الدائم</option>
                         </optgroup>
                         <optgroup label="عام">
-                            <option value="service_end">انتهاء الخدمة</option>
+                            <option value="death">وفاة المشترك (طلب الورثة)</option>
                         </optgroup>
                     </select>
                 </div>
@@ -151,6 +192,26 @@
 (function () {
     let currentStep = 1;
     const totalSteps = 3;
+
+    var eligMessages = {
+        retirement:         'استحقاق المعاش التقاعدي: يُصرف كامل الرصيد (إلزامي + اختياري + من الجهة + عوائد) وفق المادة 137.',
+        '180months':        'اكتمال 180 شهراً: يُصرف كامل الرصيد الإلزامي والاختياري بعد التحقق من استكمال مدة الاشتراك.',
+        disability:         'العجز الكلي الدائم: يُصرف كامل الرصيد فور تقديم الوثائق الطبية المعتمدة.',
+        surplus:            'صرف الفائض الاختياري فقط: يُصرف الجزء الاختياري الذاتي الزائد عن الحد المقرر فقط — لا يُمس الرصيد الإلزامي.',
+        contract_end_nonoman: 'انتهاء العقد: يُصرف رصيد الاشتراكات الإلزامية ورصيد الجهة والعوائد. الاختياري الذاتي يُصرف اختيارياً.',
+        no_contract_3m:     'مرور 3 أشهر بلا عقد: يُصرف الرصيد الكلي بعد مرور المدة المحددة وتأكيد وزارة العمل.',
+        departure:          'مغادرة البلاد نهائياً: يُصرف الرصيد الكلي بعد تقديم وثائق إثبات المغادرة النهائية.',
+        disability_nonoman: 'العجز الكلي الدائم: يُصرف كامل الرصيد فور تقديم الوثائق الطبية المعتمدة.',
+        death:              'وفاة المشترك: يُصرف الرصيد الكلي لذوي الحق بعد تقديم وثائق الوفاة وإثبات الوراثة الشرعية.'
+    };
+    function updateEligHint(val) {
+        var hint = document.getElementById('eligHint');
+        var text = document.getElementById('eligHintText');
+        if (!val) { hint.style.display = 'none'; return; }
+        text.textContent = eligMessages[val] || '';
+        hint.style.display = eligMessages[val] ? '' : 'none';
+    }
+    window.updateEligHint = updateEligHint;
 
     function toggleInstallments() {
         var method = document.querySelector('input[name="disbMethod"]:checked').value;

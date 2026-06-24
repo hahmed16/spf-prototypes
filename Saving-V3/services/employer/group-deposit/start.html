@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -12,6 +12,12 @@
     <link rel="stylesheet" href="../../../assets/css/app.css">
     <link rel="stylesheet" href="../../../assets/css/shell.css">
     <link rel="stylesheet" href="../../../assets/css/wizard.css">
+    <style>
+        .dist-method-card { border:2px solid #dee2e6; border-radius:8px; padding:14px; cursor:pointer; transition:border-color .2s, background .2s; }
+        .dist-method-card.selected { border-color:var(--gup-color-primary,#1a6e3c); background:#f0faf4; }
+        .dist-method-card label { cursor:pointer; }
+        .cap-warn { background:#fff3cd; border:1px solid #ffc107; border-radius:6px; padding:6px 10px; font-size:.8rem; color:#856404; display:none; margin-top:4px; }
+    </style>
 </head>
 <body data-root="../../../" data-page-kind="form" data-user-role="employer">
 <main id="mainContent" class="gup-main-shell">
@@ -19,10 +25,10 @@
     <div class="gup-content-header">
         <div class="breadcrumbs-lite">
             <a href="../../../index.html">الرئيسية</a> <span>›</span>
-            <a href="index.html">إنشاء إيداع جماعي</a> <span>›</span>
+            <a href="index.html">إنشاء إيداع جماعي للعمال</a> <span>›</span>
             <span>تقديم الطلب</span>
         </div>
-        <h1>إنشاء إيداع جماعي</h1>
+        <h1>إنشاء إيداع جماعي للعمال</h1>
     </div>
 
     <!-- Stepper -->
@@ -30,12 +36,12 @@
         <ol class="wizard-stepper">
             <li class="stepper-item selected" id="step1Indicator">
                 <span class="stepper-num">1</span>
-                <span class="stepper-label">بيانات الإيداع</span>
+                <span class="stepper-label">طريقة التوزيع</span>
                 <div class="stepper-connector"></div>
             </li>
             <li class="stepper-item" id="step2Indicator">
                 <span class="stepper-num">2</span>
-                <span class="stepper-label">المراجعة</span>
+                <span class="stepper-label">مراجعة المبالغ</span>
                 <div class="stepper-connector"></div>
             </li>
             <li class="stepper-item" id="step3Indicator">
@@ -45,12 +51,106 @@
         </ol>
     </nav>
 
-    <!-- Step 1 -->
+    <!-- Step 1 — Distribution Method -->
     <div class="wizard-content-area" id="wizardStep1">
-        <section class="gup-form-section">
-            <h2>اختيار العمال ومبالغ الإيداع</h2>
 
-            <div class="table-responsive mb-4">
+        <!-- Distribution method selection -->
+        <section class="gup-form-section mb-4">
+            <h2>طريقة توزيع الإيداع على العمال</h2>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="dist-method-card selected" id="card-fixed" onclick="selectMethod('fixed')">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="distMethod" id="methodFixed" value="fixed" checked>
+                            <label class="form-check-label fw-bold" for="methodFixed">
+                                <i class="fas fa-equals me-1" style="color:#1d6fa4;"></i> مبلغ ثابت لكل عامل
+                            </label>
+                        </div>
+                        <p style="font-size:.83rem;color:#666;margin:6px 0 0 24px;">يُحدَّد مبلغ واحد موحَّد يُضاف لجميع العمال المختارين.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="dist-method-card" id="card-equal" onclick="selectMethod('equal')">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="distMethod" id="methodEqual" value="equal">
+                            <label class="form-check-label fw-bold" for="methodEqual">
+                                <i class="fas fa-divide me-1" style="color:#0a58ca;"></i> توزيع متساوٍ
+                            </label>
+                        </div>
+                        <p style="font-size:.83rem;color:#666;margin:6px 0 0 24px;">يُحدَّد إجمالي المبلغ ويُقسَّم بالتساوي على عدد العمال.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="dist-method-card" id="card-percent" onclick="selectMethod('percent')">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="distMethod" id="methodPercent" value="percent">
+                            <label class="form-check-label fw-bold" for="methodPercent">
+                                <i class="fas fa-percent me-1" style="color:#198754;"></i> نسبة مئوية من الراتب
+                            </label>
+                        </div>
+                        <p style="font-size:.83rem;color:#666;margin:6px 0 0 24px;">يُحسَّب مبلغ كل عامل تلقائياً بضرب نسبة محددة في راتبه الأساسي.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="dist-method-card" id="card-custom" onclick="selectMethod('custom')">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="distMethod" id="methodCustom" value="custom">
+                            <label class="form-check-label fw-bold" for="methodCustom">
+                                <i class="fas fa-sliders me-1" style="color:#6f42c1;"></i> مبلغ مخصص لكل عامل
+                            </label>
+                        </div>
+                        <p style="font-size:.83rem;color:#666;margin:6px 0 0 24px;">يُدخَل مبلغ مختلف لكل عامل بشكل منفرد.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Method-specific input -->
+            <div id="inputFixed" class="mb-4">
+                <label class="gup-field-label" for="fixedAmt">المبلغ الثابت لكل عامل <span class="text-danger">*</span></label>
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-3">
+                        <input type="number" id="fixedAmt" class="form-control" value="100" min="100" oninput="applyFixed(); checkMinDeposit(this.value)">
+                    </div>
+                    <div class="col-auto" style="color:#666;">ر.ع / عامل</div>
+                    <div class="col-12" id="fixedMinWarn" style="display:none;color:#c0392b;font-size:.8rem;"><i class="fas fa-exclamation-circle me-1"></i>الحد الأدنى للإيداع لكل عامل هو 100 ر.ع (FR-14D)</div>
+                </div>
+            </div>
+
+            <div id="inputEqual" class="mb-4" style="display:none;">
+                <label class="gup-field-label" for="equalTotal">إجمالي المبلغ المراد توزيعه <span class="text-danger">*</span></label>
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-3">
+                        <input type="number" id="equalTotal" class="form-control" value="150" min="0" oninput="applyEqual()">
+                    </div>
+                    <div class="col-auto" style="color:#666;">ر.ع</div>
+                </div>
+            </div>
+
+            <div id="inputPercent" class="mb-4" style="display:none;">
+                <label class="gup-field-label" for="pctValue">النسبة من الراتب الأساسي <span class="text-danger">*</span></label>
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-3">
+                        <input type="number" id="pctValue" class="form-control" value="5" min="0" max="100" step="0.5" oninput="applyPercent()">
+                    </div>
+                    <div class="col-auto" style="color:#666;">%</div>
+                </div>
+            </div>
+
+            <div id="inputCustom" style="display:none;">
+                <!-- handled inline in the table below -->
+                <div class="gup-inline-alert info mb-3">
+                    <i class="fas fa-info-circle"></i>
+                    <span>أدخل المبلغ المخصص لكل عامل في العمود المخصص بالجدول أدناه.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Workers Table -->
+        <section class="gup-form-section">
+            <h2>العمال المشمولون بالإيداع</h2>
+
+            <div class="table-responsive mb-3">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
@@ -58,68 +158,38 @@
                             <th>الاسم</th>
                             <th>الرقم المدني</th>
                             <th>الراتب الأساسي</th>
+                            <th>السقف السنوي المتبقي</th>
                             <th>مبلغ الإيداع (ر.ع)</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td><input type="checkbox" class="form-check-input worker-check" checked data-amount="63" onchange="calcTotal()"></td>
-                            <td>محمد بن علي السعدي</td>
-                            <td>23456789</td>
-                            <td>700 ر.ع</td>
-                            <td><input type="number" class="form-control form-control-sm deposit-amount" value="63" min="0" style="width:100px;" oninput="calcTotal()"></td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox" class="form-check-input worker-check" checked data-amount="49.5" onchange="calcTotal()"></td>
-                            <td>أحمد بن سالم الحارثي</td>
-                            <td>34567890</td>
-                            <td>550 ر.ع</td>
-                            <td><input type="number" class="form-control form-control-sm deposit-amount" value="49.5" min="0" style="width:100px;" oninput="calcTotal()"></td>
-                        </tr>
-                        <tr>
-                            <td><input type="checkbox" class="form-check-input worker-check" checked data-amount="34.2" onchange="calcTotal()"></td>
-                            <td>راجيف كومار</td>
-                            <td>45678901</td>
-                            <td>380 ر.ع</td>
-                            <td><input type="number" class="form-control form-control-sm deposit-amount" value="34.2" min="0" style="width:100px;" oninput="calcTotal()"></td>
-                        </tr>
+                    <tbody id="workersTbody">
+                        <!-- rows injected by JS -->
                     </tbody>
                 </table>
             </div>
 
-            <div class="gup-inline-alert info mb-4">
-                <i class="fas fa-calculator"></i>
-                <span>إجمالي مبلغ الإيداع: <strong id="totalAmount">146.700 ر.ع</strong></span>
+            <div class="d-flex align-items-center justify-content-between p-3 rounded" style="background:#f0faf4;border:2px solid var(--gup-color-primary,#1a6e3c);">
+                <span style="color:#555;">إجمالي مبلغ الإيداع الجماعي</span>
+                <span class="fw-bold" style="font-size:1.2rem;color:var(--gup-color-primary,#1a6e3c);" id="totalAmount">—</span>
             </div>
 
-            <div class="row g-3">
-                <div class="col-12">
-                    <label class="gup-field-label d-block mb-2">طريقة الدفع</label>
-                    <div class="d-flex gap-4">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="payMethod" id="payBank" value="bank" checked>
-                            <label class="form-check-label" for="payBank">تحويل بنكي</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="payMethod" id="payCheque" value="cheque">
-                            <label class="form-check-label" for="payCheque">شيك مصرفي</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <label class="gup-field-label" for="bankRef">رقم المرجع البنكي</label>
-                    <input type="text" id="bankRef" class="form-control" placeholder="أدخل رقم المرجع البنكي">
-                </div>
+            <div class="gup-inline-alert warning mt-3">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>الفاتورة الجماعية لا تقبل الدفع الجزئي. يجب سداد المبلغ الكامل دفعةً واحدة.</span>
             </div>
         </section>
     </div>
 
-    <!-- Step 2 -->
+    <!-- Step 2 — Review -->
     <div class="wizard-content-area" id="wizardStep2" style="display:none">
         <section class="gup-form-section">
             <h2>مراجعة الإيداع الجماعي</h2>
 
-            <div class="table-responsive mb-4">
+            <div class="gup-labelled-item"><span class="item-label">طريقة التوزيع</span><span class="item-value" id="rev-method">—</span></div>
+            <div class="gup-labelled-item"><span class="item-label">عدد العمال المشمولين</span><span class="item-value" id="rev-count">—</span></div>
+            <div class="gup-labelled-item"><span class="item-label">إجمالي المبلغ</span><span class="item-value fw-bold" id="rev-total" style="font-size:1.1rem;color:var(--gup-color-primary,#1a6e3c);">—</span></div>
+
+            <div class="table-responsive mt-3">
                 <table class="table align-middle">
                     <thead class="table-light">
                         <tr>
@@ -128,49 +198,31 @@
                             <th>مبلغ الإيداع</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>محمد بن علي السعدي</td>
-                            <td>23456789</td>
-                            <td class="fw-bold">63.000 ر.ع</td>
-                        </tr>
-                        <tr>
-                            <td>أحمد بن سالم الحارثي</td>
-                            <td>34567890</td>
-                            <td class="fw-bold">49.500 ر.ع</td>
-                        </tr>
-                        <tr>
-                            <td>راجيف كومار</td>
-                            <td>45678901</td>
-                            <td class="fw-bold">34.200 ر.ع</td>
-                        </tr>
-                        <tr class="table-light">
-                            <td colspan="2" class="fw-bold">الإجمالي</td>
-                            <td class="fw-bold" style="color:var(--gup-color-primary,#1a6e3c); font-size:1.1rem;">146.700 ر.ع</td>
-                        </tr>
-                    </tbody>
+                    <tbody id="reviewTbody"></tbody>
                 </table>
             </div>
-
-            <div class="gup-labelled-item"><span class="item-label">طريقة الدفع</span><span class="item-value">تحويل بنكي</span></div>
-            <div class="gup-labelled-item"><span class="item-label">رقم المرجع البنكي</span><span class="item-value" id="rev-bankRef">—</span></div>
-            <div class="gup-labelled-item"><span class="item-label">عدد العمال المشمولين</span><span class="item-value">3 عمال</span></div>
         </section>
     </div>
 
-    <!-- Step 3 -->
+    <!-- Step 3 — Confirmation -->
     <div class="wizard-content-area" id="wizardStep3" style="display:none">
         <div class="page-status-card">
-            <div class="page-status-icon" style="background:#d4edda; color:#1a7f37;">
+            <div class="page-status-icon" style="background:#d4edda;color:#1a7f37;">
                 <i class="fas fa-check-circle fa-2x"></i>
             </div>
             <h2>تم إنشاء الإيداع الجماعي بنجاح</h2>
-            <p>رقم المرجع:</p>
-            <div class="ref-number">SPF-GRP-2024-000391</div>
-            <p class="mt-3">تم استلام طلب الإيداع الجماعي وسيتم معالجته خلال يوم عمل واحد.</p>
-            <div class="mt-4 d-flex gap-3 justify-content-center flex-wrap">
-                <a href="../transaction-history/start.html" class="gup-primary-btn">عرض سجل العمليات</a>
-                <a href="../dashboard/start.html" class="gup-outline-btn">العودة إلى لوحة البيانات</a>
+            <p>صدرت الفاتورة الجماعية. يُرجى سدادها عبر قنوات الدفع المعتمدة.</p>
+            <div class="mt-3 mb-3" style="text-align:right;max-width:360px;margin-left:auto;margin-right:auto;">
+                <div class="gup-labelled-item"><span class="item-label">رقم الفاتورة</span><span class="item-value fw-bold">INV-GRP-2024-000391</span></div>
+                <div class="gup-labelled-item"><span class="item-label">إجمالي المبلغ</span><span class="item-value fw-bold" id="conf-total">—</span></div>
+                <div class="gup-labelled-item"><span class="item-label">عدد العمال</span><span class="item-value" id="conf-count">—</span></div>
+                <div class="gup-labelled-item"><span class="item-label">حالة الفاتورة</span>
+                    <span class="item-value"><span style="background:#fff3cd;color:#856404;border:1px solid #ffc107;border-radius:20px;padding:2px 10px;font-size:.83rem;">بانتظار السداد</span></span>
+                </div>
+            </div>
+            <div class="mt-3 d-flex gap-3 justify-content-center flex-wrap">
+                <a href="../optional-invoices/start.html" class="gup-primary-btn"><i class="fas fa-file-invoice me-1"></i> متابعة الفاتورة</a>
+                <a href="../dashboard/start.html" class="gup-outline-btn">لوحة البيانات</a>
             </div>
         </div>
     </div>
@@ -188,24 +240,105 @@
 <script src="../../../assets/js/external-shell.js"></script>
 <script>
 (function () {
+    const workers = [
+        { name: 'محمد بن علي السعدي', id: '23456789', salary: 700,  cap: 2400 },
+        { name: 'أحمد بن سالم الحارثي', id: '34567890', salary: 550, cap: 1800 },
+        { name: 'راجيف كومار',          id: '45678901', salary: 380,  cap: 950  },
+        { name: 'فيليكس أوكوي',         id: '56789012', salary: 450,  cap: 1200 },
+    ];
+
     let currentStep = 1;
     const totalSteps = 3;
+    const methodLabels = { fixed: 'مبلغ ثابت لكل عامل', equal: 'توزيع متساوٍ', percent: 'نسبة مئوية من الراتب', custom: 'مبلغ مخصص لكل عامل' };
+
+    function currentMethod() {
+        return document.querySelector('input[name="distMethod"]:checked').value;
+    }
+
+    function renderTable() {
+        const method = currentMethod();
+        const tbody = document.getElementById('workersTbody');
+        tbody.innerHTML = workers.map((w, i) => {
+            let amt = getAmount(w, i, method);
+            const capWarn = amt > w.cap ? `<div class="cap-warn" style="display:block;"><i class="fas fa-exclamation-triangle me-1"></i> تجاوز السقف السنوي (${w.cap} ر.ع)</div>` : '';
+            const isCustom = method === 'custom';
+            const amtCell = isCustom
+                ? `<input type="number" class="form-control form-control-sm deposit-amount" id="amt_${i}" value="${amt.toFixed(3)}" min="0" style="width:110px;" oninput="calcTotal()">${capWarn}`
+                : `<span class="fw-bold">${amt.toFixed(3)}</span>${capWarn}`;
+            return `<tr>
+                <td><input type="checkbox" class="form-check-input worker-check" checked onchange="calcTotal()"></td>
+                <td>${w.name}</td>
+                <td>${w.id}</td>
+                <td>${w.salary} ر.ع</td>
+                <td>${w.cap} ر.ع</td>
+                <td>${amtCell}</td>
+            </tr>`;
+        }).join('');
+        calcTotal();
+    }
+
+    function getAmount(w, i, method) {
+        if (method === 'fixed')   return parseFloat(document.getElementById('fixedAmt').value) || 0;
+        if (method === 'equal') {
+            const total = parseFloat(document.getElementById('equalTotal').value) || 0;
+            return total / workers.length;
+        }
+        if (method === 'percent') {
+            const pct = parseFloat(document.getElementById('pctValue').value) || 0;
+            return w.salary * pct / 100;
+        }
+        if (method === 'custom') {
+            const el = document.getElementById('amt_' + i);
+            return el ? parseFloat(el.value) || 0 : w.salary * 0.09;
+        }
+        return 0;
+    }
 
     function calcTotal() {
         let total = 0;
-        const checks = document.querySelectorAll('.worker-check');
-        const amounts = document.querySelectorAll('.deposit-amount');
-        checks.forEach((chk, i) => {
-            if (chk.checked) total += parseFloat(amounts[i].value) || 0;
+        document.querySelectorAll('.worker-check').forEach((chk, i) => {
+            if (!chk.checked) return;
+            const method = currentMethod();
+            if (method === 'custom') {
+                const el = document.getElementById('amt_' + i);
+                total += el ? parseFloat(el.value) || 0 : 0;
+            } else {
+                total += getAmount(workers[i], i, method);
+            }
         });
-        const el = document.getElementById('totalAmount');
-        if (el) el.textContent = total.toFixed(3) + ' ر.ع';
+        document.getElementById('totalAmount').textContent = total.toFixed(3) + ' ر.ع';
     }
     window.calcTotal = calcTotal;
 
+    window.applyFixed   = renderTable;
+    window.applyEqual   = renderTable;
+    window.applyPercent = renderTable;
+
+    window.selectMethod = function (m) {
+        ['fixed','equal','percent','custom'].forEach(x => {
+            document.getElementById('card-' + x).classList.toggle('selected', x === m);
+            document.getElementById('input' + x.charAt(0).toUpperCase() + x.slice(1)).style.display = x === m ? '' : 'none';
+        });
+        document.querySelector('input[name="distMethod"][value="' + m + '"]').checked = true;
+        renderTable();
+    };
+
     document.getElementById('selectAll').addEventListener('change', function () {
-        document.querySelectorAll('.worker-check').forEach(c => { c.checked = this.checked; calcTotal(); });
+        document.querySelectorAll('.worker-check').forEach(c => { c.checked = this.checked; });
+        calcTotal();
     });
+
+    function getCheckedWorkers() {
+        const method = currentMethod();
+        return workers.map((w, i) => {
+            const chk = document.querySelectorAll('.worker-check')[i];
+            if (!chk || !chk.checked) return null;
+            const amt = method === 'custom'
+                ? (parseFloat((document.getElementById('amt_' + i) || {}).value) || 0)
+                : getAmount(w, i, method);
+            return { ...w, depositAmt: amt };
+        }).filter(Boolean);
+    }
 
     function showStep(n) {
         for (let i = 1; i <= totalSteps; i++) {
@@ -219,16 +352,26 @@
             }
         }
         currentStep = n;
-        const footer = document.getElementById('wizardFooter');
-        if (footer) footer.style.display = n === totalSteps ? 'none' : '';
+        document.getElementById('wizardFooter').style.display = n === totalSteps ? 'none' : '';
         const backBtn = document.getElementById('backBtn');
-        if (backBtn) {
-            if (n === 1) { backBtn.setAttribute('href', 'index.html'); backBtn.removeAttribute('data-back'); }
-            else { backBtn.removeAttribute('href'); backBtn.setAttribute('data-back', ''); }
-        }
+        if (n === 1) { backBtn.setAttribute('href', 'index.html'); backBtn.removeAttribute('data-back'); }
+        else { backBtn.removeAttribute('href'); backBtn.setAttribute('data-back', ''); }
+
         if (n === 2) {
-            const ref = (document.getElementById('bankRef') || {}).value || '—';
-            document.getElementById('rev-bankRef').textContent = ref;
+            const checked = getCheckedWorkers();
+            const total = checked.reduce((s, w) => s + w.depositAmt, 0);
+            document.getElementById('rev-method').textContent = methodLabels[currentMethod()];
+            document.getElementById('rev-count').textContent = checked.length + ' عمال';
+            document.getElementById('rev-total').textContent = total.toFixed(3) + ' ر.ع';
+            document.getElementById('reviewTbody').innerHTML = checked.map(w =>
+                `<tr><td>${w.name}</td><td>${w.id}</td><td class="fw-bold">${w.depositAmt.toFixed(3)} ر.ع</td></tr>`
+            ).join('') + `<tr class="table-light"><td colspan="2" class="fw-bold">الإجمالي</td><td class="fw-bold" style="color:var(--gup-color-primary,#1a6e3c)">${total.toFixed(3)} ر.ع</td></tr>`;
+        }
+        if (n === 3) {
+            const checked = getCheckedWorkers();
+            const total = checked.reduce((s, w) => s + w.depositAmt, 0);
+            document.getElementById('conf-total').textContent = total.toFixed(3) + ' ر.ع';
+            document.getElementById('conf-count').textContent = checked.length + ' عمال';
         }
     }
 
@@ -239,6 +382,13 @@
         if (currentStep > 1) { e.preventDefault(); showStep(currentStep - 1); }
     });
 
+    function checkMinDeposit(val) {
+        var warn = document.getElementById('fixedMinWarn');
+        if (warn) warn.style.display = (parseFloat(val) || 0) < 100 ? '' : 'none';
+    }
+    window.checkMinDeposit = checkMinDeposit;
+
+    renderTable();
     showStep(1);
 })();
 </script>

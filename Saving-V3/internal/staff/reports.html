@@ -226,6 +226,73 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Report Card: Disbursement by Reason -->
+                        <div class="p-3 border rounded" style="border-color:#0dcaf0!important;">
+                            <div class="fw-bold mb-2"><i class="fas fa-hand-holding-usd me-2 text-info"></i> تقرير الصرف حسب السبب</div>
+                            <div class="row g-2 align-items-end">
+                                <div class="col-5">
+                                    <select class="form-select form-select-sm">
+                                        <option value="">كل الأسباب</option>
+                                        <option>استحقاق المعاش التقاعدي</option>
+                                        <option>اكتمال 180 شهراً</option>
+                                        <option>العجز الكلي الدائم</option>
+                                        <option>مغادرة السلطنة نهائياً</option>
+                                        <option>وفاة المشترك</option>
+                                        <option>صرف الفائض الاختياري فقط</option>
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                    <select class="form-select form-select-sm">
+                                        <option>PDF</option>
+                                        <option>Excel</option>
+                                    </select>
+                                </div>
+                                <div class="col-3">
+                                    <button class="btn btn-sm btn-info w-100 text-white" onclick="spf.showSuccess('جاري توليد تقرير الصرف حسب السبب...')">توليد</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Report Card: Penalties -->
+                        <div class="p-3 border rounded" style="border-color:#dc3545!important;">
+                            <div class="fw-bold mb-2"><i class="fas fa-exclamation-circle me-2 text-danger"></i> تقرير غرامات التأخير (BR-PEN-01)</div>
+                            <div class="row g-2 align-items-end">
+                                <div class="col-5">
+                                    <input type="date" class="form-control form-control-sm" placeholder="من تاريخ">
+                                </div>
+                                <div class="col-4">
+                                    <select class="form-select form-select-sm">
+                                        <option>PDF</option>
+                                        <option>Excel</option>
+                                    </select>
+                                </div>
+                                <div class="col-3">
+                                    <button class="btn btn-sm btn-outline-danger w-100" onclick="spf.showSuccess('جاري توليد تقرير الغرامات...')">توليد</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Report Card: Article 138 Settlements -->
+                        <div class="p-3 border rounded" style="border-color:#6f42c1!important;">
+                            <div class="fw-bold mb-2"><i class="fas fa-file-contract me-2" style="color:#6f42c1;"></i> تقرير تسويات المادة 138</div>
+                            <div class="row g-2 align-items-end">
+                                <div class="col-5">
+                                    <select class="form-select form-select-sm">
+                                        <option>كل الحالات</option>
+                                        <option>وافق العامل</option>
+                                        <option>اعترض العامل</option>
+                                        <option>معتمدة</option>
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                    <select class="form-select form-select-sm">
+                                        <option>PDF</option>
+                                        <option>Excel</option>
+                                    </select>
+                                </div>
+                                <div class="col-3">
+                                    <button class="btn btn-sm w-100 text-white" style="background:#6f42c1;" onclick="spf.showSuccess('جاري توليد تقرير تسويات المادة 138...')">توليد</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

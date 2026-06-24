@@ -49,6 +49,61 @@
             </div>
         </div>
 
+        <!-- Eligibility Check Panel (shown when reviewing a request) -->
+        <div id="eligibilityPanel" class="internal-grid-card mb-4" style="display:none; border:2px solid #1a6e3c;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0" style="color:#1a6e3c;"><i class="fas fa-clipboard-check me-2"></i>فحص أهلية الصرف — <span id="eligReqNum">DIS-2026-0381</span></h6>
+                <button class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('eligibilityPanel').style.display='none'"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <div class="p-3 rounded border" style="background:#eafaf1;">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="fas fa-check-circle text-success fa-lg"></i>
+                            <span class="fw-bold" style="font-size:.9rem;">حالة وزارة العمل</span>
+                        </div>
+                        <div style="font-size:.85rem;color:#444;">العقد منتهٍ — مؤكَّد</div>
+                        <div style="font-size:.75rem;color:#888;margin-top:2px;">REF: MOL-CONF-2026-7841</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded border" id="eligCheck180" style="background:#fdecea;">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="fas fa-exclamation-circle text-danger fa-lg"></i>
+                            <span class="fw-bold" style="font-size:.9rem;">اشتراطات 180 شهراً</span>
+                        </div>
+                        <div style="font-size:.85rem;color:#444;">مكتمل: 48 شهراً فقط</div>
+                        <div style="font-size:.75rem;color:#888;margin-top:2px;">سبب الصرف: استحقاق معاش — لا يشترط 180</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded border" style="background:#eafaf1;">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="fas fa-check-circle text-success fa-lg"></i>
+                            <span class="fw-bold" style="font-size:.9rem;">التزامات مستحقة</span>
+                        </div>
+                        <div style="font-size:.85rem;color:#444;">لا توجد التزامات مستحقة</div>
+                        <div style="font-size:.75rem;color:#888;margin-top:2px;">رصيد الالتزامات: 0 ر.ع</div>
+                    </div>
+                </div>
+            </div>
+            <div class="gup-inline-alert info mb-3" style="font-size:.88rem;">
+                <i class="fas fa-info-circle"></i>
+                <span>المبلغ المؤهل للصرف: <strong>2,150 ر.ع</strong> — المصادر: إلزامي 630 ر.ع + من الجهة 375 ر.ع + اختياري 1,145 ر.ع</span>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-success btn-sm" onclick="spf.showSuccess('تمت الموافقة على طلب الصرف رقم DIS-2026-0381');document.getElementById('eligibilityPanel').style.display='none'">
+                    <i class="fas fa-check me-1"></i> الموافقة على الصرف
+                </button>
+                <button class="btn btn-outline-danger btn-sm" onclick="spf.showSuccess('تم رفض الطلب وإشعار المشترك');document.getElementById('eligibilityPanel').style.display='none'">
+                    <i class="fas fa-times me-1"></i> رفض الطلب
+                </button>
+                <button class="btn btn-outline-warning btn-sm" onclick="spf.showSuccess('تم إرسال طلب الوثائق للمشترك')">
+                    <i class="fas fa-file-upload me-1"></i> طلب وثائق إضافية
+                </button>
+            </div>
+        </div>
+
         <!-- Requests Table -->
         <div class="internal-grid-card">
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -76,11 +131,8 @@
                             <td>20/06/2026</td>
                             <td><span class="badge bg-warning text-dark">معلق</span></td>
                             <td>
-                                <button class="btn btn-sm btn-success me-1 py-0 px-2" onclick="spf.showSuccess('تمت الموافقة على طلب الصرف رقم DIS-2026-0381')">
-                                    <i class="fas fa-check"></i> موافقة
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="spf.showSuccess('تم رفض الطلب وإشعار المشترك')">
-                                    <i class="fas fa-times"></i> رفض
+                                <button class="btn btn-sm btn-primary py-0 px-2" onclick="showEligibility('DIS-2026-0381')">
+                                    <i class="fas fa-clipboard-check"></i> فحص الأهلية
                                 </button>
                             </td>
                         </tr>
@@ -92,27 +144,25 @@
                             <td>18/06/2026</td>
                             <td><span class="badge bg-warning text-dark">معلق</span></td>
                             <td>
-                                <button class="btn btn-sm btn-success me-1 py-0 px-2" onclick="spf.showSuccess('تمت الموافقة على طلب الصرف رقم DIS-2026-0380')">
-                                    <i class="fas fa-check"></i> موافقة
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="spf.showSuccess('تم رفض الطلب وإشعار المشترك')">
-                                    <i class="fas fa-times"></i> رفض
+                                <button class="btn btn-sm btn-primary py-0 px-2" onclick="showEligibility('DIS-2026-0380')">
+                                    <i class="fas fa-clipboard-check"></i> فحص الأهلية
                                 </button>
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="table-warning">
                             <td><span class="ref-number">DIS-2026-0375</span></td>
-                            <td class="fw-bold">محمد بن علي الشحي</td>
+                            <td class="fw-bold">محمد بن علي الشحي <span class="badge bg-danger ms-1" style="font-size:.7rem;">وفاة — غير عماني</span></td>
                             <td>وفاة (طلب ورثة)</td>
                             <td>8,200.000 ر.ع</td>
                             <td>15/06/2026</td>
                             <td><span class="badge bg-info text-dark">قيد المعالجة</span></td>
                             <td>
-                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="spf.showSuccess('عرض تفاصيل الطلب')">
-                                    <i class="fas fa-eye"></i> عرض
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="spf.showSuccess('حالة وفاة غير عماني: تتطلب مسار يدوي قانوني وفق BR-EXC-05 — التواصل مع الإدارة القانونية')">
+                                    <i class="fas fa-balance-scale"></i> مسار قانوني
                                 </button>
                             </td>
                         </tr>
+                        <div style="display:none" id="deathCaseNote"></div>
                         <tr>
                             <td><span class="ref-number">DIS-2026-0360</span></td>
                             <td class="fw-bold">أحمد بن سالم البلوشي</td>
@@ -146,5 +196,13 @@
     </main>
     <script src="../../assets/js/prototype-core.js"></script>
     <script src="../../assets/js/internal-shell.js"></script>
+    <script>
+    function showEligibility(reqNum) {
+        document.getElementById('eligReqNum').textContent = reqNum;
+        var panel = document.getElementById('eligibilityPanel');
+        panel.style.display = '';
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    </script>
 </body>
 </html>

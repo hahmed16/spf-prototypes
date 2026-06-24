@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل العمال - صندوق الحماية الاجتماعية</title>
+    <title>تسجيل العمال في الادخار الاختياري - صندوق الحماية الاجتماعية</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;700&display=swap" rel="stylesheet">
@@ -19,10 +19,10 @@
     <div class="gup-content-header">
         <div class="breadcrumbs-lite">
             <a href="../../../index.html">الرئيسية</a> <span>›</span>
-            <a href="index.html">تسجيل العمال</a> <span>›</span>
+            <a href="index.html">تسجيل العمال في الادخار الاختياري</a> <span>›</span>
             <span>تقديم الطلب</span>
         </div>
-        <h1>تسجيل العمال</h1>
+        <h1>تسجيل العمال في الادخار الاختياري</h1>
     </div>
 
     <!-- Stepper -->
@@ -30,7 +30,7 @@
         <ol class="wizard-stepper">
             <li class="stepper-item selected" id="step1Indicator">
                 <span class="stepper-num">1</span>
-                <span class="stepper-label">بيانات العامل</span>
+                <span class="stepper-label">اختيار العمال</span>
                 <div class="stepper-connector"></div>
             </li>
             <li class="stepper-item" id="step2Indicator">
@@ -45,76 +45,108 @@
         </ol>
     </nav>
 
-    <!-- Step 1 -->
+    <!-- Step 1: Worker Selection -->
     <div class="wizard-content-area" id="wizardStep1">
         <section class="gup-form-section">
-            <h2>بيانات العامل</h2>
+            <h2>اختر العمال المراد تسجيلهم في الادخار الاختياري</h2>
 
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="gup-field-label" for="workerName">الاسم الكامل للعامل <span class="text-danger">*</span></label>
-                    <input type="text" id="workerName" class="form-control" placeholder="أدخل الاسم الكامل" required>
-                </div>
-                <div class="col-md-6">
-                    <label class="gup-field-label" for="civilId">الرقم المدني <span class="text-danger">*</span></label>
-                    <input type="text" id="civilId" class="form-control" placeholder="أدخل الرقم المدني" required>
-                </div>
-                <div class="col-md-6">
-                    <label class="gup-field-label" for="nationality">الجنسية <span class="text-danger">*</span></label>
-                    <select id="nationality" class="form-select" required>
-                        <option value="">اختر الجنسية</option>
-                        <option value="omani">عماني</option>
-                        <option value="non-omani">غير عماني</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label class="gup-field-label" for="profession">المهنة</label>
-                    <input type="text" id="profession" class="form-control" placeholder="أدخل المهنة">
-                </div>
-                <div class="col-md-6">
-                    <label class="gup-field-label" for="basicSalary">الراتب الأساسي</label>
-                    <input type="number" id="basicSalary" class="form-control" placeholder="0" min="100">
-                    <div class="gup-field-hint">بالريال العماني — الحد الأدنى 100 ر.ع</div>
-                </div>
-                <div class="col-md-6">
-                    <label class="gup-field-label" for="startDate">تاريخ بدء العمل</label>
-                    <input type="date" id="startDate" class="form-control">
-                </div>
-                <div class="col-md-6">
-                    <label class="gup-field-label" for="phone">رقم الهاتف</label>
-                    <input type="text" id="phone" class="form-control" placeholder="9XXXXXXX">
-                </div>
+            <div class="gup-inline-alert info mb-4">
+                <i class="fas fa-info-circle"></i>
+                <span>العمال المعروضون أدناه مرتبطون بمنشأتك في السجل الإلكتروني ولم يُسجَّلوا بعد في الادخار الاختياري. اختر عاملاً واحداً أو أكثر لتسجيلهم.</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered align-middle mb-0" style="font-size:.9rem;">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:44px;">
+                                <input class="form-check-input" type="checkbox" id="selectAll" title="تحديد الكل">
+                            </th>
+                            <th>اسم العامل</th>
+                            <th>الرقم المدني</th>
+                            <th>الجنسية</th>
+                            <th>الراتب الأساسي</th>
+                            <th>الحالة الحالية</th>
+                        </tr>
+                    </thead>
+                    <tbody id="workerTableBody">
+                        <tr>
+                            <td><input class="form-check-input worker-chk" type="checkbox" value="0"></td>
+                            <td class="fw-bold">سالم بن ناصر الهنائي</td>
+                            <td style="direction:ltr;text-align:right;">1023****</td>
+                            <td><span class="badge bg-success">عماني</span></td>
+                            <td>850 ر.ع</td>
+                            <td><span class="badge bg-warning text-dark">إلزامي فقط</span></td>
+                        </tr>
+                        <tr>
+                            <td><input class="form-check-input worker-chk" type="checkbox" value="1"></td>
+                            <td class="fw-bold">آنا سيلفيا رودريغيز</td>
+                            <td style="direction:ltr;text-align:right;">A987****</td>
+                            <td><span class="badge bg-secondary">غير عماني</span></td>
+                            <td>600 ر.ع</td>
+                            <td><span class="badge bg-warning text-dark">إلزامي فقط</span></td>
+                        </tr>
+                        <tr>
+                            <td><input class="form-check-input worker-chk" type="checkbox" value="2"></td>
+                            <td class="fw-bold">محمد بن خميس البلوشي</td>
+                            <td style="direction:ltr;text-align:right;">1034****</td>
+                            <td><span class="badge bg-success">عماني</span></td>
+                            <td>1,200 ر.ع</td>
+                            <td><span class="badge bg-warning text-dark">إلزامي فقط</span></td>
+                        </tr>
+                        <tr>
+                            <td><input class="form-check-input worker-chk" type="checkbox" value="3"></td>
+                            <td class="fw-bold">راجيش كومار</td>
+                            <td style="direction:ltr;text-align:right;">P552****</td>
+                            <td><span class="badge bg-secondary">غير عماني</span></td>
+                            <td>500 ر.ع</td>
+                            <td><span class="badge bg-warning text-dark">إلزامي فقط</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="selectionSummary" class="mt-3 p-3 rounded" style="background:#f0f4ff;border:1px solid #bfd8ff;display:none;">
+                <i class="fas fa-users me-2 text-primary"></i>
+                تم اختيار <strong id="selCount">0</strong> عامل للتسجيل في الادخار الاختياري
             </div>
         </section>
     </div>
 
-    <!-- Step 2 -->
+    <!-- Step 2: Review -->
     <div class="wizard-content-area" id="wizardStep2" style="display:none">
         <section class="gup-form-section">
-            <h2>مراجعة البيانات</h2>
-            <div class="gup-labelled-item"><span class="item-label">الاسم الكامل للعامل</span><span class="item-value" id="rev-name">—</span></div>
-            <div class="gup-labelled-item"><span class="item-label">الرقم المدني</span><span class="item-value" id="rev-civil">—</span></div>
-            <div class="gup-labelled-item"><span class="item-label">الجنسية</span><span class="item-value" id="rev-nat">—</span></div>
-            <div class="gup-labelled-item"><span class="item-label">المهنة</span><span class="item-value" id="rev-prof">—</span></div>
-            <div class="gup-labelled-item"><span class="item-label">الراتب الأساسي</span><span class="item-value" id="rev-salary">—</span></div>
-            <div class="gup-labelled-item"><span class="item-label">تاريخ بدء العمل</span><span class="item-value" id="rev-date">—</span></div>
-            <div class="gup-labelled-item"><span class="item-label">رقم الهاتف</span><span class="item-value" id="rev-phone">—</span></div>
+            <h2>مراجعة العمال المختارين</h2>
+            <div class="gup-inline-alert info mb-4">
+                <i class="fas fa-info-circle"></i>
+                <span>سيتم إنشاء طلب تسجيل في الادخار الاختياري للعمال التاليين. سيُرسَل إشعار لكل عامل لاستكمال إجراءات الاشتراك.</span>
+            </div>
+            <div id="reviewTable"></div>
+
+            <div class="p-3 rounded mt-4" style="background:#f8f9fa;border:1px solid #dee2e6;">
+                <div class="fw-bold mb-2" style="font-size:.9rem;"><i class="fas fa-info-circle me-1 text-primary"></i> ملاحظات</div>
+                <ul style="font-size:.85rem;color:#555;margin-bottom:0;">
+                    <li>الحد الأدنى للاشتراك الاختياري الشهري: <strong>100 ر.ع</strong> لكل عامل.</li>
+                    <li>سيحدد كل عامل مبلغ اشتراكه الشهري بنفسه عند الاستجابة للإشعار.</li>
+                    <li>تُضاف مساهمات جهة العمل الاختيارية وفقاً لسياسة المنشأة.</li>
+                </ul>
+            </div>
         </section>
     </div>
 
-    <!-- Step 3 -->
+    <!-- Step 3: Success -->
     <div class="wizard-content-area" id="wizardStep3" style="display:none">
         <div class="page-status-card">
             <div class="page-status-icon" style="background:#d4edda; color:#1a7f37;">
                 <i class="fas fa-check-circle fa-2x"></i>
             </div>
-            <h2>تم تسجيل العامل بنجاح</h2>
+            <h2>تم تقديم طلب التسجيل بنجاح</h2>
             <p>رقم المرجع:</p>
-            <div class="ref-number">SPF-WRK-2024-001842</div>
-            <p class="mt-3">تم تسجيل بيانات العامل وإضافته إلى سجل جهة عملك بنجاح.</p>
+            <div class="ref-number">SPF-OPTREG-2026-000418</div>
+            <p class="mt-3">تم إرسال إشعار لكل عامل مختار لاستكمال إجراءات الاشتراك في الادخار الاختياري.</p>
             <div class="mt-4 d-flex gap-3 justify-content-center flex-wrap">
                 <a href="../registered-workers/start.html" class="gup-primary-btn">عرض العمال المسجلين</a>
-                <a href="start.html" class="gup-outline-btn">تسجيل عامل آخر</a>
+                <a href="start.html" class="gup-outline-btn">تسجيل عمال آخرين</a>
             </div>
         </div>
     </div>
@@ -135,18 +167,49 @@
     let currentStep = 1;
     const totalSteps = 3;
 
-    function getValue(id) { return (document.getElementById(id) || {}).value || '—'; }
-    function getSelectText(id) {
-        const el = document.getElementById(id);
-        if (!el) return '—';
-        return el.options[el.selectedIndex]?.text || '—';
+    var workers = [
+        { name: 'سالم بن ناصر الهنائي',     nat: 'عماني',     salary: '850 ر.ع' },
+        { name: 'آنا سيلفيا رودريغيز',      nat: 'غير عماني', salary: '600 ر.ع' },
+        { name: 'محمد بن خميس البلوشي',     nat: 'عماني',     salary: '1,200 ر.ع' },
+        { name: 'راجيش كومار',              nat: 'غير عماني', salary: '500 ر.ع' }
+    ];
+
+    function getSelected() {
+        return Array.from(document.querySelectorAll('.worker-chk:checked')).map(function(c){ return parseInt(c.value); });
+    }
+
+    function updateSummary() {
+        var sel = getSelected();
+        var div = document.getElementById('selectionSummary');
+        document.getElementById('selCount').textContent = sel.length;
+        div.style.display = sel.length > 0 ? '' : 'none';
+    }
+
+    document.querySelectorAll('.worker-chk').forEach(function(chk) {
+        chk.addEventListener('change', updateSummary);
+    });
+
+    document.getElementById('selectAll').addEventListener('change', function() {
+        document.querySelectorAll('.worker-chk').forEach(function(c){ c.checked = this.checked; }.bind(this));
+        updateSummary();
+    });
+
+    function buildReviewTable(sel) {
+        if (!sel.length) return '<p class="text-muted">لم يتم اختيار أي عامل.</p>';
+        var rows = sel.map(function(i) {
+            var w = workers[i];
+            return '<tr><td class="fw-bold">' + w.name + '</td><td>' + w.nat + '</td><td>' + w.salary + '</td></tr>';
+        }).join('');
+        return '<div class="table-responsive"><table class="table table-bordered table-sm align-middle mb-0" style="font-size:.9rem;">' +
+            '<thead class="table-light"><tr><th>اسم العامل</th><th>الجنسية</th><th>الراتب الأساسي</th></tr></thead>' +
+            '<tbody>' + rows + '</tbody></table></div>';
     }
 
     function showStep(n) {
-        for (let i = 1; i <= totalSteps; i++) {
-            const el = document.getElementById('wizardStep' + i);
+        for (var i = 1; i <= totalSteps; i++) {
+            var el = document.getElementById('wizardStep' + i);
             if (el) el.style.display = i === n ? '' : 'none';
-            const ind = document.getElementById('step' + i + 'Indicator');
+            var ind = document.getElementById('step' + i + 'Indicator');
             if (ind) {
                 ind.classList.remove('selected', 'done');
                 if (i < n) ind.classList.add('done');
@@ -154,28 +217,29 @@
             }
         }
         currentStep = n;
-        const footer = document.getElementById('wizardFooter');
+        var footer = document.getElementById('wizardFooter');
         if (footer) footer.style.display = n === totalSteps ? 'none' : '';
-        const backBtn = document.getElementById('backBtn');
+        var backBtn = document.getElementById('backBtn');
         if (backBtn) {
             if (n === 1) { backBtn.setAttribute('href', 'index.html'); backBtn.removeAttribute('data-back'); }
             else { backBtn.removeAttribute('href'); backBtn.setAttribute('data-back', ''); }
         }
         if (n === 2) {
-            document.getElementById('rev-name').textContent = getValue('workerName');
-            document.getElementById('rev-civil').textContent = getValue('civilId');
-            document.getElementById('rev-nat').textContent = getSelectText('nationality');
-            document.getElementById('rev-prof').textContent = getValue('profession') || '—';
-            const sal = getValue('basicSalary');
-            document.getElementById('rev-salary').textContent = sal !== '—' ? sal + ' ر.ع' : '—';
-            document.getElementById('rev-date').textContent = getValue('startDate');
-            document.getElementById('rev-phone').textContent = getValue('phone') || '—';
+            document.getElementById('reviewTable').innerHTML = buildReviewTable(getSelected());
         }
     }
 
     document.getElementById('continueBtn').addEventListener('click', function () {
+        if (currentStep === 1) {
+            var sel = getSelected();
+            if (!sel.length) {
+                spf.showSuccess('يرجى اختيار عامل واحد على الأقل للمتابعة.');
+                return;
+            }
+        }
         if (currentStep < totalSteps) showStep(currentStep + 1);
     });
+
     document.getElementById('backBtn').addEventListener('click', function (e) {
         if (currentStep > 1) { e.preventDefault(); showStep(currentStep - 1); }
     });

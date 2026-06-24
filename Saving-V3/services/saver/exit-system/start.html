@@ -45,9 +45,91 @@
         <section class="gup-form-section">
             <h2>بيانات الخروج من النظام</h2>
 
-            <div class="gup-inline-alert warning mb-4">
+            <div class="gup-inline-alert danger mb-4" style="background:#fdecea;border-color:#f5c6cb;color:#721c24;">
                 <i class="fas fa-exclamation-triangle"></i>
-                <span><strong>تنبيه</strong> — لا يمكن التراجع عن هذا الإجراء بعد التأكيد. سيتم إغلاق حسابك وتصفية كافة المبالغ.</span>
+                <div>
+                    <strong>تحذير — إجراء نهائي لا يمكن التراجع عنه</strong>
+                    <ul class="mb-0 mt-1" style="font-size:.88rem;">
+                        <li>سيتم إغلاق حسابك الادخاري نهائياً وتصفية كافة المبالغ.</li>
+                        <li>ستتوقف عوائد الاستثمار فوراً بعد الخروج ولن تُضاف أي عوائد مستقبلية.</li>
+                        <li>لن تتمكن من إعادة التسجيل في نظام الادخار مستقبلاً إلا بشروط جديدة.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Late Notification Penalty Panel (FR-47 / BR-PEN-04) -->
+            <div class="p-3 rounded mb-4" style="background:#fff9e6;border:2px solid #ffc107;">
+                <div class="fw-bold mb-2" style="color:#856404;"><i class="fas fa-clock me-1"></i> مهلة الإشعار بانتهاء الأهلية — FR-47 / BR-PEN-04</div>
+                <p style="font-size:.87rem;color:#555;margin-bottom:10px;">
+                    يتعين عليك إخطار الصندوق خلال <strong>30 يوم</strong> من تاريخ انتهاء عقد العمل أو فقدان شرط الأهلية.
+                    التأخر في الإشعار يترتب عليه تخفيض عوائد الاستثمار وفق الجدول الآتي:
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered mb-0" style="font-size:.83rem;background:#fff;">
+                        <thead class="table-warning">
+                            <tr>
+                                <th>حالة الإشعار</th>
+                                <th>العائد المطبَّق</th>
+                                <th>الأثر</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge bg-success">إشعار في الموعد (خلال 30 يوماً)</span></td>
+                                <td>العائد السنوي الكامل المعتمد</td>
+                                <td class="text-success fw-bold">لا خصم — عوائد كاملة حتى تاريخ الخروج</td>
+                            </tr>
+                            <tr class="table-warning">
+                                <td><span class="badge bg-warning text-dark">إشعار متأخر — السنة الأولى</span></td>
+                                <td>2% فقط (الحد الأدنى القانوني)</td>
+                                <td style="color:#856404;font-weight:600;">خسارة الفرق بين العائد المعتمد و 2%</td>
+                            </tr>
+                            <tr class="table-danger">
+                                <td><span class="badge bg-danger">إشعار متأخر — ما بعد السنة الأولى</span></td>
+                                <td>0% (لا عوائد)</td>
+                                <td class="text-danger fw-bold">توقف العوائد كلياً من تاريخ انتهاء الأهلية</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-2 p-2 rounded" style="background:#fff3cd;font-size:.82rem;color:#856404;">
+                    <i class="fas fa-calendar-alt me-1"></i>
+                    <strong>تاريخ انتهاء العقد المسجَّل:</strong> 01/03/2024 &nbsp;|&nbsp;
+                    <strong>آخر موعد للإشعار دون عقوبة:</strong> <span style="color:#c0392b;font-weight:700;">31/03/2024</span> &nbsp;|&nbsp;
+                    <strong>تاريخ اليوم:</strong> 15/03/2024
+                    <span class="ms-2 badge bg-success">ضمن المهلة</span>
+                </div>
+            </div>
+
+            <!-- Final Settlement Summary -->
+            <div class="p-3 rounded mb-4" style="background:#f0f4f8;border:2px solid #1a6e3c;">
+                <h5 style="color:#1a6e3c;margin-bottom:12px;"><i class="fas fa-calculator me-2"></i>ملخص التسوية النهائية</h5>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <div class="gup-labelled-item" style="border-bottom:1px solid #dee2e6;padding-bottom:6px;">
+                            <span class="item-label" style="font-size:.82rem;">إجمالي الإيداعات (إلزامي + اختياري + من الجهة)</span>
+                            <span class="item-value fw-bold">1,405.000 ر.ع</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="gup-labelled-item" style="border-bottom:1px solid #dee2e6;padding-bottom:6px;">
+                            <span class="item-label" style="font-size:.82rem;">عوائد الاستثمار المتراكمة</span>
+                            <span class="item-value fw-bold text-success">+45.250 ر.ع</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="gup-labelled-item" style="border-bottom:1px solid #dee2e6;padding-bottom:6px;">
+                            <span class="item-label" style="font-size:.82rem;">خصم: التزامات مستوفاة</span>
+                            <span class="item-value fw-bold text-danger">-0.000 ر.ع</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2" style="border-top:2px solid #1a6e3c;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span style="font-size:1rem;font-weight:600;color:#1a6e3c;">المبلغ الصافي للتحويل</span>
+                        <span style="font-size:1.4rem;font-weight:700;color:#1a6e3c;">1,450.250 ر.ع</span>
+                    </div>
+                </div>
             </div>
 
             <div class="row g-3 mb-4">

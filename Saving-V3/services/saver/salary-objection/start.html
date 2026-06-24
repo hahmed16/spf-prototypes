@@ -50,6 +50,27 @@
         <section class="gup-form-section">
             <h2>بيانات الاعتراض</h2>
 
+            <!-- Current Salary Info -->
+            <div class="p-3 rounded mb-4" style="background:#f0f4f8;border:1px solid #c8d8e8;">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-4">
+                        <div style="font-size:.8rem;color:#666;">الأجر الأساسي المسجَّل حالياً</div>
+                        <div style="font-size:1.3rem;font-weight:700;color:#1a6e3c;">500 ر.ع</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div style="font-size:.8rem;color:#666;">تاريخ آخر تحديث</div>
+                        <div style="font-size:1rem;font-weight:600;">01/01/2024</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div style="font-size:.8rem;color:#666;">المهلة المتاحة للاعتراض</div>
+                        <div id="deadlineCountdown" style="font-size:1rem;font-weight:700;color:#c0392b;">
+                            <i class="fas fa-clock"></i> <span id="daysLeft">—</span> يوم متبقٍ
+                        </div>
+                        <div style="font-size:.75rem;color:#888;">آخر موعد: 01/04/2024</div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
                     <label class="gup-field-label">الأجر الأساسي المقترح</label>
@@ -81,6 +102,7 @@
     <div class="wizard-content-area" id="wizardStep2" style="display:none">
         <section class="gup-form-section">
             <h2>مراجعة البيانات</h2>
+            <div class="gup-labelled-item"><span class="item-label">الأجر الأساسي المسجَّل حالياً</span><span class="item-value">500 ر.ع</span></div>
             <div class="gup-labelled-item"><span class="item-label">الأجر الأساسي المقترح</span><span class="item-value" id="reviewSalary">—</span></div>
             <div class="gup-labelled-item"><span class="item-label">تاريخ سريان الأجر</span><span class="item-value" id="reviewEffectDate">—</span></div>
             <div class="gup-labelled-item"><span class="item-label">المستند الداعم</span><span class="item-value" id="reviewDoc">—</span></div>
@@ -157,6 +179,23 @@
     });
 
     showStep(1);
+
+    // 90-day countdown: salary registered 01/01/2024, deadline = 01/04/2024
+    (function() {
+        var deadline = new Date('2024-04-01');
+        var today = new Date('2024-03-15'); // prototype fixed date
+        var diff = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+        var el = document.getElementById('daysLeft');
+        if (el) {
+            if (diff > 0) {
+                el.textContent = diff;
+                document.getElementById('deadlineCountdown').style.color = diff <= 14 ? '#c0392b' : '#856404';
+            } else {
+                el.textContent = '0';
+                document.getElementById('deadlineCountdown').style.color = '#c0392b';
+            }
+        }
+    })();
 })();
 </script>
 </body>

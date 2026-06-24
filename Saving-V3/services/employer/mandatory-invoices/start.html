@@ -25,9 +25,19 @@
         <h1>متابعة الفاتورة الشهرية للاشتراكات الإلزامية</h1>
     </div>
 
-    <div class="gup-inline-alert info mb-4">
+    <div class="gup-inline-alert info mb-3">
         <i class="fas fa-info-circle"></i>
         <span>نسبة الاشتراك الإلزامي هي <strong>9%</strong> من الأجر الأساسي وفقاً للائحة.</span>
+    </div>
+
+    <div class="gup-inline-alert danger mb-4" style="background:#fdecea;border-color:#f5c6cb;color:#721c24;">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+            <strong>تحذير: فواتير متأخرة السداد</strong><br>
+            لديك فاتورتان مستحقتا السداد. وفقاً للبند <strong>BR-PEN-01</strong>، تُحتسب غرامة تأخير بنسبة <strong>8% سنوياً</strong> على المبالغ غير المسددة بعد انتهاء المهلة المحددة.<br>
+            <span style="font-size:.85rem;">معادلة الغرامة: المبلغ × 8% ÷ 365 × عدد أيام التأخير</span><br>
+            <span style="font-size:.85rem;font-weight:600;color:#721c24;">⚠ الغرامة تتراكم يومياً حتى تاريخ السداد الفعلي الكامل — لا تُوقف إلا بالسداد التام.</span>
+        </div>
     </div>
 
     <!-- Filter -->
@@ -79,37 +89,46 @@
                         <th>الحساب الافتراضي</th>
                         <th>عدد العمال</th>
                         <th>إجمالي 9%</th>
-                        <th>المتبقي</th>
+                        <th>غرامة التأخير</th>
+                        <th>الإجمالي المستحق</th>
                         <th>الحالة</th>
                         <th>إجراء</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    <tr class="table-danger">
                         <td class="fw-bold">MND-2024-001</td>
                         <td>يناير 2024</td>
                         <td>الحساب الافتراضي الرئيسي</td>
                         <td>450 عامل</td>
                         <td>4,050 ر.ع</td>
-                        <td>4,050 ر.ع</td>
-                        <td><span class="badge bg-danger">مستحقة</span></td>
                         <td>
-                            <button type="button" class="gup-primary-btn" style="padding:4px 14px; font-size:.85rem;" onclick="payMandInvoice('MND-2024-001')">
-                                <i class="fas fa-credit-card"></i> دفع الفاتورة
+                            <span class="text-danger fw-bold">40.0 ر.ع</span><br>
+                            <span style="font-size:.75rem;color:#888;">45 يوم × 8% ÷ 365</span>
+                        </td>
+                        <td class="fw-bold text-danger">4,090 ر.ع</td>
+                        <td><span class="badge bg-danger">متأخرة</span></td>
+                        <td>
+                            <button type="button" class="gup-primary-btn" style="padding:4px 14px; font-size:.85rem;" onclick="payMandInvoice('MND-2024-001', '4,090')">
+                                <i class="fas fa-file-invoice"></i> سداد الفاتورة
                             </button>
                         </td>
                     </tr>
-                    <tr>
+                    <tr class="table-warning">
                         <td class="fw-bold">MND-2024-002</td>
                         <td>فبراير 2024</td>
                         <td>الحساب الافتراضي الرئيسي</td>
                         <td>448 عامل</td>
                         <td>4,032 ر.ع</td>
-                        <td>4,032 ر.ع</td>
-                        <td><span class="badge bg-danger">مستحقة</span></td>
                         <td>
-                            <button type="button" class="gup-primary-btn" style="padding:4px 14px; font-size:.85rem;" onclick="payMandInvoice('MND-2024-002')">
-                                <i class="fas fa-credit-card"></i> دفع الفاتورة
+                            <span class="text-danger fw-bold">13.3 ر.ع</span><br>
+                            <span style="font-size:.75rem;color:#888;">15 يوم × 8% ÷ 365</span>
+                        </td>
+                        <td class="fw-bold text-danger">4,045.3 ر.ع</td>
+                        <td><span class="badge bg-warning text-dark">متأخرة</span></td>
+                        <td>
+                            <button type="button" class="gup-primary-btn" style="padding:4px 14px; font-size:.85rem;" onclick="payMandInvoice('MND-2024-002', '4,045.3')">
+                                <i class="fas fa-file-invoice"></i> سداد الفاتورة
                             </button>
                         </td>
                     </tr>
@@ -119,7 +138,8 @@
                         <td>الحساب الافتراضي الرئيسي</td>
                         <td>445 عامل</td>
                         <td>4,005 ر.ع</td>
-                        <td>0 ر.ع</td>
+                        <td><span style="color:#888;">—</span></td>
+                        <td>4,005 ر.ع</td>
                         <td><span class="badge bg-success">مدفوعة</span></td>
                         <td>
                             <button type="button" class="gup-outline-btn" style="padding:4px 14px; font-size:.85rem;">
@@ -134,17 +154,21 @@
         <!-- Summary -->
         <div class="mt-4 p-3 rounded" style="background:#f8f9fa; border:1px solid #dee2e6;">
             <div class="row g-2 text-center">
-                <div class="col-md-4">
-                    <div style="color:#666; font-size:.85rem;">إجمالي المستحق</div>
+                <div class="col-md-3">
+                    <div style="color:#666; font-size:.85rem;">أصل المبالغ المستحقة</div>
                     <div class="fw-bold" style="font-size:1.2rem; color:#c0392b;">8,082 ر.ع</div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <div style="color:#666; font-size:.85rem;">إجمالي غرامات التأخير</div>
+                    <div class="fw-bold" style="font-size:1.2rem; color:#c0392b;">53.3 ر.ع</div>
+                </div>
+                <div class="col-md-3">
+                    <div style="color:#666; font-size:.85rem;">الإجمالي الواجب سداده</div>
+                    <div class="fw-bold" style="font-size:1.2rem; color:#c0392b;">8,135.3 ر.ع</div>
+                </div>
+                <div class="col-md-3">
                     <div style="color:#666; font-size:.85rem;">إجمالي المدفوع</div>
                     <div class="fw-bold" style="font-size:1.2rem; color:var(--gup-color-primary,#1a6e3c);">4,005 ر.ع</div>
-                </div>
-                <div class="col-md-4">
-                    <div style="color:#666; font-size:.85rem;">نسبة الاشتراك</div>
-                    <div class="fw-bold" style="font-size:1.2rem;">9% من الأجر الأساسي</div>
                 </div>
             </div>
         </div>
@@ -152,23 +176,28 @@
 
     <!-- Payment Panel -->
     <div id="mandPaySection" style="display:none;" class="gup-form-section mt-4">
-        <h2><i class="fas fa-credit-card me-2"></i>دفع الفاتورة: <span id="mandPayInvNum"></span></h2>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="gup-field-label">طريقة الدفع</label>
-                <select class="form-select">
-                    <option>تحويل بنكي</option>
-                    <option>شيك مصرفي</option>
-                </select>
-            </div>
-            <div class="col-md-6">
-                <label class="gup-field-label">رقم المرجع البنكي</label>
-                <input type="text" class="form-control" placeholder="أدخل رقم المرجع">
+        <h2><i class="fas fa-file-invoice me-2"></i>سداد الفاتورة: <span id="mandPayInvNum"></span></h2>
+        <div class="gup-labelled-item">
+            <span class="item-label">رقم الفاتورة</span>
+            <span class="item-value fw-bold" id="mandPayInvNum2"></span>
+        </div>
+        <div class="gup-labelled-item">
+            <span class="item-label">الإجمالي المستحق (شامل الغرامة)</span>
+            <span class="item-value fw-bold text-danger" id="mandPayTotal"></span>
+        </div>
+        <div class="gup-inline-alert info mt-3 mb-3">
+            <i class="fas fa-info-circle"></i>
+            <div>
+                <strong>آلية السداد:</strong> يُرجى سداد المبلغ كاملاً عبر قنوات الدفع الحكومية المعتمدة باستخدام رقم الفاتورة أعلاه.
+                <ul class="mb-0 mt-1" style="font-size:.9rem;">
+                    <li>ONEIC</li>
+                    <li>THAWANI أو OIFC</li>
+                </ul>
+                لا يُقبل الدفع الجزئي. تستمر الغرامة في التراكم حتى تاريخ السداد الفعلي.
             </div>
         </div>
         <div class="mt-3 d-flex gap-3">
-            <button type="button" class="gup-primary-btn" onclick="document.getElementById('mandPaySection').style.display='none'">تأكيد الدفع</button>
-            <button type="button" class="gup-outline-btn" onclick="document.getElementById('mandPaySection').style.display='none'">إلغاء</button>
+            <button type="button" class="gup-outline-btn" onclick="document.getElementById('mandPaySection').style.display='none'">إغلاق</button>
         </div>
     </div>
 
@@ -176,8 +205,10 @@
 <script src="../../../assets/js/prototype-core.js"></script>
 <script src="../../../assets/js/external-shell.js"></script>
 <script>
-function payMandInvoice(inv) {
+function payMandInvoice(inv, total) {
     document.getElementById('mandPayInvNum').textContent = inv;
+    document.getElementById('mandPayInvNum2').textContent = inv;
+    document.getElementById('mandPayTotal').textContent = total + ' ر.ع';
     document.getElementById('mandPaySection').style.display = '';
     document.getElementById('mandPaySection').scrollIntoView({ behavior: 'smooth' });
 }

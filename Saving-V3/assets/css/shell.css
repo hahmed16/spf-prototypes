@@ -515,21 +515,19 @@ body {
 
 .landing-shell {
     display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 300px;
     gap: 28px;
     align-items: start;
     margin-top: 24px;
 }
 
-/* In RTL: column 1 (left physically) = CTA sidebar, column 2 (right physically) = main content */
 .landing-shell > aside {
-    grid-column: 1;
+    align-self: start;
     position: sticky;
     top: 96px;
 }
 
 .landing-shell > div {
-    grid-column: 2;
     display: grid;
     gap: 20px;
 }
@@ -945,9 +943,11 @@ body {
     }
 
     .landing-shell {
-        grid-template-areas:
-            "body"
-            "side";
+        grid-template-columns: 1fr;
+    }
+
+    .landing-shell > aside {
+        position: static;
     }
 
     .auth-shell {

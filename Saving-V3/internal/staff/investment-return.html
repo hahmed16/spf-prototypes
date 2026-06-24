@@ -32,6 +32,40 @@
                     <h5 class="mb-4"><i class="fas fa-percentage me-2"></i> تحديد عائد الاستثمار لعام 2025</h5>
 
                     <div class="gup-form-section">
+                        <!-- Calculation Method -->
+                        <div class="mb-4">
+                            <label class="gup-field-label">طريقة احتساب العائد <span class="text-danger">*</span></label>
+                            <div class="d-flex flex-column gap-2 mt-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="calcMethod" id="methodBeginning" value="beginning" checked onchange="updateMethodHint()">
+                                    <label class="form-check-label" for="methodBeginning">
+                                        <strong>رصيد بداية الفترة</strong>
+                                        <div style="font-size:.8rem;color:#666;">يُطبَّق العائد على الرصيد المسجَّل في أول يوم من سنة التوزيع</div>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="calcMethod" id="methodDaily" value="daily" onchange="updateMethodHint()">
+                                    <label class="form-check-label" for="methodDaily">
+                                        <strong>متوسط يومي</strong>
+                                        <div style="font-size:.8rem;color:#666;">يُحتسب متوسط الرصيد اليومي طوال الفترة — أكثر دقة للإيداعات المتكررة</div>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="calcMethod" id="methodPeriodic" value="periodic" onchange="updateMethodHint()">
+                                    <label class="form-check-label" for="methodPeriodic">
+                                        <strong>متوسط فترات (شهري)</strong>
+                                        <div style="font-size:.8rem;color:#666;">يُحسب متوسط الرصيد على أساس شهري ثم يُجمَّع سنوياً</div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="methodHint" class="gup-inline-alert info mt-2" style="font-size:.82rem;">
+                                <i class="fas fa-info-circle"></i>
+                                <span>الطريقة الحالية: <strong>رصيد بداية الفترة</strong> — يُوزَّع العائد على الرصيد الثابت أول الفترة. الأبسط في التطبيق.</span>
+                            </div>
+                        </div>
+
+                        <hr class="my-3">
+
                         <div class="mb-4">
                             <label class="gup-field-label">نسبة العائد السنوي %</label>
                             <div class="input-group">
@@ -52,9 +86,34 @@
                             <input type="date" class="form-control">
                         </div>
 
+                        <!-- Approval Workflow -->
+                        <div class="p-3 rounded mb-4" style="background:#f8f9fa;border:1px solid #dee2e6;">
+                            <div class="fw-bold mb-2" style="font-size:.88rem;color:#555;"><i class="fas fa-project-diagram me-1"></i> مسار الاعتماد (FR-37G)</div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap" style="font-size:.82rem;">
+                                <div class="text-center px-2 py-1 rounded" style="background:#cff4fc;border:1px solid #0dcaf0;min-width:90px;">
+                                    <div><i class="fas fa-user-edit"></i></div>
+                                    <div class="fw-bold">المحلل المالي</div>
+                                    <div style="color:#055160;">إعداد</div>
+                                </div>
+                                <i class="fas fa-arrow-left" style="color:#aaa;"></i>
+                                <div class="text-center px-2 py-1 rounded" style="background:#fff3cd;border:1px solid #ffc107;min-width:90px;">
+                                    <div><i class="fas fa-shield-alt"></i></div>
+                                    <div class="fw-bold">مدير المخاطر</div>
+                                    <div style="color:#856404;">مراجعة</div>
+                                </div>
+                                <i class="fas fa-arrow-left" style="color:#aaa;"></i>
+                                <div class="text-center px-2 py-1 rounded" style="background:#d1e7dd;border:1px solid #198754;min-width:90px;">
+                                    <div><i class="fas fa-vote-yea"></i></div>
+                                    <div class="fw-bold">لجنة الاستثمار</div>
+                                    <div style="color:#0a3622;">اعتماد نهائي</div>
+                                </div>
+                            </div>
+                            <div style="font-size:.78rem;color:#888;margin-top:6px;">بعد حفظ النموذج، يُرسَل تلقائياً لمدير المخاطر للمراجعة ثم للجنة الاستثمار للاعتماد النهائي.</div>
+                        </div>
+
                         <div class="d-flex gap-2">
                             <button class="btn btn-primary" onclick="submitReturn()">
-                                <i class="fas fa-save me-2"></i> حفظ التغييرات
+                                <i class="fas fa-paper-plane me-2"></i> إرسال للمراجعة
                             </button>
                             <button class="btn btn-outline-secondary" onclick="spf.showSuccess('تم إعادة تعيين النموذج')">
                                 <i class="fas fa-undo me-1"></i> إعادة تعيين
@@ -118,6 +177,19 @@
     <script src="../../assets/js/prototype-core.js"></script>
     <script src="../../assets/js/internal-shell.js"></script>
     <script>
+        var methodDescriptions = {
+            beginning: 'رصيد بداية الفترة — يُوزَّع العائد على الرصيد الثابت أول الفترة. الأبسط في التطبيق.',
+            daily:     'متوسط يومي — يُحتسب متوسط الرصيد اليومي طوال الفترة. أكثر دقة للإيداعات المتكررة.',
+            periodic:  'متوسط فترات (شهري) — يُحسب متوسط الرصيد شهرياً ثم يُجمَّع سنوياً.'
+        };
+        var methodNames = { beginning: 'رصيد بداية الفترة', daily: 'متوسط يومي', periodic: 'متوسط فترات (شهري)' };
+        function updateMethodHint() {
+            var selected = document.querySelector('input[name="calcMethod"]:checked');
+            if (!selected) return;
+            var hint = document.getElementById('methodHint');
+            hint.querySelector('span').innerHTML = 'الطريقة الحالية: <strong>' + methodNames[selected.value] + '</strong> — ' + methodDescriptions[selected.value];
+        }
+
         function submitReturn() {
             const rate = parseFloat(document.getElementById('returnRate').value);
             if (!rate || rate < 2) {

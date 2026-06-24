@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -12,6 +12,19 @@
     <link rel="stylesheet" href="../../../assets/css/app.css">
     <link rel="stylesheet" href="../../../assets/css/shell.css">
     <link rel="stylesheet" href="../../../assets/css/wizard.css">
+    <style>
+        .worker-settlement-row { border:1px solid #dee2e6; border-radius:8px; padding:16px; margin-bottom:12px; background:#fafafa; transition:border-color .2s; }
+        .worker-settlement-row:hover { border-color:var(--gup-color-primary,#1a6e3c); }
+        .status-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:.8rem; font-weight:600; }
+        .status-pending    { background:#fff3cd; color:#856404; border:1px solid #ffc107; }
+        .status-sent       { background:#cff4fc; color:#055160; border:1px solid #0dcaf0; }
+        .status-accepted   { background:#d1e7dd; color:#0a3622; border:1px solid #198754; }
+        .status-rejected   { background:#f8d7da; color:#842029; border:1px solid #dc3545; }
+        .status-paid       { background:#d4edda; color:#1a7f37; border:1px solid #28a745; }
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; align-items:center; justify-content:center; }
+        .modal-overlay.open { display:flex; }
+        .modal-box { background:#fff; border-radius:12px; padding:28px; max-width:560px; width:95%; max-height:90vh; overflow-y:auto; }
+    </style>
 </head>
 <body data-root="../../../" data-page-kind="form" data-user-role="employer">
 <main id="mainContent" class="gup-main-shell">
@@ -20,207 +33,383 @@
         <div class="breadcrumbs-lite">
             <a href="../../../index.html">الرئيسية</a> <span>›</span>
             <a href="index.html">تسوية مكافأة نهاية الخدمة السابقة</a> <span>›</span>
-            <span>تقديم الطلب</span>
+            <span>إدارة التسويات</span>
         </div>
         <h1>تسوية مكافأة نهاية الخدمة السابقة للعمال</h1>
+        <p class="gup-page-intro">عرض جميع العمال المسجلين وحالة تسوية مكافأة نهاية الخدمة السابقة لكل منهم. يمكنك تقديم قرار التسوية أو الاطلاع على التفاصيل.</p>
     </div>
 
-    <!-- Stepper -->
-    <nav class="wizard-stepper-bar" aria-label="خطوات الطلب">
-        <ol class="wizard-stepper">
-            <li class="stepper-item selected" id="step1Indicator">
-                <span class="stepper-num">1</span>
-                <span class="stepper-label">بيانات التسوية</span>
-                <div class="stepper-connector"></div>
-            </li>
-            <li class="stepper-item" id="step2Indicator">
-                <span class="stepper-num">2</span>
-                <span class="stepper-label">المراجعة</span>
-                <div class="stepper-connector"></div>
-            </li>
-            <li class="stepper-item" id="step3Indicator">
-                <span class="stepper-num">3</span>
-                <span class="stepper-label">التأكيد</span>
-            </li>
-        </ol>
-    </nav>
+    <!-- Summary KPIs -->
+    <div class="dashboard-stat-grid mb-4">
+        <div class="gup-form-section" style="text-align:center;padding:16px;">
+            <div style="font-size:1.6rem;color:#555;margin-bottom:4px;"><i class="fas fa-users"></i></div>
+            <div style="font-size:1.4rem;font-weight:700;">12</div>
+            <div style="color:#666;font-size:.85rem;margin-top:2px;">إجمالي العمال</div>
+        </div>
+        <div class="gup-form-section" style="text-align:center;padding:16px;">
+            <div style="font-size:1.6rem;color:#856404;margin-bottom:4px;"><i class="fas fa-hourglass-half"></i></div>
+            <div style="font-size:1.4rem;font-weight:700;">5</div>
+            <div style="color:#666;font-size:.85rem;margin-top:2px;">بانتظار قرار الجهة</div>
+        </div>
+        <div class="gup-form-section" style="text-align:center;padding:16px;">
+            <div style="font-size:1.6rem;color:#055160;margin-bottom:4px;"><i class="fas fa-paper-plane"></i></div>
+            <div style="font-size:1.4rem;font-weight:700;">4</div>
+            <div style="color:#666;font-size:.85rem;margin-top:2px;">أُرسل للعامل — بانتظار الرد</div>
+        </div>
+        <div class="gup-form-section" style="text-align:center;padding:16px;">
+            <div style="font-size:1.6rem;color:#1a7f37;margin-bottom:4px;"><i class="fas fa-check-circle"></i></div>
+            <div style="font-size:1.4rem;font-weight:700;">3</div>
+            <div style="color:#666;font-size:.85rem;margin-top:2px;">مكتملة</div>
+        </div>
+    </div>
 
-    <!-- Step 1 -->
-    <div class="wizard-content-area" id="wizardStep1">
-        <!-- Worker Search -->
-        <section class="gup-form-section mb-4">
-            <h2>البحث عن العامل</h2>
-            <div class="row g-3 align-items-end">
-                <div class="col-md-5">
-                    <label class="gup-field-label" for="gstWorkerSearch">الاسم أو الرقم المدني</label>
-                    <input type="text" id="gstWorkerSearch" class="form-control" value="محمد بن علي السعدي" placeholder="أدخل الاسم أو الرقم المدني">
-                </div>
+    <!-- Filters -->
+    <div class="gup-form-section mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="gup-field-label" for="filterSearch">بحث بالاسم أو الرقم المدني</label>
+                <input type="text" id="filterSearch" class="form-control" placeholder="اسم العامل أو الرقم المدني...">
+            </div>
+            <div class="col-md-3">
+                <label class="gup-field-label" for="filterStatus">حالة التسوية</label>
+                <select id="filterStatus" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="pending">بانتظار قرار الجهة</option>
+                    <option value="sent">أُرسل للعامل</option>
+                    <option value="accepted">وافق العامل</option>
+                    <option value="rejected">اعترض العامل</option>
+                    <option value="paid">مكتملة ومسددة</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="button" class="gup-primary-btn w-100"><i class="fas fa-search"></i> بحث</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workers List -->
+    <div class="gup-form-section">
+        <h2>قائمة العمال وحالات التسوية</h2>
+
+        <!-- Worker 1 — pending employer decision -->
+        <div class="worker-settlement-row">
+            <div class="row align-items-center g-2">
                 <div class="col-md-3">
-                    <label class="gup-field-label" for="gstStatusFilter">حالة التسوية</label>
-                    <select id="gstStatusFilter" class="form-select">
-                        <option value="">الكل</option>
-                        <option value="review">قيد المراجعة</option>
-                        <option value="approved">معتمدة</option>
-                        <option value="rejected">مرفوضة</option>
-                    </select>
+                    <div class="fw-bold">محمد بن علي السعدي</div>
+                    <div style="color:#888;font-size:.82rem;">23456789 · مهندس</div>
                 </div>
-                <div class="col-md-4">
-                    <button type="button" class="gup-primary-btn w-100">
-                        <i class="fas fa-search"></i> بحث
+                <div class="col-md-2" style="font-size:.85rem;">
+                    <div style="color:#666;">تاريخ بدء الخدمة</div>
+                    <div>01/03/2018</div>
+                </div>
+                <div class="col-md-2" style="font-size:.85rem;">
+                    <div style="color:#666;">مدة الخدمة</div>
+                    <div>6 سنوات</div>
+                </div>
+                <div class="col-md-2" style="font-size:.85rem;">
+                    <div style="color:#666;">المبلغ المحتسب</div>
+                    <div class="fw-bold">4,200 ر.ع</div>
+                </div>
+                <div class="col-md-1">
+                    <span class="status-badge status-pending">بانتظار القرار</span>
+                </div>
+                <div class="col-md-2 text-start">
+                    <button class="gup-primary-btn" style="font-size:.82rem;padding:6px 14px;" onclick="openDecisionModal(1)">
+                        <i class="fas fa-gavel"></i> تقديم القرار
                     </button>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- Worker Info (pre-filled) -->
-        <section class="gup-form-section mb-4">
-            <h2>
-                <i class="fas fa-user-circle me-2" style="color:var(--gup-color-primary,#1a6e3c);"></i>
-                نتيجة البحث: محمد بن علي السعدي
-            </h2>
-            <div class="gup-labelled-item"><span class="item-label">الاسم الكامل</span><span class="item-value">محمد بن علي السعدي</span></div>
-            <div class="gup-labelled-item"><span class="item-label">الرقم المدني</span><span class="item-value">23456789</span></div>
-            <div class="gup-labelled-item"><span class="item-label">المهنة</span><span class="item-value">مهندس</span></div>
-            <div class="gup-labelled-item"><span class="item-label">الراتب الأساسي</span><span class="item-value">700 ر.ع</span></div>
-            <div class="gup-labelled-item"><span class="item-label">تاريخ بدء الخدمة</span><span class="item-value">01/03/2020</span></div>
-            <div class="gup-labelled-item"><span class="item-label">سنوات الخدمة السابقة</span><span class="item-value">4 سنوات</span></div>
-            <div class="gup-labelled-item"><span class="item-label">المبلغ المحسوب للمكافأة</span><span class="item-value fw-bold" style="color:var(--gup-color-primary,#1a6e3c);">1,400 ر.ع</span></div>
-        </section>
-
-        <!-- Settlement Details -->
-        <section class="gup-form-section">
-            <h2>بيانات التسوية</h2>
-
-            <div class="row g-3">
-                <div class="col-12 mb-2">
-                    <label class="gup-field-label d-block mb-2">قرار التسوية <span class="text-danger">*</span></label>
-                    <div class="d-flex flex-column gap-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="settlementType" id="typeWilly" value="willy" checked>
-                            <label class="form-check-label fw-bold" for="typeWilly">
-                                <i class="fas fa-handshake me-1 text-primary"></i>
-                                تسوية ودية
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="settlementType" id="typeTransfer" value="transfer">
-                            <label class="form-check-label fw-bold" for="typeTransfer">
-                                <i class="fas fa-exchange-alt me-1 text-success"></i>
-                                نقل المبلغ إلى حساب الادخار
-                            </label>
-                        </div>
-                    </div>
+        <!-- Worker 2 — pending employer decision -->
+        <div class="worker-settlement-row">
+            <div class="row align-items-center g-2">
+                <div class="col-md-3">
+                    <div class="fw-bold">أحمد خان</div>
+                    <div style="color:#888;font-size:.82rem;">34567890 · عامل ماهر</div>
                 </div>
-                <div class="col-md-6">
-                    <label class="gup-field-label" for="approvedAmount">المبلغ المعتمد <span class="text-danger">*</span></label>
-                    <input type="number" id="approvedAmount" class="form-control" value="1400" min="0">
-                    <div class="gup-field-hint">بالريال العماني</div>
+                <div class="col-md-2" style="font-size:.85rem;">
+                    <div style="color:#666;">تاريخ بدء الخدمة</div>
+                    <div>15/07/2019</div>
                 </div>
-                <div class="col-md-6">
-                    <label class="gup-field-label" for="paymentRef">رقم المرجع الدفعة</label>
-                    <input type="text" id="paymentRef" class="form-control" placeholder="أدخل رقم المرجع">
+                <div class="col-md-2" style="font-size:.85rem;">
+                    <div style="color:#666;">مدة الخدمة</div>
+                    <div>4 سنوات</div>
                 </div>
-                <div class="col-12">
-                    <label class="gup-field-label" for="gstNotes">ملاحظات</label>
-                    <textarea id="gstNotes" class="form-control" rows="3" placeholder="أدخل أي ملاحظات إضافية..."></textarea>
+                <div class="col-md-2" style="font-size:.85rem;">
+                    <div style="color:#666;">المبلغ المحتسب</div>
+                    <div class="fw-bold">1,650 ر.ع</div>
                 </div>
-            </div>
-        </section>
-    </div>
-
-    <!-- Step 2 -->
-    <div class="wizard-content-area" id="wizardStep2" style="display:none">
-        <section class="gup-form-section">
-            <h2>مراجعة بيانات التسوية</h2>
-
-            <div class="gup-labelled-item"><span class="item-label">اسم العامل</span><span class="item-value">محمد بن علي السعدي</span></div>
-            <div class="gup-labelled-item"><span class="item-label">الرقم المدني</span><span class="item-value">23456789</span></div>
-            <div class="gup-labelled-item"><span class="item-label">سنوات الخدمة السابقة</span><span class="item-value">4 سنوات</span></div>
-            <div class="gup-labelled-item"><span class="item-label">قرار التسوية</span><span class="item-value" id="rev-settlementType">—</span></div>
-            <div class="gup-labelled-item"><span class="item-label">المبلغ المعتمد</span><span class="item-value" id="rev-amount">—</span></div>
-            <div class="gup-labelled-item"><span class="item-label">رقم مرجع الدفعة</span><span class="item-value" id="rev-ref">—</span></div>
-            <div class="gup-labelled-item"><span class="item-label">الملاحظات</span><span class="item-value" id="rev-gstNotes">—</span></div>
-        </section>
-    </div>
-
-    <!-- Step 3 -->
-    <div class="wizard-content-area" id="wizardStep3" style="display:none">
-        <div class="page-status-card">
-            <div class="page-status-icon" style="background:#d4edda; color:#1a7f37;">
-                <i class="fas fa-check-circle fa-2x"></i>
-            </div>
-            <h2>تم تقديم طلب التسوية بنجاح</h2>
-            <p>رقم المرجع:</p>
-            <div class="ref-number">SPF-GST-2024-000178</div>
-            <p class="mt-3">سيتم مراجعة طلب التسوية ومعالجته خلال 5-7 أيام عمل وإشعارك بالنتيجة.</p>
-            <div class="mt-4">
-                <a href="../dashboard/start.html" class="gup-outline-btn">العودة إلى لوحة البيانات</a>
+                <div class="col-md-1">
+                    <span class="status-badge status-pending">بانتظار القرار</span>
+                </div>
+                <div class="col-md-2 text-start">
+                    <button class="gup-primary-btn" style="font-size:.82rem;padding:6px 14px;" onclick="openDecisionModal(2)">
+                        <i class="fas fa-gavel"></i> تقديم القرار
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Sticky Footer -->
-    <div class="wizard-footer-bar" id="wizardFooter">
-        <div class="wizard-footer-inner">
-            <a href="index.html" class="gup-outline-btn" id="backBtn"><i class="fas fa-arrow-right"></i> رجوع</a>
-            <button type="button" class="gup-primary-btn" id="continueBtn">تابع <i class="fas fa-arrow-left"></i></button>
+        <!-- Worker 3 — sent to worker, awaiting response -->
+        <div class="worker-settlement-row">
+            <div class="row align-items-center g-2">
+                <div class="col-md-3">
+                    <div class="fw-bold">راجيف شارما</div>
+                    <div style="color:#888;font-size:.82rem;">45678901 · محاسب</div>
+                </div>
+                <div class="col-md-2" style="font-size:.85rem;">
+                    <div style="color:#666;">تاريخ بدء الخدمة</div>
+                    <div>01/01/2017</div>
+                </div>
+                <div class="col-md-2" style="font-size:.85rem;">
+                    <div style="color:#666;">مدة الخدمة</div>
+                    <div>7 سنوات</div>
+                </div>
+                <div class="col-md-2" style="font-size:.85rem;">
+                    <div style="color:#666;">المبلغ المعتمد</div>
+                    <div class="fw-bold">3,850 ر.ع</div>
+                </div>
+                <div class="col-md-1">
+                    <span class="status-badge status-sent">أُرسل للعامل</span>
+                </div>
+                <div class="col-md-2 text-start">
+                    <button class="gup-outline-btn" style="font-size:.82rem;padding:6px 14px;" onclick="openDetailsModal(3)">
+                        <i class="fas fa-eye"></i> عرض التفاصيل
+                    </button>
+                </div>
+            </div>
+            <div class="mt-2 pe-2" style="font-size:.82rem;color:#666;border-top:1px dashed #ddd;padding-top:8px;">
+                <i class="fas fa-clock me-1"></i> أُرسل بتاريخ 05/06/2024 · بانتظار رد العامل
+            </div>
         </div>
-    </div>
+
+        <!-- Worker 4 — worker accepted, invoice pending payment -->
+        <div class="worker-settlement-row">
+            <div class="row align-items-center g-2">
+                <div class="col-md-3">
+                    <div class="fw-bold">فيليكس أوكوي</div>
+                    <div style="color:#888;font-size:.82rem;">56789012 · سائق</div>
+                </div>
+                <div class="col-md-2" style="font-size:.85rem;">
+                    <div style="color:#666;">تاريخ بدء الخدمة</div>
+                    <div>10/09/2020</div>
+                </div>
+                <div class="col-md-2" style="font-size:.85rem;">
+                    <div style="color:#666;">مدة الخدمة</div>
+                    <div>3 سنوات</div>
+                </div>
+                <div class="col-md-2" style="font-size:.85rem;">
+                    <div style="color:#666;">المبلغ المعتمد</div>
+                    <div class="fw-bold">1,120 ر.ع</div>
+                </div>
+                <div class="col-md-1">
+                    <span class="status-badge status-accepted">وافق العامل</span>
+                </div>
+                <div class="col-md-2 text-start">
+                    <button class="gup-outline-btn" style="font-size:.82rem;padding:6px 14px;" onclick="openDetailsModal(4)">
+                        <i class="fas fa-eye"></i> عرض التفاصيل
+                    </button>
+                </div>
+            </div>
+            <div class="mt-2 pe-2" style="font-size:.82rem;color:#1a6e3c;border-top:1px dashed #ddd;padding-top:8px;">
+                <i class="fas fa-file-invoice-dollar me-1"></i> رقم الفاتورة: INV-GRT-2024-003400 · <span style="color:#856404;">بانتظار السداد</span>
+            </div>
+        </div>
+
+        <!-- Worker 5 — completed and allocated -->
+        <div class="worker-settlement-row" style="background:#f0faf4;border-color:#b7dfca;">
+            <div class="row align-items-center g-2">
+                <div class="col-md-3">
+                    <div class="fw-bold">إيان مولر</div>
+                    <div style="color:#888;font-size:.82rem;">67890123 · مدير مشروع</div>
+                </div>
+                <div class="col-md-2" style="font-size:.85rem;">
+                    <div style="color:#666;">تاريخ بدء الخدمة</div>
+                    <div>01/06/2016</div>
+                </div>
+                <div class="col-md-2" style="font-size:.85rem;">
+                    <div style="color:#666;">مدة الخدمة</div>
+                    <div>8 سنوات</div>
+                </div>
+                <div class="col-md-2" style="font-size:.85rem;">
+                    <div style="color:#666;">المبلغ المُخصَّص</div>
+                    <div class="fw-bold" style="color:#1a7f37;">5,600 ر.ع</div>
+                </div>
+                <div class="col-md-1">
+                    <span class="status-badge status-paid">مكتملة</span>
+                </div>
+                <div class="col-md-2 text-start">
+                    <button class="gup-outline-btn" style="font-size:.82rem;padding:6px 14px;" onclick="openDetailsModal(5)">
+                        <i class="fas fa-eye"></i> عرض التفاصيل
+                    </button>
+                </div>
+            </div>
+            <div class="mt-2 pe-2" style="font-size:.82rem;color:#1a7f37;border-top:1px dashed #c3e6cb;padding-top:8px;">
+                <i class="fas fa-check-circle me-1"></i> تم التخصيص في حساب العامل بتاريخ 01/06/2024 · INV-GRT-2024-002980
+            </div>
+        </div>
+
+    </div><!-- end gup-form-section -->
 
 </main>
+
+<!-- ===== Decision Modal ===== -->
+<div class="modal-overlay" id="decisionModal">
+    <div class="modal-box">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 style="margin:0;">تقديم قرار التسوية</h3>
+            <button type="button" onclick="closeModal('decisionModal')" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#666;">&times;</button>
+        </div>
+
+        <div class="gup-inline-alert info mb-3">
+            <i class="fas fa-user-circle"></i>
+            <span id="modalWorkerName" class="fw-bold">—</span>
+        </div>
+
+        <div class="gup-labelled-item"><span class="item-label">المبلغ المحتسب من النظام</span><span class="item-value fw-bold" id="modalCalcAmount">—</span></div>
+        <div class="gup-labelled-item"><span class="item-label">مدة الخدمة</span><span class="item-value" id="modalServiceYears">—</span></div>
+
+        <!-- Article 138 Calculation Breakdown -->
+        <div class="p-3 rounded mb-3" style="background:#f0f9ff;border:1px solid #b8daff;font-size:.84rem;">
+            <div class="fw-bold mb-2" style="color:#0a58ca;"><i class="fas fa-calculator me-1"></i> أساس الاحتساب — المادة 138</div>
+            <div id="calcBreakdown">
+                <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
+                    <span style="color:#555;">الأجر الأساسي الأخير</span>
+                    <span class="fw-bold" id="brkSalary">700 ر.ع</span>
+                </div>
+                <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
+                    <span style="color:#555;">مدة الخدمة (بالسنوات)</span>
+                    <span class="fw-bold" id="brkYears">—</span>
+                </div>
+                <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
+                    <span style="color:#555;">معدل الاستحقاق</span>
+                    <span class="fw-bold">شهر عن كل سنة خدمة</span>
+                </div>
+                <div class="d-flex justify-content-between pt-1">
+                    <span style="color:#555;font-weight:600;">الإجمالي المحتسب (الأجر × مدد الخدمة)</span>
+                    <span class="fw-bold text-primary" id="brkTotal">—</span>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-3">
+
+        <div class="mb-3">
+            <label class="gup-field-label d-block mb-2">قرار التسوية <span class="text-danger">*</span></label>
+            <div class="d-flex flex-column gap-2">
+                <div class="form-check p-3 rounded" style="border:1px solid #dee2e6;cursor:pointer;" onclick="document.getElementById('typeWilly').checked=true">
+                    <input class="form-check-input" type="radio" name="mSettlementType" id="typeWilly" value="willy">
+                    <label class="form-check-label fw-bold" for="typeWilly" style="cursor:pointer;">
+                        <i class="fas fa-handshake me-1" style="color:#0d6efd;"></i> تسوية ودية (دفع مباشر للعامل)
+                    </label>
+                </div>
+                <div class="form-check p-3 rounded" style="border:1px solid #dee2e6;cursor:pointer;" onclick="document.getElementById('typeTransfer').checked=true">
+                    <input class="form-check-input" type="radio" name="mSettlementType" id="typeTransfer" value="transfer">
+                    <label class="form-check-label fw-bold" for="typeTransfer" style="cursor:pointer;">
+                        <i class="fas fa-piggy-bank me-1" style="color:#1a6e3c;"></i> تحويل المبلغ إلى حساب الادخار
+                        <div style="font-size:.8rem;font-weight:400;color:#666;margin-top:2px;">ستُنشأ فاتورة للسداد بعد موافقة العامل</div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="gup-field-label" for="mApprovedAmount">المبلغ المعتمد <span class="text-danger">*</span></label>
+            <input type="number" id="mApprovedAmount" class="form-control" placeholder="ر.ع">
+        </div>
+
+        <div class="mb-3">
+            <label class="gup-field-label" for="mNotes">ملاحظات (اختياري)</label>
+            <textarea id="mNotes" class="form-control" rows="2" placeholder="أدخل أي ملاحظات..."></textarea>
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end">
+            <button type="button" class="gup-outline-btn" onclick="closeModal('decisionModal')">إلغاء</button>
+            <button type="button" class="gup-primary-btn" onclick="submitDecision()">
+                <i class="fas fa-paper-plane me-1"></i> إرسال القرار للعامل
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Details Modal ===== -->
+<div class="modal-overlay" id="detailsModal">
+    <div class="modal-box">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 style="margin:0;">تفاصيل التسوية</h3>
+            <button type="button" onclick="closeModal('detailsModal')" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#666;">&times;</button>
+        </div>
+        <div id="detailsContent"></div>
+        <div class="d-flex justify-content-end mt-3">
+            <button type="button" class="gup-outline-btn" onclick="closeModal('detailsModal')">إغلاق</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Success Toast ===== -->
+<div id="successToast" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:2000;min-width:320px;">
+    <div class="gup-inline-alert success">
+        <i class="fas fa-check-circle"></i>
+        <span>تم إرسال قرار التسوية للعامل بنجاح. سيتلقى إشعاراً فورياً.</span>
+    </div>
+</div>
+
 <script src="../../../assets/js/prototype-core.js"></script>
 <script src="../../../assets/js/external-shell.js"></script>
 <script>
-(function () {
-    let currentStep = 1;
-    const totalSteps = 3;
+const workerData = {
+    1: { name: 'محمد بن علي السعدي', calc: '4,200 ر.ع', years: '6 سنوات', salary: 700, yrsNum: 6 },
+    2: { name: 'أحمد خان',           calc: '1,650 ر.ع', years: '4 سنوات', salary: 412, yrsNum: 4 }
+};
+const detailsData = {
+    3: { name: 'راجيف شارما',   status: 'أُرسل للعامل', decision: 'تحويل إلى حساب الادخار', amount: '3,850 ر.ع', sent: '05/06/2024', workerReply: 'بانتظار الرد', invoice: '—' },
+    4: { name: 'فيليكس أوكوي',   status: 'وافق العامل', decision: 'تحويل إلى حساب الادخار', amount: '1,120 ر.ع', sent: '01/06/2024', workerReply: 'موافق (03/06/2024)', invoice: 'INV-GRT-2024-003400 · بانتظار السداد' },
+    5: { name: 'إيان مولر',      status: 'مكتملة',       decision: 'تحويل إلى حساب الادخار', amount: '5,600 ر.ع', sent: '20/05/2024', workerReply: 'موافق (22/05/2024)', invoice: 'INV-GRT-2024-002980 · مُخصَّص ✓' }
+};
 
-    const settlementLabels = { willy: 'تسوية ودية', transfer: 'نقل المبلغ إلى حساب الادخار' };
-
-    function getRadioVal(name) {
-        const checked = document.querySelector('input[name="' + name + '"]:checked');
-        return checked ? checked.value : '';
-    }
-    function getValue(id) { return (document.getElementById(id) || {}).value || '—'; }
-
-    function showStep(n) {
-        for (let i = 1; i <= totalSteps; i++) {
-            const el = document.getElementById('wizardStep' + i);
-            if (el) el.style.display = i === n ? '' : 'none';
-            const ind = document.getElementById('step' + i + 'Indicator');
-            if (ind) {
-                ind.classList.remove('selected', 'done');
-                if (i < n) ind.classList.add('done');
-                else if (i === n) ind.classList.add('selected');
-            }
-        }
-        currentStep = n;
-        const footer = document.getElementById('wizardFooter');
-        if (footer) footer.style.display = n === totalSteps ? 'none' : '';
-        const backBtn = document.getElementById('backBtn');
-        if (backBtn) {
-            if (n === 1) { backBtn.setAttribute('href', 'index.html'); backBtn.removeAttribute('data-back'); }
-            else { backBtn.removeAttribute('href'); backBtn.setAttribute('data-back', ''); }
-        }
-        if (n === 2) {
-            const stType = getRadioVal('settlementType');
-            document.getElementById('rev-settlementType').textContent = settlementLabels[stType] || '—';
-            const amt = getValue('approvedAmount');
-            document.getElementById('rev-amount').textContent = amt !== '—' ? amt + ' ر.ع' : '—';
-            document.getElementById('rev-ref').textContent = getValue('paymentRef');
-            document.getElementById('rev-gstNotes').textContent = getValue('gstNotes') || '—';
-        }
-    }
-
-    document.getElementById('continueBtn').addEventListener('click', function () {
-        if (currentStep < totalSteps) showStep(currentStep + 1);
-    });
-    document.getElementById('backBtn').addEventListener('click', function (e) {
-        if (currentStep > 1) { e.preventDefault(); showStep(currentStep - 1); }
-    });
-
-    showStep(1);
-})();
+function openDecisionModal(id) {
+    const w = workerData[id];
+    document.getElementById('modalWorkerName').textContent = w.name;
+    document.getElementById('modalCalcAmount').textContent = w.calc;
+    document.getElementById('modalServiceYears').textContent = w.years;
+    document.getElementById('mApprovedAmount').value = '';
+    document.getElementById('mNotes').value = '';
+    document.querySelectorAll('input[name="mSettlementType"]').forEach(r => r.checked = false);
+    // Article 138 breakdown
+    var total = w.salary * w.yrsNum;
+    document.getElementById('brkSalary').textContent = w.salary + ' ر.ع';
+    document.getElementById('brkYears').textContent = w.yrsNum + ' سنوات';
+    document.getElementById('brkTotal').textContent = total.toLocaleString('ar-SA') + ' ر.ع';
+    document.getElementById('decisionModal').classList.add('open');
+}
+function openDetailsModal(id) {
+    const d = detailsData[id];
+    document.getElementById('detailsContent').innerHTML = `
+        <div class="gup-labelled-item"><span class="item-label">العامل</span><span class="item-value fw-bold">${d.name}</span></div>
+        <div class="gup-labelled-item"><span class="item-label">حالة التسوية</span><span class="item-value">${d.status}</span></div>
+        <div class="gup-labelled-item"><span class="item-label">قرار الجهة</span><span class="item-value">${d.decision}</span></div>
+        <div class="gup-labelled-item"><span class="item-label">المبلغ المعتمد</span><span class="item-value fw-bold">${d.amount}</span></div>
+        <div class="gup-labelled-item"><span class="item-label">تاريخ الإرسال للعامل</span><span class="item-value">${d.sent}</span></div>
+        <div class="gup-labelled-item"><span class="item-label">رد العامل</span><span class="item-value">${d.workerReply}</span></div>
+        <div class="gup-labelled-item"><span class="item-label">الفاتورة والتخصيص</span><span class="item-value">${d.invoice}</span></div>
+    `;
+    document.getElementById('detailsModal').classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function submitDecision() {
+    const type = document.querySelector('input[name="mSettlementType"]:checked');
+    const amt  = document.getElementById('mApprovedAmount').value;
+    if (!type) { alert('يُرجى اختيار قرار التسوية'); return; }
+    if (!amt)  { alert('يُرجى إدخال المبلغ المعتمد'); return; }
+    closeModal('decisionModal');
+    const t = document.getElementById('successToast');
+    t.style.display = '';
+    setTimeout(() => { t.style.display = 'none'; }, 4000);
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
 </script>
 </body>
 </html>
